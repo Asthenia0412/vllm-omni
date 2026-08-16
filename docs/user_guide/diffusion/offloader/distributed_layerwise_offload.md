@@ -110,6 +110,14 @@ independent `TP=2` engines normally create two entries: both TP0 workers map
 one entry and both TP1 workers map the other. Cache sharing does not create a
 process group or an inference-time collective.
 
+At inference time, cached tensors remain pageable mmap views. DLO packs each
+streamed block into one of two bounded pinned host slots before the asynchronous
+H2D copy. The private ordinary-loader path instead creates model-sized pinned
+storage once during initialization. The cache therefore exchanges recurrent
+host-to-host copies and DDR bandwidth for lower steady-state PSS; competing TP
+ranks or engines can turn staging skew into collective wait time. Treat this as
+a host-capacity mode and benchmark it on the target CPU/memory topology.
+
 The mmap plan skips only dedicated DiT weight sources. Other component sources,
 such as a text encoder loaded through the shared diffusion loader, continue to
 use their ordinary component loader. A checkpoint source that mixes DiT and
@@ -206,6 +214,14 @@ The runtime cache improves steady-state host PSS, not startup peak: every rank
 loads private weights before remapping, and validation adds full content-hash
 passes. Skip-load-on-cache-hit and cache eviction remain follow-up work in
 [RFC #6195](https://github.com/vllm-project/vllm-omni/issues/6195).
+
+It is also not latency-neutral. In the four-L20X MiniMax-H3 smoke documented in
+the L20X runtime-cache matrix in the
+[feature design](../../../design/feature/offloader/distributed_layerwise_offload.md#l20x-runtime-cache-smoke-matrix),
+two independent TP2 engines reduced request-time host PSS by 36.6% with the
+cache, but recurrent mmap-to-pinned staging reduced combined throughput by
+69.3%. HBM and GPU compute were unchanged. Use the cache only when that
+measured memory/latency tradeoff is appropriate for the deployment.
 
 See the [Cosmos3 DistOffload recipe](https://github.com/vllm-project/vllm-omni/blob/main/recipes/cosmos3/Cosmos3-DistOffload.md)
 for an end-to-end example.

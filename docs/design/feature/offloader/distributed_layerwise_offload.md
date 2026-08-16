@@ -139,7 +139,11 @@ DLO maps this plan without moving the DiT to `meta` and without rerunning any
 post-load hook. It changes tensor storage while preserving `Parameter` objects,
 then runs the existing `gc.collect()`/`malloc_trim()` cleanup before installing
 streaming hooks. The source mappings remain open through DLO disable and feed
-the existing bounded two-slot host staging path.
+the existing bounded two-slot host staging path. Because file-backed pages are
+not pinned, every streamed block is first packed from mmap storage into one of
+those pinned slots and is then copied to the device. This removes model-sized
+private pinned storage, but adds a recurrent host-to-host copy and can amplify
+TP synchronization waits when several ranks compete for host bandwidth.
 
 This version is deliberately opt-in and steady-state-oriented. It requires
 roughly one local-disk model copy per runtime identity, has no eviction, and
@@ -341,12 +345,64 @@ from 167.53 to 70.24 GiB for worker 0 and from 115.40 to 17.44 GiB for worker
 because it counts a shared physical page in every process that maps it; summed
 PSS is the appropriate node-memory comparison.
 
-The highest-value missing coverage is the Phase B hardware matrix from
-[issue #6231](https://github.com/vllm-project/vllm-omni/issues/6231): cold and
-warm publication, inode sharing, PSS/`Private_Dirty`, output equivalence, and
-independently scheduled `TP=2` engines on target hardware. The historical
-B300 rows above predate the runtime cache and must not be treated as Phase B
-memory validation.
+### L20X runtime-cache smoke matrix
+
+Phase B was also exercised on four L20X GPUs in one NVLink domain with
+MiniMax-H3 FL2VA, CUDNN attention, eager execution, 256x256 four-second
+outputs, two denoising steps, `dlo_resident_layers=0`, text-encoder TP1, and
+VAE TP1. This is a functional, memory, and profiler smoke test rather than a
+production-quality performance benchmark. Host values below are node-wide
+maxima during request waves from descendant-process `smaps_rollup`; they do
+not represent the private startup peak. HBM is the engine-reported request
+peak because sampled `nvidia-smi` data can miss short-lived allocations.
+
+One internal DP2xTP2 engine compared the three host-storage/transfer choices.
+Each measured wave contained two requests. NVLink TX is the physical per-link
+counter delta summed across the four GPUs; RX had the same value and is not
+added again here.
+
+| Mode | Two-request wave | Throughput | Host PSS | `Private_Dirty` | Engine peak HBM | NVLink TX / wave |
+|---|---:|---:|---:|---:|---:|---:|
+| AllGather, ordinary loader | 3.41 s | 0.587 req/s | 210.70 GiB | 209.72 GiB | 12,498 MB | 73.37 GiB |
+| no-AllGather, private loader weights | 6.96 s | 0.287 req/s | 312.56 GiB | 311.56 GiB | 11,882 MB | 19.78 GiB |
+| no-AllGather, runtime cache (cold publish) | 18.94 s | 0.106 req/s | 178.71 GiB | 116.00 GiB | 11,882 MB | 19.78 GiB |
+| no-AllGather, runtime cache (warm reuse) | 24.23 s | 0.083 req/s | 178.29 GiB | 115.58 GiB | 11,882 MB | 19.78 GiB |
+
+The no-AllGather cache preserved the no-AllGather NVLink traffic and HBM
+footprint while reducing node PSS by about 134 GiB relative to private loader
+weights. Cold and warm labels describe cache publication or reuse during
+initialization; both request phases ran after initialization. A warm hit still
+performed ordinary loading and full content hashing, so it was not a startup
+fast path. All measured no-AllGather private/cache outputs were byte-identical
+for matching seeds.
+
+The deployment shape targeted by the cache was tested separately as two
+independent DP1xTP2 engines on the same node. Both engines mapped the same two
+TP-coordinate entries, including the same file device/inode tuples; the cache
+occupied 66,281,995,903 bytes. A start barrier kept all four measured requests
+ahead of profiling.
+
+| Storage | Mean request latency, engines A / B | Combined throughput | Host PSS | `Private_Dirty` | Engine peak HBM |
+|---|---:|---:|---:|---:|---:|
+| Private loader weights | 3.50 / 3.60 s | 0.463 req/s | 366.20 GiB | 365.22 GiB | 11,882 MB |
+| Shared runtime cache | 8.96 / 12.30 s | 0.142 req/s | 232.23 GiB | 169.52 GiB | 11,882 MB |
+
+The shared cache reduced request-time PSS by 133.97 GiB (36.6%) and
+`Private_Dirty` by 195.70 GiB (53.6%), but reduced combined throughput by
+69.3% in this host-contention smoke. Across one profiled request per engine,
+aggregate GPU compute was unchanged (1.359 versus 1.357 seconds) and H2D
+payload was exactly 264.24 GiB in both modes. Aggregate CPU `aten::copy_` time
+rose from 3.75 to 32.49 seconds, while communication-kernel time rose from
+3.56 to 5.80 seconds as TP ranks waited on skewed staging. These durations are
+summed across ranks and can overlap; they identify the mechanism, not wall
+time. Matching private/cache outputs were byte-identical.
+
+The result confirms that runtime-cache v1 is a host-capacity option, not a
+latency-neutral replacement for private pinned weights. Broader SP, model,
+platform, and production-quality validation remains tracked in
+[issue #6231](https://github.com/vllm-project/vllm-omni/issues/6231). The
+historical B300 rows above predate the runtime cache and must not be treated as
+Phase B memory validation.
 
 ## Recommendations
 
@@ -356,7 +412,9 @@ memory validation.
   not the goal.
 - Use **no-AllGather** when independent replica execution is required. TP1
   direct-mmap deployments can share checkpoint pages per node. Enable the
-  runtime cache when independent replicas have repeated final layouts,
-  especially matching coordinates across multiple TP engines.
+  runtime cache only when independent replicas have repeated final layouts and
+  host capacity is more important than the added mmap-to-pinned staging cost.
+  Benchmark the target CPU/memory topology, especially for matching
+  coordinates across multiple TP engines.
 - Prefer **HSDP alone** for production HSDP deployments until the combined
   HSDP + DLO no-AllGather path has broader end-to-end coverage.
