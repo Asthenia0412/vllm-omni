@@ -545,6 +545,9 @@ class OrchestratorArgs:
     enable_layerwise_offload: bool = False
     enable_distributed_layerwise_offload: bool = False
     dlo_use_allgather: bool = True
+    dlo_enable_runtime_cache: bool = False
+    dlo_runtime_cache_dir: str | None = None
+    dlo_runtime_cache_lock_timeout: float = 600.0
     dlo_resident_layers: int = 0
     boundary_ratio: float | None = None
     flow_shift: float | None = None

@@ -43,15 +43,15 @@ DLO weight collective.
 
 Host storage is selected separately from the transfer protocol. The loader can
 produce a direct-checkpoint mmap plan for a proven-compatible runtime layout;
-otherwise it uses the ordinary loader. Consequently, no-AllGather replicas on
-the same node can share immutable checkpoint pages when direct mmap is
-selected, while the ordinary-loader fallback still keeps a private runtime
-copy per process.
+otherwise it uses the ordinary loader. In no-AllGather mode, an opt-in Phase B
+runtime cache can normalize those final ordinary-loader DiT tensors into an
+immutable node-local mmap entry. Consequently, replicas can share either
+proven-compatible checkpoint pages or equivalent final runtime layouts.
 
 The Phase A shared-mmap support boundary is TP1. TP greater than one is an
 ordinary-loader compatibility path: DLO can consume the resulting TP-local
-tensors, but those configurations do not use checkpoint mmap and must not be
-used to claim shared-mmap host-memory savings.
+tensors. Direct checkpoint mmap still does not cover TP, but the Phase B cache
+can share each final TP coordinate among equivalent processes.
 
 The compatibility matrix below describes the current implementation. The
 unit-level guards are covered, but not every parallelism combination has a
@@ -105,6 +105,48 @@ flags such as `_supports_mmap_loading` or parameter attributes for mmap-only
 transforms. Model-specific direct-layout knowledge, when required, lives in a
 checkpoint adapter beside the ordinary loader.
 
+### Post-load runtime cache
+
+The Phase B cache preserves the same ownership boundary. DLO neither derives
+cache keys nor interprets model loaders. When enabled with no-AllGather, every
+rank first completes the ordinary loader, custom callbacks, post-load
+processing, strict validation, and calibration. The loader then:
+
+1. discovers final CPU DiT parameters and persistent buffers;
+2. rejects unsupported non-contiguous, aliased, quantized, distributed, or
+   ambiguous layouts before changing the model;
+3. hashes tensor names, metadata, and final bytes;
+4. builds or joins one content-addressed entry under a strict POSIX lock; and
+5. returns a `HostWeightPlan(backing_kind="runtime_cache")` only after file,
+   manifest, and remapped-tensor content validation succeeds.
+
+The identity excludes DP size/rank and SP rank. It includes TP world size/rank
+and conservative SP implementation/world-size guards. DP replicas and
+equivalent SP ranks can therefore share; different TP coordinates cannot.
+Final tensor content is authoritative, so an unmodeled loader/config change
+that changes bytes creates a different entry instead of risking silent
+sharing.
+
+Publication writes sharded safetensors and a JSON manifest into a same-
+filesystem temporary directory, flushes them, and atomically renames the
+directory. The manifest includes per-file SHA-256 digests and the final tensor
+content digest. Kernel `flock` ownership distinguishes a live writer from a
+stale lock file: process death releases the lock automatically. Stale temporary
+entries are removed only by the next lock owner. A bounded wait or any cache
+error retains the already-valid ordinary tensors.
+
+DLO maps this plan without moving the DiT to `meta` and without rerunning any
+post-load hook. It changes tensor storage while preserving `Parameter` objects,
+then runs the existing `gc.collect()`/`malloc_trim()` cleanup before installing
+streaming hooks. The source mappings remain open through DLO disable and feed
+the existing bounded two-slot host staging path.
+
+This version is deliberately opt-in and steady-state-oriented. It requires
+roughly one local-disk model copy per runtime identity, has no eviction, and
+still performs ordinary loading plus full content-hash passes in every rank.
+Skip-load-on-hit is a separate follow-up after loader side effects can be
+modeled safely.
+
 ### AllGather path
 
 With the default `dlo_use_allgather=True`, each rank stores approximately
@@ -138,11 +180,17 @@ When DP is greater than one, the engine can process one request per DP rank in
 the same denoising wave. Because AllGather is a collective, all participating
 requests must take the same execution path at every denoising step.
 
+Fast NVLink/NVSwitch changes collective cost, not this execution contract. For
+independently scheduled replicas—even on one NVSwitch baseboard—no-AllGather
+plus shared mmap storage avoids coupling their request schedules and failure
+domains.
+
 ### Rank-local path without DLO AllGather
 
 With `--dlo-no-use-allgather`, DLO forces its internal offload shard size to
 one and streams complete blocks using H2D copies only. The host backing may be
-either a loader-approved checkpoint mapping or ordinary runtime tensors.
+a loader-approved checkpoint mapping, a normalized runtime-cache mapping, or
+ordinary runtime tensors.
 
 For direct mmap, each process retains immutable safetensors views and uses two
 bounded pinned host staging slots. Processes on the same node that map the same
@@ -153,8 +201,8 @@ node has its own page cache.
 
 When direct mmap preflight fails, the regular model loader remains responsible
 for preparing each rank's weights, including TP-local tensors or HSDP-managed
-parameters. In that fallback, each pure-DP process keeps a private full runtime
-copy.
+parameters. Supported CPU layouts may then enter the opt-in runtime cache.
+Unsupported layouts keep one private runtime copy per process.
 
 This mode means:
 
@@ -165,17 +213,17 @@ This mode means:
 - TP/HSDP/SP collectives, if configured, are not disabled by this flag; only
   DLO's additional weight AllGather is disabled.
 - Pure DP deployments share one checkpoint-backed copy per node when direct
-  mmap is selected; the ordinary-loader fallback keeps one private runtime
-  copy per rank.
+  mmap is selected. The runtime cache can share equivalent ordinary-loader
+  outputs; its fallback keeps one private runtime copy per rank.
 - The scheduler does not require a synchronized DP request wave for DLO.
 
 ## Parallelism compatibility
 
 | Parallelism | DLO + AllGather | DLO without AllGather |
 |---|---|---|
-| **DP** | Supported primary path. DLO shards host weights across the DP group and can run DP multi-concurrency. | Supported rank-local path. Compatible TP1 replicas can share checkpoint pages on each node; fallback runtime tensors remain private. |
-| **SP** | Supported in the implementation. With DP=1, DLO uses the SP group for host-weight sharding; SP still shards sequence/activation work. | SP remains active, but DLO keeps standard-loader rank-local weights and adds no SP weight collective. |
-| **TP > 1** | Outside the Phase A shared-mmap support scope. The loader falls back before mutation, preserves TP-local layouts, and DLO may apply DP/SP host sharding to those ordinary runtime tensors. | Outside the Phase A shared-mmap support scope. The ordinary TP-aware loader produces rank-local tensors, which DLO streams without an additional weight collective; DP replicas retain private runtime storage. |
+| **DP** | Supported primary path. DLO shards host weights across the DP group and can run DP multi-concurrency. | Supported rank-local path. Compatible TP1 replicas can share checkpoint pages; the optional runtime cache shares equivalent final layouts while excluding DP rank from its identity. |
+| **SP** | Supported in the implementation. With DP=1, DLO uses the SP group for host-weight sharding; SP still shards sequence/activation work. | SP remains active without a DLO weight collective. Runtime-cache v1 excludes SP rank and includes conservative SP implementation/world-size guards. |
+| **TP > 1** | Outside the Phase A direct-mmap scope. The loader preserves TP-local layouts and DLO may apply DP/SP host sharding to ordinary runtime tensors. | The ordinary TP-aware loader produces rank-local tensors. Runtime-cache v1 creates one entry per TP coordinate, shareable by equivalent DP/SP processes. |
 | **HSDP** | Rejected. HSDP has already sharded parameters, so DLO AllGather would double-shard them. | Accepted by configuration. HSDP owns parameter sharding and its own gathers; DLO only stages rank-local parameters. End-to-end coverage is limited. |
 
 ### Combined dimensions
@@ -211,10 +259,9 @@ reconstructs those tensors with their recorded layouts. Other online methods
 must use `--dlo-no-use-allgather` or disable online quantization until their
 runtime layouts are validated.
 
-A normalized runtime mmap cache, built through the ordinary loader, is the
-proposed general mechanism for sharing transformed TP or quantized layouts.
-That cache and its publication/lifecycle protocol are intentionally outside
-this phase; see [RFC #6195](https://github.com/vllm-project/vllm-omni/issues/6195).
+Runtime-cache v1 is no-AllGather only and rejects all quantization
+configurations, HSDP/DTensor, CFG parallelism, PP, non-contiguous tensors, and
+tied/shared storage.
 
 ## Validation coverage
 
@@ -229,6 +276,11 @@ Current source-level validation includes:
 - exact loader-to-backend plan transfer and ordinary-loader fallback;
 - rank-local mmap source retention, bounded two-slot staging, and adapter
   transforms without parameter-side flags;
+- runtime-cache content identity, sharded atomic publication, concurrent
+  writer election, corruption rebuild, lock timeout, and fail-closed layout
+  rejection;
+- loader ordering through final post-load mutation and DLO remapping without
+  rerunning post-load hooks;
 - resident-layer requests requiring no-AllGather;
 - DP request-wave validation for denoising-step compatibility;
 - sharding, double-buffer, AllGather-size, and heterogeneous-block regression
@@ -288,11 +340,12 @@ from 167.53 to 70.24 GiB for worker 0 and from 115.40 to 17.44 GiB for worker
 because it counts a shared physical page in every process that maps it; summed
 PSS is the appropriate node-memory comparison.
 
-The highest-value missing coverage is broader end-to-end numerical and
-lifecycle comparison against ordinary layerwise offload for DP+SP,
-HSDP+SP+no-AllGather, and TP greater than one across additional models and
-target CUDA/NCCL or CANN/HCCL hardware. That broader TP coverage does not
-change the Phase A direct-mmap TP1 support boundary.
+The highest-value missing coverage is the Phase B hardware matrix from
+[issue #6231](https://github.com/vllm-project/vllm-omni/issues/6231): cold and
+warm publication, inode sharing, PSS/`Private_Dirty`, output equivalence, and
+independently scheduled `TP=2` engines on target hardware. The historical
+B300 rows above predate the runtime cache and must not be treated as Phase B
+memory validation.
 
 ## Recommendations
 
@@ -301,8 +354,8 @@ change the Phase A direct-mmap TP1 support boundary.
 - Use **SP + DLO AllGather** for long-sequence workloads when DP concurrency is
   not the goal.
 - Use **no-AllGather** when independent replica execution is required. TP1
-  direct-mmap deployments can share checkpoint pages per node; other layouts
-  retain the ordinary loader's private host memory behavior and are outside
-  the Phase A shared-mmap support scope.
+  direct-mmap deployments can share checkpoint pages per node. Enable the
+  runtime cache when independent replicas have repeated final layouts,
+  especially matching coordinates across multiple TP engines.
 - Prefer **HSDP alone** for production HSDP deployments until the combined
   HSDP + DLO no-AllGather path has broader end-to-end coverage.

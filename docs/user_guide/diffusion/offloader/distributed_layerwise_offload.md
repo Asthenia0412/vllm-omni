@@ -5,7 +5,9 @@ deployments. With AllGather enabled, each rank stores roughly `1 / dp_size` of
 the host weights and reconstructs each layer at runtime. Without AllGather,
 each rank streams a complete block independently. Compatible TP1 deployments
 can share checkpoint-backed host pages among processes on the same node;
-otherwise DLO streams the ordinary loader's rank-local tensors.
+otherwise DLO streams the ordinary loader's rank-local tensors. The optional
+runtime-weight cache extends node-local sharing to final ordinary-loader
+layouts, including matching TP coordinates across independent engines.
 
 See the [DLO feature design](../../../design/feature/offloader/distributed_layerwise_offload.md)
 for the implementation contract and compatibility matrix.
@@ -21,8 +23,10 @@ AllGather:       [AG N+1]           [AG N+2]
 Slots:           slot 0: Layer N    slot 1: Layer N+1
 ```
 
-AllGather communicates only request-independent weight shards, so data-
-parallel ranks may process different requests concurrently.
+AllGather communicates request-independent weight shards, but every member of
+the transfer group must request the same next block in the same collective
+order. A synchronized DP wave may contain different prompts only when those
+requests follow the same denoising and block-execution path.
 
 ## Usage
 
@@ -38,6 +42,14 @@ vllm serve /path/to/model --omni \
   --data-parallel-size 4 \
   --dlo-no-use-allgather
 
+# Independently scheduled replicas sharing final runtime weights on one node
+vllm serve /path/to/model --omni \
+  --enable-distributed-layerwise-offload \
+  --tensor-parallel-size 2 \
+  --dlo-no-use-allgather \
+  --dlo-enable-runtime-cache \
+  --dlo-runtime-cache-dir /var/cache/vllm-omni/dlo-runtime-weights
+
 # Sequence parallel deployment
 vllm serve /path/to/model --omni \
   --enable-distributed-layerwise-offload \
@@ -50,7 +62,9 @@ from vllm_omni import Omni
 omni = Omni(
     model="/path/to/model",
     enable_distributed_layerwise_offload=True,
-    dlo_use_allgather=True,
+    dlo_use_allgather=False,
+    dlo_enable_runtime_cache=True,
+    dlo_runtime_cache_dir="/var/cache/vllm-omni/dlo-runtime-weights",
 )
 ```
 
@@ -62,6 +76,9 @@ omni = Omni(
 | `--data-parallel-size N` | DP ranks and AllGather weight-sharding group | `1` |
 | `--dlo-use-allgather` | Shard host weights and reconstruct with AllGather | `true` |
 | `--dlo-no-use-allgather` | Stream complete rank-local blocks without a DLO weight collective | `false` |
+| `--dlo-enable-runtime-cache` | Normalize final ordinary-loader DiT weights into a node-local mmap cache; requires no-AllGather | `false` |
+| `--dlo-runtime-cache-dir PATH` | Shared local-disk cache root | `~/.cache/vllm-omni/dlo-runtime-weights` |
+| `--dlo-runtime-cache-lock-timeout SECONDS` | Maximum wait for another process publishing the same layout | `600` |
 | `--dlo-resident-layers N` | Keep N leading main-DiT blocks on device; requires no-AllGather and model-declared resident paths | `0` |
 
 ## Host-weight loading
@@ -77,6 +94,21 @@ greater than one falls back before model mutation to ordinary TP-aware loading.
 DLO may still consume those TP-local tensors, but this is a compatibility path:
 it does not share checkpoint-backed runtime weights across DP replicas and
 provides no shared-mmap host-memory guarantee.
+
+When `--dlo-enable-runtime-cache` is set with no-AllGather, that fallback gains
+a second storage opportunity. Every rank still completes ordinary loading,
+loader callbacks, post-load processing, validation, and calibration. It then
+hashes the final CPU DiT parameters and persistent buffers. One process per
+equivalent runtime layout publishes sharded safetensors plus a checksummed
+manifest; peers validate and mmap the same files. DLO replaces only tensor
+storage, preserves the final `Parameter` objects, and releases the private
+allocator-backed copies before installing its streaming hooks.
+
+The runtime layout identity excludes DP rank and SP rank. It includes TP world
+size/rank and conservative SP implementation/world-size guards. Therefore two
+independent `TP=2` engines normally create two entries: both TP0 workers map
+one entry and both TP1 workers map the other. Cache sharing does not create a
+process group or an inference-time collective.
 
 The mmap plan skips only dedicated DiT weight sources. Other component sources,
 such as a text encoder loaded through the shared diffusion loader, continue to
@@ -103,6 +135,27 @@ process.
 
 When the effective DLO group size is one, `dlo_use_allgather=True` does not
 perform a collective and uses the same rank-local transfer behavior.
+
+## Runtime-cache lifecycle
+
+Runtime-cache publication uses a per-layout POSIX file lock, a temporary
+directory on the same filesystem, file and final-tensor SHA-256 validation,
+`fsync`, and an atomic directory rename. A crashed writer releases its kernel
+lock; the next writer removes only that layout's stale temporary directories
+while holding the lock. Lock timeout, unsupported layout, insufficient disk,
+or validation failure keeps the already-valid ordinary tensors.
+
+The cache root is deliberately independent of `VLLM_CACHE_ROOT`, because
+vLLM-Omni may isolate that variable between stage replicas. All consumers that
+should share must receive the same `--dlo-runtime-cache-dir` on a local,
+disk-backed filesystem. Do not place the cache on tmpfs when the goal is lower
+host-memory PSS, and do not use a cross-node directory in this version.
+
+There is no automatic eviction. Budget roughly one final DiT copy per distinct
+TP coordinate, dtype/layout, and model version, plus temporary space while an
+entry is published. Operators may remove entries or the complete cache root
+only after all workers using its mmap files have stopped. The feature is
+opt-in for this reason.
 
 ## Declarative topology
 
@@ -132,10 +185,10 @@ must enter each collective.
 
 ## Limitations
 
-- Direct checkpoint mmap currently requires TP1. TP greater than one is
-  outside the Phase A shared-mmap support scope and falls back before model
-  mutation to the ordinary TP-aware loader. DLO can stream that runtime layout,
-  but it provides no shared-mmap host-memory benefit or guarantee.
+- Direct checkpoint mmap currently requires TP1. TP greater than one falls
+  back to the ordinary TP-aware loader. With the optional runtime cache,
+  equivalent processes at the same TP coordinate can then share that final
+  rank-local layout in no-AllGather mode.
 - HSDP plus AllGather is rejected to avoid double sharding. HSDP without
   AllGather has limited end-to-end validation.
 - Per-tensor online FP8 linears use the ordinary loader and can run with either
@@ -143,14 +196,16 @@ must enter each collective.
   complete FP8 model in host memory before DLO retains only its shard. Other
   online quantization methods require no-AllGather until their runtime layouts
   are validated.
+- Runtime-cache v1 rejects all quantized, non-contiguous, aliased/tied,
+  device-only, HSDP, CFG-parallel, and PP layouts.
 - Resident leading layers require `--dlo-no-use-allgather` and a model
   `OffloadPlan` that declares eligible `resident_dit_paths`.
 - DP concurrency requires an explicit, identical inference-step count.
 
-Sharing transformed TP or quantized runtime layouts through a normalized mmap
-cache is a follow-up design in
-[RFC #6195](https://github.com/vllm-project/vllm-omni/issues/6195), not part of
-the direct-checkpoint path.
+The runtime cache improves steady-state host PSS, not startup peak: every rank
+loads private weights before remapping, and validation adds full content-hash
+passes. Skip-load-on-cache-hit and cache eviction remain follow-up work in
+[RFC #6195](https://github.com/vllm-project/vllm-omni/issues/6195).
 
 See the [Cosmos3 DistOffload recipe](https://github.com/vllm-project/vllm-omni/blob/main/recipes/cosmos3/Cosmos3-DistOffload.md)
 for an end-to-end example.

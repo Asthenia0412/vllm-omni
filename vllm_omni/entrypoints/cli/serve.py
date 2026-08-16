@@ -723,6 +723,30 @@ class OmniServeCommand(CLISubcommand):
             ),
         )
         omni_config_group.add_argument(
+            "--dlo-enable-runtime-cache",
+            action="store_true",
+            help=(
+                "After ordinary loading, publish or join a node-local mmap cache "
+                "for final DiT weights. This first version requires "
+                "--dlo-no-use-allgather."
+            ),
+        )
+        omni_config_group.add_argument(
+            "--dlo-runtime-cache-dir",
+            type=str,
+            default=None,
+            help=(
+                "Shared local-disk directory for DLO runtime weights. Defaults "
+                "to ~/.cache/vllm-omni/dlo-runtime-weights."
+            ),
+        )
+        omni_config_group.add_argument(
+            "--dlo-runtime-cache-lock-timeout",
+            type=float,
+            default=600.0,
+            help="Seconds to wait for another process publishing the same runtime layout.",
+        )
+        omni_config_group.add_argument(
             "--dlo-resident-layers",
             type=int,
             default=0,

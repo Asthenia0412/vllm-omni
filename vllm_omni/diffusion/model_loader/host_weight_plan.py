@@ -28,7 +28,7 @@ TensorTransform = Callable[[torch.Tensor], torch.Tensor]
 class TensorBinding:
     """One runtime tensor backed by one safetensors entry."""
 
-    checkpoint_key: str
+    storage_key: str
     file_path: str
     transform: TensorTransform | None = None
 
@@ -40,6 +40,8 @@ class HostWeightPlan:
     backing_kind: str
     bindings: dict[str, TensorBinding]
     planned_source_prefixes: frozenset[str] = frozenset()
+    runtime_layout_key: str | None = None
+    post_load_complete: bool = False
 
 
 @dataclass(frozen=True)
@@ -48,6 +50,7 @@ class HostWeightPlanResult:
 
     plan: HostWeightPlan | None
     fallback_reason: str | None = None
+    fallback_code: str | None = None
 
 
 class _PlanIncompatibleError(RuntimeError):
@@ -258,11 +261,11 @@ def _validate_source_metadata(
         with safe_open(file_path, framework="pt", device="cpu") as handle:
             available = set(handle.keys())
             for runtime_name, target, binding in entries:
-                if binding.checkpoint_key not in available:
+                if binding.storage_key not in available:
                     raise _PlanIncompatibleError(
-                        f"checkpoint key {binding.checkpoint_key!r} for {runtime_name!r} is missing from {file_path}"
+                        f"checkpoint key {binding.storage_key!r} for {runtime_name!r} is missing from {file_path}"
                     )
-                source = handle.get_slice(binding.checkpoint_key)
+                source = handle.get_slice(binding.storage_key)
                 source_shape = tuple(source.get_shape())
                 source_dtype = _SAFETENSORS_DTYPES.get(source.get_dtype())
                 if source_shape != tuple(target.shape):
@@ -287,11 +290,19 @@ def build_checkpoint_mmap_plan(
 ) -> HostWeightPlanResult:
     """Build a complete direct-checkpoint plan or return a fallback reason."""
     if tensor_parallel_size != 1:
-        return HostWeightPlanResult(None, f"TP={tensor_parallel_size} requires the ordinary loader")
+        return HostWeightPlanResult(
+            None,
+            f"TP={tensor_parallel_size} requires the ordinary loader",
+            "unsupported_tp",
+        )
     if use_hsdp:
-        return HostWeightPlanResult(None, "HSDP requires the ordinary loader")
+        return HostWeightPlanResult(None, "HSDP requires the ordinary loader", "unsupported_hsdp")
     if online_quantization:
-        return HostWeightPlanResult(None, "online quantization requires the ordinary loader")
+        return HostWeightPlanResult(
+            None,
+            "online quantization requires the ordinary loader",
+            "unsupported_online_quantization",
+        )
 
     remap_fn = getattr(type(pipeline), "_remap_ckpt_key", None)
     if not callable(remap_fn):
@@ -328,14 +339,14 @@ def build_checkpoint_mmap_plan(
                 )
             checkpoint_key, file_path = model_to_ckpt[runtime_name]
             bindings[runtime_name] = TensorBinding(
-                checkpoint_key=checkpoint_key,
+                storage_key=checkpoint_key,
                 file_path=file_path,
                 transform=policy.transform if policy is not None else None,
             )
 
         _validate_source_metadata(required, bindings)
     except (OSError, ValueError, _PlanIncompatibleError) as exc:
-        return HostWeightPlanResult(None, str(exc))
+        return HostWeightPlanResult(None, str(exc), "checkpoint_plan_incompatible")
 
     return HostWeightPlanResult(
         HostWeightPlan(

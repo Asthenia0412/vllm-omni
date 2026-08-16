@@ -346,7 +346,7 @@ def test_dlo_plan_loads_component_sources_outside_planned_dit(monkeypatch):
         backing_kind="checkpoint_mmap",
         bindings={
             "transformer.weight": TensorBinding(
-                checkpoint_key="weight",
+                storage_key="weight",
                 file_path="unused",
             )
         },
@@ -402,6 +402,135 @@ def test_dlo_plan_fallback_runs_ordinary_loader(monkeypatch):
 
     assert loader.load_model(load_device="cpu") is model
     assert calls == ["load", "process"]
+    assert loader.take_host_weight_plan() is None
+
+
+def test_dlo_runtime_cache_is_built_after_final_post_load_mutation(monkeypatch, tmp_path):
+    import vllm_omni.diffusion.model_loader.diffusers_loader as loader_mod
+    import vllm_omni.diffusion.model_loader.runtime_weight_cache as cache_mod
+
+    od_config = SimpleNamespace(
+        dtype=torch.float32,
+        parallel_config=SimpleNamespace(
+            use_hsdp=False,
+            tensor_parallel_size=1,
+            sequence_parallel_size=1,
+            data_parallel_size=2,
+            cfg_parallel_size=1,
+            pipeline_parallel_size=1,
+            ulysses_degree=1,
+            ring_degree=1,
+            allgather_degree=1,
+            ulysses_mode="strict",
+        ),
+        quantization_config=None,
+        enable_distributed_layerwise_offload=True,
+        dlo_use_allgather=False,
+        dlo_enable_runtime_cache=True,
+        dlo_runtime_cache_dir=str(tmp_path),
+        dlo_runtime_cache_lock_timeout=1.0,
+        model="unused",
+        revision=None,
+        model_config={},
+    )
+    loader = DiffusersPipelineLoader(LoadConfig(), od_config)
+    model = nn.Module()
+    model.transformer = nn.Linear(2, 2, bias=False)
+    events: list[str] = []
+    runtime_plan = HostWeightPlan(
+        backing_kind="runtime_cache",
+        bindings={},
+        runtime_layout_key="layout-key",
+        post_load_complete=True,
+    )
+
+    def load_weights(_model):
+        events.append("load")
+        with torch.no_grad():
+            model.transformer.weight.fill_(1)
+
+    def process_weights(_model, _device):
+        events.append("process")
+        with torch.no_grad():
+            model.transformer.weight.add_(1)
+
+    def calibrate(_model):
+        events.append("calibrate")
+        with torch.no_grad():
+            model.transformer.weight.add_(1)
+
+    original_eval = model.eval
+
+    def eval_model():
+        events.append("eval")
+        return original_eval()
+
+    def build_cache(_pipeline, **kwargs):
+        events.append("cache")
+        assert torch.equal(model.transformer.weight, torch.full((2, 2), 3.0))
+        assert kwargs["tensor_parallel_rank"] == 0
+        assert "data_parallel_size" not in kwargs["sequence_parallel_guard"]
+        return HostWeightPlanResult(runtime_plan)
+
+    loader._init_from_load_format = lambda *_args, **_kwargs: model  # type: ignore[method-assign]
+    loader.load_weights = load_weights  # type: ignore[method-assign]
+    loader._process_weights_after_loading = process_weights  # type: ignore[method-assign]
+    loader._apply_skip_softmax_calibration = calibrate  # type: ignore[method-assign]
+    model.eval = eval_model  # type: ignore[method-assign]
+    monkeypatch.setattr(
+        loader_mod,
+        "build_checkpoint_mmap_plan",
+        lambda *_args, **_kwargs: HostWeightPlanResult(None, "requires normalization"),
+    )
+    monkeypatch.setattr(cache_mod, "build_runtime_weight_cache_plan", build_cache)
+
+    assert loader.load_model(load_device="cpu") is model
+    assert events == ["load", "process", "calibrate", "eval", "cache"]
+    assert loader.take_host_weight_plan() is runtime_plan
+
+
+def test_dlo_runtime_cache_failure_retains_ordinary_weights(monkeypatch, tmp_path):
+    import vllm_omni.diffusion.model_loader.diffusers_loader as loader_mod
+    import vllm_omni.diffusion.model_loader.runtime_weight_cache as cache_mod
+
+    od_config = SimpleNamespace(
+        dtype=torch.float32,
+        parallel_config=SimpleNamespace(
+            use_hsdp=False,
+            tensor_parallel_size=1,
+            sequence_parallel_size=1,
+            data_parallel_size=2,
+            cfg_parallel_size=1,
+            pipeline_parallel_size=1,
+        ),
+        quantization_config=None,
+        enable_distributed_layerwise_offload=True,
+        dlo_use_allgather=False,
+        dlo_enable_runtime_cache=True,
+        dlo_runtime_cache_dir=str(tmp_path),
+        model="unused",
+    )
+    loader = DiffusersPipelineLoader(LoadConfig(), od_config)
+    model = nn.Module()
+    model.transformer = nn.Linear(2, 2, bias=False)
+    loader._init_from_load_format = lambda *_args, **_kwargs: model  # type: ignore[method-assign]
+    loader.load_weights = lambda _model: None  # type: ignore[method-assign]
+    loader._process_weights_after_loading = lambda *_args: None  # type: ignore[method-assign]
+    loader._apply_skip_softmax_calibration = lambda _model: None  # type: ignore[method-assign]
+    monkeypatch.setattr(
+        loader_mod,
+        "build_checkpoint_mmap_plan",
+        lambda *_args, **_kwargs: HostWeightPlanResult(None, "requires normalization"),
+    )
+    monkeypatch.setattr(
+        cache_mod,
+        "build_runtime_weight_cache_plan",
+        lambda *_args, **_kwargs: HostWeightPlanResult(None, "writer timed out", "lock_timeout"),
+    )
+
+    original_weight = model.transformer.weight.detach().clone()
+    assert loader.load_model(load_device="cpu") is model
+    assert torch.equal(model.transformer.weight, original_weight)
     assert loader.take_host_weight_plan() is None
 
 

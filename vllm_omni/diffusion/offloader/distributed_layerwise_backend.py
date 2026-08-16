@@ -1023,7 +1023,7 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
                     framework="pt",
                     device="cpu",
                 )
-            tensor = file_cache[binding.file_path].get_tensor(binding.checkpoint_key)
+            tensor = file_cache[binding.file_path].get_tensor(binding.storage_key)
             if is_parameter:
                 replacement = torch.nn.Parameter(tensor, requires_grad=target.requires_grad)
                 parent._parameters[leaf_name] = replacement
@@ -1102,6 +1102,90 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
                 f"{len(remaining_meta)} DiT tensors on the meta device "
                 f"(first 5: {remaining_meta[:5]})."
             )
+
+    def _load_weights_from_runtime_cache(
+        self,
+        pipeline: nn.Module,
+        modules,
+        plan: HostWeightPlan,
+    ) -> None:
+        """Replace final ordinary-loader tensors with validated cache views."""
+        from safetensors import safe_open
+
+        if not plan.post_load_complete:
+            raise RuntimeError("A runtime-cache plan must describe fully post-processed weights")
+        if any(binding.transform is not None for binding in plan.bindings.values()):
+            raise RuntimeError("Runtime-cache bindings cannot carry deferred checkpoint transforms")
+
+        required_names: set[str] = set()
+        for dit_name, dit_module in zip(modules.dit_names, modules.dits):
+            required_names.update(f"{dit_name}.{name}" for name, _ in dit_module.named_parameters())
+            for name, _ in dit_module.named_buffers():
+                parent_path, _, leaf_name = name.rpartition(".")
+                owner = dit_module.get_submodule(parent_path)
+                if leaf_name not in owner._non_persistent_buffers_set:
+                    required_names.add(f"{dit_name}.{name}")
+        if required_names != set(plan.bindings):
+            missing = sorted(required_names - set(plan.bindings))
+            unexpected = sorted(set(plan.bindings) - required_names)
+            raise RuntimeError(
+                "Runtime-cache plan coverage changed after loader validation: "
+                f"missing={missing[:5]}, unexpected={unexpected[:5]}"
+            )
+
+        file_cache: dict[str, Any] = {}
+        replacements: list[tuple[torch.Tensor, torch.Tensor]] = []
+        try:
+            # Validate and map every tensor before mutating the pipeline. A
+            # missing/corrupt shard therefore leaves the ordinary tensors intact.
+            for runtime_name, binding in plan.bindings.items():
+                parent_path, _, leaf_name = runtime_name.rpartition(".")
+                try:
+                    parent = pipeline.get_submodule(parent_path)
+                except AttributeError as exc:
+                    raise RuntimeError(f"Runtime-cache target module {parent_path!r} no longer exists") from exc
+
+                target = parent._parameters.get(leaf_name)
+                if target is None:
+                    target = parent._buffers.get(leaf_name)
+                if target is None:
+                    raise RuntimeError(f"Runtime-cache target tensor {runtime_name!r} no longer exists")
+                if target.device.type != "cpu" or target.is_meta:
+                    raise RuntimeError(
+                        f"Runtime-cache target {runtime_name!r} is not an ordinary CPU tensor: {target.device}"
+                    )
+
+                if binding.file_path not in file_cache:
+                    file_cache[binding.file_path] = safe_open(
+                        binding.file_path,
+                        framework="pt",
+                        device="cpu",
+                    )
+                tensor = file_cache[binding.file_path].get_tensor(binding.storage_key)
+                if tensor.shape != target.shape or tensor.dtype != target.dtype:
+                    raise RuntimeError(
+                        f"Runtime-cache metadata changed for {runtime_name!r}: "
+                        f"cache={tuple(tensor.shape)}/{tensor.dtype}, "
+                        f"runtime={tuple(target.shape)}/{target.dtype}"
+                    )
+                replacements.append((target, tensor))
+        except Exception:
+            file_cache.clear()
+            raise
+
+        # Preserve Parameter objects and their loader/runtime attributes; only
+        # their storage changes. This also keeps any references held by model
+        # code valid while dropping the private allocator-backed storage.
+        for target, tensor in replacements:
+            set_tensor_storage(target, tensor)
+
+        self._mmap_transforms_by_tensor_id.clear()
+        self._mmap_file_cache = file_cache
+        logger.info(
+            "Remapped %d final DiT tensors from runtime cache %s",
+            len(replacements),
+            plan.runtime_layout_key[:12] if plan.runtime_layout_key else "unknown",
+        )
 
     def _init_dp_group(self) -> None:
         """Reuse the process group initialized by parallel_state.
@@ -1443,16 +1527,30 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         self._using_mmap = self.host_weight_plan is not None
         self._using_rank_local_mmap = self._using_mmap and self.dp_size <= 1
         if self._using_mmap:
-            if self.host_weight_plan.backing_kind != "checkpoint_mmap":
+            if self.host_weight_plan.backing_kind == "checkpoint_mmap":
+                self._load_weights_via_mmap(
+                    pipeline,
+                    modules,
+                    self.host_weight_plan,
+                )
+            elif self.host_weight_plan.backing_kind == "runtime_cache":
+                if self.config.dlo_use_allgather:
+                    raise ValueError("Runtime-cache backing is no-AllGather only in the first implementation")
+                self._using_rank_local_mmap = True
+                self._load_weights_from_runtime_cache(
+                    pipeline,
+                    modules,
+                    self.host_weight_plan,
+                )
+                # Assignments above dropped the model's private tensor
+                # references. Reclaim those allocations before hook setup so
+                # steady-state PSS reflects the shared mmap backing.
+                self._cleanup_after_loading()
+            else:
                 raise ValueError(f"Unsupported DLO host-weight backing: {self.host_weight_plan.backing_kind}")
-            self._load_weights_via_mmap(
-                pipeline,
-                modules,
-                self.host_weight_plan,
-            )
             if self._using_rank_local_mmap:
                 logger.info(
-                    "DLO rank-local mmap storage enabled: checkpoint pages are "
+                    "DLO rank-local mmap storage enabled: file-backed pages are "
                     "node-shared; each worker owns only two bounded host staging slots"
                 )
         else:

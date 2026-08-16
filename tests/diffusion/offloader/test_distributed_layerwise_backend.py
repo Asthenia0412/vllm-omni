@@ -765,6 +765,95 @@ class _MmapPostLoadPipeline(nn.Module):
 
 
 class TestMmapWeightLoading:
+    def test_runtime_cache_maps_final_weights_without_rerunning_post_load(
+        self,
+        tmp_path,
+        patched_offload_runtime,
+    ):
+        class Transformer(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.proj = nn.Linear(2, 2, bias=False)
+                self.post_load_calls = 0
+
+            def post_load_weights(self):
+                self.post_load_calls += 1
+
+        class Pipeline(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.transformer = Transformer()
+
+        pipeline = Pipeline()
+        old_parameter = pipeline.transformer.proj.weight
+        old_parameter.runtime_marker = "preserved"
+        weight_file = tmp_path / "runtime.safetensors"
+        save_file({"transformer.proj.weight": torch.full((2, 2), 9.0)}, str(weight_file))
+        plan = HostWeightPlan(
+            backing_kind="runtime_cache",
+            bindings={
+                "transformer.proj.weight": TensorBinding(
+                    storage_key="transformer.proj.weight",
+                    file_path=str(weight_file),
+                )
+            },
+            runtime_layout_key="runtime-layout",
+            post_load_complete=True,
+        )
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=False,
+                dlo_use_allgather=False,
+            ),
+            torch.device("cpu"),
+            host_weight_plan=plan,
+        )
+        modules = SimpleNamespace(dits=[pipeline.transformer], dit_names=["transformer"])
+
+        backend._load_weights_from_runtime_cache(pipeline, modules, plan)
+
+        assert pipeline.transformer.post_load_calls == 0
+        assert pipeline.transformer.proj.weight is old_parameter
+        assert pipeline.transformer.proj.weight.runtime_marker == "preserved"
+        assert torch.equal(pipeline.transformer.proj.weight, torch.full((2, 2), 9.0))
+        backend._release_mmap_handles()
+
+    def test_runtime_cache_mapping_failure_leaves_ordinary_tensors_intact(
+        self,
+        tmp_path,
+        patched_offload_runtime,
+    ):
+        pipeline = nn.Module()
+        pipeline.transformer = nn.Linear(2, 2, bias=False)
+        old_parameter = pipeline.transformer.weight
+        plan = HostWeightPlan(
+            backing_kind="runtime_cache",
+            bindings={
+                "transformer.weight": TensorBinding(
+                    storage_key="transformer.weight",
+                    file_path=str(tmp_path / "missing.safetensors"),
+                )
+            },
+            runtime_layout_key="runtime-layout",
+            post_load_complete=True,
+        )
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=False,
+                dlo_use_allgather=False,
+            ),
+            torch.device("cpu"),
+            host_weight_plan=plan,
+        )
+        modules = SimpleNamespace(dits=[pipeline.transformer], dit_names=["transformer"])
+
+        with pytest.raises(Exception, match="missing.safetensors"):
+            backend._load_weights_from_runtime_cache(pipeline, modules, plan)
+
+        assert pipeline.transformer.weight is old_parameter
+
     def test_runs_model_post_load_hook(self, tmp_path, patched_offload_runtime):
         pipeline = _MmapPostLoadPipeline()
         weights = {name: torch.ones(param.shape, dtype=torch.bfloat16) for name, param in pipeline.named_parameters()}
@@ -788,7 +877,7 @@ class TestMmapWeightLoading:
             backing_kind="checkpoint_mmap",
             bindings={
                 name: TensorBinding(
-                    checkpoint_key=name,
+                    storage_key=name,
                     file_path=str(weight_file),
                 )
                 for name in weights
@@ -857,6 +946,53 @@ class TestMmapWeightLoading:
         assert backend._using_rank_local_mmap
         assert backend.dp_group is None
         assert all(hook.rank_local_mmap for group in backend._all_hook_groups for hook in group)
+        backend.disable()
+
+    def test_runtime_cache_enable_reclaims_private_weights_before_hook_setup(
+        self,
+        tmp_path,
+        patched_offload_runtime,
+    ):
+        class Transformer(nn.Module):
+            _layerwise_offload_blocks_attrs = ["blocks"]
+
+            def __init__(self):
+                super().__init__()
+                self.blocks = nn.ModuleList([nn.Linear(2, 2, bias=False) for _ in range(2)])
+
+        class Pipeline(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.transformer = Transformer()
+
+        pipeline = Pipeline()
+        weights = {name: torch.full_like(param, 4) for name, param in pipeline.named_parameters()}
+        weight_file = tmp_path / "runtime.safetensors"
+        save_file(weights, str(weight_file))
+        plan = HostWeightPlan(
+            backing_kind="runtime_cache",
+            bindings={name: TensorBinding(storage_key=name, file_path=str(weight_file)) for name in weights},
+            runtime_layout_key="runtime-layout",
+            post_load_complete=True,
+        )
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=False,
+                dlo_use_allgather=False,
+            ),
+            torch.device("cpu"),
+            host_weight_plan=plan,
+        )
+        cleanup_calls: list[None] = []
+        backend._cleanup_after_loading = lambda: cleanup_calls.append(None)  # type: ignore[method-assign]
+
+        backend.enable(pipeline)
+
+        assert backend._using_rank_local_mmap
+        # One reclamation immediately after remap, plus the existing final
+        # post-hook cleanup.
+        assert len(cleanup_calls) == 2
         backend.disable()
 
 
@@ -1164,7 +1300,7 @@ class TestMmapValidation:
         assert result.fallback_reason is None
         assert result.plan is not None
         assert result.plan.bindings["transformer.blocks.0.weight"] == TensorBinding(
-            checkpoint_key="blocks.0.weight",
+            storage_key="blocks.0.weight",
             file_path=str(checkpoint_file),
         )
         assert result.plan.planned_source_prefixes == frozenset({"transformer."})
@@ -1454,7 +1590,7 @@ class TestMmapValidation:
 
         assert result.plan is not None
         assert result.plan.bindings["transformer.proj_in.weight"] == TensorBinding(
-            checkpoint_key="proj_in.weight",
+            storage_key="proj_in.weight",
             file_path=str(checkpoint_file),
         )
 

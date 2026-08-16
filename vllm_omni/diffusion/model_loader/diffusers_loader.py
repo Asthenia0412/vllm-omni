@@ -496,7 +496,8 @@ class DiffusersPipelineLoader:
                         )
                     if _dist_offload and plan_result is not None:
                         logger.info(
-                            "DLO direct checkpoint mmap unavailable; using ordinary loader: %s",
+                            "DLO direct checkpoint mmap unavailable [%s]; using ordinary loader: %s",
+                            plan_result.fallback_code or "unknown",
                             plan_result.fallback_reason,
                         )
                     logger.debug("Loading weights on %s ...", load_device)
@@ -521,7 +522,96 @@ class DiffusersPipelineLoader:
                 logger.info("Quantization complete, offloaded model back to CPU")
 
         self._apply_skip_softmax_calibration(model)
-        return model.eval()
+        model.eval()
+        self._maybe_build_runtime_weight_cache(model, load_format)
+        return model
+
+    def _maybe_build_runtime_weight_cache(self, model: nn.Module, load_format: str) -> None:
+        """Publish final ordinary-loader DiT tensors for no-AllGather DLO."""
+        if self.host_weight_plan is not None:
+            return
+        if not getattr(self.od_config, "enable_distributed_layerwise_offload", False):
+            return
+        if not getattr(self.od_config, "dlo_enable_runtime_cache", False):
+            return
+        if getattr(self.od_config, "dlo_use_allgather", True):
+            logger.info("DLO runtime cache is no-AllGather only; leaving AllGather storage unchanged")
+            return
+
+        parallel_config = self.parallel_config
+        tp_size = int(getattr(parallel_config, "tensor_parallel_size", 1))
+        tp_rank = 0
+        if tp_size > 1:
+            try:
+                from vllm.distributed import get_tensor_model_parallel_rank
+
+                tp_rank = int(get_tensor_model_parallel_rank())
+            except Exception as exc:
+                logger.warning(
+                    "DLO runtime cache unavailable [parallel_rank_unavailable]: cannot resolve TP rank for TP=%d: %s",
+                    tp_size,
+                    exc,
+                )
+                return
+
+        modules = ModuleDiscovery.discover(model)
+        from vllm_omni.diffusion.model_loader.runtime_weight_cache import (
+            DEFAULT_SHARD_SIZE_BYTES,
+            build_runtime_weight_cache_plan,
+        )
+
+        loader_inputs = {
+            "model_class_name": getattr(self.od_config, "model_class_name", None),
+            "model_config": getattr(self.od_config, "model_config", None),
+            "diffusers_load_kwargs": getattr(self.od_config, "diffusers_load_kwargs", None),
+            "custom_pipeline_args": getattr(self.od_config, "custom_pipeline_args", None),
+            "lora_path": getattr(self.od_config, "lora_path", None),
+            "lora_scale": getattr(self.od_config, "lora_scale", None),
+            "lora_backend": getattr(self.od_config, "lora_backend", None),
+        }
+        sp_guard = {
+            "sequence_parallel_size": int(getattr(parallel_config, "sequence_parallel_size", 1)),
+            "ulysses_degree": int(getattr(parallel_config, "ulysses_degree", 1)),
+            "ring_degree": int(getattr(parallel_config, "ring_degree", 1)),
+            "allgather_degree": int(getattr(parallel_config, "allgather_degree", 1)),
+            "ulysses_mode": getattr(parallel_config, "ulysses_mode", "strict"),
+        }
+        model_identity = getattr(self.od_config, "model", None)
+        result = build_runtime_weight_cache_plan(
+            model,
+            dit_modules=tuple(zip(modules.dit_names, modules.dits)),
+            loader_type=type(self),
+            cache_root=getattr(self.od_config, "dlo_runtime_cache_dir", None),
+            lock_timeout_seconds=float(getattr(self.od_config, "dlo_runtime_cache_lock_timeout", 600.0)),
+            max_shard_bytes=DEFAULT_SHARD_SIZE_BYTES,
+            model_identity=str(model_identity) if model_identity is not None else None,
+            revision=getattr(self.od_config, "revision", None),
+            runtime_dtype=getattr(self.od_config, "dtype", None),
+            load_format=load_format,
+            loader_inputs=loader_inputs,
+            tensor_parallel_size=tp_size,
+            tensor_parallel_rank=tp_rank,
+            sequence_parallel_guard=sp_guard,
+            use_hsdp=bool(getattr(parallel_config, "use_hsdp", False)),
+            quantization_config=self.quant_config,
+            cfg_parallel_size=int(getattr(parallel_config, "cfg_parallel_size", 1)),
+            pipeline_parallel_size=int(getattr(parallel_config, "pipeline_parallel_size", 1)),
+        )
+        if result.plan is not None:
+            self.host_weight_plan = result.plan
+            logger.info(
+                "DLO runtime cache selected (layout=%s, TP=%d/%d, SP=%d)",
+                result.plan.runtime_layout_key[:12] if result.plan.runtime_layout_key else "unknown",
+                tp_rank,
+                tp_size,
+                sp_guard["sequence_parallel_size"],
+            )
+        else:
+            logger.warning(
+                "DLO runtime cache unavailable [%s]; retaining ordinary host tensors: %s",
+                result.fallback_code or "unknown",
+                result.fallback_reason or "unspecified reason",
+            )
 
     @staticmethod
     def _request_offload_after_quant(model: nn.Module) -> int:

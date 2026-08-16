@@ -71,8 +71,9 @@ def get_offload_backend(
     Args:
         od_config: OmniDiffusionConfig with offload settings
         device: Target device (auto-detected if None)
-        host_weight_plan: Exact loader-produced backing plan, if ordinary
-            weight materialization was skipped.
+        host_weight_plan: Exact loader-produced backing plan. Checkpoint plans
+            may have skipped ordinary materialization; runtime-cache plans
+            describe already-valid ordinary tensors that can be remapped.
 
     Returns:
         OffloadBackend instance or None if offloading disabled
@@ -85,10 +86,14 @@ def get_offload_backend(
     # Extract and validate configuration
     config = OffloadConfig.from_od_config(od_config)
 
+    plan_requires_backend = host_weight_plan is not None and not host_weight_plan.post_load_complete
     if host_weight_plan is not None and config.strategy != OffloadStrategy.DISTRIBUTED_LAYER_WISE:
-        raise RuntimeError(
-            "A loader-owned DLO host-weight plan was produced, but distributed layerwise offload is not selected"
-        )
+        if plan_requires_backend:
+            raise RuntimeError(
+                "A loader-owned DLO host-weight plan was produced, but distributed layerwise offload is not selected"
+            )
+        logger.warning("Ignoring optional runtime-cache plan because distributed layerwise offload is not selected")
+        host_weight_plan = None
 
     # Return None if no offloading requested
     if config.strategy == OffloadStrategy.NONE:
@@ -96,7 +101,7 @@ def get_offload_backend(
 
     # Validate platform (CUDA required for now)
     if not current_omni_platform.supports_cpu_offload() or current_omni_platform.get_device_count() < 1:
-        if host_weight_plan is not None:
+        if plan_requires_backend:
             raise RuntimeError(
                 "The loader skipped ordinary weight materialization for DLO, "
                 "but this platform cannot create the required offload backend"
@@ -112,7 +117,7 @@ def get_offload_backend(
         try:
             device = current_omni_platform.get_torch_device()
         except (NotImplementedError, AttributeError) as exc:
-            if host_weight_plan is not None:
+            if plan_requires_backend:
                 raise RuntimeError(
                     "The loader skipped ordinary weight materialization for DLO, "
                     "but the target device could not be resolved"
