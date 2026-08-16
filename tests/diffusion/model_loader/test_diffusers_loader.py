@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 from huggingface_hub import snapshot_download
 from vllm.config.load import LoadConfig
+from vllm.model_executor.layers.linear import UnquantizedLinearMethod
 
 from vllm_omni.diffusion.config import get_current_diffusion_config, get_current_diffusion_config_or_none
 from vllm_omni.diffusion.data import DiffusionParallelConfig, OmniDiffusionConfig
@@ -436,6 +437,7 @@ def test_dlo_runtime_cache_is_built_after_final_post_load_mutation(monkeypatch, 
     loader = DiffusersPipelineLoader(LoadConfig(), od_config)
     model = nn.Module()
     model.transformer = nn.Linear(2, 2, bias=False)
+    model.transformer.quant_method = UnquantizedLinearMethod()
     events: list[str] = []
     runtime_plan = HostWeightPlan(
         backing_kind="runtime_cache",
@@ -470,6 +472,7 @@ def test_dlo_runtime_cache_is_built_after_final_post_load_mutation(monkeypatch, 
         assert torch.equal(model.transformer.weight, torch.full((2, 2), 3.0))
         assert kwargs["tensor_parallel_rank"] == 0
         assert "data_parallel_size" not in kwargs["sequence_parallel_guard"]
+        assert kwargs["quantization_config"] is None
         return HostWeightPlanResult(runtime_plan)
 
     loader._init_from_load_format = lambda *_args, **_kwargs: model  # type: ignore[method-assign]
@@ -513,6 +516,7 @@ def test_dlo_runtime_cache_failure_retains_ordinary_weights(monkeypatch, tmp_pat
     loader = DiffusersPipelineLoader(LoadConfig(), od_config)
     model = nn.Module()
     model.transformer = nn.Linear(2, 2, bias=False)
+    model.transformer.quant_method = object()
     loader._init_from_load_format = lambda *_args, **_kwargs: model  # type: ignore[method-assign]
     loader.load_weights = lambda _model: None  # type: ignore[method-assign]
     loader._process_weights_after_loading = lambda *_args: None  # type: ignore[method-assign]
@@ -522,11 +526,12 @@ def test_dlo_runtime_cache_failure_retains_ordinary_weights(monkeypatch, tmp_pat
         "build_checkpoint_mmap_plan",
         lambda *_args, **_kwargs: HostWeightPlanResult(None, "requires normalization"),
     )
-    monkeypatch.setattr(
-        cache_mod,
-        "build_runtime_weight_cache_plan",
-        lambda *_args, **_kwargs: HostWeightPlanResult(None, "writer timed out", "lock_timeout"),
-    )
+
+    def build_cache(_pipeline, **kwargs):
+        assert kwargs["quantization_config"] == "module_quant_method"
+        return HostWeightPlanResult(None, "writer timed out", "lock_timeout")
+
+    monkeypatch.setattr(cache_mod, "build_runtime_weight_cache_plan", build_cache)
 
     original_weight = model.transformer.weight.detach().clone()
     assert loader.load_model(load_device="cpu") is model

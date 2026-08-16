@@ -61,6 +61,7 @@ def _build(pipeline: nn.Module, cache_root: Path, **overrides):
         "tensor_parallel_rank": 0,
         "sequence_parallel_guard": {"sequence_parallel_size": 1, "backend": "none"},
         "use_hsdp": False,
+        "enable_expert_parallel": False,
         "quantization_config": None,
         "cfg_parallel_size": 1,
         "pipeline_parallel_size": 1,
@@ -123,6 +124,14 @@ def test_final_runtime_content_is_authoritative(tmp_path):
 
     assert first.plan is not None and second.plan is not None
     assert first.plan.runtime_layout_key != second.plan.runtime_layout_key
+
+
+def test_expert_parallel_ownership_fails_closed(tmp_path):
+    result = _build(_Pipeline(), tmp_path, enable_expert_parallel=True)
+
+    assert result.plan is None
+    assert result.fallback_code == "unsupported_expert_parallel"
+    assert list(tmp_path.rglob("*.safetensors")) == []
 
 
 def test_corrupt_published_entry_is_rebuilt_under_the_key_lock(tmp_path):

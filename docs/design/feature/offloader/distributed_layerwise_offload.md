@@ -260,7 +260,8 @@ must use `--dlo-no-use-allgather` or disable online quantization until their
 runtime layouts are validated.
 
 Runtime-cache v1 is no-AllGather only and rejects all quantization
-configurations, HSDP/DTensor, CFG parallelism, PP, non-contiguous tensors, and
+configurations, HSDP/DTensor, expert parallelism, CFG parallelism, PP,
+non-contiguous tensors, and
 tied/shared storage.
 
 ## Validation coverage

@@ -14,6 +14,7 @@ import torch
 from torch import nn
 from vllm.config.load import LoadConfig
 from vllm.logger import init_logger
+from vllm.model_executor.layers.linear import UnquantizedLinearMethod
 from vllm.model_executor.layers.quantization.base_config import QuantizeMethodBase
 from vllm.model_executor.model_loader.weight_utils import (
     download_safetensors_index_file_from_hf,
@@ -556,6 +557,7 @@ class DiffusersPipelineLoader:
 
         modules = ModuleDiscovery.discover(model)
         from vllm_omni.diffusion.model_loader.runtime_weight_cache import (
+            DEFAULT_LOCK_TIMEOUT_SECONDS,
             DEFAULT_SHARD_SIZE_BYTES,
             build_runtime_weight_cache_plan,
         )
@@ -577,12 +579,21 @@ class DiffusersPipelineLoader:
             "ulysses_mode": getattr(parallel_config, "ulysses_mode", "strict"),
         }
         model_identity = getattr(self.od_config, "model", None)
+        runtime_quantization = self.quant_config
+        if runtime_quantization is None and any(
+            (quant_method := getattr(module, "quant_method", None)) is not None
+            and not isinstance(quant_method, UnquantizedLinearMethod)
+            for module in model.modules()
+        ):
+            runtime_quantization = "module_quant_method"
         result = build_runtime_weight_cache_plan(
             model,
             dit_modules=tuple(zip(modules.dit_names, modules.dits)),
             loader_type=type(self),
             cache_root=getattr(self.od_config, "dlo_runtime_cache_dir", None),
-            lock_timeout_seconds=float(getattr(self.od_config, "dlo_runtime_cache_lock_timeout", 600.0)),
+            lock_timeout_seconds=float(
+                getattr(self.od_config, "dlo_runtime_cache_lock_timeout", DEFAULT_LOCK_TIMEOUT_SECONDS)
+            ),
             max_shard_bytes=DEFAULT_SHARD_SIZE_BYTES,
             model_identity=str(model_identity) if model_identity is not None else None,
             revision=getattr(self.od_config, "revision", None),
@@ -593,7 +604,8 @@ class DiffusersPipelineLoader:
             tensor_parallel_rank=tp_rank,
             sequence_parallel_guard=sp_guard,
             use_hsdp=bool(getattr(parallel_config, "use_hsdp", False)),
-            quantization_config=self.quant_config,
+            enable_expert_parallel=bool(getattr(parallel_config, "enable_expert_parallel", False)),
+            quantization_config=runtime_quantization,
             cfg_parallel_size=int(getattr(parallel_config, "cfg_parallel_size", 1)),
             pipeline_parallel_size=int(getattr(parallel_config, "pipeline_parallel_size", 1)),
         )

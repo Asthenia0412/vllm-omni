@@ -572,6 +572,7 @@ def build_runtime_weight_cache_plan(
     tensor_parallel_rank: int,
     sequence_parallel_guard: Mapping[str, Any],
     use_hsdp: bool,
+    enable_expert_parallel: bool,
     quantization_config: Any,
     cfg_parallel_size: int,
     pipeline_parallel_size: int,
@@ -585,6 +586,12 @@ def build_runtime_weight_cache_plan(
         )
     if use_hsdp:
         return HostWeightPlanResult(None, "HSDP/DTensor layouts are not runtime-cache compatible", "unsupported_hsdp")
+    if enable_expert_parallel:
+        return HostWeightPlanResult(
+            None,
+            "expert-parallel weight ownership is outside runtime-cache v1",
+            "unsupported_expert_parallel",
+        )
     if quantization_config is not None:
         return HostWeightPlanResult(
             None,
