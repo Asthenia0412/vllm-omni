@@ -12,11 +12,13 @@ This module tests the WorkerWrapperBase implementation:
 - Dynamic worker class extension
 """
 
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
 
+import vllm_omni.diffusion.worker.diffusion_worker as worker_module
 from vllm_omni.diffusion.worker.diffusion_worker import (
     CustomPipelineWorkerExtension,
     DiffusionWorker,
@@ -203,6 +205,29 @@ class TestWorkerWrapperBaseDelegation:
         result = wrapper.shutdown()
         wrapper.worker.shutdown.assert_called_once()
         assert result is None
+
+    def test_worker_shutdown_disables_offloader_before_distributed_teardown(
+        self,
+        mocker: MockerFixture,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        worker = object.__new__(DiffusionWorker)
+        offload_backend = mocker.Mock()
+        kv_transfer_manager = mocker.Mock()
+        worker.model_runner = SimpleNamespace(
+            offload_backend=offload_backend,
+            kv_transfer_manager=kv_transfer_manager,
+        )
+        events: list[str] = []
+        offload_backend.disable.side_effect = lambda: events.append("offloader")
+        kv_transfer_manager.shutdown_prefetch.side_effect = lambda: events.append("kv_transfer")
+        monkeypatch.setattr(worker_module, "destroy_distributed_env", lambda: events.append("distributed"))
+
+        worker.shutdown()
+
+        offload_backend.disable.assert_called_once_with()
+        kv_transfer_manager.shutdown_prefetch.assert_called_once_with()
+        assert events == ["offloader", "kv_transfer", "distributed"]
 
 
 # -------------------------------------------------------------------------

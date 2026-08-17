@@ -548,6 +548,7 @@ class OrchestratorArgs:
     dlo_enable_runtime_cache: bool = False
     dlo_runtime_cache_dir: str | None = None
     dlo_runtime_cache_lock_timeout: float = 600.0
+    dlo_runtime_cache_pin_limit_gib: float = 0.0
     dlo_resident_layers: int = 0
     boundary_ratio: float | None = None
     flow_shift: float | None = None

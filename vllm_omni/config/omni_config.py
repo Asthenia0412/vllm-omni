@@ -690,6 +690,7 @@ class _DiffusionConfigProjection:
     dlo_enable_runtime_cache: bool = False
     dlo_runtime_cache_dir: str | None = None
     dlo_runtime_cache_lock_timeout: float = Field(default=600.0, gt=0)
+    dlo_runtime_cache_pin_limit_gib: float = Field(default=0.0, ge=0)
     dlo_resident_layers: int = Field(default=0, ge=0)
     pin_cpu_memory: bool = True
     diffusion_compile_granularity: Literal["regional", "full"] = "regional"
@@ -756,6 +757,8 @@ class _DiffusionConfigProjection:
             raise ValueError("dlo_enable_runtime_cache requires distributed layerwise offload")
         if self.dlo_enable_runtime_cache and self.dlo_use_allgather:
             raise ValueError("dlo_enable_runtime_cache currently requires dlo_use_allgather=False")
+        if self.dlo_runtime_cache_pin_limit_gib and not self.dlo_enable_runtime_cache:
+            raise ValueError("dlo_runtime_cache_pin_limit_gib requires dlo_enable_runtime_cache=True")
 
         if self.tf_model_config is None:
             self.tf_model_config = TransformerConfig()

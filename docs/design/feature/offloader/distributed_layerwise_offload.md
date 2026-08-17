@@ -46,7 +46,9 @@ produce a direct-checkpoint mmap plan for a proven-compatible runtime layout;
 otherwise it uses the ordinary loader. In no-AllGather mode, an opt-in Phase B
 runtime cache can normalize those final ordinary-loader DiT tensors into an
 immutable node-local mmap entry. Consequently, replicas can share either
-proven-compatible checkpoint pages or equivalent final runtime layouts.
+proven-compatible checkpoint pages or equivalent final runtime layouts. An
+opt-in CUDA registration budget can make the complete final mapping directly
+H2D-copyable, avoiding the recurrent host packing otherwise required by mmap.
 
 The Phase A shared-mmap support boundary is TP1. TP greater than one is an
 ordinary-loader compatibility path: DLO can consume the resulting TP-local
@@ -138,18 +140,56 @@ error retains the already-valid ordinary tensors.
 DLO maps this plan without moving the DiT to `meta` and without rerunning any
 post-load hook. It changes tensor storage while preserving `Parameter` objects,
 then runs the existing `gc.collect()`/`malloc_trim()` cleanup before installing
-streaming hooks. The source mappings remain open through DLO disable and feed
-the existing bounded two-slot host staging path. Because file-backed pages are
-not pinned, every streamed block is first packed from mmap storage into one of
-those pinned slots and is then copied to the device. This removes model-sized
-private pinned storage, but adds a recurrent host-to-host copy and can amplify
-TP synchronization waits when several ranks compete for host bandwidth.
+streaming hooks. The source mappings remain open through DLO disable. With the
+default zero registration budget they feed the existing bounded two-slot host
+staging path. Every streamed block is first packed from pageable mmap storage
+into one of those pinned slots and is then copied to the device. This removes
+model-sized private pinned storage, but adds a recurrent host-to-host copy and
+can amplify TP synchronization waits when several ranks compete for host
+bandwidth.
 
 This version is deliberately opt-in and steady-state-oriented. It requires
 roughly one local-disk model copy per runtime identity, has no eviction, and
 still performs ordinary loading plus full content-hash passes in every rank.
 Skip-load-on-hit is a separate follow-up after loader side effects can be
 modeled safely.
+
+### Registered runtime-cache transfer
+
+`dlo_runtime_cache_pin_limit_gib > 0` opts a CUDA worker into complete
+runtime-cache registration. It also changes loader selection: no-AllGather
+uses the ordinary loader and final runtime cache even when a TP1 direct-
+checkpoint plan is available. A checkpoint binding can carry a deferred
+adapter such as grouped-QKV reordering. Registering that raw source would not
+remove the adapter's recurrent CPU allocation/copy, whereas the runtime cache
+contains the transform-complete final tensors.
+
+After mapping and validating every final tensor, DLO groups source storages by
+backing file, page-aligns their address ranges, and coalesces overlapping or
+adjacent ranges within that mapping. The complete byte count is checked
+against the per-worker budget before any CUDA call. It then registers every
+range with the read-only CUDA host-registration flag and verifies that PyTorch
+recognizes every mapped tensor as pinned. Failure rolls back any ranges already
+registered and preserves the existing two-slot staging path. Partial direct
+transfer is deliberately unsupported. A rollback failure aborts worker
+initialization so a still-registered range is retained until process/context
+teardown rather than being unsafely unmapped.
+
+On success, the hooks copy each immutable tensor view directly into its offset
+in the existing flattened rotating device buffer on the copy stream. Parameter
+repointing, two-block HBM residency, and H2D/compute overlap are unchanged. The
+implementation currently issues more H2D copy operations than block packing,
+but avoids the much larger recurrent CPU copy. A packed cache schema should be
+considered only if launch-count measurements justify its added format and
+publication complexity.
+
+Registration is per process and CUDA context; physical file-cache pages remain
+shared and are not copied into one private host allocation per worker. The
+operator must nevertheless budget page-locked memory and satisfy OS/CUDA
+registration limits for every worker. During shutdown, DLO first synchronizes
+outstanding device work, unregisters all ranges, and then closes the safetensors
+mappings. Worker teardown invokes this cleanup before destroying the
+distributed environment and CUDA context.
 
 ### AllGather path
 
@@ -203,6 +243,10 @@ the persistent private full-model copy per pure-DP process, but each process
 still packs and transfers every complete block. Sharing is node-local; each
 node has its own page cache.
 
+For a runtime-cache mapping, a positive registration budget replaces those
+host slots with direct copies from the shared final tensor views. A zero budget
+or failed registration retains the bounded staging behavior.
+
 When direct mmap preflight fails, the regular model loader remains responsible
 for preparing each rank's weights, including TP-local tensors or HSDP-managed
 parameters. Supported CPU layouts may then enter the opt-in runtime cache.
@@ -225,9 +269,9 @@ This mode means:
 
 | Parallelism | DLO + AllGather | DLO without AllGather |
 |---|---|---|
-| **DP** | Supported primary path. DLO shards host weights across the DP group and can run DP multi-concurrency. | Supported rank-local path. Compatible TP1 replicas can share checkpoint pages; the optional runtime cache shares equivalent final layouts while excluding DP rank from its identity. |
-| **SP** | Supported in the implementation. With DP=1, DLO uses the SP group for host-weight sharding; SP still shards sequence/activation work. | SP remains active without a DLO weight collective. Runtime-cache v1 excludes SP rank and includes conservative SP implementation/world-size guards. |
-| **TP > 1** | Outside the Phase A direct-mmap scope. The loader preserves TP-local layouts and DLO may apply DP/SP host sharding to ordinary runtime tensors. | The ordinary TP-aware loader produces rank-local tensors. Runtime-cache v1 creates one entry per TP coordinate, shareable by equivalent DP/SP processes. |
+| **DP** | Supported primary path. DLO shards host weights across the DP group and can run DP multi-concurrency. | Supported rank-local path. Compatible TP1 replicas can share checkpoint pages; the optional runtime cache shares equivalent final layouts while excluding DP rank from its identity. CUDA workers may register the complete final mapping for direct H2D. |
+| **SP** | Supported in the implementation. With DP=1, DLO uses the SP group for host-weight sharding; SP still shards sequence/activation work. | SP remains active without a DLO weight collective. Runtime-cache v1 excludes SP rank and includes conservative SP implementation/world-size guards. Registered transfer does not remove ordinary SP activation/attention collectives. |
+| **TP > 1** | Outside the Phase A direct-mmap scope. The loader preserves TP-local layouts and DLO may apply DP/SP host sharding to ordinary runtime tensors. | The ordinary TP-aware loader produces rank-local tensors. Runtime-cache v1 creates one entry per TP coordinate, shareable by equivalent DP/SP processes. Registering those final mappings removes staging-driven TP skew but does not remove ordinary TP collectives. |
 | **HSDP** | Rejected. HSDP has already sharded parameters, so DLO AllGather would double-shard them. | Accepted by configuration. HSDP owns parameter sharding and its own gathers; DLO only stages rank-local parameters. End-to-end coverage is limited. |
 
 ### Combined dimensions
@@ -286,6 +330,8 @@ Current source-level validation includes:
   rejection;
 - loader ordering through final post-load mutation and DLO remapping without
   rerunning post-load hooks;
+- all-or-nothing page-aligned registration, budget rejection, partial-failure
+  rollback, direct-copy staging bypass, and explicit shutdown cleanup;
 - resident-layer requests requiring no-AllGather;
 - DP request-wave validation for denoising-step compatibility;
 - sharding, double-buffer, AllGather-size, and heterogeneous-block regression
@@ -397,12 +443,47 @@ rose from 3.75 to 32.49 seconds, while communication-kernel time rose from
 summed across ranks and can overlap; they identify the mechanism, not wall
 time. Matching private/cache outputs were byte-identical.
 
-The result confirms that runtime-cache v1 is a host-capacity option, not a
-latency-neutral replacement for private pinned weights. Broader SP, model,
-platform, and production-quality validation remains tracked in
+The result confirms that zero-budget runtime-cache staging is a host-capacity
+option, not a latency-neutral replacement for private pinned weights. Broader
+SP, model, platform, and production-quality validation remains tracked in
 [issue #6231](https://github.com/vllm-project/vllm-omni/issues/6231). The
 historical B300 rows above predate the runtime cache and must not be treated as
 Phase B memory validation.
+
+### L20X registered-runtime-cache smoke
+
+The read-only registered path was then tested with the same MiniMax-H3
+workload. These are functional and mechanism-validation measurements, not a
+production benchmark. The TP1 pair used one request per wave. Both modes moved
+exactly 121.86 GiB H2D in the profiled request and produced byte-identical video
+and audio for both measured seeds.
+
+| TP1 no-AllGather mode | Mean wave | Throughput | Request-time host PSS | `Private_Dirty` | Engine peak HBM | CPU `aten::copy_` | GPU compute |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Checkpoint mmap + bounded staging | 33.87 s | 0.0295 req/s | 133.65 GiB | 71.16 GiB | 13,226 MB | 21.91 s | 419.28 ms |
+| Final runtime cache + registered direct H2D | 4.88 s | 0.2055 req/s | 129.41 GiB | 66.93 GiB | 13,226 MB | 1.64 s | 419.05 ms |
+
+Registration covered 61.73 GiB in 13 page-aligned ranges. Mean wave latency
+fell by 85.6% and throughput increased 6.94x. GPU compute and H2D payload were
+unchanged, identifying recurrent host transform/packing as the removed work.
+The direct path issued 2,425 H2D events versus 1,945 for packed staging, but
+that launch increase was much smaller than the eliminated CPU cost.
+
+Two independent TP2 engines also registered the same two TP-coordinate cache
+entries across four workers. Compared with the zero-budget cache, mean wave
+latency improved from 9.21/12.55 seconds to 3.80/3.86 seconds for engines A/B;
+the private-loader reference was 3.61/3.72 seconds. Registered request-time
+host PSS was 224.26 GiB versus 232.23 GiB staged and 366.20 GiB private.
+Aggregate CPU `aten::copy_` time was 3.83 seconds registered, 32.49 seconds
+staged, and 3.75 seconds private; aggregate GPU compute and the 264.24 GiB H2D
+payload were effectively unchanged. Ordinary TP communication remained, but
+the extra wait caused by staging-driven rank skew largely disappeared.
+
+All workers explicitly unregistered before releasing their mappings, the
+system's acquired-minus-released pin counter returned to its pre-run value,
+and every GPU allocation was released. Cold runtime-cache publication remained
+expensive because it still performs ordinary loading and multiple full-content
+passes; that startup problem is outside the registered transfer scope.
 
 ## Recommendations
 
@@ -413,8 +494,10 @@ Phase B memory validation.
 - Use **no-AllGather** when independent replica execution is required. TP1
   direct-mmap deployments can share checkpoint pages per node. Enable the
   runtime cache only when independent replicas have repeated final layouts and
-  host capacity is more important than the added mmap-to-pinned staging cost.
-  Benchmark the target CPU/memory topology, especially for matching
-  coordinates across multiple TP engines.
+  benchmark the target CPU/memory topology, especially for matching
+  coordinates across multiple TP engines. On CUDA, provide an explicit
+  registration budget large enough for the complete final layout when
+  recurrent staging cost is unacceptable; leave it at zero when page-locking
+  that layout is not operationally acceptable.
 - Prefer **HSDP alone** for production HSDP deployments until the combined
   HSDP + DLO no-AllGather path has broader end-to-end coverage.

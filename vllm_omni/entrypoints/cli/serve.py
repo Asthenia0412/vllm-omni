@@ -747,6 +747,15 @@ class OmniServeCommand(CLISubcommand):
             help="Seconds to wait for another process publishing the same runtime layout.",
         )
         omni_config_group.add_argument(
+            "--dlo-runtime-cache-pin-limit-gib",
+            type=float,
+            default=0.0,
+            help=(
+                "Maximum GiB of read-only runtime-cache mappings each CUDA worker "
+                "may register for direct H2D. Zero keeps bounded pinned staging."
+            ),
+        )
+        omni_config_group.add_argument(
             "--dlo-resident-layers",
             type=int,
             default=0,

@@ -1043,6 +1043,7 @@ class AsyncOmniEngine:
             "dlo_enable_runtime_cache": kwargs.get("dlo_enable_runtime_cache", False),
             "dlo_runtime_cache_dir": kwargs.get("dlo_runtime_cache_dir", None),
             "dlo_runtime_cache_lock_timeout": kwargs.get("dlo_runtime_cache_lock_timeout", 600.0),
+            "dlo_runtime_cache_pin_limit_gib": kwargs.get("dlo_runtime_cache_pin_limit_gib", 0.0),
             "dlo_resident_layers": kwargs.get("dlo_resident_layers", 0),
             "enforce_eager": False if kwargs.get("enforce_eager") is None else kwargs.get("enforce_eager"),
             "diffusion_compile_granularity": (

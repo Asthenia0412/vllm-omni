@@ -859,11 +859,18 @@ class DiffusionWorker:
 
     def shutdown(self) -> None:
         """Shutdown the worker and cleanup distributed environment."""
-        if self.model_runner is not None:
-            mgr = getattr(self.model_runner, "kv_transfer_manager", None)
-            if mgr is not None:
-                mgr.shutdown_prefetch()
-        destroy_distributed_env()
+        try:
+            if self.model_runner is not None:
+                mgr = getattr(self.model_runner, "kv_transfer_manager", None)
+                try:
+                    offload_backend = getattr(self.model_runner, "offload_backend", None)
+                    if offload_backend is not None:
+                        offload_backend.disable()
+                finally:
+                    if mgr is not None:
+                        mgr.shutdown_prefetch()
+        finally:
+            destroy_distributed_env()
 
 
 class CustomPipelineWorkerExtension:

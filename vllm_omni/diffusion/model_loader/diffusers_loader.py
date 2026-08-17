@@ -441,10 +441,16 @@ class DiffusersPipelineLoader:
                 _dp_size = int(getattr(self.parallel_config, "data_parallel_size", 1))
                 _sp_size = int(getattr(self.parallel_config, "sequence_parallel_size", 1))
                 _dlo_group_size = _dp_size if _dp_size > 1 else _sp_size
+                _prefer_registered_runtime_cache = (
+                    _dist_offload
+                    and not _use_ag
+                    and bool(getattr(self.od_config, "dlo_enable_runtime_cache", False))
+                    and float(getattr(self.od_config, "dlo_runtime_cache_pin_limit_gib", 0.0)) > 0
+                )
 
                 plan_result = None
                 weight_sources = self._get_weight_sources(model)
-                if _dist_offload:
+                if _dist_offload and not _prefer_registered_runtime_cache:
                     modules = ModuleDiscovery.discover(model)
                     plan_result = build_checkpoint_mmap_plan(
                         model,
@@ -456,6 +462,16 @@ class DiffusersPipelineLoader:
                         online_quantization=_has_online_quant,
                     )
                     self.host_weight_plan = plan_result.plan
+                elif _prefer_registered_runtime_cache:
+                    # Direct checkpoint bindings can carry deferred transforms
+                    # (for example grouped-QKV reordering), so registering the
+                    # raw checkpoint mapping would not make every recurrent H2D
+                    # source directly copyable. Materialize once, apply every
+                    # post-load mutation, then publish/register the final layout.
+                    logger.info(
+                        "DLO runtime-cache registration requested; using the ordinary loader "
+                        "once to publish a transform-complete final mmap layout"
+                    )
 
                 _skip_load = self.host_weight_plan is not None
 

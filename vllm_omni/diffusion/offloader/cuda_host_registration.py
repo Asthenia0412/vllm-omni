@@ -1,0 +1,205 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+"""Bounded CUDA registration for existing read-only host mappings."""
+
+from __future__ import annotations
+
+import mmap
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from typing import Any
+
+import torch
+
+_CUDA_HOST_REGISTER_READ_ONLY = 0x08
+
+
+class CudaHostRegistrationError(RuntimeError):
+    """Raised when an existing host range cannot be registered safely."""
+
+
+class CudaHostRegistrationBudgetError(CudaHostRegistrationError):
+    """Raised before mutation when the complete mapping exceeds its budget."""
+
+
+class CudaHostRegistrationCleanupError(CudaHostRegistrationError):
+    """Raised when partial registration could not be rolled back safely."""
+
+
+@dataclass(frozen=True)
+class _AddressRange:
+    start: int
+    end: int
+
+    @property
+    def size(self) -> int:
+        return self.end - self.start
+
+
+def _coalesce_ranges(
+    ranges: Sequence[tuple[int, int]],
+    page_size: int = mmap.PAGESIZE,
+) -> tuple[_AddressRange, ...]:
+    """Page-align and merge overlapping ranges from one backing mapping."""
+    if page_size <= 0:
+        raise ValueError(f"page_size must be positive, got {page_size}")
+
+    aligned: list[_AddressRange] = []
+    for start, size in ranges:
+        if start <= 0 or size < 0:
+            raise ValueError(f"invalid host range start={start}, size={size}")
+        if size == 0:
+            continue
+        aligned_start = start - start % page_size
+        end = start + size
+        aligned_end = ((end + page_size - 1) // page_size) * page_size
+        aligned.append(_AddressRange(aligned_start, aligned_end))
+
+    merged: list[_AddressRange] = []
+    for region in sorted(aligned, key=lambda item: (item.start, item.end)):
+        if merged and region.start <= merged[-1].end:
+            previous = merged[-1]
+            merged[-1] = _AddressRange(previous.start, max(previous.end, region.end))
+        else:
+            merged.append(region)
+    return tuple(merged)
+
+
+def _tensor_regions(
+    sources_by_mapping: Mapping[str, Sequence[torch.Tensor]],
+) -> tuple[_AddressRange, ...]:
+    """Resolve storage spans without merging unrelated file mappings."""
+    regions: list[_AddressRange] = []
+    for mapping_name, tensors in sources_by_mapping.items():
+        ranges: list[tuple[int, int]] = []
+        for tensor in tensors:
+            if tensor.device.type != "cpu":
+                raise CudaHostRegistrationError(
+                    f"CUDA host registration requires CPU storage, but {mapping_name!r} contains {tensor.device}"
+                )
+            storage = tensor.untyped_storage()
+            ranges.append((storage.data_ptr(), storage.nbytes()))
+        regions.extend(_coalesce_ranges(ranges))
+    return tuple(regions)
+
+
+def _error_message(runtime: Any, error: Any) -> str:
+    try:
+        message = runtime.cudaGetErrorString(error)
+    except Exception:
+        return str(error)
+    if isinstance(message, bytes):
+        return message.decode(errors="replace")
+    return str(message)
+
+
+class CudaHostRegistration:
+    """Own CUDA registrations for already-existing file-backed CPU tensors."""
+
+    def __init__(
+        self,
+        runtime: Any,
+        regions: tuple[_AddressRange, ...],
+    ) -> None:
+        self._runtime = runtime
+        self._regions = regions
+        self._closed = False
+
+    @classmethod
+    def create(
+        cls,
+        sources_by_mapping: Mapping[str, Sequence[torch.Tensor]],
+        *,
+        max_bytes: int,
+    ) -> CudaHostRegistration:
+        if max_bytes <= 0:
+            raise CudaHostRegistrationBudgetError("CUDA host-registration budget is disabled")
+        regions = _tensor_regions(sources_by_mapping)
+        total_bytes = sum(region.size for region in regions)
+        if total_bytes > max_bytes:
+            raise CudaHostRegistrationBudgetError(
+                f"mapped host ranges need {total_bytes} bytes, exceeding the {max_bytes}-byte registration budget"
+            )
+        if not regions:
+            raise CudaHostRegistrationError("no non-empty host ranges were available for registration")
+        if not torch.cuda.is_available():
+            raise CudaHostRegistrationError("CUDA is not available")
+
+        try:
+            runtime = torch.cuda.cudart()
+        except Exception as exc:
+            raise CudaHostRegistrationError(f"cannot access the CUDA runtime: {exc}") from exc
+
+        registered: list[_AddressRange] = []
+        try:
+            for region in regions:
+                error = runtime.cudaHostRegister(
+                    region.start,
+                    region.size,
+                    _CUDA_HOST_REGISTER_READ_ONLY,
+                )
+                if int(error) != 0:
+                    raise CudaHostRegistrationError(
+                        "cudaHostRegister(read-only) failed for "
+                        f"[{region.start:#x}, {region.end:#x}): {_error_message(runtime, error)}"
+                    )
+                registered.append(region)
+
+            unpinned = [
+                mapping_name
+                for mapping_name, tensors in sources_by_mapping.items()
+                if any(tensor.numel() and not tensor.is_pinned() for tensor in tensors)
+            ]
+            if unpinned:
+                raise CudaHostRegistrationError(
+                    f"CUDA registration succeeded but PyTorch did not recognize pinned storage for {unpinned[:3]}"
+                )
+        except Exception as exc:
+            rollback_errors: list[str] = []
+            for region in reversed(registered):
+                try:
+                    error = runtime.cudaHostUnregister(region.start)
+                    if int(error) != 0:
+                        rollback_errors.append(
+                            f"cudaHostUnregister({region.start:#x}) failed: {_error_message(runtime, error)}"
+                        )
+                except Exception as rollback_exc:
+                    rollback_errors.append(f"cudaHostUnregister({region.start:#x}) raised: {rollback_exc}")
+            if rollback_errors:
+                raise CudaHostRegistrationCleanupError(
+                    f"CUDA host registration failed ({exc}); rollback errors: {rollback_errors[:3]}"
+                ) from exc
+            if isinstance(exc, CudaHostRegistrationError):
+                raise
+            raise CudaHostRegistrationError(f"CUDA host registration raised: {exc}") from exc
+
+        return cls(runtime, regions)
+
+    @property
+    def total_bytes(self) -> int:
+        return sum(region.size for region in self._regions)
+
+    @property
+    def region_count(self) -> int:
+        return len(self._regions)
+
+    def close(self) -> list[str]:
+        """Unregister every range, returning errors after best-effort cleanup."""
+        if self._closed:
+            return []
+        errors: list[str] = []
+        failed: list[_AddressRange] = []
+        for region in reversed(self._regions):
+            try:
+                error = self._runtime.cudaHostUnregister(region.start)
+                if int(error) != 0:
+                    errors.append(
+                        f"cudaHostUnregister({region.start:#x}) failed: {_error_message(self._runtime, error)}"
+                    )
+                    failed.append(region)
+            except Exception as exc:
+                errors.append(f"cudaHostUnregister({region.start:#x}) raised: {exc}")
+                failed.append(region)
+        self._regions = tuple(reversed(failed))
+        self._closed = not self._regions
+        return errors

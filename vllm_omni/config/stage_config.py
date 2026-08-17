@@ -385,6 +385,7 @@ class StageDeployConfig:
     dlo_enable_runtime_cache: bool | None = None
     dlo_runtime_cache_dir: str | None = None
     dlo_runtime_cache_lock_timeout: float | None = None
+    dlo_runtime_cache_pin_limit_gib: float | None = None
     dlo_resident_layers: int | None = None
     # Diffusion-specific debug and observability knobs.
     enable_diffusion_pipeline_profiler: bool | None = None

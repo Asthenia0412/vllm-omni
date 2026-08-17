@@ -708,13 +708,18 @@ class OmniDiffusionConfig:
     # This avoids AllGather synchronization, while host memory follows the
     # loader's existing rank-local layout instead of adding a second DP shard.
     dlo_use_allgather: bool = True
-    # Build or join a node-local mmap cache after ordinary loading when direct
-    # checkpoint mmap is unavailable. The first version is no-AllGather only.
+    # Build or join a node-local mmap cache after ordinary loading. This is
+    # used when direct checkpoint mmap is unavailable, or when direct CUDA
+    # registration requires a transform-complete final layout. The first
+    # version is no-AllGather only.
     dlo_enable_runtime_cache: bool = False
     # Shared local-disk root. None selects ~/.cache/vllm-omni/dlo-runtime-weights.
     dlo_runtime_cache_dir: str | None = None
     # Maximum wait for the per-layout POSIX writer lock.
     dlo_runtime_cache_lock_timeout: float = 600.0
+    # Maximum file-backed memory a worker may register with CUDA. Zero keeps
+    # the bounded mmap-to-pinned staging path.
+    dlo_runtime_cache_pin_limit_gib: float = 0.0
     # Leading main-DiT blocks kept resident by distributed layerwise offload.
     dlo_resident_layers: int = 0
 
@@ -945,10 +950,14 @@ class OmniDiffusionConfig:
     def __post_init__(self):
         if not math.isfinite(self.dlo_runtime_cache_lock_timeout) or self.dlo_runtime_cache_lock_timeout <= 0:
             raise ValueError("dlo_runtime_cache_lock_timeout must be positive")
+        if not math.isfinite(self.dlo_runtime_cache_pin_limit_gib) or self.dlo_runtime_cache_pin_limit_gib < 0:
+            raise ValueError("dlo_runtime_cache_pin_limit_gib must be non-negative")
         if self.dlo_enable_runtime_cache and not self.enable_distributed_layerwise_offload:
             raise ValueError("dlo_enable_runtime_cache requires distributed layerwise offload")
         if self.dlo_enable_runtime_cache and self.dlo_use_allgather:
             raise ValueError("dlo_enable_runtime_cache currently requires dlo_use_allgather=False")
+        if self.dlo_runtime_cache_pin_limit_gib and not self.dlo_enable_runtime_cache:
+            raise ValueError("dlo_runtime_cache_pin_limit_gib requires dlo_enable_runtime_cache=True")
         if self.diffusion_compile_granularity not in {"regional", "full"}:
             raise ValueError(
                 "diffusion_compile_granularity must be 'regional' or 'full', "

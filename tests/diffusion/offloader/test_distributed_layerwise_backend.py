@@ -546,6 +546,31 @@ class TestDistributedLayerwiseOffloadHook:
         assert staging[0][torch.float32].numel() == 12
         assert staging[1][torch.float32].numel() == 12
 
+    def test_registered_mmap_copies_directly_without_staging(self, patched_offload_runtime):
+        current_block = nn.Linear(2, 2, bias=False)
+        next_block = nn.Linear(2, 2, bias=False)
+        expected = torch.arange(4, dtype=torch.float32).view(2, 2)
+        next_block.weight.data.copy_(expected)
+        hook = DistributedLayerwiseOffloadHook(
+            next_block=next_block,
+            device=torch.device("cpu"),
+            dp_group=None,
+            dp_size=1,
+            rank=0,
+            pin_memory=False,
+            rank_local_mmap=True,
+        )
+        hook.initialize_hook(current_block)
+        hook.registered_mmap = True
+
+        def fail_staging(_slot):
+            raise AssertionError("registered mmap must bypass host staging")
+
+        hook._stage_mmap_sources = fail_staging  # type: ignore[method-assign]
+        hook.prefetch_layer(slot=0, non_blocking=True)
+
+        assert torch.equal(next_block.weight, expected)
+
 
 class TestPinnedResidentLayerGroup:
     def test_load_offload_reuses_pinned_master_weights(self, patched_offload_runtime):
@@ -635,6 +660,24 @@ class TestPinnedResidentLayerGroup:
 
         group.offload()
         assert all(block.weight.numel() == 0 for block in blocks)
+
+    def test_registered_mmap_resident_layers_bypass_staging(self, patched_offload_runtime):
+        block = nn.Linear(2, 2, bias=False)
+        expected = torch.arange(4, dtype=torch.float32).view(2, 2)
+        block.weight.data.copy_(expected)
+        group = PinnedResidentLayerGroup(
+            [block],
+            device=torch.device("cpu"),
+            copy_stream=DummyStream(),
+            pin_memory=False,
+            rank_local_mmap=True,
+        )
+        group.registered_mmap = True
+        group._cpu_staging_buffers.clear()
+
+        group.load()
+
+        assert torch.equal(block.weight, expected)
 
     def test_shared_allgather_output_is_narrowed_to_current_block(
         self, dist_group, patched_offload_runtime, monkeypatch
@@ -994,6 +1037,52 @@ class TestMmapWeightLoading:
         # post-hook cleanup.
         assert len(cleanup_calls) == 2
         backend.disable()
+
+    def test_runtime_cache_registration_uses_budget_and_releases_before_mmap(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        patched_offload_runtime,
+    ):
+        events: list[str] = []
+
+        class Registration:
+            total_bytes = 4096
+            region_count = 1
+
+            @staticmethod
+            def close() -> list[str]:
+                events.append("unregister")
+                return []
+
+        create_calls: list[tuple[dict[str, list[torch.Tensor]], int]] = []
+
+        def create(sources, *, max_bytes):
+            create_calls.append((sources, max_bytes))
+            return Registration()
+
+        monkeypatch.setattr(dist_backend_module.CudaHostRegistration, "create", staticmethod(create))
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=True,
+                dlo_use_allgather=False,
+                dlo_runtime_cache_pin_limit_gib=1.5,
+            ),
+            torch.device("cuda"),
+        )
+        sources = {"runtime.safetensors": [torch.ones(1)]}
+        backend._runtime_cache_mapped_sources = sources
+
+        assert backend._try_register_runtime_cache_mmap()
+        assert create_calls == [(sources, int(1.5 * 1024**3))]
+
+        backend.enabled = True
+        backend._using_rank_local_mmap = True
+        backend._mmap_file_cache = {}
+        backend._release_mmap_handles = lambda: events.append("mmap")  # type: ignore[method-assign]
+        backend.disable()
+
+        assert events == ["unregister", "mmap"]
 
 
 class TestGetBlocksFromDit:
