@@ -3,30 +3,11 @@
 
 from __future__ import annotations
 
-import re
 from collections.abc import Mapping
 from typing import Any
 
 DREAMID_OMNI_EXTRA_BODY_PARAMS = frozenset({"solver_name", "shift"})
 DREAMID_OMNI_INPUT_AUDIO_SAMPLE_RATE = 16000
-
-
-def _clean_official_prompt(prompt: str) -> str:
-    """Remove metadata tags used by DreamID's official prompt fixtures."""
-    prompt = re.sub(
-        r"\[SPEAKER_TIMESTAMPS_START\].*?\[SPEAKER_TIMESTAMPS_END\]",
-        "",
-        prompt,
-        flags=re.DOTALL,
-    ).strip()
-    prompt = re.sub(
-        r"\[AUDIO_DESCRIPTION_START].*?\[AUDIO_DESCRIPTION_END]",
-        "",
-        prompt,
-        flags=re.DOTALL,
-    ).strip()
-    prompt = re.sub(r"\[[A-Z_]+\]", "", prompt)
-    return re.sub(r"\n\s*\n", "\n", prompt).strip()
 
 
 def build_x_to_video_audio_prompt(
@@ -35,7 +16,6 @@ def build_x_to_video_audio_prompt(
 ) -> dict[str, Any]:
     """Translate the canonical X-to-video+audio envelope for DreamID-Omni."""
     result = dict(prompt)
-    result["prompt"] = _clean_official_prompt(str(prompt["prompt"]))
 
     for key in ("video_negative_prompt", "audio_negative_prompt"):
         if request_options.get(key) is not None:

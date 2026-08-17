@@ -4,12 +4,15 @@
 import argparse
 import json
 import math
+import re
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+import torch
 from PIL import Image
 from vllm.multimodal.media.audio import load_audio
 
@@ -25,6 +28,7 @@ from vllm_omni.model_extras import (
     get_extra_body_params,
     get_input_audio_sample_rate,
     get_model_class_name,
+    get_output_tensor_range,
 )
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".gif"}
@@ -39,6 +43,7 @@ class XToVideoAudioOutput:
     audio: Any | None
     fps: float
     audio_sample_rate: int | None
+    output_tensor_range: str = "negative_one_to_one"
 
 
 def parse_json_object(value: str) -> dict[str, Any]:
@@ -60,6 +65,24 @@ def build_x_to_video_audio_prompt(
     if media_inputs:
         result["multi_modal_data"] = media_inputs
     return result
+
+
+def _clean_official_prompt(prompt: str) -> str:
+    """Remove metadata tags used by the official DreamID prompt fixtures."""
+    prompt = re.sub(
+        r"\[SPEAKER_TIMESTAMPS_START\].*?\[SPEAKER_TIMESTAMPS_END\]",
+        "",
+        prompt,
+        flags=re.DOTALL,
+    ).strip()
+    prompt = re.sub(
+        r"\[AUDIO_DESCRIPTION_START].*?\[AUDIO_DESCRIPTION_END]",
+        "",
+        prompt,
+        flags=re.DOTALL,
+    ).strip()
+    prompt = re.sub(r"\[[A-Z_]+\]", "", prompt)
+    return re.sub(r"\n\s*\n", "\n", prompt).strip()
 
 
 def parse_args() -> argparse.Namespace:
@@ -185,6 +208,7 @@ def extract_x_to_video_audio_output(
     *,
     fps: float | None = None,
     audio_sample_rate: int | None = None,
+    output_tensor_range: str = "negative_one_to_one",
 ) -> XToVideoAudioOutput:
     """Normalize engine output without depending on a model's tensor layout."""
     if isinstance(outputs, list):
@@ -228,13 +252,32 @@ def extract_x_to_video_audio_output(
     elif resolved_sample_rate is not None:
         resolved_sample_rate = int(resolved_sample_rate)
 
-    return XToVideoAudioOutput(video, audio, resolved_fps, resolved_sample_rate)
+    return XToVideoAudioOutput(video, audio, resolved_fps, resolved_sample_rate, output_tensor_range)
+
+
+def _normalize_output_tensor_range(video: Any, source_range: str) -> Any:
+    """Normalize floating-point output according to the pipeline contract."""
+    if isinstance(video, torch.Tensor):
+        if not video.is_floating_point():
+            return video
+        video = video.detach().cpu().float().numpy()
+    if isinstance(video, np.ndarray):
+        if not np.issubdtype(video.dtype, np.floating):
+            return video
+        if source_range == "negative_one_to_one":
+            return np.clip(video, -1.0, 1.0) * 0.5 + 0.5
+        if source_range == "zero_to_one":
+            return np.clip(video, 0.0, 1.0)
+        raise ValueError(f"Unsupported floating-point tensor range: {source_range!r}")
+    if isinstance(video, list):
+        return [_normalize_output_tensor_range(frame, source_range) for frame in video]
+    return video
 
 
 def encode_x_to_video_audio_output(output: XToVideoAudioOutput) -> bytes:
     """Encode any video layout supported by the shared video API utility."""
     return encode_video_bytes(
-        output.video,
+        _normalize_output_tensor_range(output.video, output.output_tensor_range),
         output.fps,
         output.audio,
         output.audio_sample_rate,
@@ -271,6 +314,8 @@ def main() -> None:
     if args.prompt_file:
         with open(args.prompt_file) as f:
             text_prompt = json.load(f)
+            if isinstance(text_prompt, str):
+                text_prompt = _clean_official_prompt(text_prompt)
     if not isinstance(text_prompt, str):
         raise ValueError("Prompt content must be a JSON string or --prompt text.")
 
@@ -313,7 +358,7 @@ def main() -> None:
         omni_kwargs["quantization"] = args.quantization
     omni = Omni(**omni_kwargs)
     try:
-        model_class_name = get_model_class_name(omni) or args.model_class_name
+        model_class_name = args.model_class_name or get_model_class_name(omni)
         input_sample_rate = get_input_audio_sample_rate(model_class_name)
         images, audios = load_image_and_audio(
             args.image_path,
@@ -361,6 +406,7 @@ def main() -> None:
             outputs,
             fps=args.fps,
             audio_sample_rate=args.audio_sample_rate,
+            output_tensor_range=get_output_tensor_range(model_class_name),
         )
 
         output_path = Path(args.output)

@@ -149,10 +149,7 @@ def test_dreamid_x_to_video_audio_adapter() -> None:
     image = Image.new("RGB", (16, 16))
     waveform = object()
     canonical_prompt = {
-        "prompt": (
-            "[SPEAKER_TIMESTAMPS_START]metadata[SPEAKER_TIMESTAMPS_END]\n\n"
-            "A person waves.\n[AUDIO_DESCRIPTION_START]noise[AUDIO_DESCRIPTION_END]"
-        ),
+        "prompt": "A person waves.",
         "modalities": ["video"],
         "multi_modal_data": {"image": [image], "audio": [(waveform, 16000)]},
     }

@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
+import io
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
 
+import av
 import numpy as np
 import pytest
 from PIL import Image
@@ -37,6 +38,15 @@ def test_canonical_prompt_omits_empty_media() -> None:
         "prompt": "A landscape.",
         "modalities": ["video"],
     }
+
+
+def test_official_prompt_cleanup_stays_in_prompt_file_handling() -> None:
+    prompt = (
+        "[SPEAKER_TIMESTAMPS_START]metadata[SPEAKER_TIMESTAMPS_END]\n\n"
+        "A person waves.\n[AUDIO_DESCRIPTION_START]noise[AUDIO_DESCRIPTION_END]"
+    )
+
+    assert x_to_video_audio._clean_official_prompt(prompt) == "A person waves."
 
 
 def test_media_loader_preserves_complete_audio(
@@ -115,19 +125,20 @@ def test_output_contract_requires_model_neutral_metadata() -> None:
         x_to_video_audio.extract_x_to_video_audio_output(result, fps=24)
 
 
-def test_output_encoder_receives_opaque_payload(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    video = object()
-    audio = object()
-    output = x_to_video_audio.XToVideoAudioOutput(video, audio, 23.976, 48000)
-    received: list[tuple[Any, ...]] = []
+def test_output_encoder_normalizes_declared_range_and_channel_first_layout() -> None:
+    video = np.zeros((3, 2, 4, 6), dtype=np.float32)
+    output = x_to_video_audio.XToVideoAudioOutput(
+        video=video,
+        audio=None,
+        fps=8,
+        audio_sample_rate=None,
+        output_tensor_range="negative_one_to_one",
+    )
 
-    def fake_encode(*args: Any) -> bytes:
-        received.append(args)
-        return b"encoded"
+    payload = x_to_video_audio.encode_x_to_video_audio_output(output)
 
-    monkeypatch.setattr(x_to_video_audio, "encode_video_bytes", fake_encode)
-
-    assert x_to_video_audio.encode_x_to_video_audio_output(output) == b"encoded"
-    assert received == [(video, 23.976, audio, 48000)]
+    with av.open(io.BytesIO(payload)) as container:
+        decoded = [frame.to_ndarray(format="rgb24") for frame in container.decode(video=0)]
+    assert len(decoded) == 2
+    assert decoded[0].shape == (4, 6, 3)
+    np.testing.assert_allclose(decoded, 128, atol=2)

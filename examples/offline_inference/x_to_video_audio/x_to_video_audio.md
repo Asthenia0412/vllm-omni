@@ -9,9 +9,10 @@ through `vllm_omni.model_extras` without adding another model-specific runner.
 The example builds one canonical request envelope: `prompt` is text,
 `modalities` is `["video"]`, and optional `multi_modal_data` contains RGB PIL
 images plus audio `(waveform, sample_rate)` tuples. Audio files are loaded in
-full; the runner does not silently select or crop a time range. Prepare a
-trimmed input file explicitly when only part of a recording should condition
-the model.
+full by design; the runner does not apply a time window. Prepare a trimmed input
+file explicitly when only part of a recording should condition the model.
+DreamID-Omni's audio conditioning sequence grows with the complete input
+duration, so long recordings increase denoising memory and step time.
 
 Model-specific request translation (for example, DreamID-Omni's two negative
 prompts and its 16 kHz input requirement) is declared in `model_extras`. Model
