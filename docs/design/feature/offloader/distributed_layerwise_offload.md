@@ -47,8 +47,9 @@ otherwise it uses the ordinary loader. In no-AllGather mode, an opt-in Phase B
 runtime cache can normalize those final ordinary-loader DiT tensors into an
 immutable node-local mmap entry. Consequently, replicas can share either
 proven-compatible checkpoint pages or equivalent final runtime layouts. An
-opt-in CUDA registration budget can make the complete final mapping directly
-H2D-copyable, avoiding the recurrent host packing otherwise required by mmap.
+opt-in host-registration budget can make the complete final mapping directly
+H2D-copyable when the platform provides a backend, avoiding the recurrent host
+packing otherwise required by mmap. CUDA is the first implementation.
 
 The Phase A shared-mmap support boundary is TP1. TP greater than one is an
 ordinary-loader compatibility path: DLO can consume the resulting TP-local
@@ -156,10 +157,10 @@ modeled safely.
 
 ### Registered runtime-cache transfer
 
-`dlo_runtime_cache_pin_limit_gib > 0` opts a CUDA worker into complete
-runtime-cache registration. It also changes loader selection: no-AllGather
-uses the ordinary loader and final runtime cache even when a TP1 direct-
-checkpoint plan is available. A checkpoint binding can carry a deferred
+`dlo_runtime_cache_pin_limit_gib > 0` opts a worker into complete runtime-cache
+registration when its platform supports it. It also changes loader selection:
+no-AllGather uses the ordinary loader and final runtime cache even when a TP1
+direct-checkpoint plan is available. A checkpoint binding can carry a deferred
 adapter such as grouped-QKV reordering. Registering that raw source would not
 remove the adapter's recurrent CPU allocation/copy, whereas the runtime cache
 contains the transform-complete final tensors.
@@ -167,13 +168,13 @@ contains the transform-complete final tensors.
 After mapping and validating every final tensor, DLO groups source storages by
 backing file, page-aligns their address ranges, and coalesces overlapping or
 adjacent ranges within that mapping. The complete byte count is checked
-against the per-worker budget before any CUDA call. It then registers every
-range with the read-only CUDA host-registration flag and verifies that PyTorch
-recognizes every mapped tensor as pinned. Failure rolls back any ranges already
-registered and preserves the existing two-slot staging path. Partial direct
-transfer is deliberately unsupported. A rollback failure aborts worker
-initialization so a still-registered range is retained until process/context
-teardown rather than being unsafely unmapped.
+against the per-worker budget before any platform mutation. The CUDA backend
+then registers every range with the read-only host-registration flag and
+verifies that PyTorch recognizes every mapped tensor as pinned. Failure rolls
+back any ranges already registered and preserves the existing two-slot staging
+path. Partial direct transfer is deliberately unsupported. A rollback failure
+aborts worker initialization so a still-registered range is retained until
+process/context teardown rather than being unsafely unmapped.
 
 On success, the hooks copy each immutable tensor view directly into its offset
 in the existing flattened rotating device buffer on the copy stream. Parameter
@@ -183,13 +184,13 @@ but avoids the much larger recurrent CPU copy. A packed cache schema should be
 considered only if launch-count measurements justify its added format and
 publication complexity.
 
-Registration is per process and CUDA context; physical file-cache pages remain
-shared and are not copied into one private host allocation per worker. The
-operator must nevertheless budget page-locked memory and satisfy OS/CUDA
-registration limits for every worker. During shutdown, DLO first synchronizes
-outstanding device work, unregisters all ranges, and then closes the safetensors
-mappings. Worker teardown invokes this cleanup before destroying the
-distributed environment and CUDA context.
+Registration is per process and platform context; physical file-cache pages
+remain shared and are not copied into one private host allocation per worker.
+The operator must nevertheless budget page-locked memory and satisfy the
+platform and OS registration limits for every worker. During shutdown, DLO
+first synchronizes outstanding device work, unregisters all ranges, and then
+closes the safetensors mappings. Worker teardown invokes this cleanup before
+destroying the distributed environment and platform context.
 
 ### AllGather path
 

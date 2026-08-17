@@ -732,27 +732,13 @@ class OmniServeCommand(CLISubcommand):
             ),
         )
         omni_config_group.add_argument(
-            "--dlo-runtime-cache-dir",
-            type=str,
-            default=None,
-            help=(
-                "Shared local-disk directory for DLO runtime weights. Defaults "
-                "to ~/.cache/vllm-omni/dlo-runtime-weights."
-            ),
-        )
-        omni_config_group.add_argument(
-            "--dlo-runtime-cache-lock-timeout",
-            type=float,
-            default=600.0,
-            help="Seconds to wait for another process publishing the same runtime layout.",
-        )
-        omni_config_group.add_argument(
             "--dlo-runtime-cache-pin-limit-gib",
             type=float,
             default=0.0,
             help=(
-                "Maximum GiB of read-only runtime-cache mappings each CUDA worker "
-                "may register for direct H2D. Zero keeps bounded pinned staging."
+                "Maximum GiB of read-only runtime-cache mappings each worker may "
+                "register for direct H2D when the platform supports it. Zero keeps "
+                "bounded pinned staging."
             ),
         )
         omni_config_group.add_argument(

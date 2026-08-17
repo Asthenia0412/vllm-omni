@@ -329,10 +329,6 @@ def test_serve_cli_forwards_distributed_offload_residency():
             "--enable-distributed-layerwise-offload",
             "--dlo-no-use-allgather",
             "--dlo-enable-runtime-cache",
-            "--dlo-runtime-cache-dir",
-            "/var/cache/vllm-omni-dlo",
-            "--dlo-runtime-cache-lock-timeout",
-            "30",
             "--dlo-runtime-cache-pin-limit-gib",
             "80",
             "--dlo-resident-layers",
@@ -347,15 +343,13 @@ def test_serve_cli_forwards_distributed_offload_residency():
     assert args.enable_distributed_layerwise_offload is True
     assert args.dlo_use_allgather is False
     assert args.dlo_enable_runtime_cache is True
-    assert args.dlo_runtime_cache_dir == "/var/cache/vllm-omni-dlo"
-    assert args.dlo_runtime_cache_lock_timeout == 30
     assert args.dlo_runtime_cache_pin_limit_gib == 80
     assert args.dlo_resident_layers == 20
     assert engine_args["enable_distributed_layerwise_offload"] is True
     assert engine_args["dlo_use_allgather"] is False
     assert engine_args["dlo_enable_runtime_cache"] is True
-    assert engine_args["dlo_runtime_cache_dir"] == "/var/cache/vllm-omni-dlo"
-    assert engine_args["dlo_runtime_cache_lock_timeout"] == 30
+    assert engine_args["dlo_runtime_cache_dir"] is None
+    assert engine_args["dlo_runtime_cache_lock_timeout"] == 600.0
     assert engine_args["dlo_runtime_cache_pin_limit_gib"] == 80
     assert engine_args["dlo_resident_layers"] == 20
 

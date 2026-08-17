@@ -1056,11 +1056,12 @@ class TestMmapWeightLoading:
 
         create_calls: list[tuple[dict[str, list[torch.Tensor]], int]] = []
 
-        def create(sources, *, max_bytes):
+        def register(sources, *, device, max_bytes):
+            assert device == torch.device("cuda")
             create_calls.append((sources, max_bytes))
             return Registration()
 
-        monkeypatch.setattr(dist_backend_module.CudaHostRegistration, "create", staticmethod(create))
+        monkeypatch.setattr(dist_backend_module, "register_host_mappings", register)
         backend = DistributedLayerwiseOffloadBackend(
             OffloadConfig(
                 strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
@@ -1083,6 +1084,24 @@ class TestMmapWeightLoading:
         backend.disable()
 
         assert events == ["unregister", "mmap"]
+
+    def test_runtime_cache_registration_falls_back_on_unsupported_platform(
+        self,
+        patched_offload_runtime,
+    ):
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=True,
+                dlo_use_allgather=False,
+                dlo_runtime_cache_pin_limit_gib=1.0,
+            ),
+            torch.device("cpu"),
+        )
+        backend._runtime_cache_mapped_sources = {"runtime.safetensors": [torch.ones(1)]}
+
+        assert not backend._try_register_runtime_cache_mmap()
+        assert backend._host_registration is None
 
 
 class TestGetBlocksFromDit:

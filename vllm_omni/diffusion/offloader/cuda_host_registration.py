@@ -1,29 +1,35 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
-"""Bounded CUDA registration for existing read-only host mappings."""
+"""CUDA implementation of read-only host-mapping registration."""
 
 from __future__ import annotations
 
 import mmap
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Protocol
 
 import torch
 
+from .host_registration import (
+    HostRegistrationBudgetError,
+    HostRegistrationCleanupError,
+    HostRegistrationError,
+)
+
 _CUDA_HOST_REGISTER_READ_ONLY = 0x08
 
-
-class CudaHostRegistrationError(RuntimeError):
-    """Raised when an existing host range cannot be registered safely."""
-
-
-class CudaHostRegistrationBudgetError(CudaHostRegistrationError):
-    """Raised before mutation when the complete mapping exceeds its budget."""
+CudaHostRegistrationError = HostRegistrationError
+CudaHostRegistrationBudgetError = HostRegistrationBudgetError
+CudaHostRegistrationCleanupError = HostRegistrationCleanupError
 
 
-class CudaHostRegistrationCleanupError(CudaHostRegistrationError):
-    """Raised when partial registration could not be rolled back safely."""
+class _CudaRuntime(Protocol):
+    def cudaHostRegister(self, address: int, size: int, flags: int) -> int: ...
+
+    def cudaHostUnregister(self, address: int) -> int: ...
+
+    def cudaGetErrorString(self, error: int) -> str | bytes: ...
 
 
 @dataclass(frozen=True)
@@ -74,7 +80,7 @@ def _tensor_regions(
         ranges: list[tuple[int, int]] = []
         for tensor in tensors:
             if tensor.device.type != "cpu":
-                raise CudaHostRegistrationError(
+                raise HostRegistrationError(
                     f"CUDA host registration requires CPU storage, but {mapping_name!r} contains {tensor.device}"
                 )
             storage = tensor.untyped_storage()
@@ -83,7 +89,7 @@ def _tensor_regions(
     return tuple(regions)
 
 
-def _error_message(runtime: Any, error: Any) -> str:
+def _error_message(runtime: _CudaRuntime, error: int) -> str:
     try:
         message = runtime.cudaGetErrorString(error)
     except Exception:
@@ -98,7 +104,7 @@ class CudaHostRegistration:
 
     def __init__(
         self,
-        runtime: Any,
+        runtime: _CudaRuntime,
         regions: tuple[_AddressRange, ...],
     ) -> None:
         self._runtime = runtime
@@ -113,22 +119,22 @@ class CudaHostRegistration:
         max_bytes: int,
     ) -> CudaHostRegistration:
         if max_bytes <= 0:
-            raise CudaHostRegistrationBudgetError("CUDA host-registration budget is disabled")
+            raise HostRegistrationBudgetError("CUDA host-registration budget is disabled")
         regions = _tensor_regions(sources_by_mapping)
         total_bytes = sum(region.size for region in regions)
         if total_bytes > max_bytes:
-            raise CudaHostRegistrationBudgetError(
+            raise HostRegistrationBudgetError(
                 f"mapped host ranges need {total_bytes} bytes, exceeding the {max_bytes}-byte registration budget"
             )
         if not regions:
-            raise CudaHostRegistrationError("no non-empty host ranges were available for registration")
+            raise HostRegistrationError("no non-empty host ranges were available for registration")
         if not torch.cuda.is_available():
-            raise CudaHostRegistrationError("CUDA is not available")
+            raise HostRegistrationError("CUDA is not available")
 
         try:
             runtime = torch.cuda.cudart()
         except Exception as exc:
-            raise CudaHostRegistrationError(f"cannot access the CUDA runtime: {exc}") from exc
+            raise HostRegistrationError(f"cannot access the CUDA runtime: {exc}") from exc
 
         registered: list[_AddressRange] = []
         try:
@@ -139,7 +145,7 @@ class CudaHostRegistration:
                     _CUDA_HOST_REGISTER_READ_ONLY,
                 )
                 if int(error) != 0:
-                    raise CudaHostRegistrationError(
+                    raise HostRegistrationError(
                         "cudaHostRegister(read-only) failed for "
                         f"[{region.start:#x}, {region.end:#x}): {_error_message(runtime, error)}"
                     )
@@ -151,7 +157,7 @@ class CudaHostRegistration:
                 if any(tensor.numel() and not tensor.is_pinned() for tensor in tensors)
             ]
             if unpinned:
-                raise CudaHostRegistrationError(
+                raise HostRegistrationError(
                     f"CUDA registration succeeded but PyTorch did not recognize pinned storage for {unpinned[:3]}"
                 )
         except Exception as exc:
@@ -166,12 +172,12 @@ class CudaHostRegistration:
                 except Exception as rollback_exc:
                     rollback_errors.append(f"cudaHostUnregister({region.start:#x}) raised: {rollback_exc}")
             if rollback_errors:
-                raise CudaHostRegistrationCleanupError(
+                raise HostRegistrationCleanupError(
                     f"CUDA host registration failed ({exc}); rollback errors: {rollback_errors[:3]}"
                 ) from exc
-            if isinstance(exc, CudaHostRegistrationError):
+            if isinstance(exc, HostRegistrationError):
                 raise
-            raise CudaHostRegistrationError(f"CUDA host registration raised: {exc}") from exc
+            raise HostRegistrationError(f"CUDA host registration raised: {exc}") from exc
 
         return cls(runtime, regions)
 

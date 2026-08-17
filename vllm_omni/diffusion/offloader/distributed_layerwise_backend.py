@@ -35,10 +35,11 @@ from vllm_omni.platforms import current_omni_platform
 
 from .base import OffloadBackend, OffloadConfig
 from .block_discovery import get_blocks_from_dit
-from .cuda_host_registration import (
-    CudaHostRegistration,
-    CudaHostRegistrationCleanupError,
-    CudaHostRegistrationError,
+from .host_registration import (
+    HostRegistration,
+    HostRegistrationCleanupError,
+    HostRegistrationError,
+    register_host_mappings,
 )
 from .module_collector import ModuleDiscovery
 from .offload_plan import (
@@ -966,7 +967,7 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         self.host_weight_plan = host_weight_plan
         self._mmap_transforms_by_tensor_id: dict[int, Any] = {}
         self._runtime_cache_mapped_sources: dict[str, list[torch.Tensor]] = {}
-        self._cuda_host_registration: CudaHostRegistration | None = None
+        self._host_registration: HostRegistration | None = None
 
     def load_resident_layers(self) -> None:
         """Load the model-declared leading blocks for the denoise stage."""
@@ -1259,12 +1260,6 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         pin_limit_gib = self.config.dlo_runtime_cache_pin_limit_gib
         if pin_limit_gib <= 0:
             return False
-        if self.device.type != "cuda":
-            logger.warning(
-                "DLO runtime-cache registration is CUDA-only; using bounded host staging on %s",
-                self.device,
-            )
-            return False
         if not self.config.pin_cpu_memory:
             logger.warning("DLO runtime-cache registration requires pin_cpu_memory=True; using bounded host staging")
             return False
@@ -1275,23 +1270,24 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         max_bytes = int(pin_limit_gib * 1024**3)
         started = time.perf_counter()
         try:
-            registration = CudaHostRegistration.create(
+            registration = register_host_mappings(
                 self._runtime_cache_mapped_sources,
+                device=self.device,
                 max_bytes=max_bytes,
             )
-        except CudaHostRegistrationCleanupError:
-            # Falling back could unmap a range that CUDA still owns. Abort the
-            # worker so process/context teardown provides the final cleanup.
+        except HostRegistrationCleanupError:
+            # Falling back could unmap a range the platform still owns. Abort
+            # the worker so process/context teardown provides final cleanup.
             logger.exception("DLO runtime-cache registration rollback failed")
             raise
-        except CudaHostRegistrationError as exc:
+        except HostRegistrationError as exc:
             logger.warning(
                 "DLO runtime-cache direct H2D unavailable (%s); using bounded host staging",
                 exc,
             )
             return False
 
-        self._cuda_host_registration = registration
+        self._host_registration = registration
         logger.info(
             "Registered %.2f GiB of shared runtime-cache mappings in %d range(s) for direct H2D in %.3f s",
             registration.total_bytes / 1024**3,
@@ -1301,7 +1297,7 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         return True
 
     def _release_registered_mmap(self) -> bool:
-        registration = self._cuda_host_registration
+        registration = self._host_registration
         if registration is None:
             return True
         errors = registration.close()
@@ -1311,7 +1307,7 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
                 errors[:3],
             )
             return False
-        self._cuda_host_registration = None
+        self._host_registration = None
         logger.info("Unregistered DLO runtime-cache host mappings")
         return True
 

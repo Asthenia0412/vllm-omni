@@ -6,6 +6,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pytest
+import torch
 
 import vllm_omni.diffusion.offloader.cuda_host_registration as registration_module
 from vllm_omni.diffusion.offloader.cuda_host_registration import (
@@ -14,6 +15,10 @@ from vllm_omni.diffusion.offloader.cuda_host_registration import (
     CudaHostRegistrationCleanupError,
     CudaHostRegistrationError,
     _coalesce_ranges,
+)
+from vllm_omni.diffusion.offloader.host_registration import (
+    HostRegistrationError,
+    register_host_mappings,
 )
 
 pytestmark = [pytest.mark.diffusion, pytest.mark.cpu, pytest.mark.core_model]
@@ -76,6 +81,25 @@ class _FakeRuntime:
     @staticmethod
     def cudaGetErrorString(error: int) -> str:
         return f"error-{error}"
+
+
+def test_platform_factory_reports_unsupported_registration() -> None:
+    with pytest.raises(HostRegistrationError, match="not supported on cpu"):
+        register_host_mappings({}, device=torch.device("cpu"), max_bytes=4096)
+
+
+def test_platform_factory_dispatches_cuda(monkeypatch: pytest.MonkeyPatch) -> None:
+    sentinel = object()
+    sources = {"weights": []}
+
+    def create(actual_sources, *, max_bytes):
+        assert actual_sources is sources
+        assert max_bytes == 4096
+        return sentinel
+
+    monkeypatch.setattr(CudaHostRegistration, "create", staticmethod(create))
+
+    assert register_host_mappings(sources, device=torch.device("cuda"), max_bytes=4096) is sentinel
 
 
 def test_coalesce_ranges_aligns_and_merges_overlapping_pages() -> None:

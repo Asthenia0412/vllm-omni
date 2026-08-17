@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import contextlib
-import dataclasses
 import errno
 import fcntl
 import hashlib
@@ -18,7 +17,6 @@ import time
 import uuid
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from enum import Enum
 from itertools import chain
 from pathlib import Path
 from typing import Any
@@ -34,12 +32,24 @@ from vllm_omni.diffusion.model_loader.host_weight_plan import (
     HostWeightPlanResult,
     TensorBinding,
 )
+from vllm_omni.diffusion.model_loader.runtime_cache_utils import (
+    IdentityNormalizationError,
+    canonical_json,
+    canonicalize_existing_local_path,
+    normalize_identity,
+)
 
 logger = init_logger(__name__)
 
+# Internal cache-format and I/O defaults, not environment variables. Public
+# configuration may override the root and lock timeout; chunk sizes stay private.
+# Bump the schema to isolate incompatible manifest layouts.
 RUNTIME_CACHE_SCHEMA_VERSION = 1
+# Keep the default shared across local stage replicas.
 DEFAULT_RUNTIME_CACHE_ROOT = "~/.cache/vllm-omni/dlo-runtime-weights"
+# Bound waits for another publisher instead of hanging initialization forever.
 DEFAULT_LOCK_TIMEOUT_SECONDS = 600.0
+# Avoid one model-sized output file and bound hashing/read working sets.
 DEFAULT_SHARD_SIZE_BYTES = 5 * 1024**3
 _HASH_CHUNK_BYTES = 64 * 1024**2
 _FILE_HASH_CHUNK_BYTES = 8 * 1024**2
@@ -112,6 +122,13 @@ def _collect_runtime_tensors(
     pipeline: nn.Module,
     dit_modules: Sequence[tuple[str, nn.Module]],
 ) -> list[_RuntimeTensor]:
+    """Collect a complete, safely remappable view of final CPU DiT tensors.
+
+    Parameters and persistent buffers must resolve to the same objects through
+    the owning pipeline, occupy complete contiguous CPU storages, use supported
+    dtypes, and have no aliases inside or outside the discovered DiT modules.
+    The stable name ordering is reused by content hashing and publication.
+    """
     records: dict[str, _RuntimeTensor] = {}
     for dit_name, dit_module in dit_modules:
         for local_name, tensor in _named_parameters_with_duplicates(dit_module):
@@ -220,68 +237,6 @@ def _collect_runtime_tensors(
     return [records[name] for name in sorted(records)]
 
 
-def _type_identity(value: Any) -> str:
-    value_type = value if inspect.isclass(value) else type(value)
-    return f"{value_type.__module__}.{value_type.__qualname__}"
-
-
-def _canonicalize_existing_local_path(value: str | os.PathLike[str]) -> str:
-    original = os.fsdecode(os.fspath(value))
-    candidate = Path(original).expanduser()
-    try:
-        if candidate.exists():
-            return str(candidate.resolve())
-    except OSError:
-        pass
-    return original
-
-
-def _json_normalize(value: Any) -> Any:
-    if value is None or isinstance(value, (bool, int, float, str)):
-        return value
-    if isinstance(value, Enum):
-        return {"enum": _type_identity(value), "name": value.name}
-    if isinstance(value, torch.dtype):
-        return str(value)
-    if isinstance(value, os.PathLike):
-        return _canonicalize_existing_local_path(value)
-    if inspect.isclass(value):
-        return _type_identity(value)
-    if dataclasses.is_dataclass(value):
-        return _json_normalize(dataclasses.asdict(value))
-    model_dump = getattr(value, "model_dump", None)
-    if callable(model_dump):
-        try:
-            dumped = model_dump(mode="json")
-        except (TypeError, ValueError):
-            dumped = model_dump()
-        return _json_normalize(dumped)
-    if isinstance(value, Mapping):
-        if not all(isinstance(key, str) for key in value):
-            raise _RuntimeCacheError(
-                "unstable_identity",
-                "runtime-cache identity mappings require string keys",
-            )
-        return {key: _json_normalize(value[key]) for key in sorted(value)}
-    if isinstance(value, (set, frozenset)):
-        return sorted((_json_normalize(item) for item in value), key=lambda item: _canonical_json(item))
-    if isinstance(value, (list, tuple)):
-        return [_json_normalize(item) for item in value]
-    raise _RuntimeCacheError(
-        "unstable_identity",
-        f"runtime-cache identity does not support values of type {_type_identity(value)}",
-    )
-
-
-def _canonical_json(value: Any) -> bytes:
-    return json.dumps(
-        _json_normalize(value),
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode()
-
-
 def _implementation_fingerprint(
     loader_type: type, pipeline: nn.Module, dit_modules: Sequence[tuple[str, nn.Module]]
 ) -> str:
@@ -331,7 +286,7 @@ def _update_hash_with_tensor(digest: Any, tensor: torch.Tensor) -> None:
 def _runtime_content_digest(records: Sequence[_RuntimeTensor]) -> str:
     digest = hashlib.sha256()
     for record in records:
-        digest.update(_canonical_json({"name": record.name, **_tensor_metadata(record)}))
+        digest.update(canonical_json({"name": record.name, **_tensor_metadata(record)}))
         _update_hash_with_tensor(digest, record.tensor)
     return digest.hexdigest()
 
@@ -636,19 +591,19 @@ def build_runtime_weight_cache_plan(
         content_digest = _runtime_content_digest(records)
         layout_identity = {
             "schema_version": RUNTIME_CACHE_SCHEMA_VERSION,
-            "model": (_canonicalize_existing_local_path(model_identity) if model_identity is not None else None),
+            "model": (canonicalize_existing_local_path(model_identity) if model_identity is not None else None),
             "revision": revision,
             "runtime_dtype": str(runtime_dtype),
             "load_format": load_format,
-            "loader_inputs": _json_normalize(loader_inputs),
+            "loader_inputs": normalize_identity(loader_inputs),
             "loader_implementation_sha256": _implementation_fingerprint(loader_type, pipeline, dit_modules),
             "components": [name for name, _ in dit_modules],
             "tensor_parallel_size": tensor_parallel_size,
             "tensor_parallel_rank": tensor_parallel_rank,
-            "sequence_parallel_guard": _json_normalize(sequence_parallel_guard),
+            "sequence_parallel_guard": normalize_identity(sequence_parallel_guard),
             "runtime_content_sha256": content_digest,
         }
-        cache_key = hashlib.sha256(_canonical_json(layout_identity)).hexdigest()
+        cache_key = hashlib.sha256(canonical_json(layout_identity)).hexdigest()
         root = Path(cache_root or default_runtime_cache_root()).expanduser().resolve()
         entries_root = root / f"v{RUNTIME_CACHE_SCHEMA_VERSION}"
         entry_dir = entries_root / cache_key
@@ -710,6 +665,8 @@ def build_runtime_weight_cache_plan(
             return HostWeightPlanResult(plan)
     except _RuntimeCacheError as exc:
         return HostWeightPlanResult(None, str(exc), exc.code)
+    except IdentityNormalizationError as exc:
+        return HostWeightPlanResult(None, str(exc), "unstable_identity")
     except Exception as exc:
         return HostWeightPlanResult(None, f"runtime-cache operation failed: {exc}", "cache_operation_failed")
 
