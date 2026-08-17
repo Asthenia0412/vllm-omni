@@ -5,8 +5,9 @@ buffers instead of keeping the complete DiT in HBM. It supports sharded host
 weights with AllGather or independently streamed rank-local weights. The
 no-AllGather path can optionally share node-local runtime weights through mmap.
 
-See the [DLO feature design](../../../design/feature/offloader/distributed_layerwise_offload.md)
-for loader contracts, compatibility details, failure handling, and benchmarks.
+See the [DLO component architecture](../../../design/feature/offloader/distributed_layerwise_offload.md#architecture)
+for ownership and lifecycle coordination, and the remaining feature design for
+loader contracts, compatibility details, failure handling, and benchmarks.
 
 ## Choose a mode
 

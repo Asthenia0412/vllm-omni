@@ -60,7 +60,181 @@ The compatibility matrix below describes the current implementation. The
 unit-level guards are covered, but not every parallelism combination has a
 full model-and-hardware end-to-end test.
 
-## Design
+## Architecture
+
+DLO is divided into four planes: configuration, loader-owned host storage,
+backend setup, and the per-block inference hot path. Keeping these decisions
+separate is intentional. In particular, an mmap cache is a host-storage choice;
+it does not imply a DLO AllGather, and disabling DLO AllGather does not decide
+whether the host source is private memory, checkpoint mmap, or runtime-cache
+mmap.
+
+### Components and ownership
+
+```mermaid
+flowchart TB
+    CLI["CLI / EngineArgs"] --> Config["OmniDiffusionConfig<br/>validation and operator policy"]
+    Config --> Runner["DiffusionModelRunner<br/>startup coordinator"]
+
+    subgraph LoaderPlane["Loader-owned host-storage plane"]
+        Loader["DiffusersPipelineLoader"]
+        Checkpoint["checkpoint mmap preflight"]
+        Ordinary["ordinary load + callbacks + calibration"]
+        RuntimeCache["runtime_weight_cache<br/>final-layout publication / join"]
+        Contract["HostWeightPlan<br/>backing + bindings + transforms"]
+        Loader --> Checkpoint
+        Loader -->|"registered final layout requested"| Ordinary
+        Checkpoint -->|"compatible"| Contract
+        Checkpoint -->|"fallback"| Ordinary
+        Ordinary -->|"runtime cache enabled"| RuntimeCache
+        RuntimeCache -->|"enabled and compatible"| Contract
+    end
+
+    Runner -->|"load_model"| Loader
+    Loader -->|"pipeline + optional HostWeightPlan"| Runner
+
+    Config --> Factory["get_offload_backend<br/>OffloadConfig normalization"]
+    Runner -->|"device + optional plan"| Factory
+    Factory --> Backend["DistributedLayerwiseOffloadBackend<br/>resource and transfer owner"]
+    Topology["existing DP / SP process groups"] --> Backend
+    Discovery["ModuleDiscovery + optional OffloadPlan"] --> Backend
+    Contract -.->|"passed once by the runner"| Backend
+
+    Backend -.->|"runtime cache + positive budget"| Registration["host_registration<br/>platform-neutral lifecycle"]
+    Registration --> CUDA["CUDA registration backend"]
+    Backend --> Hooks["DistributedLayerwiseOffloadHook<br/>one circular hook per streamed block"]
+    Forward["pipeline.forward"] --> Hooks
+    Hooks --> DataPath["two device slots<br/>H2D only or H2D + AllGather"]
+
+    Shutdown["DiffusionWorker.shutdown"] -->|"disable before process-group teardown"| Backend
+```
+
+| Component | Owns | Must not own |
+| --- | --- | --- |
+| CLI, engine arguments, and `OmniDiffusionConfig` | User policy, defaults, validation, and propagation to every worker | Checkpoint inspection, cache publication, or buffer allocation |
+| `OffloadConfig.from_od_config()` | Offload-strategy selection, effective DLO group size, AllGather policy, resident-layer count, and registration budget | Host-weight compatibility decisions |
+| `DiffusersPipelineLoader` | Ordinary loading lifecycle and the decision to return an optional `HostWeightPlan` | DLO process groups or block-stream scheduling |
+| Checkpoint mmap planner | Proving that checkpoint tensors can represent the required runtime layout before ordinary DiT materialization is skipped | Runtime-cache identity or transfer policy |
+| `runtime_weight_cache` | Normalizing final ordinary-loader tensors into an immutable node-local entry and returning a validated plan | Model mutation, host registration, H2D, or collectives |
+| `HostWeightPlan` | The one-way loader-to-offloader contract: backing kind, tensor bindings, source coverage, and any bounded transforms | Cache construction or runtime scheduling |
+| `ModuleDiscovery` and model `OffloadPlan` | Discovering DiT/components and declaring block, resident, and on-demand paths | Loader or cache behavior embedded in model pipelines |
+| `DistributedLayerwiseOffloadBackend` | Consuming the exact plan, selecting the existing group, mapping/repointing storage, allocating shared buffers and streams, optional host registration, installing hooks, and cleanup | Re-running loader compatibility checks or orchestrating replicas |
+| `DistributedLayerwiseOffloadHook` | The block hot path: prefetch, optional DLO AllGather, readiness events, parameter repointing, and replacement with offload placeholders | Cache keys, manifest validation, or request routing |
+| `host_registration` and platform backend | All-or-nothing registration lifecycle for existing immutable mappings | Choosing which weights are cached or changing the two-slot device-buffer contract |
+| `DiffusionWorker` | Calling backend teardown before destroying the distributed environment | Managing backend-owned mappings or registrations directly |
+
+The configuration fields are routed to the component that can enforce their
+contract. `dlo_enable_runtime_cache`, its cache root, and lock timeout are
+consumed by the loader. `dlo_runtime_cache_pin_limit_gib` is also visible while
+loading because a positive value deliberately selects the transform-complete
+runtime cache; the backend later consumes the same budget for registration.
+`dlo_use_allgather` controls loader plan routing because the runtime cache is
+no-AllGather-only, and it selects the backend transfer protocol. This is
+coordination through typed configuration and `HostWeightPlan`, not through
+model-specific global state.
+
+### Startup and runtime sequence
+
+```mermaid
+sequenceDiagram
+    participant R as DiffusionModelRunner
+    participant L as DiffusersPipelineLoader
+    participant C as runtime_weight_cache
+    participant B as DLO backend
+    participant P as platform registration
+    participant H as block hooks
+    participant W as DiffusionWorker
+
+    R->>L: load_model(config)
+    L->>L: checkpoint mmap preflight
+    alt checkpoint layout is proven compatible
+        L->>L: load component sources outside the DiT plan
+        L-->>R: pipeline + checkpoint HostWeightPlan
+    else use ordinary loading
+        L->>L: load weights, callbacks, post-load, validation, calibration
+        opt no-AllGather runtime cache enabled
+            L->>C: build or join final-layout entry
+            C-->>L: runtime-cache plan or fail-closed fallback
+        end
+        L-->>R: pipeline + optional runtime-cache plan
+    end
+
+    R->>B: create and enable(config, device, optional plan)
+    B->>B: discover modules and consume host backing
+    B->>H: install circular hooks
+    B->>B: select existing DP/SP group and allocate device/shard slots
+    opt runtime-cache registration budget is positive
+        B->>P: register complete immutable mapping
+        P-->>B: direct-H2D source or bounded-staging fallback
+    end
+    B->>B: allocate staging slots if needed and prime the first block
+
+    loop each streamed block during pipeline.forward
+        H->>H: ensure current tensors point at the ready current slot
+        H->>H: prefetch and repoint next block into the alternate slot
+        H->>H: execute current block
+        H->>H: replace current tensors with placeholders
+    end
+
+    W->>B: shutdown calls disable()
+    B->>B: synchronize, unregister, remove hooks, close mmap handles
+```
+
+The loader returns a plan only after its contract is valid: checkpoint plans
+have preflight-proven source coverage and metadata, while runtime-cache plans
+also have full manifest, file, and mapped-content validation. From that point,
+the runner transfers ownership exactly once with
+`model_loader.take_host_weight_plan()`. If no plan is returned, the backend
+requires materialized ordinary-loader tensors. If a plan caused ordinary DiT
+materialization to be skipped, failure to create or enable its consumer is a
+hard startup error rather than a fallback to uninitialized parameters.
+
+At inference time, the model pipeline remains the caller: normal block forward
+calls activate the installed hooks. The hooks use one copy stream, an optional
+communication stream, and two shared device slots sized for the largest
+streamed block. They do not call the loader or cache. Ordinary TP/SP model
+collectives remain inside model execution and are independent of DLO's optional
+weight AllGather.
+
+### Host backing and transfer composition
+
+| Loader-selected host backing | Backend transfer mode | Setup result | Per-block hot path |
+| --- | --- | --- | --- |
+| Ordinary runtime tensors | AllGather group larger than one | Each rank retains a pinned local weight shard | shard H2D → DLO AllGather → device slot |
+| Checkpoint mmap | AllGather group larger than one | Each rank prepares its persistent shard, then releases the source mapping | shard H2D → DLO AllGather → device slot |
+| Ordinary runtime tensors | Rank-local / no-AllGather | Each rank retains the complete loader-produced local layout | complete-block H2D → device slot |
+| Checkpoint or runtime-cache mmap, zero registration budget | Rank-local / no-AllGather | Immutable mapping plus two bounded pinned host-staging slots | mmap views → pinned staging slot → device slot |
+| Runtime-cache mmap, positive registration budget | Rank-local / no-AllGather | Complete mapping is registered by the platform backend | registered mmap views → device slot |
+
+The three axes therefore remain independent:
+
+1. **Offload policy:** whether DLO is enabled and which layers are resident.
+2. **Host backing:** ordinary tensors, checkpoint mmap, or final runtime-cache
+   mmap, selected by the loader.
+3. **Transfer protocol:** rank-local H2D or H2D plus DLO AllGather, selected by
+   the backend from validated configuration and existing topology.
+
+### Failure and lifecycle boundaries
+
+- Invalid option combinations fail during configuration validation.
+- Checkpoint mmap preflight failure falls back before ordinary loading is
+  skipped.
+- Runtime-cache incompatibility, timeout, or publication failure retains the
+  already-valid ordinary tensors.
+- Host-registration failure rolls back and retains bounded staging. A rollback
+  failure aborts startup because unmapping a range still owned by the platform
+  would be unsafe.
+- During shutdown, DLO synchronizes outstanding device work, unregisters host
+  mappings, removes hooks, and closes mmap handles only after safe unregister;
+  the worker destroys its process groups afterward.
+
+DLO deliberately does not own DP replica placement, independent-engine request
+routing, cross-engine admission control, or cross-node cache distribution.
+Those belong to an external router/orchestrator. It also does not replace TP or
+SP model collectives; it only adds an optional weight collective over an
+already-existing DP or SP group.
+
+## Detailed design
 
 ### DLO consumes the existing parallel topology
 
