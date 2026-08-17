@@ -7,7 +7,7 @@ no-AllGather path can optionally share node-local runtime weights through mmap.
 
 See the [DLO component architecture](../../../design/feature/offloader/distributed_layerwise_offload.md#architecture)
 for ownership and lifecycle coordination, and the remaining feature design for
-loader contracts, compatibility details, failure handling, and benchmarks.
+loader contracts, compatibility details, and failure handling.
 
 ## Choose a mode
 
@@ -92,12 +92,11 @@ SP model collectives still synchronize ranks within each engine.
   until their runtime layouts are validated.
 - Runtime-cache v1 rejects quantized, non-contiguous, aliased/tied, device-only,
   HSDP, expert-parallel, CFG-parallel, and PP layouts.
-- HSDP plus DLO AllGather is unsupported. HSDP without AllGather has limited
-  end-to-end validation.
-- The runtime cache lowers steady-state host PSS, not startup peak: each worker
-  still performs ordinary loading and full content validation.
-- Skip-load-on-hit, cache eviction, cross-node sharing, and broader SP hardware
-  validation remain follow-up work in
+- HSDP plus DLO AllGather is unsupported, and runtime-cache v1 rejects HSDP.
+- The runtime cache changes steady-state host backing, not startup loading:
+  each worker still performs ordinary loading and full content validation.
+- Skip-load-on-hit, cache eviction, and cross-node sharing remain follow-up
+  work in
   [RFC #6195](https://github.com/vllm-project/vllm-omni/issues/6195).
 
 See the [Cosmos3 DistOffload recipe](https://github.com/vllm-project/vllm-omni/blob/main/recipes/cosmos3/Cosmos3-DistOffload.md)
