@@ -99,6 +99,32 @@ def test_equivalent_process_layouts_reuse_one_entry(tmp_path):
     }
 
 
+def test_equivalent_local_model_paths_reuse_one_entry(tmp_path, monkeypatch):
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    model_link = tmp_path / "model-link"
+    model_link.symlink_to(model_dir, target_is_directory=True)
+    cache_root = tmp_path / "cache"
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    identities = (str(model_dir), "~/model", "model", str(model_link))
+    results = [_build(_Pipeline(), cache_root, model_identity=identity) for identity in identities]
+
+    assert all(result.plan is not None for result in results)
+    assert len({result.plan.runtime_layout_key for result in results if result.plan is not None}) == 1
+    assert len(list((cache_root / "v1").iterdir())) == 1
+
+
+def test_unstable_loader_identity_fails_closed(tmp_path):
+    result = _build(_Pipeline(), tmp_path, loader_inputs={"opaque": object()})
+
+    assert result.plan is None
+    assert result.fallback_code == "unstable_identity"
+    assert result.fallback_reason == "runtime-cache identity does not support values of type builtins.object"
+    assert list(tmp_path.rglob("*.safetensors")) == []
+
+
 def test_tp_coordinate_and_sp_implementation_guard_split_entries(tmp_path):
     pipeline = _Pipeline()
     tp0 = _build(pipeline, tmp_path, tensor_parallel_size=2, tensor_parallel_rank=0)

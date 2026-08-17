@@ -18,6 +18,7 @@ import time
 import uuid
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from enum import Enum
 from itertools import chain
 from pathlib import Path
 from typing import Any
@@ -219,13 +220,33 @@ def _collect_runtime_tensors(
     return [records[name] for name in sorted(records)]
 
 
+def _type_identity(value: Any) -> str:
+    value_type = value if inspect.isclass(value) else type(value)
+    return f"{value_type.__module__}.{value_type.__qualname__}"
+
+
+def _canonicalize_existing_local_path(value: str | os.PathLike[str]) -> str:
+    original = os.fsdecode(os.fspath(value))
+    candidate = Path(original).expanduser()
+    try:
+        if candidate.exists():
+            return str(candidate.resolve())
+    except OSError:
+        pass
+    return original
+
+
 def _json_normalize(value: Any) -> Any:
     if value is None or isinstance(value, (bool, int, float, str)):
         return value
+    if isinstance(value, Enum):
+        return {"enum": _type_identity(value), "name": value.name}
     if isinstance(value, torch.dtype):
         return str(value)
     if isinstance(value, os.PathLike):
-        return os.fspath(value)
+        return _canonicalize_existing_local_path(value)
+    if inspect.isclass(value):
+        return _type_identity(value)
     if dataclasses.is_dataclass(value):
         return _json_normalize(dataclasses.asdict(value))
     model_dump = getattr(value, "model_dump", None)
@@ -236,17 +257,20 @@ def _json_normalize(value: Any) -> Any:
             dumped = model_dump()
         return _json_normalize(dumped)
     if isinstance(value, Mapping):
-        return {str(key): _json_normalize(item) for key, item in sorted(value.items(), key=lambda item: str(item[0]))}
+        if not all(isinstance(key, str) for key in value):
+            raise _RuntimeCacheError(
+                "unstable_identity",
+                "runtime-cache identity mappings require string keys",
+            )
+        return {key: _json_normalize(value[key]) for key in sorted(value)}
     if isinstance(value, (set, frozenset)):
         return sorted((_json_normalize(item) for item in value), key=lambda item: _canonical_json(item))
     if isinstance(value, (list, tuple)):
         return [_json_normalize(item) for item in value]
-    if inspect.isclass(value):
-        return f"{value.__module__}.{value.__qualname__}"
-    return {
-        "type": f"{type(value).__module__}.{type(value).__qualname__}",
-        "value": str(value),
-    }
+    raise _RuntimeCacheError(
+        "unstable_identity",
+        f"runtime-cache identity does not support values of type {_type_identity(value)}",
+    )
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -612,7 +636,7 @@ def build_runtime_weight_cache_plan(
         content_digest = _runtime_content_digest(records)
         layout_identity = {
             "schema_version": RUNTIME_CACHE_SCHEMA_VERSION,
-            "model": model_identity,
+            "model": (_canonicalize_existing_local_path(model_identity) if model_identity is not None else None),
             "revision": revision,
             "runtime_dtype": str(runtime_dtype),
             "load_format": load_format,
