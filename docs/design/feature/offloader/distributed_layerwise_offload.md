@@ -67,9 +67,13 @@ backend setup, and the per-block inference hot path. Keeping these decisions
 separate is intentional. In particular, an mmap cache is a host-storage choice;
 it does not imply a DLO AllGather, and disabling DLO AllGather does not decide
 whether the host source is private memory, checkpoint mmap, or runtime-cache
-mmap.
+mmap. The shared control plane is described once below; the AllGather and
+no-AllGather startup and hot paths are then shown separately.
 
-### Components and ownership
+### Component ownership
+
+The map includes optional mode-specific components, but the ownership rules
+and loader-to-backend boundary are shared.
 
 ```mermaid
 flowchart TB
@@ -133,68 +137,113 @@ no-AllGather-only, and it selects the backend transfer protocol. This is
 coordination through typed configuration and `HostWeightPlan`, not through
 model-specific global state.
 
-### Startup and runtime sequence
+### Shared startup and lifecycle
+
+The shared control path selects host backing and transfers its ownership to
+the backend before either transfer mode installs hooks:
 
 ```mermaid
 sequenceDiagram
+    participant C as OmniDiffusionConfig
     participant R as DiffusionModelRunner
     participant L as DiffusersPipelineLoader
-    participant C as runtime_weight_cache
     participant B as DLO backend
-    participant P as platform registration
-    participant H as block hooks
     participant W as DiffusionWorker
 
+    C->>R: validated offload policy
     R->>L: load_model(config)
-    L->>L: checkpoint mmap preflight
-    alt checkpoint layout is proven compatible
-        L->>L: load component sources outside the DiT plan
-        L-->>R: pipeline + checkpoint HostWeightPlan
-    else use ordinary loading
-        L->>L: load weights, callbacks, post-load, validation, calibration
-        opt no-AllGather runtime cache enabled
-            L->>C: build or join final-layout entry
-            C-->>L: runtime-cache plan or fail-closed fallback
-        end
-        L-->>R: pipeline + optional runtime-cache plan
-    end
-
-    R->>B: create and enable(config, device, optional plan)
+    L->>L: select and validate host backing
+    L-->>R: pipeline + optional HostWeightPlan
+    R->>B: enable(config, device, optional plan)
     B->>B: discover modules and consume host backing
-    B->>H: install circular hooks
-    B->>B: select existing DP/SP group and allocate device/shard slots
-    opt runtime-cache registration budget is positive
-        B->>P: register complete immutable mapping
-        P-->>B: direct-H2D source or bounded-staging fallback
-    end
-    B->>B: allocate staging slots if needed and prime the first block
-
-    loop each streamed block during pipeline.forward
-        H->>H: ensure current tensors point at the ready current slot
-        H->>H: prefetch and repoint next block into the alternate slot
-        H->>H: execute current block
-        H->>H: replace current tensors with placeholders
-    end
-
+    B-->>R: mode-specific backend is ready
     W->>B: shutdown calls disable()
-    B->>B: synchronize, unregister, remove hooks, close mmap handles
+    B->>B: synchronize, unregister, remove hooks, close mappings
 ```
 
 The loader returns a plan only after its contract is valid: checkpoint plans
 have preflight-proven source coverage and metadata, while runtime-cache plans
-also have full manifest, file, and mapped-content validation. From that point,
-the runner transfers ownership exactly once with
+also have full manifest, file, and mapped-content validation. The runner then
+transfers ownership exactly once with
 `model_loader.take_host_weight_plan()`. If no plan is returned, the backend
 requires materialized ordinary-loader tensors. If a plan caused ordinary DiT
 materialization to be skipped, failure to create or enable its consumer is a
 hard startup error rather than a fallback to uninitialized parameters.
 
 At inference time, the model pipeline remains the caller: normal block forward
-calls activate the installed hooks. The hooks use one copy stream, an optional
-communication stream, and two shared device slots sized for the largest
-streamed block. They do not call the loader or cache. Ordinary TP/SP model
-collectives remain inside model execution and are independent of DLO's optional
-weight AllGather.
+calls activate the installed hooks. Both modes use one copy stream and two
+shared device slots sized for the largest streamed block. The hooks do not
+call the loader or cache.
+
+### AllGather startup and hot path
+
+```mermaid
+sequenceDiagram
+    participant B as DLO backend
+    participant H as block hooks
+    participant G as existing DP or SP group
+
+    B->>B: choose existing group and prepare persistent local shards
+    B->>B: allocate two device slots and a communication stream
+    B->>H: install hooks and prime the first block
+    loop each streamed block
+        H->>H: copy the next local shard to the alternate slot
+        H->>G: all_gather_into_tensor(next block)
+        G-->>H: complete next block is ready
+        H->>H: execute current block and rotate slots
+    end
+```
+
+AllGather uses the existing DP group when DP is greater than one, otherwise
+the existing SP group when SP is greater than one. TP is never selected as
+DLO's weight-sharding group. Every participating rank must request blocks in
+the same order; fast P2P reduces communication cost but does not remove that
+lockstep contract. An effective group size of one issues no collective and
+uses rank-local transfer.
+
+### No-AllGather startup and hot path
+
+```mermaid
+sequenceDiagram
+    participant L as DiffusersPipelineLoader
+    participant C as runtime_weight_cache
+    participant B as DLO backend
+    participant P as platform registration
+    participant H as block hooks
+
+    L->>L: checkpoint mmap preflight
+    alt loader selects a compatible checkpoint plan
+        L-->>B: checkpoint plan via runner
+    else ordinary loading
+        L->>L: load, mutate, validate, and calibrate final tensors
+        opt runtime cache enabled
+            L->>C: publish or join final-layout entry
+            C-->>L: validated runtime-cache plan or fail-closed fallback
+        end
+        L-->>B: plan or materialized tensors via runner
+    end
+    B->>B: consume complete rank-local block sources
+    opt runtime-cache plan and positive registration budget
+        B->>P: register the complete immutable mapping
+        P-->>B: direct-H2D source or bounded-staging fallback
+    end
+    B->>H: install hooks and prime the first block
+    loop each streamed block
+        alt registered runtime-cache mapping
+            H->>H: copy complete next block directly to device
+        else pageable mmap mapping
+            H->>H: pack into a pinned staging slot, then copy to device
+        else ordinary runtime tensors
+            H->>H: copy complete next block to device
+        end
+        H->>H: execute current block and rotate slots
+    end
+```
+
+No-AllGather creates no DLO weight group and issues no DLO collective.
+Workers may therefore schedule requests independently. Ordinary TP and SP
+collectives remain inside model execution; host registration changes only
+the source of the complete-block H2D copy.
 
 ### Host backing and transfer composition
 
@@ -234,7 +283,9 @@ Those belong to an external router/orchestrator. It also does not replace TP or
 SP model collectives; it only adds an optional weight collective over an
 already-existing DP or SP group.
 
-## Detailed design
+## Shared design
+
+The following topology and loader contracts apply to both transfer modes.
 
 ### DLO consumes the existing parallel topology
 
@@ -242,15 +293,10 @@ DLO does not create a new DP, TP, or SP topology. It reads the configured
 `DiffusionParallelConfig` and attaches offload hooks to the DiT blocks after the
 standard distributed groups have been initialized.
 
-The DLO weight-sharding group is selected as follows:
-
-1. Use the existing DP group when `data_parallel_size > 1`.
-2. When DP is one and SP is greater than one, use the SP group.
-3. Otherwise, run rank-locally without a DLO process group.
-
-TP is deliberately not used as DLO's AllGather group. HSDP has its own
-parameter-sharding lifecycle and is not allowed to be sharded a second time by
-DLO's AllGather path.
+AllGather mode selects one existing group for DLO weight sharding; no-AllGather
+mode creates no DLO group. Neither mode changes ordinary TP or SP model
+collectives. The mode-specific group and scheduling contracts are described
+below.
 
 ### The loader owns host-weight planning
 
@@ -281,6 +327,99 @@ This boundary keeps checkpoint semantics out of DLO and avoids model-pipeline
 flags such as `_supports_mmap_loading` or parameter attributes for mmap-only
 transforms. Model-specific direct-layout knowledge, when required, lives in a
 checkpoint adapter beside the ordinary loader.
+
+## AllGather design
+
+### Group selection
+
+The DLO weight-sharding group is selected in this order:
+
+1. Use the existing DP group when `data_parallel_size > 1`.
+2. When DP is one and SP is greater than one, use the existing SP group.
+3. Otherwise, use an effective group size of one and issue no collective.
+
+TP is deliberately not used as DLO's AllGather group. HSDP has its own
+parameter-sharding lifecycle and cannot be sharded a second time by DLO.
+
+### Sharded transfer and double buffering
+
+The loader may provide ordinary runtime tensors or a compatible checkpoint
+plan. During backend setup, either source is normalized into persistent local
+shards. The final-layout runtime cache is not selected in AllGather mode.
+
+With the default `dlo_use_allgather=True`, each rank stores approximately
+`1 / group_size` of each streamable block in pinned host memory. The next
+block's shard is copied to a device buffer and reconstructed with
+`all_gather_into_tensor` on a communication stream while the current block is
+executing.
+
+```text
+Compute:    [Block N]             [Block N+1]          [Block N+2]
+H2D:                      [shard N+1]           [shard N+2]
+AllGather:                [full N+1]             [full N+2]
+Buffers:    [current slot]       [prefetch slot]       [current slot]
+```
+
+![DLO double-buffer prefetch pipeline](../../figures/dlo/dlo_pipeline.gif)
+
+The backend uses two shared device buffers, so accelerator weight residency is
+bounded by the largest streamed blocks rather than the complete model.
+
+When direct checkpoint mmap is selected, the checkpoint mappings are only the
+source used to prepare each rank's persistent shard. They can be closed after
+shard preparation. Across the AllGather group, those private shards total
+approximately one runtime model copy.
+
+An effective DLO group size of one performs no collective, even when
+`dlo_use_allgather=True`; it follows the rank-local transfer path described
+below.
+
+When DP is greater than one, the engine can process one request per DP rank in
+the same denoising wave. Because AllGather is a collective, all participating
+requests must take the same execution path at every denoising step.
+
+Fast NVLink/NVSwitch changes collective cost, not this execution contract. For
+independently scheduled replicas—even on one NVSwitch baseboard—no-AllGather
+plus shared mmap storage avoids coupling their request schedules and failure
+domains.
+
+## No-AllGather design
+
+### Rank-local transfer
+
+With `--dlo-no-use-allgather`, DLO forces its internal offload shard size to
+one and streams complete blocks using H2D copies only. The host backing may be
+a loader-approved checkpoint mapping, a normalized runtime-cache mapping, or
+ordinary runtime tensors.
+
+For direct mmap, each process retains immutable safetensors views and uses two
+bounded pinned host staging slots. Processes on the same node that map the same
+files share physical checkpoint pages through the OS page cache. This removes
+the persistent private full-model copy per pure-DP process, but each process
+still packs and transfers every complete block. Sharing is node-local; each
+node has its own page cache.
+
+For a runtime-cache mapping, a positive registration budget replaces those
+host slots with direct copies from the shared final tensor views. A zero budget
+or failed registration retains the bounded staging behavior.
+
+When direct mmap preflight fails, the regular model loader remains responsible
+for preparing each rank's weights, including TP-local tensors or HSDP-managed
+parameters. Supported CPU layouts may then enter the opt-in runtime cache.
+Unsupported layouts keep one private runtime copy per process.
+
+This mode means:
+
+- DP still provides independent replicas, but DLO does not shard weights
+  across DP ranks.
+- SP still performs its normal activation/attention collectives, but DLO does
+  not shard weights across SP ranks.
+- TP/HSDP/SP collectives, if configured, are not disabled by this flag; only
+  DLO's additional weight AllGather is disabled.
+- Pure DP deployments share one checkpoint-backed copy per node when direct
+  mmap is selected. The runtime cache can share equivalent ordinary-loader
+  outputs; its fallback keeps one private runtime copy per rank.
+- The scheduler does not require a synchronized DP request wave for DLO.
 
 ### Post-load runtime cache
 
@@ -353,10 +492,9 @@ process/context teardown rather than being unsafely unmapped.
 On success, the hooks copy each immutable tensor view directly into its offset
 in the existing flattened rotating device buffer on the copy stream. Parameter
 repointing, two-block HBM residency, and H2D/compute overlap are unchanged. The
-implementation currently issues more H2D copy operations than block packing,
-but avoids the much larger recurrent CPU copy. A packed cache schema should be
-considered only if launch-count measurements justify its added format and
-publication complexity.
+direct path trades recurrent host packing for finer-grained H2D operations. A
+packed cache schema should be considered only if that additional format and
+publication complexity becomes necessary.
 
 Registration is per process and platform context; physical file-cache pages
 remain shared and are not copied into one private host allocation per worker.
@@ -365,80 +503,6 @@ platform and OS registration limits for every worker. During shutdown, DLO
 first synchronizes outstanding device work, unregisters all ranges, and then
 closes the safetensors mappings. Worker teardown invokes this cleanup before
 destroying the distributed environment and platform context.
-
-### AllGather path
-
-With the default `dlo_use_allgather=True`, each rank stores approximately
-`1 / group_size` of each streamable block in pinned host memory. The next
-block's shard is copied to a device buffer and reconstructed with
-`all_gather_into_tensor` on a communication stream while the current block is
-executing.
-
-```text
-Compute:    [Block N]             [Block N+1]          [Block N+2]
-H2D:                      [shard N+1]           [shard N+2]
-AllGather:                [full N+1]             [full N+2]
-Buffers:    [current slot]       [prefetch slot]       [current slot]
-```
-
-![DLO double-buffer prefetch pipeline](../../figures/dlo/dlo_pipeline.gif)
-
-The backend uses two shared device buffers, so accelerator weight residency is
-bounded by the largest streamed blocks rather than the complete model.
-
-When direct checkpoint mmap is selected, the checkpoint mappings are only the
-source used to prepare each rank's persistent shard. They can be closed after
-shard preparation. Across the AllGather group, those private shards total
-approximately one runtime model copy.
-
-An effective DLO group size of one performs no collective, even when
-`dlo_use_allgather=True`; it follows the rank-local transfer path described
-below.
-
-When DP is greater than one, the engine can process one request per DP rank in
-the same denoising wave. Because AllGather is a collective, all participating
-requests must take the same execution path at every denoising step.
-
-Fast NVLink/NVSwitch changes collective cost, not this execution contract. For
-independently scheduled replicas—even on one NVSwitch baseboard—no-AllGather
-plus shared mmap storage avoids coupling their request schedules and failure
-domains.
-
-### Rank-local path without DLO AllGather
-
-With `--dlo-no-use-allgather`, DLO forces its internal offload shard size to
-one and streams complete blocks using H2D copies only. The host backing may be
-a loader-approved checkpoint mapping, a normalized runtime-cache mapping, or
-ordinary runtime tensors.
-
-For direct mmap, each process retains immutable safetensors views and uses two
-bounded pinned host staging slots. Processes on the same node that map the same
-files share physical checkpoint pages through the OS page cache. This removes
-the persistent private full-model copy per pure-DP process, but each process
-still packs and transfers every complete block. Sharing is node-local; each
-node has its own page cache.
-
-For a runtime-cache mapping, a positive registration budget replaces those
-host slots with direct copies from the shared final tensor views. A zero budget
-or failed registration retains the bounded staging behavior.
-
-When direct mmap preflight fails, the regular model loader remains responsible
-for preparing each rank's weights, including TP-local tensors or HSDP-managed
-parameters. Supported CPU layouts may then enter the opt-in runtime cache.
-Unsupported layouts keep one private runtime copy per process.
-
-This mode means:
-
-- DP still provides independent replicas, but DLO does not shard weights
-  across DP ranks.
-- SP still performs its normal activation/attention collectives, but DLO does
-  not shard weights across SP ranks.
-- TP/HSDP/SP collectives, if configured, are not disabled by this flag; only
-  DLO's additional weight AllGather is disabled.
-- Pure DP deployments share one checkpoint-backed copy per node when direct
-  mmap is selected. The runtime cache can share equivalent ordinary-loader
-  outputs; its fallback keeps one private runtime copy per rank.
-- The scheduler does not require a synchronized DP request wave for DLO.
 
 ## Parallelism compatibility
 
@@ -463,7 +527,9 @@ This mode means:
 - **HSDP + DP or TP:** rejected independently by the diffusion parallel
   configuration.
 
-## Request and loading constraints
+## Mode constraints
+
+### AllGather constraints
 
 AllGather DP multi-concurrency requires:
 
@@ -471,21 +537,23 @@ AllGather DP multi-concurrency requires:
 - the same `num_inference_steps` for all requests in a wave; and
 - identical request arguments that affect the collective execution path.
 
+Per-tensor online FP8 linears can use DLO AllGather after the ordinary loader
+finalizes their runtime weights and scales. Other online methods must use
+`--dlo-no-use-allgather` or disable online quantization until their runtime
+layouts are validated.
+
+### No-AllGather constraints
+
 The no-AllGather path does not impose these DLO-specific synchronized-wave
-requirements.
+requirements. Runtime-cache v1 is no-AllGather only and rejects all
+quantization configurations, HSDP/DTensor, expert parallelism, CFG
+parallelism, PP, non-contiguous tensors, and tied/shared storage.
+
+### Shared loading constraint
 
 Direct checkpoint mmap can back either transfer path. It is currently limited
 to proven TP1, non-HSDP, non-online-quantized layouts. Other layouts use the
-ordinary loader. Per-tensor online FP8 linears can use DLO AllGather after the
-ordinary loader finalizes their runtime weights and scales; DLO then shards and
-reconstructs those tensors with their recorded layouts. Other online methods
-must use `--dlo-no-use-allgather` or disable online quantization until their
-runtime layouts are validated.
-
-Runtime-cache v1 is no-AllGather only and rejects all quantization
-configurations, HSDP/DTensor, expert parallelism, CFG parallelism, PP,
-non-contiguous tensors, and
-tied/shared storage.
+ordinary loader.
 
 ## Validation status
 
@@ -497,11 +565,16 @@ artifacts before making hardware or performance claims. Track that work in
 
 ## Recommendations
 
+### AllGather
+
 - Use **DP + DLO AllGather** when ranks already execute the same block path in
   lockstep and belong to the same fast P2P domain. It shards persistent host
   weights across that group.
 - Use **SP + DLO AllGather** for long-sequence workloads when DP concurrency is
   not the goal.
+
+### No-AllGather
+
 - Use **no-AllGather** when independent replica execution is required. TP1
   direct-mmap deployments can share checkpoint pages per node. Enable the
   runtime cache only when independent replicas have repeated final layouts and
@@ -510,5 +583,8 @@ artifacts before making hardware or performance claims. Track that work in
   registration budget large enough for the complete final layout when
   recurrent staging cost is unacceptable; leave it at zero when page-locking
   that layout is not operationally acceptable.
+
+### HSDP
+
 - Do not combine HSDP with DLO AllGather or runtime-cache v1. HSDP with
   no-AllGather remains an ordinary-loader rank-local path.
