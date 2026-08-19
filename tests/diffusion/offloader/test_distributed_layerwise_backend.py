@@ -842,7 +842,6 @@ class TestMmapWeightLoading:
                 )
             },
             runtime_layout_key="runtime-layout",
-            post_load_complete=True,
             expected_file_digests={str(weight_file): file_digest(weight_file)},
         )
         backend = DistributedLayerwiseOffloadBackend(
@@ -881,7 +880,6 @@ class TestMmapWeightLoading:
                 )
             },
             runtime_layout_key="runtime-layout",
-            post_load_complete=True,
             expected_file_digests={str(tmp_path / "missing.safetensors"): "unused"},
         )
         backend = DistributedLayerwiseOffloadBackend(
@@ -926,7 +924,6 @@ class TestMmapWeightLoading:
                 )
             },
             runtime_layout_key="runtime-layout",
-            post_load_complete=True,
             expected_file_digests={str(weight_file): expected_digest},
         )
         backend = DistributedLayerwiseOffloadBackend(
@@ -1065,7 +1062,6 @@ class TestMmapWeightLoading:
             backing_kind="host_weight_cache",
             bindings={name: TensorBinding(storage_key=name, file_path=str(weight_file)) for name in weights},
             runtime_layout_key="runtime-layout",
-            post_load_complete=True,
             expected_file_digests={str(weight_file): file_digest(weight_file)},
         )
         backend = DistributedLayerwiseOffloadBackend(
@@ -1113,7 +1109,6 @@ class TestMmapWeightLoading:
             backing_kind="host_weight_cache",
             bindings={name: TensorBinding(storage_key=name, file_path=str(weight_file)) for name in weights},
             runtime_layout_key="runtime-layout",
-            post_load_complete=True,
             expected_file_digests={str(weight_file): "stale-digest"},
         )
         backend = DistributedLayerwiseOffloadBackend(
@@ -1268,6 +1263,47 @@ class TestMmapWeightLoading:
 
         assert not backend._try_register_host_weight_cache_mmap()
         assert backend._host_registration is None
+
+    def test_host_weight_cache_transfer_is_configured_once_for_all_consumers(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        patched_offload_runtime,
+    ):
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=True,
+                dlo_use_allgather=False,
+            ),
+            torch.device("cuda"),
+            host_weight_plan=HostWeightPlan(
+                backing_kind="host_weight_cache",
+                bindings={},
+            ),
+        )
+        backend._using_rank_local_mmap = True
+        backend._host_weight_cache_mapped_sources = {"runtime.safetensors": [torch.ones(1)]}
+        streamed_hook = SimpleNamespace(registered_mmap=False)
+        resident_group = SimpleNamespace(
+            registered_mmap=False,
+            _cpu_staging_buffers=[{"buffer": torch.ones(1)}],
+        )
+        backend._resident_layer_group = resident_group
+        register_calls: list[None] = []
+
+        def register() -> bool:
+            register_calls.append(None)
+            return True
+
+        monkeypatch.setattr(backend, "_try_register_host_weight_cache_mmap", register)
+
+        backend._configure_host_weight_cache_transfer([streamed_hook])  # type: ignore[list-item]
+
+        assert register_calls == [None]
+        assert streamed_hook.registered_mmap
+        assert resident_group.registered_mmap
+        assert resident_group._cpu_staging_buffers == []
+        assert backend._host_weight_cache_mapped_sources == {}
 
     def test_host_weight_cache_registration_falls_back_on_unsupported_platform(
         self,

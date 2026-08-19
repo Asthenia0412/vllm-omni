@@ -1179,8 +1179,6 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         """Replace final ordinary-loader tensors with validated cache views."""
         from safetensors import safe_open
 
-        if not plan.post_load_complete:
-            raise RuntimeError("A host weight cache plan must describe fully post-processed weights")
         if any(binding.transform is not None for binding in plan.bindings.values()):
             raise RuntimeError("Host weight cache bindings cannot carry deferred checkpoint transforms")
 
@@ -1306,6 +1304,29 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
             time.perf_counter() - started,
         )
         return True
+
+    def _configure_host_weight_cache_transfer(
+        self,
+        hooks: list[DistributedLayerwiseOffloadHook],
+    ) -> None:
+        """Select registered mmap or staging once for every cache consumer."""
+        plan = self.host_weight_plan
+        if (
+            (not hooks and self._resident_layer_group is None)
+            or not self._using_rank_local_mmap
+            or plan is None
+            or plan.backing_kind != "host_weight_cache"
+        ):
+            return
+
+        self._using_registered_mmap = self._try_register_host_weight_cache_mmap()
+        self._host_weight_cache_mapped_sources.clear()
+        for hook in hooks:
+            hook.registered_mmap = self._using_registered_mmap
+        if self._resident_layer_group is not None:
+            self._resident_layer_group.registered_mmap = self._using_registered_mmap
+            if self._using_registered_mmap:
+                self._resident_layer_group._cpu_staging_buffers.clear()
 
     def _release_registered_mmap(self) -> bool:
         registration = self._host_registration
@@ -1866,19 +1887,11 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
             )
             pipeline._dlo_residency_controller = self
 
+        all_hooks = [hook for group in self._all_hook_groups for hook in group]
+        self._configure_host_weight_cache_transfer(all_hooks)
+
         if not self._all_hook_groups:
             self.enabled = bool(self._resident_blocks)
-            if (
-                self.enabled
-                and self._using_rank_local_mmap
-                and self.host_weight_plan.backing_kind == "host_weight_cache"
-            ):
-                self._using_registered_mmap = self._try_register_host_weight_cache_mmap()
-                self._host_weight_cache_mapped_sources.clear()
-                assert self._resident_layer_group is not None
-                self._resident_layer_group.registered_mmap = self._using_registered_mmap
-                if self._using_registered_mmap:
-                    self._resident_layer_group._cpu_staging_buffers.clear()
             if self._using_mmap and not self.enabled:
                 self._release_mmap_handles()
             return
@@ -1886,22 +1899,10 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         # Unified allocation: 2 shared output buffers + 2 shared shard buffers
         # sized to the max block across ALL module groups (gen_layers +
         # language_model).  Groups execute sequentially, so 2 buffers suffice.
-        all_hooks: list[DistributedLayerwiseOffloadHook] = []
-        for group in self._all_hook_groups:
-            all_hooks.extend(group)
-
         unified_buffers = self._allocate_shared_buffers(all_hooks)
         unified_shard_buffers = None
         if self.dp_size > 1:
             unified_shard_buffers = self._allocate_shared_shard_buffers(all_hooks)
-
-        if self._using_rank_local_mmap and self.host_weight_plan.backing_kind == "host_weight_cache":
-            self._using_registered_mmap = self._try_register_host_weight_cache_mmap()
-            self._host_weight_cache_mapped_sources.clear()
-            for hook in all_hooks:
-                hook.registered_mmap = self._using_registered_mmap
-            if self._resident_layer_group is not None:
-                self._resident_layer_group.registered_mmap = self._using_registered_mmap
 
         unified_cpu_staging = None
         cpu_staging_events = None

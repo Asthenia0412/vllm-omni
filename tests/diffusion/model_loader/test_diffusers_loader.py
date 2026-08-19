@@ -310,6 +310,7 @@ def test_dlo_transfers_loader_plan_and_skips_ordinary_weight_loading(monkeypatch
 
     assert loader.load_model(load_device="cpu") is model
     assert not loaded_ordinary_weights
+    assert plan.requires_backend
     assert loader.take_host_weight_plan() is plan
     assert loader.take_host_weight_plan() is None
 
@@ -449,7 +450,6 @@ def test_dlo_host_weight_cache_is_built_after_final_post_load_mutation(monkeypat
         backing_kind="host_weight_cache",
         bindings={},
         runtime_layout_key="layout-key",
-        post_load_complete=True,
     )
 
     def load_weights(_model):
@@ -530,7 +530,6 @@ def test_dlo_host_weight_cache_prefers_final_layout_over_checkpoint_plan(monkeyp
         backing_kind="host_weight_cache",
         bindings={},
         runtime_layout_key="layout-key",
-        post_load_complete=True,
     )
 
     loader._init_from_load_format = lambda *_args, **_kwargs: model  # type: ignore[method-assign]

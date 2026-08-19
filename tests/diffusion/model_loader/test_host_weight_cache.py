@@ -90,7 +90,7 @@ def test_equivalent_process_layouts_reuse_one_entry(tmp_path):
     assert first.plan is not None
     assert second.plan is not None
     assert first.plan.runtime_layout_key == second.plan.runtime_layout_key
-    assert first.plan.post_load_complete
+    assert not first.plan.requires_backend
     assert {binding.file_path for binding in first.plan.bindings.values()} == {
         binding.file_path for binding in second.plan.bindings.values()
     }

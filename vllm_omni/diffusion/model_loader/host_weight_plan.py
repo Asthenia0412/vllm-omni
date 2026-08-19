@@ -9,6 +9,7 @@ import json
 import os
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import Literal
 
 import torch
 from safetensors import safe_open
@@ -37,12 +38,16 @@ class TensorBinding:
 class HostWeightPlan:
     """Complete, prevalidated host backing consumed by an offload backend."""
 
-    backing_kind: str
+    backing_kind: Literal["checkpoint_mmap", "host_weight_cache"]
     bindings: dict[str, TensorBinding]
     planned_source_prefixes: frozenset[str] = frozenset()
     runtime_layout_key: str | None = None
-    post_load_complete: bool = False
     expected_file_digests: dict[str, str] | None = None
+
+    @property
+    def requires_backend(self) -> bool:
+        """Whether ordinary loading was skipped and this plan must be consumed."""
+        return self.backing_kind == "checkpoint_mmap"
 
 
 @dataclass(frozen=True)

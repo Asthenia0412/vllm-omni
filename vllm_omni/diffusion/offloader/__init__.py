@@ -86,7 +86,7 @@ def get_offload_backend(
     # Extract and validate configuration
     config = OffloadConfig.from_od_config(od_config)
 
-    plan_requires_backend = host_weight_plan is not None and not host_weight_plan.post_load_complete
+    plan_requires_backend = host_weight_plan is not None and host_weight_plan.requires_backend
     if host_weight_plan is not None and config.strategy != OffloadStrategy.DISTRIBUTED_LAYER_WISE:
         if plan_requires_backend:
             raise RuntimeError(
