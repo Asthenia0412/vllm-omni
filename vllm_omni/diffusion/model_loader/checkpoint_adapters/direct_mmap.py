@@ -41,6 +41,8 @@ class _MiniMaxH3DirectMmapAdapter:
         target: torch.Tensor,
     ) -> DirectMmapTensorPolicy:
         del target
+        if getattr(self.pipeline, "_dlo_fp8_cache_normalized", False):
+            return DirectMmapTensorPolicy(allow_custom_loader=True)
         transform = None
         suffix = ".qkv_proj.weight"
         if runtime_name.endswith(suffix):

@@ -752,6 +752,10 @@ class OmniDiffusionConfig:
     dlo_use_allgather: bool = True
     # Leading main-DiT blocks kept resident by distributed layerwise offload.
     dlo_resident_layers: int = 0
+    # Optional Phase-I normalized online-FP8 cache. A cache miss builds the
+    # artifact after the ordinary online loader; a valid cache hit uses the
+    # serialized FP8 checkpoint-mmap path.
+    dlo_fp8_cache_dir: str | None = None
 
     pin_cpu_memory: bool = True  # Use pinned memory for faster transfers when offloading
 

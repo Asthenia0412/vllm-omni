@@ -1034,6 +1034,9 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
 
         logger.info("Realized %d loader-planned tensors as mmap views", len(loaded_names))
 
+        if getattr(pipeline, "_dlo_fp8_cache_normalized", False):
+            self._process_normalized_fp8_cache(pipeline)
+
         # Keep file handles open — _shard_and_pin will read from the mmap views.
         # They will be released after _shard_and_pin completes (when params are
         # replaced with offload placeholders).
@@ -1102,6 +1105,52 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
                 f"{len(remaining_meta)} DiT tensors on the meta device "
                 f"(first 5: {remaining_meta[:5]})."
             )
+
+    @staticmethod
+    def _process_normalized_fp8_cache(pipeline: nn.Module) -> None:
+        """Finalize serialized FP8 parameters after mmap replacement.
+
+        Phase-I cache files use the serialized FP8 checkpoint layout: the
+        weight is stored before the quantization method's final transpose, and
+        ``weight_scale`` is stored as an explicit cache tensor.  The ordinary
+        loader normally runs this method before DLO owns the plan; mmap loading
+        must run the same finalizer after replacing meta parameters.
+        """
+        from vllm.model_executor.layers.quantization.fp8 import Fp8LinearMethod
+        from vllm.model_executor.utils import replace_parameter
+
+        for module in pipeline.modules():
+            quant_method = getattr(module, "quant_method", None)
+            if not isinstance(quant_method, Fp8LinearMethod):
+                continue
+            if getattr(module, "_already_called_process_weights_after_loading", False):
+                continue
+
+            # ``Fp8LinearMethod.process_weights_after_loading`` also handles
+            # non-serialized checkpoints.  Its common path calls
+            # ``process_fp8_weight_tensor_strategy`` to requantize fused
+            # tensors, which is a CUDA-only operation.  A normalized cache
+            # already contains the serialized FP8 values and the generated
+            # scales, so only perform the layout transition and the kernel's
+            # own preprocessing here.  This keeps the warm path CPU/mmap
+            # compatible and preserves the cache bytes exactly.
+            if quant_method.block_quant:
+                raise ValueError("Phase-I normalized FP8 cache does not support block-quantized weights")
+            replace_parameter(module, "weight", module.weight.t().data)
+            # The online quantizer records one scalar.  A serialized FP8
+            # checkpoint may expose one repeated slot per logical shard in a
+            # fused module, but those slots must agree before they can be
+            # collapsed to the canonical per-tensor ``[1, 1]`` form.
+            weight_scale = module.weight_scale.reshape(-1)
+            if weight_scale.numel() > 1 and not torch.all(weight_scale == weight_scale[0]):
+                raise ValueError("Phase-I normalized FP8 cache contains non-uniform fused weight scales")
+            weight_scale = weight_scale[:1].reshape(1, 1)
+            replace_parameter(module, "weight_scale", weight_scale.data)
+            module.input_scale = None
+            if quant_method.use_marlin and hasattr(quant_method.fp8_linear, "marlin_input_dtype"):
+                quant_method.fp8_linear.marlin_input_dtype = quant_method.marlin_input_dtype
+            quant_method.fp8_linear.process_weights_after_loading(module)
+            module._already_called_process_weights_after_loading = True
 
     def _init_dp_group(self) -> None:
         """Reuse the process group initialized by parallel_state.

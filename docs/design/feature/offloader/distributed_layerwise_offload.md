@@ -105,6 +105,31 @@ flags such as `_supports_mmap_loading` or parameter attributes for mmap-only
 transforms. Model-specific direct-layout knowledge, when required, lives in a
 checkpoint adapter beside the ordinary loader.
 
+### Phase-I normalized online-FP8 cache
+
+The direct-checkpoint plan above cannot quantize a BF16 source online. Phase I
+adds an explicit, opt-in normalized cache for the narrower case of one TP1
+transformer with per-tensor online FP8 and DLO AllGather:
+
+```text
+cache miss:  BF16 source -> ordinary online FP8 loader -> atomic FP8 cache
+cache hit:   FP8 cache   -> direct mmap plan -> DLO host shard -> AllGather
+```
+
+The cache stores the serialized runtime representation, including finalized FP8
+weights, generated scales, and persistent transformer buffers. Its manifest
+records the schema, component, quantization contract, tensor count, source
+files, and a source fingerprint. A missing, stale, incomplete, incompatible, or
+invalid artifact is a cache miss; cache publication is best-effort and falls
+back to the ordinary loader on failure.
+
+Phase I keeps the cache binding deliberately simple: one source per transformer
+component, with existing per-tensor transforms applied before publication. The
+cache is not selected for DLO-disabled, no-AllGather, TP>1, or HSDP deployments,
+and it normalizes the transformer only. Cache sharing and compatibility for
+other components, transformed TP coordinates, and broader DP/SP layouts remain
+in [RFC #6231](https://github.com/vllm-project/vllm-omni/issues/6231).
+
 ### AllGather path
 
 With the default `dlo_use_allgather=True`, each rank stores approximately
@@ -211,10 +236,10 @@ reconstructs those tensors with their recorded layouts. Other online methods
 must use `--dlo-no-use-allgather` or disable online quantization until their
 runtime layouts are validated.
 
-A normalized runtime mmap cache, built through the ordinary loader, is the
-proposed general mechanism for sharing transformed TP or quantized layouts.
-That cache and its publication/lifecycle protocol are intentionally outside
-this phase; see [RFC #6195](https://github.com/vllm-project/vllm-omni/issues/6195).
+The Phase-I normalized online-FP8 cache is the supported TP1 transformer case.
+The general cache-compatibility contract for additional components, transformed
+TP coordinates, and cross-DP/SP reuse remains in
+[RFC #6231](https://github.com/vllm-project/vllm-omni/issues/6231).
 
 ## Validation coverage
 

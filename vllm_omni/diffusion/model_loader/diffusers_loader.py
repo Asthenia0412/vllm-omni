@@ -8,7 +8,7 @@ import re
 import time
 from collections.abc import Generator, Iterable, Sequence
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 import torch
 from torch import nn
@@ -33,6 +33,12 @@ from vllm_omni.diffusion.data import OmniDiffusionConfig
 from vllm_omni.diffusion.distributed.hsdp import HSDPInferenceConfig, apply_hsdp_to_model
 from vllm_omni.diffusion.model_loader.checkpoint_adapters import (
     get_checkpoint_adapter,
+)
+from vllm_omni.diffusion.model_loader.fp8_cache import (
+    _transformer_quant_config,
+    build_normalized_fp8_cache,
+    is_online_fp8_config,
+    load_fp8_cache_manifest,
 )
 from vllm_omni.diffusion.model_loader.host_weight_plan import (
     HostWeightPlan,
@@ -141,6 +147,10 @@ class DiffusersPipelineLoader:
         self.quant_config = od_config.quantization_config
         self.parallel_config = od_config.parallel_config
         self.host_weight_plan: HostWeightPlan | None = None
+        self._fp8_cache_dir: Path | None = None
+        self._fp8_cache_requested = False
+        self._fp8_cache_hit = False
+        self._fp8_cache_manifest: dict[str, Any] | None = None
 
     def take_host_weight_plan(self) -> HostWeightPlan | None:
         """Transfer the loader-produced plan to the offload backend."""
@@ -367,11 +377,60 @@ class DiffusersPipelineLoader:
         )
 
     def _get_weight_sources(self, model: nn.Module) -> tuple["ComponentSource", ...]:
-        return tuple(
+        sources = tuple(
             cast(
                 Iterable[DiffusersPipelineLoader.ComponentSource],
                 getattr(model, "weights_sources", ()),
             )
+        )
+        if not self._fp8_cache_hit or self._fp8_cache_dir is None or self._fp8_cache_manifest is None:
+            return sources
+
+        cache_prefix = str(self._fp8_cache_manifest["source_prefix"])
+        cache_subfolder = str(self._fp8_cache_manifest.get("component_subfolder", "transformer"))
+        return tuple(
+            dataclasses.replace(
+                source,
+                model_or_path=str(self._fp8_cache_dir),
+                subfolder=cache_subfolder,
+                revision=None,
+            )
+            if source.prefix == cache_prefix
+            else source
+            for source in sources
+        )
+
+    def _prepare_fp8_cache(self) -> None:
+        """Select the Phase-I cache path before constructing the pipeline."""
+        cache_dir = getattr(self.od_config, "dlo_fp8_cache_dir", None)
+        if not cache_dir or not is_online_fp8_config(self.quant_config):
+            return
+        if not getattr(self.od_config, "enable_distributed_layerwise_offload", False):
+            logger.warning("Ignoring --dlo-fp8-cache-dir because distributed layerwise offload is disabled")
+            return
+        if not getattr(self.od_config, "dlo_use_allgather", True):
+            logger.warning("Ignoring --dlo-fp8-cache-dir because DLO AllGather is disabled")
+            return
+        if int(getattr(self.parallel_config, "tensor_parallel_size", 1)) != 1:
+            logger.warning("Ignoring --dlo-fp8-cache-dir because Phase-I cache requires TP=1")
+            return
+        if bool(getattr(self.parallel_config, "use_hsdp", False)):
+            logger.warning("Ignoring --dlo-fp8-cache-dir because Phase-I cache does not support HSDP")
+            return
+
+        self._fp8_cache_dir = Path(cache_dir)
+        self._fp8_cache_requested = True
+        self._fp8_cache_manifest = load_fp8_cache_manifest(self._fp8_cache_dir)
+        if self._fp8_cache_manifest is None:
+            logger.info("DLO normalized FP8 cache miss: %s", self._fp8_cache_dir)
+            return
+
+        self._fp8_cache_hit = True
+        self.quant_config = _transformer_quant_config()
+        self.od_config.quantization_config = self.quant_config
+        logger.info(
+            "DLO normalized FP8 cache hit: %s; selecting serialized FP8 checkpoint path",
+            self._fp8_cache_dir,
         )
 
     def _get_expected_parameter_names(self, model: nn.Module) -> set[str]:
@@ -403,6 +462,7 @@ class DiffusersPipelineLoader:
         self.host_weight_plan = None
         if load_format is None:
             load_format = "default"
+        self._prepare_fp8_cache()
         # CPU offload + quantization: for offline-quantized models (e.g., AutoRound MXFP8),
         # weights are already quantized in the checkpoint — load directly on CPU.
         # For online quantization, load on device so quantization can run on accelerator,
@@ -413,7 +473,9 @@ class DiffusersPipelineLoader:
             is_offline = getattr(quant_cfg, "data_type", None) == "mx_fp" or getattr(
                 quant_cfg, "is_checkpoint_quantized", False
             )
-            if not is_offline:
+            if self._fp8_cache_hit:
+                logger.info("Normalized FP8 cache is already serialized; keeping model initialization on CPU")
+            elif not is_offline:
                 load_device = device.type
                 offload_after_quant = True
                 logger.info(
@@ -431,6 +493,11 @@ class DiffusersPipelineLoader:
                 )
             else:
                 model = self._init_from_load_format(load_format, target_device, custom_pipeline_name, is_hsdp=False)
+                if self._fp8_cache_hit:
+                    # The direct-mmap adapter must see this before plan
+                    # construction so normalized QKV tensors bypass the raw
+                    # checkpoint grouped-QKV transform.
+                    setattr(model, "_dlo_fp8_cache_normalized", True)
 
                 _dist_offload = getattr(self.od_config, "enable_distributed_layerwise_offload", False)
                 _use_ag = getattr(self.od_config, "dlo_use_allgather", True)
@@ -519,6 +586,20 @@ class DiffusersPipelineLoader:
             if offload_after_quant:
                 model.to("cpu")
                 logger.info("Quantization complete, offloaded model back to CPU")
+
+        if self._fp8_cache_requested and self._fp8_cache_dir is not None and not self._fp8_cache_hit:
+            try:
+                build_normalized_fp8_cache(
+                    model,
+                    sources=self._get_weight_sources(model),
+                    cache_dir=self._fp8_cache_dir,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "DLO normalized FP8 cache build failed; retaining ordinary-loader path: %s",
+                    exc,
+                    exc_info=True,
+                )
 
         self._apply_skip_softmax_calibration(model)
         return model.eval()

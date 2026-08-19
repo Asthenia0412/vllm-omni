@@ -729,6 +729,14 @@ class OmniServeCommand(CLISubcommand):
             help="Keep this many leading main-DiT blocks resident on the device "
             "while distributed layerwise offload streams the remaining blocks.",
         )
+        omni_config_group.add_argument(
+            "--dlo-fp8-cache-dir",
+            type=str,
+            default=None,
+            help="Optional Phase-I normalized online-FP8 cache directory. "
+            "A cache miss builds the cache after the ordinary loader; a valid "
+            "cache hit uses serialized FP8 checkpoint mmap with DLO.",
+        )
         # Video model parameters (e.g., Wan2.2) - engine-level
         omni_config_group.add_argument(
             "--boundary-ratio",

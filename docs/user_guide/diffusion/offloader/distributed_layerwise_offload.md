@@ -42,6 +42,12 @@ vllm serve /path/to/model --omni \
 vllm serve /path/to/model --omni \
   --enable-distributed-layerwise-offload \
   --usp 4
+
+# Opt-in normalized online-FP8 cache (TP1 + DLO AllGather)
+vllm serve /path/to/model --omni \
+  --quantization fp8 \
+  --enable-distributed-layerwise-offload \
+  --dlo-fp8-cache-dir /path/to/node-local/fp8-cache
 ```
 
 ```python
@@ -63,6 +69,7 @@ omni = Omni(
 | `--dlo-use-allgather` | Shard host weights and reconstruct with AllGather | `true` |
 | `--dlo-no-use-allgather` | Stream complete rank-local blocks without a DLO weight collective | `false` |
 | `--dlo-resident-layers N` | Keep N leading main-DiT blocks on device; requires no-AllGather and model-declared resident paths | `0` |
+| `--dlo-fp8-cache-dir PATH` | Opt into the Phase-I normalized online-FP8 cache for the transformer | unset |
 
 ## Host-weight loading
 
@@ -103,6 +110,24 @@ process.
 
 When the effective DLO group size is one, `dlo_use_allgather=True` does not
 perform a collective and uses the same rank-local transfer behavior.
+
+## Normalized online-FP8 cache
+
+`--dlo-fp8-cache-dir` is an opt-in Phase-I cache for per-tensor online FP8 with
+TP1 and DLO AllGather. On a cache miss, the ordinary loader quantizes the
+transformer once and publishes finalized FP8 weights and scales as an atomic,
+serialized safetensors artifact. On a valid cache hit, the loader selects that
+serialized source before DLO planning, so the transformer can be loaded through
+the direct checkpoint-mmap path without re-materializing the full BF16 source.
+
+The cache is keyed to the source files through the manifest's schema, component,
+quantization contract, and source fingerprint. Incomplete, incompatible, or
+stale artifacts are treated as cache misses. Cache creation is best-effort: a
+publication failure logs a warning and keeps the ordinary online-FP8 path.
+
+Phase I normalizes the transformer only. Other pipeline components keep their
+ordinary loading and quantization behavior. The cache is not selected when DLO
+is disabled, AllGather is disabled, TP is greater than one, or HSDP is enabled.
 
 ## Declarative topology
 
@@ -147,10 +172,9 @@ must enter each collective.
   `OffloadPlan` that declares eligible `resident_dit_paths`.
 - DP concurrency requires an explicit, identical inference-step count.
 
-Sharing transformed TP or quantized runtime layouts through a normalized mmap
-cache is a follow-up design in
-[RFC #6195](https://github.com/vllm-project/vllm-omni/issues/6195), not part of
-the direct-checkpoint path.
+Sharing transformed TP or quantized runtime layouts beyond this TP1 transformer
+cache remains a follow-up design in
+[RFC #6231](https://github.com/vllm-project/vllm-omni/issues/6231).
 
 See the [Cosmos3 DistOffload recipe](https://github.com/vllm-project/vllm-omni/blob/main/recipes/cosmos3/Cosmos3-DistOffload.md)
 for an end-to-end example.

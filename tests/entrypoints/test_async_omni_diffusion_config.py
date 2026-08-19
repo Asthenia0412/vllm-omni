@@ -347,6 +347,8 @@ def test_serve_cli_forwards_distributed_offload_residency():
             "--dlo-no-use-allgather",
             "--dlo-resident-layers",
             "20",
+            "--dlo-fp8-cache-dir",
+            "/tmp/dlo-fp8-cache",
         ]
     )
 
@@ -357,9 +359,11 @@ def test_serve_cli_forwards_distributed_offload_residency():
     assert args.enable_distributed_layerwise_offload is True
     assert args.dlo_use_allgather is False
     assert args.dlo_resident_layers == 20
+    assert args.dlo_fp8_cache_dir == "/tmp/dlo-fp8-cache"
     assert engine_args["enable_distributed_layerwise_offload"] is True
     assert engine_args["dlo_use_allgather"] is False
     assert engine_args["dlo_resident_layers"] == 20
+    assert engine_args["dlo_fp8_cache_dir"] == "/tmp/dlo-fp8-cache"
 
 
 def test_serve_cli_accepts_diffusion_compile_controls():
