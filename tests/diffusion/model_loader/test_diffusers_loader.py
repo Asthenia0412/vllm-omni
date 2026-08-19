@@ -498,7 +498,8 @@ def test_dlo_host_weight_cache_is_built_after_final_post_load_mutation(monkeypat
     assert loader.take_host_weight_plan() is runtime_plan
 
 
-def test_dlo_registration_prefers_final_host_weight_cache_over_checkpoint_plan(monkeypatch, tmp_path):
+@pytest.mark.parametrize("pin_cpu_memory", [True, False])
+def test_dlo_host_weight_cache_prefers_final_layout_over_checkpoint_plan(monkeypatch, tmp_path, pin_cpu_memory):
     import vllm_omni.diffusion.model_loader.diffusers_loader as loader_mod
     import vllm_omni.diffusion.model_loader.host_weight_cache as cache_mod
 
@@ -515,8 +516,10 @@ def test_dlo_registration_prefers_final_host_weight_cache_over_checkpoint_plan(m
         quantization_config=None,
         enable_distributed_layerwise_offload=True,
         dlo_use_allgather=False,
+        dlo_use_host_weight_cache=True,
+        pin_cpu_memory=pin_cpu_memory,
         dlo_host_weight_cache_dir=str(tmp_path),
-        dlo_host_weight_cache_pin_limit_gib=1.0,
+        dlo_host_weight_cache_pin_limit_gib=0.0,
         model="unused",
     )
     loader = DiffusersPipelineLoader(LoadConfig(), od_config)
@@ -536,7 +539,7 @@ def test_dlo_registration_prefers_final_host_weight_cache_over_checkpoint_plan(m
     loader._apply_skip_softmax_calibration = lambda _model: None  # type: ignore[method-assign]
 
     def unexpected_checkpoint_plan(*_args, **_kwargs):
-        pytest.fail("registered host weight cache mode must not select the raw checkpoint mmap plan")
+        pytest.fail("selected host weight cache mode must not select the raw checkpoint mmap plan")
 
     def build_cache(_pipeline, **_kwargs):
         events.append("cache")

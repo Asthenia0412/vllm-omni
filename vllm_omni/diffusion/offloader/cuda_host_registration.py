@@ -182,13 +182,11 @@ class CudaHostRegistration:
         cls,
         sources_by_mapping: Mapping[str, Sequence[torch.Tensor]],
         *,
-        max_bytes: int,
+        max_bytes: int | None,
     ) -> CudaHostRegistration:
-        if max_bytes <= 0:
-            raise HostRegistrationBudgetError("CUDA host-registration budget is disabled")
         regions = _tensor_regions(sources_by_mapping)
         total_bytes = sum(region.size for region in regions)
-        if total_bytes > max_bytes:
+        if max_bytes is not None and total_bytes > max_bytes:
             raise HostRegistrationBudgetError(
                 f"mapped host ranges need {total_bytes} bytes, exceeding the {max_bytes}-byte registration budget"
             )

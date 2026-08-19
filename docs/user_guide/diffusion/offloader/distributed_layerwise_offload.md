@@ -38,17 +38,18 @@ vllm serve /path/to/model --omni \
   --enable-distributed-layerwise-offload \
   --dlo-no-use-allgather
 
-# Share final host weights with bounded pinned staging
+# Share final host weights; prefer registered direct H2D under the pinned-memory policy
 vllm serve /path/to/model --omni \
   --enable-distributed-layerwise-offload \
   --dlo-no-use-allgather \
   --dlo-use-host-weight-cache
 
-# Share final host weights and register up to 80 GiB per worker for direct H2D
+# Apply an 80 GiB per-worker safety ceiling to the same registration attempt
 vllm serve /path/to/model --omni \
   --enable-distributed-layerwise-offload \
   --tensor-parallel-size 2 \
   --dlo-no-use-allgather \
+  --dlo-use-host-weight-cache \
   --dlo-host-weight-cache-pin-limit-gib 80
 ```
 
@@ -58,15 +59,18 @@ vllm serve /path/to/model --omni \
 | --- | --- | --- |
 | `--enable-distributed-layerwise-offload` | Enable DLO | `false` |
 | `--dlo-no-use-allgather` | Stream complete rank-local blocks independently | `false` |
-| `--dlo-use-host-weight-cache` | Use the final-layout cache after checkpoint mmap fallback | `false` |
-| `--dlo-host-weight-cache-pin-limit-gib GIB` | Per-worker registration budget; positive values also select the cache | `0` |
+| `--dlo-use-host-weight-cache` | Use the final-layout cache and prefer registration when pinned memory is enabled | `false` |
+| `--dlo-host-weight-cache-pin-limit-gib GIB` | Optional per-worker registration ceiling; zero means no additional ceiling | `0` |
 | `--dlo-resident-layers N` | Keep eligible leading DiT blocks resident in HBM | `0` |
 
 No-AllGather DLO automatically uses a compatible checkpoint mmap plan. When
 checkpoint mmap is unavailable, it preserves ordinary pinned loader weights by
-default. `--dlo-use-host-weight-cache` explicitly selects the final-layout
-cache with bounded staging; a positive registration budget also selects the
-cache and attempts direct H2D. The cache uses
+default. `--dlo-use-host-weight-cache` explicitly selects the transform-complete
+final-layout cache. Under the default `pin_cpu_memory=True` policy, DLO attempts
+to register the complete immutable mapping for direct H2D. Setting
+`pin_cpu_memory=False` through structured or programmatic configuration retains
+the staged mmap path instead. A positive pin limit is only an optional safety
+ceiling and does not select the cache. The cache uses
 `~/.cache/vllm-omni/dlo-host-weights`. Programmatic configuration may override
 `dlo_host_weight_cache_dir` and the writer lock timeout; these advanced storage
 controls are intentionally not separate CLI flags.
@@ -77,15 +81,16 @@ controls are intentionally not separate CLI flags.
   directory. Do not use tmpfs or a cross-node filesystem for this version.
 - Cache entries are immutable and validated before use. A cache or registration
   failure keeps the ordinary loader weights or falls back to bounded staging.
-- The bounded-staging cache is a memory-first mode: recurrent pageable-mmap to
+- The bounded-staging fallback is a memory-first mode: recurrent pageable-mmap to
   pinned-slot copies can reduce throughput, especially across concurrent TP
-  engines. Keep ordinary pinned weights unless the host-memory saving is worth
-  that tradeoff, or use a validated registered path.
-- A positive registration budget must cover the complete page-aligned mapping
-  reported in the worker log. Registration is all-or-nothing.
+  engines. Use it intentionally by disabling pinned host memory, or when the
+  active platform cannot register the immutable mapping.
+- When a positive registration ceiling is configured, it must cover the
+  complete page-aligned mapping reported in the worker log. Registration is
+  all-or-nothing. Zero applies no additional ceiling.
 - CUDA is the first registration backend and requires read-only host
   registration support for immutable cache mappings. Platforms or devices
-  without that capability continue to use bounded staging; a positive budget
+  without that capability continue to use bounded staging; pinned-memory policy
   requests direct H2D but does not guarantee it.
 - Registration is process-local but does not duplicate the underlying file
   pages. Each worker must still satisfy its platform and OS page-locking limits.

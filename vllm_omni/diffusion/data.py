@@ -708,16 +708,15 @@ class OmniDiffusionConfig:
     # This avoids AllGather synchronization, while host memory follows the
     # loader's existing rank-local layout instead of adding a second DP shard.
     dlo_use_allgather: bool = True
-    # Opt into publishing/joining the final-layout host weight cache when a
-    # compatible direct-checkpoint mmap plan is unavailable. A positive pin
-    # limit also selects the cache because registration requires its layout.
+    # Opt into publishing/joining the transform-complete final-layout host
+    # weight cache instead of direct-checkpoint mmap.
     dlo_use_host_weight_cache: bool = False
     # Shared local-disk root. None selects ~/.cache/vllm-omni/dlo-host-weights.
     dlo_host_weight_cache_dir: str | None = None
     # Maximum wait for the per-layout POSIX writer lock.
     dlo_host_weight_cache_lock_timeout: float = 600.0
-    # Maximum file-backed memory a worker may register with CUDA. Zero keeps
-    # the bounded mmap-to-pinned staging path.
+    # Optional maximum file-backed memory a worker may register with CUDA.
+    # Zero applies no additional ceiling; pin_cpu_memory controls registration.
     dlo_host_weight_cache_pin_limit_gib: float = 0.0
     # Leading main-DiT blocks kept resident by distributed layerwise offload.
     dlo_resident_layers: int = 0
@@ -957,6 +956,8 @@ class OmniDiffusionConfig:
             raise ValueError("dlo_host_weight_cache_pin_limit_gib requires no-AllGather distributed layerwise offload")
         if self.dlo_use_host_weight_cache and (not self.enable_distributed_layerwise_offload or self.dlo_use_allgather):
             raise ValueError("dlo_use_host_weight_cache requires no-AllGather distributed layerwise offload")
+        if self.dlo_host_weight_cache_pin_limit_gib and not self.dlo_use_host_weight_cache:
+            raise ValueError("dlo_host_weight_cache_pin_limit_gib requires dlo_use_host_weight_cache=True")
         if self.diffusion_compile_granularity not in {"regional", "full"}:
             raise ValueError(
                 "diffusion_compile_granularity must be 'regional' or 'full', "

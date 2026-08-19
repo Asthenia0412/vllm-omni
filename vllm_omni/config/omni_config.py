@@ -765,6 +765,8 @@ class _DiffusionConfigProjection:
             raise ValueError("dlo_host_weight_cache_pin_limit_gib requires no-AllGather distributed layerwise offload")
         if self.dlo_use_host_weight_cache and (not self.enable_distributed_layerwise_offload or self.dlo_use_allgather):
             raise ValueError("dlo_use_host_weight_cache requires no-AllGather distributed layerwise offload")
+        if self.dlo_host_weight_cache_pin_limit_gib and not self.dlo_use_host_weight_cache:
+            raise ValueError("dlo_host_weight_cache_pin_limit_gib requires dlo_use_host_weight_cache=True")
 
         if self.tf_model_config is None:
             self.tf_model_config = TransformerConfig()

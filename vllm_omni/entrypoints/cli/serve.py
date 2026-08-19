@@ -726,8 +726,9 @@ class OmniServeCommand(CLISubcommand):
             "--dlo-use-host-weight-cache",
             action="store_true",
             help=(
-                "Use the node-local final-layout host weight cache when direct checkpoint mmap is unavailable. "
-                "This trades recurrent host staging work for shared host pages unless direct registration succeeds."
+                "Use the node-local final-layout host weight cache for no-AllGather DLO. "
+                "With the default pinned-memory policy, supported platforms register the immutable mapping "
+                "for direct H2D; otherwise DLO uses bounded host staging."
             ),
         )
         omni_config_group.add_argument(
@@ -735,9 +736,9 @@ class OmniServeCommand(CLISubcommand):
             type=float,
             default=0.0,
             help=(
-                "Maximum GiB of read-only host weight cache mappings each worker may "
-                "register for direct H2D when the platform supports it. Zero keeps "
-                "bounded pinned staging."
+                "Optional maximum GiB of read-only host weight cache mappings each worker may "
+                "register for direct H2D. Zero applies no additional registration ceiling; "
+                "this option requires --dlo-use-host-weight-cache."
             ),
         )
         omni_config_group.add_argument(

@@ -31,8 +31,8 @@ class OffloadConfig:
     # blocks from the loader-selected host backing with H2D only.
     dlo_use_allgather: bool = True
     dlo_resident_layers: int = 0  # leading DiT layers kept on device
-    # Per-worker budget for registering shared host weight cache mappings with CUDA.
-    # Zero retains bounded host staging.
+    # Optional per-worker ceiling for registering shared host weight cache mappings.
+    # Zero applies no additional ceiling; pin_cpu_memory controls registration.
     dlo_host_weight_cache_pin_limit_gib: float = 0.0
 
     @classmethod

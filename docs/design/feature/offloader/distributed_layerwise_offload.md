@@ -46,13 +46,14 @@ produce a direct-checkpoint mmap plan for a proven-compatible runtime layout;
 otherwise it uses the ordinary loader. In no-AllGather mode, the Phase B host
 weight cache can explicitly normalize supported final ordinary-loader DiT
 tensors into an immutable node-local mmap entry. Ordinary pinned weights remain
-the default after checkpoint mmap fallback because bounded cache staging can
-reduce throughput. Replicas can share either proven-compatible checkpoint pages
-or, when selected, equivalent final runtime layouts. An opt-in
-host-registration budget can make the complete final mapping
-directly H2D-copyable when the platform provides a backend, avoiding the
-recurrent host packing otherwise required by mmap. CUDA is the first
-implementation.
+the default after checkpoint mmap fallback when the cache is not selected; cache
+publication and validation add startup and disk lifecycle costs. Replicas can
+share either proven-compatible checkpoint pages or, when selected, equivalent
+final runtime layouts. Under the existing
+pinned-memory policy, the backend attempts to make the complete final mapping
+directly H2D-copyable when the platform provides registration, avoiding the
+recurrent host packing otherwise required by mmap. An optional positive limit
+adds a per-worker safety ceiling. CUDA is the first implementation.
 
 The Phase A shared-mmap support boundary is TP1. TP greater than one is an
 ordinary-loader compatibility path: DLO can consume the resulting TP-local
@@ -107,7 +108,7 @@ flowchart TB
     Discovery["ModuleDiscovery + optional OffloadPlan"] --> Backend
     Contract -.->|"passed once by the runner"| Backend
 
-    Backend -.->|"host weight cache + positive budget"| Registration["host_registration<br/>platform-neutral lifecycle"]
+    Backend -.->|"host weight cache + pinned-memory policy"| Registration["host_registration<br/>platform-neutral lifecycle"]
     Registration --> CUDA["CUDA registration backend"]
     Backend --> Hooks["DistributedLayerwiseOffloadHook<br/>one circular hook per streamed block"]
     Forward["pipeline.forward"] --> Hooks
@@ -119,7 +120,7 @@ flowchart TB
 | Component | Owns | Must not own |
 | --- | --- | --- |
 | CLI, engine arguments, and `OmniDiffusionConfig` | User policy, defaults, validation, and propagation to every worker | Checkpoint inspection, cache publication, or buffer allocation |
-| `OffloadConfig.from_od_config()` | Offload-strategy selection, effective DLO group size, AllGather policy, resident-layer count, and registration budget | Host-weight compatibility decisions |
+| `OffloadConfig.from_od_config()` | Offload-strategy selection, effective DLO group size, AllGather policy, resident-layer count, pinned-memory policy, and optional registration ceiling | Host-weight compatibility decisions |
 | `DiffusersPipelineLoader` | Ordinary loading lifecycle and the decision to return an optional `HostWeightPlan` | DLO process groups or block-stream scheduling |
 | Checkpoint mmap planner | Proving that checkpoint tensors can represent the required runtime layout before ordinary DiT materialization is skipped | Host weight cache identity or transfer policy |
 | `host_weight_cache` | Normalizing final ordinary-loader tensors into an immutable node-local entry and returning a validated plan | Model mutation, host registration, H2D, or collectives |
@@ -133,11 +134,14 @@ flowchart TB
 The configuration fields are routed to the component that can enforce their
 contract. The cache root and lock timeout are consumed by the loader.
 `dlo_use_host_weight_cache` explicitly selects final-layout cache publication
-after direct-checkpoint mmap fallback. It defaults to false so the ordinary
+instead of direct-checkpoint mmap. It defaults to false so the ordinary
 pinned-loader path remains available without requiring an opt-out.
-`dlo_host_weight_cache_pin_limit_gib` is also visible while loading because a
-positive value also deliberately selects the transform-complete host weight
-cache; the backend later consumes the same budget for registration.
+With `pin_cpu_memory=True`, selecting the host weight cache deliberately chooses
+the transform-complete layout even when direct checkpoint mmap is available,
+because only that final layout can be registered without deferred transforms.
+The backend consumes `dlo_host_weight_cache_pin_limit_gib` as an optional
+registration ceiling; zero applies no additional ceiling and does not select
+the cache by itself.
 `dlo_use_allgather` controls loader plan routing because the host weight cache
 is no-AllGather-only, and it selects the backend transfer protocol. This is
 coordination through typed configuration and `HostWeightPlan`, not through
@@ -246,19 +250,22 @@ sequenceDiagram
     participant P as platform registration
     participant H as block hooks
 
-    L->>L: checkpoint mmap preflight
-    alt loader selects a compatible checkpoint plan
-        L-->>B: checkpoint plan via runner
-    else ordinary loading
+    alt host weight cache explicitly selected
         L->>L: load, mutate, validate, and calibrate final tensors
-        opt host weight cache enabled
-            L->>C: publish or join final-layout entry
-            C-->>L: validated host weight cache plan or fail-closed fallback
+        L->>C: publish or join final-layout entry
+        C-->>L: validated host weight cache plan or fail-closed fallback
+        L-->>B: cache plan or materialized fallback via runner
+    else automatic checkpoint selection
+        L->>L: checkpoint mmap preflight
+        alt loader selects a compatible checkpoint plan
+            L-->>B: checkpoint plan via runner
+        else ordinary loading
+            L->>L: load, mutate, validate, and calibrate final tensors
+            L-->>B: materialized tensors via runner
         end
-        L-->>B: plan or materialized tensors via runner
     end
     B->>B: consume complete rank-local block sources
-    opt host weight cache plan and positive registration budget
+    opt host weight cache plan and pinned-memory policy
         B->>P: register the complete immutable mapping
         P-->>B: direct-H2D source or bounded-staging fallback
     end
@@ -267,7 +274,7 @@ sequenceDiagram
         alt registered host weight cache mapping
             H->>H: copy complete next block directly to device
         else pageable mmap mapping
-            H->>H: pack into a pinned staging slot, then copy to device
+            H->>H: pack into a bounded staging slot, then copy to device
         else ordinary runtime tensors
             H->>H: copy complete next block to device
         end
@@ -287,8 +294,8 @@ the source of the complete-block H2D copy.
 | Ordinary runtime tensors | AllGather group larger than one | Each rank retains a pinned local weight shard | shard H2D → DLO AllGather → device slot |
 | Checkpoint mmap | AllGather group larger than one | Each rank prepares its persistent shard, then releases the source mapping | shard H2D → DLO AllGather → device slot |
 | Ordinary runtime tensors | Rank-local / no-AllGather | Each rank retains the complete loader-produced local layout | complete-block H2D → device slot |
-| Checkpoint or host weight cache mmap, zero registration budget | Rank-local / no-AllGather | Immutable mapping plus two bounded pinned host-staging slots | mmap views → pinned staging slot → device slot |
-| Host weight cache mmap, positive registration budget | Rank-local / no-AllGather | Complete mapping is registered by the platform backend | registered mmap views → device slot |
+| Checkpoint mmap, or host weight cache with pinned memory disabled/registration unavailable | Rank-local / no-AllGather | Immutable mapping plus two bounded host-staging slots | mmap views → staging slot → device slot |
+| Host weight cache mmap with pinned memory enabled and registration available | Rank-local / no-AllGather | Complete mapping is registered by the platform backend | registered mmap views → device slot |
 
 The three axes therefore remain independent:
 
@@ -453,14 +460,15 @@ the persistent private full-model copy per pure-DP process, but each process
 still packs and transfers every complete block. Sharing is node-local; each
 node has its own page cache.
 
-For a host weight cache mapping, a positive registration budget replaces those
-host slots with direct copies from the shared final tensor views. A zero budget
-or failed registration retains the bounded staging behavior.
+For a host weight cache mapping, the default pinned-memory policy attempts to
+replace those host slots with direct copies from the shared final tensor views.
+Disabling pinned memory or a failed registration retains staging behavior.
 
-When direct mmap preflight fails, the regular model loader remains responsible
-for preparing each rank's weights, including TP-local tensors or HSDP-managed
-parameters. Those ordinary pinned tensors remain the default. When the host
-weight cache or a positive registration budget is explicitly selected,
+When direct mmap preflight fails or the host weight cache is selected, the
+regular model loader remains responsible for preparing each rank's weights,
+including TP-local tensors or HSDP-managed parameters. Ordinary pinned tensors
+remain the default without cache selection. When the host weight cache is
+explicitly selected,
 supported CPU layouts enter the cache; unsupported layouts keep one private
 runtime copy per process.
 
@@ -512,13 +520,13 @@ error retains the already-valid ordinary tensors.
 DLO maps this plan without moving the DiT to `meta` and without rerunning any
 post-load hook. It changes tensor storage while preserving `Parameter` objects,
 then runs the existing `gc.collect()`/`malloc_trim()` cleanup before installing
-streaming hooks. The source mappings remain open through DLO disable. With the
-default zero registration budget they feed the existing bounded two-slot host
-staging path. Every streamed block is first packed from pageable mmap storage
-into one of those pinned slots and is then copied to the device. This removes
-model-sized private pinned storage, but adds a recurrent host-to-host copy and
-can amplify TP synchronization waits when several ranks compete for host
-bandwidth.
+streaming hooks. The source mappings remain open through DLO disable. With
+pinned memory disabled, or when registration is unavailable, they feed the
+existing bounded two-slot host-staging path. Every streamed block is first
+packed from pageable mmap storage into a staging slot and is then copied to the
+device. This removes model-sized private pinned storage, but adds a recurrent
+host-to-host copy and can amplify TP synchronization waits when several ranks
+compete for host bandwidth.
 
 This version is deliberately steady-state-oriented. It requires roughly one
 local-disk model copy per runtime identity, has no eviction, and still performs
@@ -529,19 +537,20 @@ modeled safely.
 
 ### Registered host weight cache transfer
 
-`dlo_host_weight_cache_pin_limit_gib > 0` opts a worker into registration of
-the complete host weight cache mapping when its platform supports it. It also
-changes loader selection: no-AllGather uses the ordinary loader and
-final-layout host weight cache even when a TP1 direct-checkpoint plan is
-available. A checkpoint binding can carry a deferred adapter such as
+Selecting the host weight cache with `pin_cpu_memory=True` opts a worker into
+registration of the complete mapping when its platform supports it. It also
+changes loader selection: no-AllGather uses the ordinary loader and final-layout
+host weight cache even when a TP1 direct-checkpoint plan is available. A
+checkpoint binding can carry a deferred adapter such as
 grouped-QKV reordering. Registering that raw source would not remove the
 adapter's recurrent CPU allocation/copy, whereas the host weight cache contains
 the transform-complete final tensors.
 
 After mapping and validating every final tensor, DLO groups source storages by
 backing file, page-aligns their address ranges, and coalesces overlapping or
-adjacent ranges within that mapping. The complete byte count is checked
-against the per-worker budget before any platform mutation. The CUDA backend
+adjacent ranges within that mapping. When a positive per-worker ceiling is
+configured, the complete byte count is checked against it before any platform
+mutation. The CUDA backend
 first requires `cudaDevAttrHostRegisterReadOnlySupported`, then registers every
 range with the read-only host-registration flag and verifies that PyTorch
 recognizes every mapped tensor as pinned. A device without that capability
@@ -642,10 +651,10 @@ artifacts before making hardware or performance claims. Track that work in
   direct-mmap deployments can share checkpoint pages per node. Enable the
   host weight cache only when independent replicas have repeated final layouts
   and benchmark the target CPU/memory topology, especially for matching
-  coordinates across multiple TP engines. On CUDA, provide an explicit
-  registration budget large enough for the complete final layout when
-  recurrent staging cost is unacceptable; leave it at zero when page-locking
-  that layout is not operationally acceptable.
+  coordinates across multiple TP engines. With the default pinned-memory
+  policy, supported CUDA workers prefer registered direct H2D. Configure a
+  positive ceiling when an explicit page-locking bound is required, or disable
+  pinned memory when pageable staging is operationally preferable.
 
 ### HSDP
 

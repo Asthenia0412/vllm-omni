@@ -119,6 +119,20 @@ def test_platform_factory_dispatches_cuda(monkeypatch: pytest.MonkeyPatch) -> No
     assert register_host_mappings(sources, device=torch.device("cuda"), max_bytes=4096) is sentinel
 
 
+def test_platform_factory_allows_registration_without_additional_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    sentinel = object()
+    sources = {"weights": []}
+
+    def create(actual_sources, *, max_bytes):
+        assert actual_sources is sources
+        assert max_bytes is None
+        return sentinel
+
+    monkeypatch.setattr(CudaHostRegistration, "create", staticmethod(create))
+
+    assert register_host_mappings(sources, device=torch.device("cuda"), max_bytes=None) is sentinel
+
+
 def test_coalesce_ranges_aligns_and_merges_overlapping_pages() -> None:
     assert _coalesce_ranges(
         [(0x1003, 4096), (0x2800, 1024), (0x9001, 1)],
@@ -141,6 +155,21 @@ def test_registration_rejects_over_budget_before_calling_cuda(monkeypatch: pytes
         )
 
     assert runtime.registered == []
+
+
+def test_registration_without_additional_budget_registers_complete_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(registration_module.torch.cuda, "is_available", lambda: True)
+    runtime = _FakeRuntime([0])
+    monkeypatch.setattr(registration_module.torch.cuda, "cudart", lambda: runtime)
+
+    registration = CudaHostRegistration.create(
+        {"weights": [_FakeTensor(0x1003, 4096)]},  # type: ignore[list-item]
+        max_bytes=None,
+    )
+
+    assert registration.total_bytes == 8192
+    assert len(runtime.registered) == 1
+    assert registration.close() == []
 
 
 def test_registration_rejects_unsupported_read_only_mapping(monkeypatch: pytest.MonkeyPatch) -> None:

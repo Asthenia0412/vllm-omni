@@ -1207,6 +1207,68 @@ class TestMmapWeightLoading:
 
         assert events == ["unregister", "mmap"]
 
+    def test_host_weight_cache_registration_defaults_to_pinned_memory_policy(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        patched_offload_runtime,
+    ):
+        class Registration:
+            total_bytes = 4096
+            region_count = 1
+
+            @staticmethod
+            def close() -> list[str]:
+                return []
+
+        registration = Registration()
+        create_calls: list[tuple[dict[str, list[torch.Tensor]], int | None]] = []
+
+        def register(sources, *, device, max_bytes):
+            assert device == torch.device("cuda")
+            create_calls.append((sources, max_bytes))
+            return registration
+
+        monkeypatch.setattr(dist_backend_module, "register_host_mappings", register)
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=True,
+                dlo_use_allgather=False,
+                dlo_host_weight_cache_pin_limit_gib=0.0,
+            ),
+            torch.device("cuda"),
+        )
+        sources = {"runtime.safetensors": [torch.ones(1)]}
+        backend._host_weight_cache_mapped_sources = sources
+
+        assert backend._try_register_host_weight_cache_mmap()
+        assert create_calls == [(sources, None)]
+        assert backend._host_registration is registration
+
+    def test_host_weight_cache_registration_respects_disabled_pinned_memory(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        patched_offload_runtime,
+    ):
+        monkeypatch.setattr(
+            dist_backend_module,
+            "register_host_mappings",
+            lambda *_args, **_kwargs: pytest.fail("registration must follow pin_cpu_memory=False"),
+        )
+        backend = DistributedLayerwiseOffloadBackend(
+            OffloadConfig(
+                strategy=OffloadStrategy.DISTRIBUTED_LAYER_WISE,
+                pin_cpu_memory=False,
+                dlo_use_allgather=False,
+                dlo_host_weight_cache_pin_limit_gib=0.0,
+            ),
+            torch.device("cuda"),
+        )
+        backend._host_weight_cache_mapped_sources = {"runtime.safetensors": [torch.ones(1)]}
+
+        assert not backend._try_register_host_weight_cache_mmap()
+        assert backend._host_registration is None
+
     def test_host_weight_cache_registration_falls_back_on_unsupported_platform(
         self,
         patched_offload_runtime,

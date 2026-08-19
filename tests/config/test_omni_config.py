@@ -933,6 +933,15 @@ def test_structured_diffusion_config_restricts_host_weight_cache_to_no_allgather
         )
 
 
+def test_structured_diffusion_config_requires_cache_for_registration_ceiling():
+    with pytest.raises(ValueError, match="requires dlo_use_host_weight_cache=True"):
+        omni_config_module._DiffusionConfigProjection(
+            enable_distributed_layerwise_offload=True,
+            dlo_use_allgather=False,
+            dlo_host_weight_cache_pin_limit_gib=1.0,
+        )
+
+
 @pytest.mark.parametrize(
     "field_name",
     [

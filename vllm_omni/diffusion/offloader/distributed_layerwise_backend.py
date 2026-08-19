@@ -1269,20 +1269,16 @@ class DistributedLayerwiseOffloadBackend(OffloadBackend):
         )
 
     def _try_register_host_weight_cache_mmap(self) -> bool:
-        """Register complete cache mappings when the operator budget permits."""
+        """Register complete cache mappings under the pinned-memory policy."""
         pin_limit_gib = self.config.dlo_host_weight_cache_pin_limit_gib
-        if pin_limit_gib <= 0:
-            return False
         if not self.config.pin_cpu_memory:
-            logger.warning(
-                "DLO host weight cache registration requires pin_cpu_memory=True; using bounded host staging"
-            )
+            logger.info("DLO host weight cache registration disabled by pin_cpu_memory=False; using host staging")
             return False
         if not self._host_weight_cache_mapped_sources:
             logger.warning("DLO host weight cache registration found no mapped sources; using bounded host staging")
             return False
 
-        max_bytes = int(pin_limit_gib * 1024**3)
+        max_bytes = int(pin_limit_gib * 1024**3) if pin_limit_gib > 0 else None
         started = time.perf_counter()
         try:
             registration = register_host_mappings(

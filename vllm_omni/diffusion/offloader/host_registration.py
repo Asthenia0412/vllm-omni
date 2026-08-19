@@ -38,12 +38,13 @@ def register_host_mappings(
     sources_by_mapping: Mapping[str, Sequence[torch.Tensor]],
     *,
     device: torch.device,
-    max_bytes: int,
+    max_bytes: int | None,
 ) -> HostRegistration:
     """Register mappings with the active platform or report unsupported use.
 
     CUDA is the first implementation. Other platforms retain DLO's bounded
     host-staging path until they provide an equivalent registration backend.
+    ``max_bytes=None`` applies no additional ceiling to the complete mapping.
     """
     if device.type == "cuda":
         from .cuda_host_registration import CudaHostRegistration
