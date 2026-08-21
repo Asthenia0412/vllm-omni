@@ -150,11 +150,10 @@ only after the canonical loader has established the current model.
 Post-load publication is synchronous in V1, but its outcome is independent of
 the already completed resolution. A store failure is returned in a separate
 publication report and cannot turn a valid canonical model into a failed
-resolution. On success, ownership of the validated lease transfers to the
-caller. The caller may close it after warming the store, or use a restorer to
-rebind a model that has not entered service so the current process can also use
-the shared mmap backing. Model mutation and lease teardown remain loader and
-transport responsibilities.
+resolution. On success, the runtime closes the validated store lease before
+returning the report. Post-load publication only warms future startups; it does
+not restore, rebind, or otherwise mutate the canonically loaded model serving
+the current startup.
 
 ## Restoration transaction boundary
 

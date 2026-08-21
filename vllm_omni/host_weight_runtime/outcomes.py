@@ -146,26 +146,8 @@ class PostLoadPublicationReport:
             raise ValueError("post-load publication failure ownership is inconsistent")
 
 
-@dataclass(frozen=True)
-class HostWeightPublication:
-    """Separate post-load outcome whose successful lease belongs to the caller."""
-
-    report: PostLoadPublicationReport
-    lease: HostWeightLease | None = None
-
-    def __post_init__(self) -> None:
-        lease_outcomes = {
-            PostLoadPublicationOutcome.ALREADY_PRESENT,
-            PostLoadPublicationOutcome.PUBLISHED,
-            PostLoadPublicationOutcome.JOINED,
-        }
-        if (self.report.outcome in lease_outcomes) != (self.lease is not None):
-            raise ValueError("post-load publication outcome has inconsistent lease ownership")
-
-
 __all__ = [
     "AttemptResult",
-    "HostWeightPublication",
     "HostWeightResolution",
     "PostLoadPublicationOutcome",
     "PostLoadPublicationReport",

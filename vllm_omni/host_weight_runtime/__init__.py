@@ -46,7 +46,6 @@ from .manifest import (
 )
 from .outcomes import (
     AttemptResult,
-    HostWeightPublication,
     HostWeightResolution,
     PostLoadPublicationOutcome,
     PostLoadPublicationReport,
@@ -93,7 +92,6 @@ __all__ = [
     "HostWeightError",
     "HostWeightFailure",
     "HostWeightLease",
-    "HostWeightPublication",
     "HostWeightResolution",
     "HostWeightInspector",
     "HostWeightRuntime",

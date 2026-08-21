@@ -15,7 +15,6 @@ from .identity import CanonicalJson, WeightArtifactIdentity
 from .lease import HostWeightLease
 from .outcomes import (
     AttemptResult,
-    HostWeightPublication,
     HostWeightResolution,
     PostLoadPublicationOutcome,
     PostLoadPublicationReport,
@@ -241,12 +240,12 @@ class HostWeightRuntime:
         identity: WeightArtifactIdentity | None = None,
         *,
         producer: WeightProducer | None = None,
-    ) -> HostWeightPublication:
-        """Synchronously publish a post-load artifact without revising resolution.
+    ) -> PostLoadPublicationReport:
+        """Synchronously warm a future startup without revising resolution.
 
-        A successful result transfers one validated lease to the caller. The
-        loader may use that lease to rebind a model that has not entered service,
-        or close it when publication is only warming a future startup.
+        A successful store operation returns a validated lease. The runtime
+        closes that lease before returning because POST_LOAD_ONLY production
+        must not mutate or rebind the model serving the current startup.
         """
         started = time.monotonic()
         operation_id = uuid.uuid4().hex
@@ -302,14 +301,36 @@ class HostWeightRuntime:
         outcome = successful_outcomes.get(result.status)
         if outcome is not None:
             assert result.lease is not None
+            try:
+                result.lease.close()
+            except Exception as exc:
+                return self._finish_publication(
+                    PostLoadPublicationReport(
+                        operation_id=operation_id,
+                        outcome=PostLoadPublicationOutcome.FAILED,
+                        identity_digest=identity_digest,
+                        elapsed_seconds=time.monotonic() - started,
+                        failure=HostWeightFailure(
+                            stage=ResolutionStage.LIFECYCLE,
+                            code=FailureCode.PUBLICATION_FAILED,
+                            retryable=False,
+                            message="post-load publication lease cleanup failed",
+                            details=CanonicalJson.from_value(
+                                {
+                                    "exception_type": type(exc).__name__,
+                                    "store_outcome": result.status.value,
+                                }
+                            ),
+                        ),
+                    )
+                )
             return self._finish_publication(
                 PostLoadPublicationReport(
                     operation_id=operation_id,
                     outcome=outcome,
                     identity_digest=identity_digest,
                     elapsed_seconds=time.monotonic() - started,
-                ),
-                lease=result.lease,
+                )
             )
 
         failure = result.failure
@@ -439,9 +460,7 @@ class HostWeightRuntime:
     def _finish_publication(
         self,
         report: PostLoadPublicationReport,
-        *,
-        lease: HostWeightLease | None = None,
-    ) -> HostWeightPublication:
+    ) -> PostLoadPublicationReport:
         if self._publication_observer is not None:
             try:
                 self._publication_observer(report)
@@ -450,7 +469,7 @@ class HostWeightRuntime:
                     "Host Weight Runtime publication observer failed",
                     extra={"operation_id": report.operation_id},
                 )
-        return HostWeightPublication(report=report, lease=lease)
+        return report
 
 
 __all__ = ["HostWeightRuntime"]

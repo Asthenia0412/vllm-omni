@@ -86,7 +86,9 @@ flowchart TD
     P -->|"nonretryable failure"| E
     C --> W{"Post-load publication enabled?"}
     W -->|"yes"| B2["Publish final model through POST_LOAD_ONLY producer"]
-    B2 --> R2["Return separate report and optional lease"]
+    B2 --> CL["Close validated publication lease"]
+    CL --> R2["Return separate publication report"]
+    R2 --> D
     W -->|"no"| D["Keep canonical model"]
 ```
 
@@ -144,12 +146,8 @@ sequenceDiagram
             L->>R: publish_after_load(identity, POST_LOAD_ONLY producer)
             R->>S: get_or_build(identity, producer)
             S-->>R: validated HostWeightLease or typed failure
-            R-->>L: separate publication report and optional lease
-            opt consume mmap in current startup
-                L->>X: plan_restore(model, lease)
-                X-->>L: validation-only restore plan
-                L->>X: commit() once
-            end
+            R->>R: close publication lease
+            R-->>L: separate publication report
         end
     else required or nonretryable failure
         R-->>L: FAILED report
@@ -167,9 +165,9 @@ must be discarded and canonical fallback must construct a fresh model.
 `publish_after_load()` is synchronous in V1 and accepts only a
 `POST_LOAD_ONLY` producer. Its report is separate from the terminal resolution,
 so a publication failure cannot rewrite a successful canonical fallback. A
-successful publication transfers a lease to the caller. The loader may close
-that lease after warming future startups, or restore from it before the model
-enters service to replace private host allocations with shared mmap backing.
+successful publication closes the store-returned lease inside the runtime and
+warms only future startups. It does not restore, rebind, or otherwise mutate the
+canonically loaded model serving the current startup.
 `allow_local_build` gates producers during pre-load resolution, while
 `allow_post_load_publish` independently gates this explicit post-load path.
 
