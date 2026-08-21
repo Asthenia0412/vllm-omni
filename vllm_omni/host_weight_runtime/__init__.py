@@ -46,7 +46,10 @@ from .manifest import (
 )
 from .outcomes import (
     AttemptResult,
+    HostWeightPublication,
     HostWeightResolution,
+    PostLoadPublicationOutcome,
+    PostLoadPublicationReport,
     ResolutionAttempt,
     ResolutionOutcome,
     ResolutionReport,
@@ -90,6 +93,7 @@ __all__ = [
     "HostWeightError",
     "HostWeightFailure",
     "HostWeightLease",
+    "HostWeightPublication",
     "HostWeightResolution",
     "HostWeightInspector",
     "HostWeightRuntime",
@@ -102,6 +106,8 @@ __all__ = [
     "ManifestValidationError",
     "MappedHostRegion",
     "ProducerIdentity",
+    "PostLoadPublicationOutcome",
+    "PostLoadPublicationReport",
     "ProductionMetadata",
     "ProductionPolicy",
     "ProductionSourceMode",

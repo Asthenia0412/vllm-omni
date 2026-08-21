@@ -15,7 +15,10 @@ from .identity import CanonicalJson, WeightArtifactIdentity
 from .lease import HostWeightLease
 from .outcomes import (
     AttemptResult,
+    HostWeightPublication,
     HostWeightResolution,
+    PostLoadPublicationOutcome,
+    PostLoadPublicationReport,
     ResolutionAttempt,
     ResolutionOutcome,
     ResolutionReport,
@@ -28,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class HostWeightRuntime:
-    """Resolve one exact representation without owning model restoration."""
+    """Resolve or publish one exact representation without owning restoration."""
 
     def __init__(
         self,
@@ -36,10 +39,13 @@ class HostWeightRuntime:
         store: HostWeightStore | None = None,
         *,
         observer: Callable[[ResolutionReport], None] | None = None,
+        publication_observer: Callable[[PostLoadPublicationReport], None] | None = None,
         _initialization_failure: HostWeightFailure | None = None,
     ) -> None:
         if observer is not None and not callable(observer):
             raise ValueError("Host Weight Runtime observer must be callable")
+        if publication_observer is not None and not callable(publication_observer):
+            raise ValueError("Host Weight Runtime publication observer must be callable")
         if config.mode is RuntimeMode.DISABLED and (store is not None or _initialization_failure is not None):
             raise ValueError("disabled Host Weight Runtime must not initialize a store")
         if config.mode is not RuntimeMode.DISABLED and (store is None) == (_initialization_failure is None):
@@ -48,6 +54,7 @@ class HostWeightRuntime:
         self.store = store
         self._initialization_failure = _initialization_failure
         self._observer = observer
+        self._publication_observer = publication_observer
 
     @classmethod
     def from_config(
@@ -55,18 +62,24 @@ class HostWeightRuntime:
         config: HostWeightRuntimeConfig,
         *,
         observer: Callable[[ResolutionReport], None] | None = None,
+        publication_observer: Callable[[PostLoadPublicationReport], None] | None = None,
     ) -> HostWeightRuntime:
         """Construct lazily so disabled mode performs no filesystem probe."""
         if config.mode is RuntimeMode.DISABLED:
-            return cls(config, observer=observer)
+            return cls(config, observer=observer, publication_observer=publication_observer)
         assert config.domain is not None
         from .filesystem import FilesystemHostWeightStore  # noqa: PLC0415
 
         try:
             store = FilesystemHostWeightStore(config.domain, config.capacity, config.integrity)
         except HostWeightError as exc:
-            return cls(config, observer=observer, _initialization_failure=exc.failure)
-        return cls(config, store, observer=observer)
+            return cls(
+                config,
+                observer=observer,
+                publication_observer=publication_observer,
+                _initialization_failure=exc.failure,
+            )
+        return cls(config, store, observer=observer, publication_observer=publication_observer)
 
     @property
     def enabled(self) -> bool:
@@ -223,6 +236,101 @@ class HostWeightRuntime:
 
         return self._finish_terminal(tuple(attempts), started)
 
+    def publish_after_load(
+        self,
+        identity: WeightArtifactIdentity | None = None,
+        *,
+        producer: WeightProducer | None = None,
+    ) -> HostWeightPublication:
+        """Synchronously publish a post-load artifact without revising resolution.
+
+        A successful result transfers one validated lease to the caller. The
+        loader may use that lease to rebind a model that has not entered service,
+        or close it when publication is only warming a future startup.
+        """
+        started = time.monotonic()
+        operation_id = uuid.uuid4().hex
+        if not self.enabled:
+            return self._finish_publication(
+                PostLoadPublicationReport(
+                    operation_id=operation_id,
+                    outcome=PostLoadPublicationOutcome.RUNTIME_DISABLED,
+                    identity_digest=None,
+                    elapsed_seconds=time.monotonic() - started,
+                )
+            )
+        if not self.config.production.allow_post_load_publish:
+            return self._finish_publication(
+                PostLoadPublicationReport(
+                    operation_id=operation_id,
+                    outcome=PostLoadPublicationOutcome.POLICY_DISABLED,
+                    identity_digest=None,
+                    elapsed_seconds=time.monotonic() - started,
+                )
+            )
+        if identity is None:
+            raise ValueError("enabled post-load publication requires an exact artifact identity")
+        if producer is None:
+            raise ValueError("enabled post-load publication requires one producer")
+        if producer.spec.lookup_phase is not LookupPhase.POST_LOAD_ONLY:
+            raise ValueError("publish_after_load requires a POST_LOAD_ONLY producer")
+
+        identity_digest = identity.key
+        if self._initialization_failure is not None:
+            return self._finish_publication(
+                PostLoadPublicationReport(
+                    operation_id=operation_id,
+                    outcome=PostLoadPublicationOutcome.FAILED,
+                    identity_digest=identity_digest,
+                    elapsed_seconds=time.monotonic() - started,
+                    failure=self._initialization_failure,
+                )
+            )
+
+        assert self.store is not None
+        result = self.store.get_or_build(
+            BuildRequest(identity),
+            producer,
+            validation=self.config.integrity.local_lookup,
+            deadline=started + self.config.wait.coordination_timeout_seconds,
+        )
+        successful_outcomes = {
+            StoreStatus.HIT: PostLoadPublicationOutcome.ALREADY_PRESENT,
+            StoreStatus.BUILT: PostLoadPublicationOutcome.PUBLISHED,
+            StoreStatus.JOINED: PostLoadPublicationOutcome.JOINED,
+        }
+        outcome = successful_outcomes.get(result.status)
+        if outcome is not None:
+            assert result.lease is not None
+            return self._finish_publication(
+                PostLoadPublicationReport(
+                    operation_id=operation_id,
+                    outcome=outcome,
+                    identity_digest=identity_digest,
+                    elapsed_seconds=time.monotonic() - started,
+                ),
+                lease=result.lease,
+            )
+
+        failure = result.failure
+        if failure is None:
+            failure = HostWeightFailure(
+                stage=ResolutionStage.PRODUCTION,
+                code=FailureCode.PRODUCER_FAILED,
+                retryable=False,
+                message=f"post-load publication returned unexpected store status {result.status.value}",
+                details=CanonicalJson.empty(),
+            )
+        return self._finish_publication(
+            PostLoadPublicationReport(
+                operation_id=operation_id,
+                outcome=PostLoadPublicationOutcome.FAILED,
+                identity_digest=identity_digest,
+                elapsed_seconds=time.monotonic() - started,
+                failure=failure,
+            )
+        )
+
     def _mode_terminal_action(self) -> ResolutionAction:
         if self.config.mode is RuntimeMode.PREFERRED:
             return ResolutionAction.CANONICAL_FALLBACK
@@ -327,6 +435,22 @@ class HostWeightRuntime:
                     extra={"resolution_id": report.resolution_id},
                 )
         return HostWeightResolution(report=report, lease=lease)
+
+    def _finish_publication(
+        self,
+        report: PostLoadPublicationReport,
+        *,
+        lease: HostWeightLease | None = None,
+    ) -> HostWeightPublication:
+        if self._publication_observer is not None:
+            try:
+                self._publication_observer(report)
+            except Exception:
+                logger.exception(
+                    "Host Weight Runtime publication observer failed",
+                    extra={"operation_id": report.operation_id},
+                )
+        return HostWeightPublication(report=report, lease=lease)
 
 
 __all__ = ["HostWeightRuntime"]

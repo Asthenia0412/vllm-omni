@@ -19,8 +19,11 @@ from vllm_omni.host_weight_runtime import (
     HostWeightRuntimeConfig,
     IntegrityPolicy,
     LookupPhase,
+    PostLoadPublicationOutcome,
+    PostLoadPublicationReport,
     ProducerIdentity,
     ProductionMetadata,
+    ProductionPolicy,
     ProductionSourceMode,
     RemoteImportPolicy,
     RemoteOnMiss,
@@ -222,6 +225,128 @@ def test_preload_resolution_does_not_run_postload_only_producer(tmp_path: Path) 
     assert resolution.report.outcome is ResolutionOutcome.CANONICAL_FALLBACK
     assert producer.calls == 0
     assert resolution.report.attempts[0].action.value == "canonical_fallback"
+
+
+def test_postload_publication_returns_lease_without_changing_preload_resolution(tmp_path: Path) -> None:
+    publications: list[PostLoadPublicationReport] = []
+    identity = _identity()
+    producer = CountingProducer(identity, lookup_phase=LookupPhase.POST_LOAD_ONLY)
+    runtime = HostWeightRuntime.from_config(
+        HostWeightRuntimeConfig(
+            mode=RuntimeMode.PREFERRED,
+            domain=_domain(tmp_path / "store"),
+            production=ProductionPolicy(
+                allow_local_build=False,
+                allow_post_load_publish=True,
+            ),
+        ),
+        publication_observer=publications.append,
+    )
+
+    preload = runtime.resolve(identity, producer=producer)
+    assert preload.report.outcome is ResolutionOutcome.CANONICAL_FALLBACK
+    assert producer.calls == 0
+
+    publication = runtime.publish_after_load(identity, producer=producer)
+    assert publication.report.outcome is PostLoadPublicationOutcome.PUBLISHED
+    assert publication.lease is not None
+    assert torch.equal(
+        publication.lease.tensors["weight"],
+        torch.arange(4, dtype=torch.float32).to(torch.bfloat16).reshape(2, 2),
+    )
+    assert publication.report.identity_digest == identity.key
+    publication.lease.close()
+
+    already_present = runtime.publish_after_load(identity, producer=producer)
+    assert already_present.report.outcome is PostLoadPublicationOutcome.ALREADY_PRESENT
+    assert already_present.lease is not None
+    already_present.lease.close()
+
+    warm = runtime.resolve(identity)
+    assert warm.report.outcome is ResolutionOutcome.LOCAL_HIT
+    assert warm.lease is not None
+    warm.lease.close()
+    assert producer.calls == 1
+    assert publications == [publication.report, already_present.report]
+
+
+def test_postload_publication_policy_skip_does_not_run_producer(tmp_path: Path) -> None:
+    identity = _identity()
+    producer = CountingProducer(identity, lookup_phase=LookupPhase.POST_LOAD_ONLY)
+    runtime = HostWeightRuntime.from_config(
+        HostWeightRuntimeConfig(mode=RuntimeMode.PREFERRED, domain=_domain(tmp_path / "store"))
+    )
+
+    publication = runtime.publish_after_load(identity, producer=producer)
+
+    assert publication.report.outcome is PostLoadPublicationOutcome.POLICY_DISABLED
+    assert publication.lease is None
+    assert producer.calls == 0
+
+
+def test_disabled_postload_publication_does_not_probe_configured_root(tmp_path: Path) -> None:
+    root = tmp_path / "must-not-exist"
+    runtime = HostWeightRuntime.from_config(
+        HostWeightRuntimeConfig(
+            mode=RuntimeMode.DISABLED,
+            domain=_domain(root),
+            production=ProductionPolicy(allow_post_load_publish=True),
+        )
+    )
+
+    publication = runtime.publish_after_load()
+
+    assert publication.report.outcome is PostLoadPublicationOutcome.RUNTIME_DISABLED
+    assert publication.lease is None
+    assert not root.exists()
+
+
+def test_postload_publication_rejects_preload_producer(tmp_path: Path) -> None:
+    identity = _identity()
+    runtime = HostWeightRuntime.from_config(
+        HostWeightRuntimeConfig(
+            mode=RuntimeMode.PREFERRED,
+            domain=_domain(tmp_path / "store"),
+            production=ProductionPolicy(allow_post_load_publish=True),
+        )
+    )
+
+    with pytest.raises(ValueError, match="POST_LOAD_ONLY"):
+        runtime.publish_after_load(identity, producer=CountingProducer(identity))
+
+
+def test_postload_publication_failure_is_reported_without_raising(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity = _identity()
+    producer = CountingProducer(identity, lookup_phase=LookupPhase.POST_LOAD_ONLY)
+    runtime = HostWeightRuntime.from_config(
+        HostWeightRuntimeConfig(
+            mode=RuntimeMode.PREFERRED,
+            domain=_domain(tmp_path / "store"),
+            production=ProductionPolicy(allow_post_load_publish=True),
+        )
+    )
+    assert runtime.store is not None
+    failure = HostWeightFailure(
+        stage=ResolutionStage.CAPACITY,
+        code=FailureCode.ENOSPC,
+        retryable=True,
+        message="injected post-load publication failure",
+        details=CanonicalJson.empty(),
+    )
+
+    def fail_publication(*_args: object, **_kwargs: object) -> StoreResult:
+        return StoreResult(StoreStatus.FAILED, failure=failure)
+
+    monkeypatch.setattr(runtime.store, "get_or_build", fail_publication)
+    publication = runtime.publish_after_load(identity, producer=producer)
+
+    assert publication.report.outcome is PostLoadPublicationOutcome.FAILED
+    assert publication.report.failure is failure
+    assert publication.lease is None
+    assert producer.calls == 0
 
 
 @pytest.mark.parametrize(
