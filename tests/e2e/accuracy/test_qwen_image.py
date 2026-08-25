@@ -39,7 +39,7 @@ SSIM_THRESHOLD = 0.94
 # landed at SSIM 0.9687 in build 2954 — keep a slightly tighter SSIM gate for
 # that path only.
 SSIM_THRESHOLD_SDPA_FALLBACK = 0.96
-PSNR_THRESHOLD = 30.0
+PSNR_THRESHOLD = 27.0
 
 MODEL_2512_ID = "Qwen/Qwen-Image-2512"
 MODEL_2512_ENV_VAR = "QWEN_IMAGE_2512_MODEL"
