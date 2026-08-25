@@ -17,7 +17,7 @@
 ### Tasks and inputs
 
 | Task | Text prompt | Media condition | Shared entrypoint |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | T2VA | Required | None | [`text_to_video.py`](../../examples/offline_inference/text_to_video/text_to_video.py) |
 | I2VA | Required | Exactly one still image | [`image_to_video.py`](../../examples/offline_inference/image_to_video/image_to_video.py) |
 
@@ -28,7 +28,7 @@ per-rank request batches are not supported.
 ### Output
 
 | Category | Supported Preview specification |
-|---|---|
+| --- | --- |
 | Duration | Exactly 10 seconds |
 | Video | 125 frames at 12.5 fps |
 | Native tiers | `272p` (448x256) and `540p` (896x512) |
@@ -39,7 +39,7 @@ per-rank request batches are not supported.
 ### Profiles provided by this recipe
 
 | Profile | Devices | Purpose | Qualification |
-|---|---:|---|---|
+| --- | ---: | --- | --- |
 | Resident SP4 | 4 | Recommended fidelity/default deployment | Released smoke and reference parity |
 | Rank-local DLO SP4 | 4 | Full-quality lower-HBM transformer streaming | Released checkpoint, 100-step T2VA and I2VA |
 | DLO DP4 / DP2SP2 | 4 | Concurrent request throughput | Bounded one- and four-step coverage |
@@ -75,7 +75,7 @@ required.
 ### Locally qualified NVIDIA configuration
 
 | Item | Value |
-|---|---|
+| --- | --- |
 | Accelerator | NVIDIA L20X |
 | Per-device memory | 143,771 MiB (about 140.4 GiB) |
 | Device count | 4; the one-device profile uses one of the same GPUs |
@@ -90,7 +90,7 @@ No H100, H200, B200, or B300 runtime claim is made here.
 ### Software environment
 
 | Item | Value |
-|---|---|
+| --- | --- |
 | OS | Ubuntu 22.04.5 LTS, Linux 5.10.134 |
 | Python | 3.12.13 |
 | NVIDIA driver / CUDA runtime | 570.133.20 / 13.0 |
@@ -205,7 +205,7 @@ Use the shared guides for launch syntax and feature semantics. The flags below
 are the MAGI-2-specific qualified combinations.
 
 | Feature | MAGI-2 status / topology | Guide |
-|---|---|---|
+| --- | --- | --- |
 | Sequence parallel | Resident SP4 default; compatible SP8 configuration | [Sequence parallel](../../docs/user_guide/diffusion/parallelism/sequence_parallel.md) |
 | Tensor parallel | TP4 or TP2SP2 on four workers | [Tensor parallel](../../docs/user_guide/diffusion/parallelism/tensor_parallel.md) |
 | DLO | DP4/DP2SP2 AllGather; SP4 rank-local requires `--dlo-no-use-allgather` | [Distributed layerwise offload](../../docs/design/feature/distributed_layerwise_offload.md) |
@@ -227,7 +227,7 @@ Common geometry and sampling values use the shared CLI flags. The native
 Preview pipeline accepts these model-specific `--extra-body` fields:
 
 | Field | Meaning |
-|---|---|
+| --- | --- |
 | `seconds` | Must be `10`. |
 | `resolution` | `272p` or `540p`; default `540p`. |
 | `output_width`, `output_height` | Optional final resize; supply both. |
@@ -253,7 +253,7 @@ and audio contract.
 ### Released-checkpoint E2E
 
 | Profile | Workload | Steps | E2E | Peak HBM | Peak host PSS | Output |
-|---|---|---:|---:|---:|---:|---|
+| --- | --- | ---: | ---: | ---: | ---: | --- |
 | DLO SP4 | 540p T2VA | 100 | 563.855 s | See PR evidence | See PR evidence | `3437d078e...f16fdea` |
 | DLO SP4 | 540p I2VA | 100 | 556.533 s | See PR evidence | See PR evidence | `b8c2a4ac...ff2de8` |
 | Layerwise 1 GPU | 272p T2VA | 1 | 8.86 s | 49.29 GiB | Not sampled | Valid video + audio |

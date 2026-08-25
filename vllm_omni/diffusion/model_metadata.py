@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
 
 from dataclasses import dataclass
 
@@ -60,6 +60,10 @@ _DIFFUSION_MODEL_METADATA: dict[str, DiffusionModelMetadata] = {
     "WanImageToVideoPipeline": DiffusionModelMetadata(attention_mask_free=True),
     "WanVACEPipeline": DiffusionModelMetadata(attention_mask_free=True),
     "WanS2VPipeline": DiffusionModelMetadata(attention_mask_free=True),
+    "SanaWmPipeline": DiffusionModelMetadata(
+        supports_multimodal_inputs=True,
+        max_multimodal_image_inputs=1,
+    ),
 }
 
 

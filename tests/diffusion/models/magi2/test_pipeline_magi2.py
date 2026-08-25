@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
 
 from __future__ import annotations
 
@@ -163,13 +163,15 @@ def test_local_preview_signature_detection_without_refiner(tmp_path):
 
 def test_huggingface_url_resolves_pinned_snapshot(tmp_path, monkeypatch):
     _checkpoint_tree(tmp_path)
+    api = Mock()
+    api.snapshot_download.side_effect = lambda *, repo_id, revision: (
+        str(tmp_path)
+        if (repo_id, revision) == ("sand-ai/MAGI-2-preview", MAGI2_MODEL_REVISION)
+        else pytest.fail("unexpected snapshot request")
+    )
     monkeypatch.setattr(
-        "huggingface_hub.snapshot_download",
-        lambda *, repo_id, revision: (
-            str(tmp_path)
-            if (repo_id, revision) == ("sand-ai/MAGI-2-preview", MAGI2_MODEL_REVISION)
-            else pytest.fail("unexpected snapshot request")
-        ),
+        "vllm.transformers_utils.repo_utils.hf_api",
+        lambda: api,
     )
     assert _resolve_checkpoint_root(
         "https://huggingface.co/sand-ai/MAGI-2-preview",
@@ -179,7 +181,10 @@ def test_huggingface_url_resolves_pinned_snapshot(tmp_path, monkeypatch):
 
 def test_forward_uses_native_540p_preview_defaults(monkeypatch):
     pipe, runtime = _pipeline()
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.models.magi2.pipeline_magi2.current_omni_platform.is_available",
+        lambda: False,
+    )
     result = pipe(_request("A fox walks through snow"))
 
     call = runtime.calls[0]
@@ -194,7 +199,10 @@ def test_forward_uses_native_540p_preview_defaults(monkeypatch):
 
 def test_forward_maps_272p_i2v_and_output_resize(monkeypatch):
     pipe, runtime = _pipeline()
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.models.magi2.pipeline_magi2.current_omni_platform.is_available",
+        lambda: False,
+    )
     image = Image.new("RGB", (16, 9), "white")
     prompt = {
         "prompt": "The first frame begins moving",
@@ -241,7 +249,10 @@ def test_forward_rejects_invalid_preview_requests(
     message,
 ):
     pipe, runtime = _pipeline()
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.models.magi2.pipeline_magi2.current_omni_platform.is_available",
+        lambda: False,
+    )
     with pytest.raises(OmniClientError, match=message):
         pipe(_request(prompt, extra_args=extra_args))
     assert not runtime.calls
@@ -249,7 +260,10 @@ def test_forward_rejects_invalid_preview_requests(
 
 def test_forward_rejects_zero_inference_steps_before_generation(monkeypatch):
     pipe, runtime = _pipeline()
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.models.magi2.pipeline_magi2.current_omni_platform.is_available",
+        lambda: False,
+    )
     with pytest.raises(OmniClientError, match="inference steps must be positive"):
         pipe(_request("prompt", num_inference_steps=0))
     assert not runtime.calls
@@ -257,7 +271,10 @@ def test_forward_rejects_zero_inference_steps_before_generation(monkeypatch):
 
 def test_forward_rejects_multiple_images(monkeypatch):
     pipe, _ = _pipeline()
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.models.magi2.pipeline_magi2.current_omni_platform.is_available",
+        lambda: False,
+    )
     prompt = {
         "prompt": "animate",
         "multi_modal_data": {"image": [Image.new("RGB", (2, 2)), Image.new("RGB", (2, 2))]},
