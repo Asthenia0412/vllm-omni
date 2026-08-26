@@ -20,6 +20,13 @@ from .tensor_utils import is_dtensor, set_tensor_storage
 logger = init_logger(__name__)
 
 
+# Cache budget headroom over the staged component bytes. Retained blocks
+# include allocator fragmentation and transient storages freed alongside the
+# weights at component boundaries, so the reusable payload alone under-bounds
+# the working set the policy must keep to be effective.
+_RETENTION_HEADROOM_MULTIPLIER = 2.0
+
+
 class BoundedAllocatorCache:
     """Retain reusable allocator blocks without monopolizing device memory.
 
@@ -28,35 +35,48 @@ class BoundedAllocatorCache:
     cached blocks are immediately reusable. This policy keeps the cache while
     both of these bounds hold:
 
-    * cached-but-unallocated memory is at most 25% of device capacity; and
+    * cached-but-unallocated memory stays within the derived budget: the
+      staged component byte total reported by attached ``PinnedModuleStager``
+      instances times a fixed headroom multiplier; and
     * at least 5% of device capacity is physically free.
 
-    Missing memory telemetry is handled conservatively by releasing the cache.
-    Failure paths can force release; normal executor shutdown keeps its own
-    unconditional device-cache cleanup because this policy is not global.
+    The budget derives from the model topology instead of a user-chosen
+    fraction, so it scales with the staged components rather than with device
+    capacity. Missing memory telemetry is handled conservatively by releasing
+    the cache. Failure paths can force release; normal executor shutdown keeps
+    its own unconditional device-cache cleanup because this policy is not
+    global.
     """
 
     def __init__(
         self,
         device: torch.device,
         *,
-        max_cached_fraction: float = 0.25,
         min_free_fraction: float = 0.05,
     ) -> None:
-        if not 0.0 <= max_cached_fraction <= 1.0:
-            raise ValueError(f"max_cached_fraction must be in [0, 1], got {max_cached_fraction}")
         if not 0.0 <= min_free_fraction <= 1.0:
             raise ValueError(f"min_free_fraction must be in [0, 1], got {min_free_fraction}")
         self.device = device
-        self.max_cached_fraction = max_cached_fraction
         self.min_free_fraction = min_free_fraction
+        self._staged_bytes = 0
+
+    def grow_retention_budget(self, staged_bytes: int) -> None:
+        """Grow the derived cache budget by a component's staged byte total."""
+        if staged_bytes < 0:
+            raise ValueError(f"staged_bytes must be >= 0, got {staged_bytes}")
+        self._staged_bytes += int(staged_bytes)
+
+    @property
+    def budget_bytes(self) -> int:
+        """Reusable-cache ceiling: staged bytes times the headroom multiplier."""
+        return int(self._staged_bytes * _RETENTION_HEADROOM_MULTIPLIER)
 
     def _should_release(self) -> bool:
         reserved = int(torch.accelerator.memory_reserved(self.device))
         allocated = int(torch.accelerator.memory_allocated(self.device))
         free, total = current_omni_platform.get_device_memory(self.device)
         cached = max(0, reserved - allocated)
-        return cached > int(total * self.max_cached_fraction) or free < int(total * self.min_free_fraction)
+        return cached > self.budget_bytes or free < int(total * self.min_free_fraction)
 
     def release_if_needed(self, *, force: bool = False) -> bool:
         """Release cached blocks when a bound is crossed or release is forced."""
@@ -116,11 +136,12 @@ class PinnedModuleStager:
         self.device = device
         self.copy_stream = copy_stream if copy_stream is not None else current_omni_platform.Stream()
         self._ready_event = current_omni_platform.Event()
-        self.cache_retention = cache_retention
+        self.cache_retention = None
         self.loaded = False
         self._groups = self._snapshot_groups(modules, pin_memory=pin_memory)
         self._device_storages: list[torch.Tensor] = []
         self._restore_masters()
+        self.set_cache_retention(cache_retention)
 
     @staticmethod
     def _local_tensor(target: torch.Tensor) -> torch.Tensor:
@@ -198,8 +219,17 @@ class PinnedModuleStager:
     def _restore_masters(self) -> None:
         self._bind([group.master for group in self._groups])
 
+    @property
+    def staged_bytes(self) -> int:
+        """Total unique staged storage bytes (masters are uint8 byte views)."""
+        return sum(group.master.numel() for group in self._groups)
+
     def set_cache_retention(self, cache_retention: BoundedAllocatorCache | None) -> None:
+        if cache_retention is self.cache_retention:
+            return
         self.cache_retention = cache_retention
+        if cache_retention is not None:
+            cache_retention.grow_retention_budget(self.staged_bytes)
 
     def _release_cache(self, *, force: bool = False) -> None:
         if self.cache_retention is None:

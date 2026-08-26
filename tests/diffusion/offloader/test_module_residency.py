@@ -210,11 +210,37 @@ def test_allocator_cache_policy_enforces_cache_and_free_memory_bounds(
         lambda _device: (free, 100),
     )
     retention = BoundedAllocatorCache(torch.device("cpu"))
+    retention.grow_retention_budget(10)
 
     released = retention.release_if_needed()
 
     assert released is expected_release
     assert empty_cache.call_count == int(expected_release)
+
+
+def test_allocator_cache_budget_is_derived_from_attached_stager_bytes(patched_runtime):
+    left, right = _aliased_modules()
+    retention = BoundedAllocatorCache(torch.device("cpu"))
+    assert retention.budget_bytes == 0
+
+    stager = PinnedModuleStager(
+        [left, right],
+        torch.device("cpu"),
+        pin_memory=False,
+        cache_retention=retention,
+    )
+    expected_bytes = 12 * 4 + 8 * 8  # float32 parameter + int64 buffer storages
+    assert stager.staged_bytes == expected_bytes
+    assert retention.budget_bytes == 2 * expected_bytes
+
+    # Re-attaching the same cache does not double count.
+    stager.set_cache_retention(retention)
+    assert retention.budget_bytes == 2 * expected_bytes
+
+    # A second stager grows the budget by its own staged bytes.
+    extra = PinnedModuleStager(torch.nn.Linear(2, 2), torch.device("cpu"), pin_memory=False)
+    extra.set_cache_retention(retention)
+    assert retention.budget_bytes == 2 * (expected_bytes + extra.staged_bytes)
 
 
 def test_allocator_cache_releases_when_telemetry_is_unavailable(monkeypatch, patched_runtime):

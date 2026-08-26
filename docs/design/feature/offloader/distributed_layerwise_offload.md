@@ -177,8 +177,12 @@ component can be reused by the next. The DiT prefetch path and its two shared
 device buffers are unchanged.
 
 After a component is offloaded, cached-but-unallocated memory is retained only
-while it is at most 25% of device capacity and at least 5% of device capacity
-remains physically free. Crossing either bound releases the allocator cache.
+while it stays within a budget derived from the model topology — the staged
+component byte total reported by the attached `PinnedModuleStager` instances
+times a fixed headroom multiplier — and at least 5% of device capacity
+remains physically free. Crossing either bound releases the allocator cache,
+so the budget scales with the staged components rather than with device
+capacity and needs no user-chosen fraction.
 Missing allocator telemetry also releases it conservatively. Component or
 staging failure forces a release, and an out-of-memory allocation gets one
 retry after release. This is a component-local policy rather than a global
