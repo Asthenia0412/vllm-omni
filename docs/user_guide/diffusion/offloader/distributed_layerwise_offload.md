@@ -112,6 +112,11 @@ perform a collective and uses the same rank-local transfer behavior.
 HWR is an opt-in startup optimization for models that declare the final-layout
 BF16 restore contract. Use it only with no-AllGather DLO:
 
+The validated BF16 model contracts currently cover MiniMax H3 and
+`black-forest-labs/FLUX.2-klein-4B`. FLUX.2-klein-9B, FLUX.2-dev, online FP8,
+HSDP, LoRA/adapted weights, and non-default load formats are not enabled by
+this contract.
+
 ```bash
 vllm serve /path/to/model --omni \
   --enable-distributed-layerwise-offload \
