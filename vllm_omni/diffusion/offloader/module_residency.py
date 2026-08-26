@@ -20,14 +20,19 @@ from .tensor_utils import is_dtensor, set_tensor_storage
 logger = init_logger(__name__)
 
 
-# Cache budget headroom over the staged component bytes. Retained blocks
-# include allocator fragmentation and transient storages freed alongside the
-# weights at component boundaries, so the reusable payload alone under-bounds
-# the working set the policy must keep to be effective.
+# Seed headroom over the staged component bytes. Retained blocks include
+# allocator fragmentation and transient storages freed alongside the weights
+# at component boundaries, so the reusable payload alone under-bounds the
+# working set the policy must keep to be effective. Observations take over
+# from this seed at the first component boundary (see below).
 _RETENTION_HEADROOM_MULTIPLIER = 2.0
-# Hard ceiling for the derived budget so a large staged total can never
-# monopolize a small device; the #6526 L20X retention plateau (~23.8 GB on a
-# ~140 GB card) stayed well below this fraction.
+# Margin over the largest cached-but-unallocated value observed at a component
+# boundary. The observed peak already includes the transient footprint of the
+# running workload, so this only covers check-to-check variation.
+_OBSERVED_PEAK_MARGIN = 1.25
+# Hard ceiling for the derived budget so a large staged total or a spurious
+# observation can never monopolize a small device; the #6526 L20X retention
+# plateau (~23.8 GB on a ~140 GB card) stayed well below this fraction.
 _MAX_BUDGET_CAPACITY_FRACTION = 0.25
 
 
@@ -39,16 +44,20 @@ class BoundedAllocatorCache:
     cached blocks are immediately reusable. This policy keeps the cache while
     both of these bounds hold:
 
-    * cached-but-unallocated memory stays within the derived budget: the
-      staged component byte total reported by attached ``PinnedModuleStager``
-      instances times a fixed headroom multiplier, capped at a quarter of
-      device capacity; and
+    * cached-but-unallocated memory stays within the derived budget, capped
+      at a quarter of device capacity; and
     * at least 5% of device capacity is physically free.
 
-    The budget derives from the model topology instead of a user-chosen
-    fraction, so it scales with the staged components rather than with device
-    capacity. Detaching a stager returns its bytes to the budget. Missing
-    memory telemetry is handled conservatively by releasing the cache.
+    The budget needs no user-chosen fraction and no warmup flag: it starts
+    from the staged component byte total reported by attached
+    ``PinnedModuleStager`` instances (times the seed multiplier) and then
+    tracks the largest cached value observed at any boundary. If a workload's
+    transient footprint outgrows the seed, the first over-budget boundary
+    releases once, the observation raises the budget to the observed peak
+    times its margin, and later boundaries retain. The budget therefore never
+    exceeds real observed usage by more than the margin, whatever the
+    resolution or workload. Detaching a stager returns its bytes to the seed.
+    Missing memory telemetry is handled conservatively by releasing the cache.
     Failure paths can force release; normal executor shutdown keeps its own
     unconditional device-cache cleanup because this policy is not global.
     """
@@ -64,9 +73,10 @@ class BoundedAllocatorCache:
         self.device = device
         self.min_free_fraction = min_free_fraction
         self._staged_bytes = 0
+        self._observed_cached_peak = 0
 
     def grow_retention_budget(self, staged_bytes: int) -> None:
-        """Grow the derived cache budget by a component's staged byte total."""
+        """Grow the seed cache budget by a component's staged byte total."""
         if staged_bytes < 0:
             raise ValueError(f"staged_bytes must be >= 0, got {staged_bytes}")
         self._staged_bytes += int(staged_bytes)
@@ -78,9 +88,16 @@ class BoundedAllocatorCache:
         self._staged_bytes = max(0, self._staged_bytes - int(staged_bytes))
 
     @property
+    def observed_cached_peak(self) -> int:
+        """Largest cached-but-unallocated value seen at a boundary check."""
+        return self._observed_cached_peak
+
+    @property
     def budget_bytes(self) -> int:
-        """Reusable-cache ceiling: staged bytes times the headroom multiplier."""
-        return int(self._staged_bytes * _RETENTION_HEADROOM_MULTIPLIER)
+        """Reusable-cache ceiling: seed or observed peak, whichever is larger."""
+        seed = int(self._staged_bytes * _RETENTION_HEADROOM_MULTIPLIER)
+        learned = int(self._observed_cached_peak * _OBSERVED_PEAK_MARGIN)
+        return max(seed, learned)
 
     def _should_release(self) -> bool:
         reserved = int(torch.accelerator.memory_reserved(self.device))
@@ -89,25 +106,33 @@ class BoundedAllocatorCache:
         cached = max(0, reserved - allocated)
         capacity_cap = int(total * _MAX_BUDGET_CAPACITY_FRACTION)
         budget = min(self.budget_bytes, capacity_cap)
-        if cached > budget or free < int(total * self.min_free_fraction):
+        # Decide against the pre-observation budget, then record the peak so a
+        # one-off over-budget release also teaches the budget for later checks.
+        release = cached > budget or free < int(total * self.min_free_fraction)
+        if cached > self._observed_cached_peak:
+            self._observed_cached_peak = cached
+        if release:
             reason = "cached-over-budget" if cached > budget else "low-free-memory"
             logger.debug(
                 "Releasing retained allocator cache (%s): cached=%d budget=%d staged=%d "
-                "capacity_cap=%d free=%d total=%d",
+                "observed_peak=%d capacity_cap=%d free=%d total=%d",
                 reason,
                 cached,
                 budget,
                 self._staged_bytes,
+                self._observed_cached_peak,
                 capacity_cap,
                 free,
                 total,
             )
             return True
         logger.debug(
-            "Retaining allocator cache: cached=%d budget=%d staged=%d capacity_cap=%d free=%d total=%d",
+            "Retaining allocator cache: cached=%d budget=%d staged=%d observed_peak=%d "
+            "capacity_cap=%d free=%d total=%d",
             cached,
             budget,
             self._staged_bytes,
+            self._observed_cached_peak,
             capacity_cap,
             free,
             total,

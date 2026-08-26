@@ -295,3 +295,28 @@ def test_allocator_cache_releases_when_telemetry_is_unavailable(monkeypatch, pat
 
     assert retention.release_if_needed()
     empty_cache.assert_called_once_with()
+
+
+def test_allocator_cache_budget_adapts_to_observed_peak(monkeypatch, patched_runtime):
+    empty_cache, _ = patched_runtime
+    telemetry = {"reserved": 40, "allocated": 10, "free": 80}
+    monkeypatch.setattr(torch.accelerator, "memory_reserved", lambda _device: telemetry["reserved"])
+    monkeypatch.setattr(torch.accelerator, "memory_allocated", lambda _device: telemetry["allocated"])
+    monkeypatch.setattr(
+        residency_module.current_omni_platform,
+        "get_device_memory",
+        lambda _device: (telemetry["free"], 100),
+    )
+    retention = BoundedAllocatorCache(torch.device("cpu"))
+    retention.grow_retention_budget(10)
+
+    # First boundary: cached 30 exceeds the seed budget 20, so the policy
+    # releases once and records the observed peak.
+    assert retention.release_if_needed()
+    assert retention.observed_cached_peak == 30
+
+    # The observation raises the budget to 30 * 1.25 = 37, so the same cached
+    # level is retained on every later boundary without another release.
+    assert not retention.release_if_needed()
+    assert not retention.release_if_needed()
+    assert empty_cache.call_count == 1
