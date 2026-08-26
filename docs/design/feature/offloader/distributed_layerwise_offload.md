@@ -177,18 +177,19 @@ component can be reused by the next. The DiT prefetch path and its two shared
 device buffers are unchanged.
 
 After a component is offloaded, cached-but-unallocated memory is retained only
-while it stays within a budget derived from the workload itself and at least
-5% of device capacity remains physically free. The budget starts from the
-model topology — the staged component byte total reported by the attached
-`PinnedModuleStager` instances times a seed multiplier — and then tracks the
-largest cached value observed at any component boundary: if a workload's
-transient footprint outgrows the seed, the first over-budget boundary
-releases once, the observation raises the budget to the observed peak times
-a margin, and later boundaries retain. The budget is capped at a quarter of
-device capacity so neither a large staged total nor a spurious observation
-can monopolize a small device, and a detached stager returns its bytes to the
-seed. No user-chosen fraction and no warmup flag are needed. Each decision
-logs the staged byte total, observed peak, effective budget and cap,
+while it stays within a budget learned from the running workload and at least
+5% of device capacity remains physically free. The budget is the largest
+cached value observed at any component boundary times a margin, so it tracks
+the weight-reuse payload plus the transient footprint whatever the
+resolution. It starts at zero: a cold start pays one release per observation
+step while the peak climbs, after which boundaries retain steadily, and a
+workload change whose cached footprint grows by more than the margin pays one
+further release while the new peak lands. The budget is capped at a quarter
+of device capacity so a spurious observation cannot monopolize a small
+device, and detaching the last attached stager resets the learned peak so one
+workload never permanently influences another. No user-chosen fraction, no
+multiplier constant, and no warmup flag are needed. Each decision logs the
+staged byte total, observed peak, effective budget and cap,
 cached-but-unallocated bytes, and free memory.
 Missing allocator telemetry also releases it conservatively. Component or
 staging failure forces a release, and an out-of-memory allocation gets one
