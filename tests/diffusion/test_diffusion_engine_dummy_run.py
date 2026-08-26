@@ -125,19 +125,42 @@ def _dlo_recipe_engine(enable_dlo: bool) -> DiffusionEngine:
     return engine
 
 
-def test_make_dlo_dummy_request_skipped_without_dlo(monkeypatch: pytest.MonkeyPatch) -> None:
+def _opt_out_generic_warmup(
+    monkeypatch: pytest.MonkeyPatch,
+    recipe: dict | None,
+    *,
+    supports_image_input: bool = False,
+) -> None:
+    """Make the generic dummy run opt out and stub the declared recipe."""
+
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.diffusion_engine.supports_multimodal_input",
+        lambda od_config: (supports_image_input, False),
+    )
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.diffusion_engine.get_dummy_run_num_frames",
+        lambda model_class_name, supports_audio_input: 0,
+    )
     monkeypatch.setattr(
         "vllm_omni.diffusion.diffusion_engine.get_dlo_dummy_run_recipe",
-        lambda model_class_name: {"task": "t2va"},
+        lambda model_class_name: recipe,
     )
 
-    assert _dlo_recipe_engine(enable_dlo=False)._make_dlo_dummy_request() is None
+
+def test_make_dummy_request_skips_recipe_without_dlo(monkeypatch: pytest.MonkeyPatch) -> None:
+    _opt_out_generic_warmup(monkeypatch, {"task": "t2va"})
+
+    request = _dlo_recipe_engine(enable_dlo=False)._make_dummy_request(height=512, width=512, guidance_scale=0.0)
+
+    assert request is None
 
 
-def test_make_dlo_dummy_request_builds_recipe_request(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        "vllm_omni.diffusion.diffusion_engine.get_dlo_dummy_run_recipe",
-        lambda model_class_name: {
+def test_make_dummy_request_builds_recipe_request_when_generic_opted_out(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _opt_out_generic_warmup(
+        monkeypatch,
+        {
             "task": "t2va",
             "duration": 4.0,
             "aspect_ratio": "16:9",
@@ -146,7 +169,7 @@ def test_make_dlo_dummy_request_builds_recipe_request(monkeypatch: pytest.Monkey
         },
     )
 
-    request = _dlo_recipe_engine(enable_dlo=True)._make_dlo_dummy_request()
+    request = _dlo_recipe_engine(enable_dlo=True)._make_dummy_request(height=512, width=512, guidance_scale=0.0)
 
     assert request is not None
     assert request.is_dummy_run()
@@ -159,31 +182,44 @@ def test_make_dlo_dummy_request_builds_recipe_request(monkeypatch: pytest.Monkey
     assert extra["cfg_text_scale"] == 1.0
 
 
-def test_dummy_run_falls_back_to_dlo_recipe_when_generic_opted_out(monkeypatch: pytest.MonkeyPatch) -> None:
-    engine = _dlo_recipe_engine(enable_dlo=True)
-    recipe_request = OmniDiffusionRequest(
-        prompt="dummy run",
-        request_id="dlo-dummy",
-        sampling_params=OmniDiffusionSamplingParams(num_inference_steps=2),
+def test_make_dummy_request_recipe_stays_text_only_with_image_capable_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # H3 advertises image input for fl2va, but the warmup recipe names t2va,
+    # which rejects image conditions; the recipe request must not inherit the
+    # generic dummy run's synthetic multimodal data.
+    _opt_out_generic_warmup(
+        monkeypatch,
+        {"task": "t2va", "duration": 4.0, "aspect_ratio": "16:9"},
+        supports_image_input=True,
     )
-    engine._make_dummy_request = Mock(return_value=None)
-    engine._make_dlo_dummy_request = Mock(return_value=recipe_request)
+
+    request = _dlo_recipe_engine(enable_dlo=True)._make_dummy_request(height=512, width=512, guidance_scale=0.0)
+
+    assert request is not None
+    assert not request.prompt.get("multi_modal_data")
+
+
+def test_dummy_run_sends_recipe_request_when_generic_opted_out(monkeypatch: pytest.MonkeyPatch) -> None:
+    _opt_out_generic_warmup(monkeypatch, {"task": "t2va", "duration": 15.0, "aspect_ratio": "16:9"})
+    engine = _dlo_recipe_engine(enable_dlo=True)
     engine.add_req_and_wait_for_response = Mock(return_value=SimpleNamespace(error=None, request_id="dlo-dummy"))
 
     engine._dummy_run()
 
-    engine._make_dlo_dummy_request.assert_called_once()
-    engine.add_req_and_wait_for_response.assert_called_once_with(recipe_request)
+    sent = engine.add_req_and_wait_for_response.call_args.args[0]
+    assert sent.is_dummy_run()
+    assert sent.sampling_params.extra_args["task"] == "t2va"
 
 
 def test_dummy_run_still_skips_without_recipe(monkeypatch: pytest.MonkeyPatch) -> None:
+    _opt_out_generic_warmup(monkeypatch, None)
     engine = _dlo_recipe_engine(enable_dlo=True)
-    engine._make_dummy_request = Mock(return_value=None)
-    engine._make_dlo_dummy_request = Mock(return_value=None)
+    engine.add_req_and_wait_for_response = Mock()
 
     engine._dummy_run()
 
-    engine._make_dlo_dummy_request.assert_called_once()
+    engine.add_req_and_wait_for_response.assert_not_called()
 
 
 def test_dense_mode_does_not_build_kv_profile_request() -> None:

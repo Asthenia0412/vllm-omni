@@ -65,6 +65,9 @@ logger = init_logger(__name__)
 
 _ASYNC_OUTPUT_TIMEOUT_ENV = "VLLM_OMNI_ASYNC_OUTPUT_TIMEOUT"
 _ASYNC_OUTPUT_TIMEOUT_DEFAULT = 600.0  # seconds
+# DLO warmup-recipe keys applied to the dummy request's sampling params;
+# every other recipe entry is forwarded through the request's extra_args.
+_DLO_DUMMY_RUN_SAMPLING_KEYS = frozenset({"height", "width", "num_inference_steps", "num_frames", "guidance_scale"})
 
 
 def _async_output_timeout() -> float:
@@ -1018,8 +1021,37 @@ class DiffusionEngine:
     ) -> OmniDiffusionRequest | None:
         """Build a one-step model request for startup profiling or warmup."""
 
-        prompt: OmniTextPrompt = {"prompt": "dummy run"}
         supports_image_input, supports_audio_input = supports_multimodal_input(self.od_config)
+        num_frames = get_dummy_run_num_frames(self.od_config.model_class_name, supports_audio_input)
+        if num_frames <= 0:
+            # The model opted out of the generic dummy run. Under distributed
+            # layerwise offload, fall back to its declared warmup recipe so one
+            # startup generation primes the component allocator-cache
+            # retention policy ahead of real traffic. The recipe names its own
+            # task, so the request stays text-only even when the model's other
+            # tasks accept image or audio conditions.
+            if not getattr(self.od_config, "enable_distributed_layerwise_offload", False):
+                return None
+            recipe = get_dlo_dummy_run_recipe(self.od_config.model_class_name)
+            if recipe is None:
+                return None
+            extra_args: dict[str, Any] = {"cfg_text_scale": 1.0, "cfg_img_scale": 1.0}
+            extra_args.update({k: v for k, v in recipe.items() if k not in _DLO_DUMMY_RUN_SAMPLING_KEYS})
+            return OmniDiffusionRequest(
+                prompt={"prompt": "dummy run"},
+                request_id=DUMMY_DIFFUSION_REQUEST_ID,
+                sampling_params=OmniDiffusionSamplingParams(
+                    height=int(recipe.get("height", height)),
+                    width=int(recipe.get("width", width)),
+                    num_inference_steps=int(recipe.get("num_inference_steps", 1)),
+                    num_frames=int(recipe.get("num_frames", 0)),
+                    guidance_scale=float(recipe.get("guidance_scale", guidance_scale)),
+                    num_outputs_per_prompt=1,
+                    extra_args=extra_args,
+                ),
+            )
+
+        prompt: OmniTextPrompt = {"prompt": "dummy run"}
         if supports_image_input:
             color_format = image_color_format(self.od_config.model_class_name)
             images = [PIL.Image.new(color_format, (width, height)) for _ in range(num_image_inputs)]
@@ -1029,9 +1061,6 @@ class DiffusionEngine:
             audio_sr = 16000
             prompt.setdefault("multi_modal_data", {})["audio"] = np.random.randn(audio_sr * 2).astype(np.float32)
 
-        num_frames = get_dummy_run_num_frames(self.od_config.model_class_name, supports_audio_input)
-        if num_frames <= 0:
-            return None
         return OmniDiffusionRequest(
             prompt=prompt,
             request_id=DUMMY_DIFFUSION_REQUEST_ID,
@@ -1103,10 +1132,6 @@ class DiffusionEngine:
             profile_requests.append(profile_request)
         return profile_requests
 
-    # Sampling-recipe keys consumed by _make_dlo_dummy_request directly;
-    # everything else is forwarded through the request's extra_args.
-    _DLO_DUMMY_RUN_SAMPLING_KEYS = frozenset({"height", "width", "num_inference_steps", "num_frames", "guidance_scale"})
-
     def _dummy_run(self):
         """A dummy run to warm up the model."""
         req = self._make_dummy_request(
@@ -1115,46 +1140,12 @@ class DiffusionEngine:
             guidance_scale=0.0,
         )
         if req is None:
-            req = self._make_dlo_dummy_request()
-            if req is None:
-                logger.info("Skipping dummy warmup run (num_frames=0)")
-                return
+            logger.info("Skipping dummy warmup run (num_frames=0)")
+            return
         logger.info("dummy run to warm up the model")
         output = self.add_req_and_wait_for_response(req)
         if output.error:
             raise RuntimeError(f"Dummy run failed: {output.error}")
-
-    def _make_dlo_dummy_request(self) -> OmniDiffusionRequest | None:
-        """Build the model-declared startup warmup used under distributed offload.
-
-        Models whose request geometry needs model-specific sampling arguments
-        (task, duration, aspect ratio, ...) opt out of the generic dummy run
-        and declare ``dlo_dummy_run_recipe`` instead. Under distributed
-        layerwise offload one startup generation also primes the component
-        allocator-cache retention policy's observed-peak budget, so the
-        cold-start flushes land before real traffic.
-        """
-
-        if not getattr(self.od_config, "enable_distributed_layerwise_offload", False):
-            return None
-        recipe = get_dlo_dummy_run_recipe(self.od_config.model_class_name)
-        if recipe is None:
-            return None
-        extra_args: dict[str, Any] = {"cfg_text_scale": 1.0, "cfg_img_scale": 1.0}
-        extra_args.update({k: v for k, v in recipe.items() if k not in self._DLO_DUMMY_RUN_SAMPLING_KEYS})
-        return OmniDiffusionRequest(
-            prompt={"prompt": "dummy run"},
-            request_id=DUMMY_DIFFUSION_REQUEST_ID,
-            sampling_params=OmniDiffusionSamplingParams(
-                height=int(recipe.get("height", 512)),
-                width=int(recipe.get("width", 512)),
-                num_inference_steps=int(recipe.get("num_inference_steps", 1)),
-                num_frames=int(recipe.get("num_frames", 0)),
-                guidance_scale=float(recipe.get("guidance_scale", 0.0)),
-                num_outputs_per_prompt=1,
-                extra_args=extra_args,
-            ),
-        )
 
     def _submit_rpc(
         self,
