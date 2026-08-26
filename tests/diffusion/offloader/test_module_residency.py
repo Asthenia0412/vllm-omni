@@ -305,7 +305,9 @@ def test_allocator_cache_budget_adapts_to_observed_peak(monkeypatch, patched_run
     monkeypatch.setattr(
         residency_module.current_omni_platform,
         "get_device_memory",
-        lambda _device: (telemetry["free"], 100),
+        # Capacity 400 keeps the 25% cap (100) above the learned budget so
+        # this test isolates the peak-adaptation behavior from the cap.
+        lambda _device: (telemetry["free"], 400),
     )
     retention = BoundedAllocatorCache(torch.device("cpu"))
     retention.grow_retention_budget(10)
