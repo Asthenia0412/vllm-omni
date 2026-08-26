@@ -180,9 +180,14 @@ After a component is offloaded, cached-but-unallocated memory is retained only
 while it stays within a budget derived from the model topology — the staged
 component byte total reported by the attached `PinnedModuleStager` instances
 times a fixed headroom multiplier — and at least 5% of device capacity
-remains physically free. Crossing either bound releases the allocator cache,
-so the budget scales with the staged components rather than with device
-capacity and needs no user-chosen fraction.
+remains physically free. The derived budget is capped at a quarter of device
+capacity so a large staged total cannot monopolize a small device, and a
+detached stager returns its bytes to the budget. Crossing either bound
+releases the allocator cache, so the budget scales with the staged components
+rather than with device capacity and needs no user-chosen fraction. Each
+release decision logs the staged byte total, the effective budget and cap,
+cached-but-unallocated bytes, and free memory, so a target run can validate
+the headroom multiplier directly.
 Missing allocator telemetry also releases it conservatively. Component or
 staging failure forces a release, and an out-of-memory allocation gets one
 retry after release. This is a component-local policy rather than a global

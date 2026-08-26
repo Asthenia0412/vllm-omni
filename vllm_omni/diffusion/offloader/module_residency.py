@@ -25,6 +25,10 @@ logger = init_logger(__name__)
 # weights at component boundaries, so the reusable payload alone under-bounds
 # the working set the policy must keep to be effective.
 _RETENTION_HEADROOM_MULTIPLIER = 2.0
+# Hard ceiling for the derived budget so a large staged total can never
+# monopolize a small device; the #6526 L20X retention plateau (~23.8 GB on a
+# ~140 GB card) stayed well below this fraction.
+_MAX_BUDGET_CAPACITY_FRACTION = 0.25
 
 
 class BoundedAllocatorCache:
@@ -37,15 +41,16 @@ class BoundedAllocatorCache:
 
     * cached-but-unallocated memory stays within the derived budget: the
       staged component byte total reported by attached ``PinnedModuleStager``
-      instances times a fixed headroom multiplier; and
+      instances times a fixed headroom multiplier, capped at a quarter of
+      device capacity; and
     * at least 5% of device capacity is physically free.
 
     The budget derives from the model topology instead of a user-chosen
     fraction, so it scales with the staged components rather than with device
-    capacity. Missing memory telemetry is handled conservatively by releasing
-    the cache. Failure paths can force release; normal executor shutdown keeps
-    its own unconditional device-cache cleanup because this policy is not
-    global.
+    capacity. Detaching a stager returns its bytes to the budget. Missing
+    memory telemetry is handled conservatively by releasing the cache.
+    Failure paths can force release; normal executor shutdown keeps its own
+    unconditional device-cache cleanup because this policy is not global.
     """
 
     def __init__(
@@ -66,6 +71,12 @@ class BoundedAllocatorCache:
             raise ValueError(f"staged_bytes must be >= 0, got {staged_bytes}")
         self._staged_bytes += int(staged_bytes)
 
+    def shrink_retention_budget(self, staged_bytes: int) -> None:
+        """Return bytes previously grown, e.g. when a stager detaches."""
+        if staged_bytes < 0:
+            raise ValueError(f"staged_bytes must be >= 0, got {staged_bytes}")
+        self._staged_bytes = max(0, self._staged_bytes - int(staged_bytes))
+
     @property
     def budget_bytes(self) -> int:
         """Reusable-cache ceiling: staged bytes times the headroom multiplier."""
@@ -76,7 +87,32 @@ class BoundedAllocatorCache:
         allocated = int(torch.accelerator.memory_allocated(self.device))
         free, total = current_omni_platform.get_device_memory(self.device)
         cached = max(0, reserved - allocated)
-        return cached > self.budget_bytes or free < int(total * self.min_free_fraction)
+        capacity_cap = int(total * _MAX_BUDGET_CAPACITY_FRACTION)
+        budget = min(self.budget_bytes, capacity_cap)
+        if cached > budget or free < int(total * self.min_free_fraction):
+            reason = "cached-over-budget" if cached > budget else "low-free-memory"
+            logger.debug(
+                "Releasing retained allocator cache (%s): cached=%d budget=%d staged=%d "
+                "capacity_cap=%d free=%d total=%d",
+                reason,
+                cached,
+                budget,
+                self._staged_bytes,
+                capacity_cap,
+                free,
+                total,
+            )
+            return True
+        logger.debug(
+            "Retaining allocator cache: cached=%d budget=%d staged=%d capacity_cap=%d free=%d total=%d",
+            cached,
+            budget,
+            self._staged_bytes,
+            capacity_cap,
+            free,
+            total,
+        )
+        return False
 
     def release_if_needed(self, *, force: bool = False) -> bool:
         """Release cached blocks when a bound is crossed or release is forced."""
@@ -227,6 +263,8 @@ class PinnedModuleStager:
     def set_cache_retention(self, cache_retention: BoundedAllocatorCache | None) -> None:
         if cache_retention is self.cache_retention:
             return
+        if self.cache_retention is not None:
+            self.cache_retention.shrink_retention_budget(self.staged_bytes)
         self.cache_retention = cache_retention
         if cache_retention is not None:
             cache_retention.grow_retention_budget(self.staged_bytes)
@@ -269,6 +307,10 @@ class PinnedModuleStager:
         except torch.OutOfMemoryError:
             # A retained cache is normally reusable by this process, but an
             # explicit flush gives external memory pressure one bounded retry.
+            logger.info(
+                "Staging out of memory (%d staged bytes); releasing retained cache and retrying once",
+                self.staged_bytes,
+            )
             self._cleanup_failed_load()
             try:
                 self._load_once()

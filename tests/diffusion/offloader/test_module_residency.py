@@ -237,10 +237,51 @@ def test_allocator_cache_budget_is_derived_from_attached_stager_bytes(patched_ru
     stager.set_cache_retention(retention)
     assert retention.budget_bytes == 2 * expected_bytes
 
+    # Detaching and re-attaching the same cache also counts the bytes once.
+    stager.set_cache_retention(None)
+    assert retention.budget_bytes == 0
+    stager.set_cache_retention(retention)
+    assert retention.budget_bytes == 2 * expected_bytes
+
     # A second stager grows the budget by its own staged bytes.
     extra = PinnedModuleStager(torch.nn.Linear(2, 2), torch.device("cpu"), pin_memory=False)
     extra.set_cache_retention(retention)
     assert retention.budget_bytes == 2 * (expected_bytes + extra.staged_bytes)
+
+
+@pytest.mark.parametrize(
+    ("reserved", "allocated", "free", "expected_release"),
+    [
+        # Derived budget 2 * 1000 = 2000 uncapped, but capacity cap = 25 and
+        # cached = 30 exceeds it, so the cap must trigger the release.
+        (40, 10, 80, True),
+        # Within the cap (cached = 20 <= 25) and the free floor holds.
+        (30, 10, 80, False),
+    ],
+)
+def test_allocator_cache_budget_is_capped_by_device_capacity(
+    monkeypatch,
+    patched_runtime,
+    reserved,
+    allocated,
+    free,
+    expected_release,
+):
+    empty_cache, _ = patched_runtime
+    monkeypatch.setattr(torch.accelerator, "memory_reserved", lambda _device: reserved)
+    monkeypatch.setattr(torch.accelerator, "memory_allocated", lambda _device: allocated)
+    monkeypatch.setattr(
+        residency_module.current_omni_platform,
+        "get_device_memory",
+        lambda _device: (free, 100),
+    )
+    retention = BoundedAllocatorCache(torch.device("cpu"))
+    retention.grow_retention_budget(1000)
+
+    released = retention.release_if_needed()
+
+    assert released is expected_release
+    assert empty_cache.call_count == int(expected_release)
 
 
 def test_allocator_cache_releases_when_telemetry_is_unavailable(monkeypatch, patched_runtime):
