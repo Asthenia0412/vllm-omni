@@ -34,9 +34,9 @@ from vllm_omni.diffusion.diffusion_kv.config import DiffusionKVCacheMode, is_sch
 from vllm_omni.diffusion.diffusion_kv.initialization import initialize_diffusion_kv_control_plane
 from vllm_omni.diffusion.executor.abstract import DiffusionExecutor
 from vllm_omni.diffusion.io_support import (
-    get_dlo_dummy_run_recipe,
     get_dummy_run_num_frames,
     get_dummy_run_num_image_inputs,
+    get_dummy_run_recipe,
     image_color_format,
     supports_audio_output,
     supports_multimodal_input,
@@ -65,9 +65,9 @@ logger = init_logger(__name__)
 
 _ASYNC_OUTPUT_TIMEOUT_ENV = "VLLM_OMNI_ASYNC_OUTPUT_TIMEOUT"
 _ASYNC_OUTPUT_TIMEOUT_DEFAULT = 600.0  # seconds
-# DLO warmup-recipe keys applied to the dummy request's sampling params;
-# every other recipe entry is forwarded through the request's extra_args.
-_DLO_DUMMY_RUN_SAMPLING_KEYS = frozenset({"height", "width", "num_inference_steps", "num_frames", "guidance_scale"})
+# Warmup-recipe keys applied to the dummy request's sampling params; every
+# other recipe entry is forwarded through the request's extra_args.
+_DUMMY_RUN_RECIPE_SAMPLING_KEYS = frozenset({"height", "width", "num_inference_steps", "num_frames", "guidance_scale"})
 
 
 def _async_output_timeout() -> float:
@@ -1024,19 +1024,18 @@ class DiffusionEngine:
         supports_image_input, supports_audio_input = supports_multimodal_input(self.od_config)
         num_frames = get_dummy_run_num_frames(self.od_config.model_class_name, supports_audio_input)
         if num_frames <= 0:
-            # The model opted out of the generic dummy run. Under distributed
-            # layerwise offload, fall back to its declared warmup recipe so one
-            # startup generation primes the component allocator-cache
-            # retention policy ahead of real traffic. The recipe names its own
-            # task, so the request stays text-only even when the model's other
-            # tasks accept image or audio conditions.
-            if not getattr(self.od_config, "enable_distributed_layerwise_offload", False):
-                return None
-            recipe = get_dlo_dummy_run_recipe(self.od_config.model_class_name)
+            # The model opted out of the generic dummy run; fall back to its
+            # declared warmup recipe, which supplies whatever feature-specific
+            # sampling arguments the model requires (under distributed
+            # layerwise offload the generation also primes the component
+            # allocator-cache retention policy ahead of real traffic). The
+            # recipe names its own task, so the request stays text-only even
+            # when the model's other tasks accept image or audio conditions.
+            recipe = get_dummy_run_recipe(self.od_config.model_class_name)
             if recipe is None:
                 return None
             extra_args: dict[str, Any] = {"cfg_text_scale": 1.0, "cfg_img_scale": 1.0}
-            extra_args.update({k: v for k, v in recipe.items() if k not in _DLO_DUMMY_RUN_SAMPLING_KEYS})
+            extra_args.update({k: v for k, v in recipe.items() if k not in _DUMMY_RUN_RECIPE_SAMPLING_KEYS})
             return OmniDiffusionRequest(
                 prompt={"prompt": "dummy run"},
                 request_id=DUMMY_DIFFUSION_REQUEST_ID,

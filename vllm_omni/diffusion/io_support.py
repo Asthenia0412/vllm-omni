@@ -55,18 +55,19 @@ def get_dummy_run_num_frames(model_class_name: str, supports_audio_input: bool) 
     return 2 if supports_audio_input or supports_audio_output(model_class_name) else 1
 
 
-def get_dlo_dummy_run_recipe(model_class_name: str) -> dict[str, Any] | None:
-    """Get the model-declared DLO startup-warmup recipe, or None.
+def get_dummy_run_recipe(model_class_name: str) -> dict[str, Any] | None:
+    """Get the model-declared startup-warmup recipe, or None.
 
     Models that opt out of the generic dummy run (``dummy_run_num_frames = 0``)
-    because their request geometry needs model-specific sampling arguments can
-    still declare a recipe used only when distributed layerwise offload is
-    enabled, where one startup generation primes the component allocator-cache
-    retention policy.
+    because their request geometry needs model-specific sampling arguments
+    (task, duration, aspect ratio, ...) declare a recipe instead. The recipe
+    is feature-neutral: the engine runs it at startup whatever features are
+    enabled — under distributed layerwise offload the generation also primes
+    the component allocator-cache retention policy's observed-peak budget.
     """
 
     model_cls = DiffusionModelRegistry._try_load_model_cls(model_class_name)
-    recipe = getattr(model_cls, "dlo_dummy_run_recipe", None) if model_cls is not None else None
+    recipe = getattr(model_cls, "dummy_run_recipe", None) if model_cls is not None else None
     return dict(recipe) if recipe else None
 
 

@@ -69,13 +69,13 @@ omni = Omni(
 
 ## Startup warmup
 
-Under DLO, models that need model-specific sampling arguments for a warmup
-generation (currently MiniMax-H3: `t2va`, an explicit aspect ratio) run one
-at engine startup. It runs at the maximum output duration so the component
-allocator-cache retention policy learns a footprint that covers every
-production request: the cold-start flushes happen during startup and no real
-request pays them. The tradeoff is one maximum-length generation added to
-boot time; on deployments without DLO the behavior is unchanged.
+Models whose request geometry needs model-specific sampling arguments for a
+warmup generation (currently MiniMax-H3: `t2va`, an explicit aspect ratio)
+run one at engine startup whatever features are enabled. It runs at the
+maximum output duration so it covers every production request; under DLO
+this means the component allocator-cache retention policy learns its
+footprint during startup and no real request pays the cold-start flushes.
+The tradeoff is one maximum-length generation added to boot time.
 
 ## Host-weight loading
 
