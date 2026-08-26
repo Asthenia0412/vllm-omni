@@ -704,6 +704,20 @@ class MiniMaxH3Pipeline(
         "post_decode",
     ]
     dummy_run_num_frames: ClassVar[int] = 0
+    # Startup warmup used only when distributed layerwise offload is enabled:
+    # the generic dummy run cannot satisfy t2va's required sampling arguments
+    # (explicit aspect ratio, bounded duration). Duration is the only workload
+    # variable at the fixed 768 short edge, so warming at the maximum makes the
+    # learned cache-retention peak dominate every production request and moves
+    # all cold-start flushes ahead of real traffic, at the cost of one
+    # max-length generation in boot time.
+    dlo_dummy_run_recipe: ClassVar[Mapping[str, Any] | None] = {
+        "task": "t2va",
+        "duration": MINIMAX_H3_MAX_OUTPUT_SECONDS,
+        "aspect_ratio": "16:9",
+        "num_inference_steps": 2,
+        "guidance_scale": 1.0,
+    }
     # Only distilled releases pin a schedule, so the default keeps the legacy
     # uniform path available to partially constructed pipelines.
     _base_schedule_by_partition: ClassVar[Mapping[str, DMD2SigmaSchedule | None]] = {}

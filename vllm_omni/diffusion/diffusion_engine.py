@@ -34,6 +34,7 @@ from vllm_omni.diffusion.diffusion_kv.config import DiffusionKVCacheMode, is_sch
 from vllm_omni.diffusion.diffusion_kv.initialization import initialize_diffusion_kv_control_plane
 from vllm_omni.diffusion.executor.abstract import DiffusionExecutor
 from vllm_omni.diffusion.io_support import (
+    get_dlo_dummy_run_recipe,
     get_dummy_run_num_frames,
     get_dummy_run_num_image_inputs,
     image_color_format,
@@ -1102,6 +1103,10 @@ class DiffusionEngine:
             profile_requests.append(profile_request)
         return profile_requests
 
+    # Sampling-recipe keys consumed by _make_dlo_dummy_request directly;
+    # everything else is forwarded through the request's extra_args.
+    _DLO_DUMMY_RUN_SAMPLING_KEYS = frozenset({"height", "width", "num_inference_steps", "num_frames", "guidance_scale"})
+
     def _dummy_run(self):
         """A dummy run to warm up the model."""
         req = self._make_dummy_request(
@@ -1110,12 +1115,46 @@ class DiffusionEngine:
             guidance_scale=0.0,
         )
         if req is None:
-            logger.info("Skipping dummy warmup run (num_frames=0)")
-            return
+            req = self._make_dlo_dummy_request()
+            if req is None:
+                logger.info("Skipping dummy warmup run (num_frames=0)")
+                return
         logger.info("dummy run to warm up the model")
         output = self.add_req_and_wait_for_response(req)
         if output.error:
             raise RuntimeError(f"Dummy run failed: {output.error}")
+
+    def _make_dlo_dummy_request(self) -> OmniDiffusionRequest | None:
+        """Build the model-declared startup warmup used under distributed offload.
+
+        Models whose request geometry needs model-specific sampling arguments
+        (task, duration, aspect ratio, ...) opt out of the generic dummy run
+        and declare ``dlo_dummy_run_recipe`` instead. Under distributed
+        layerwise offload one startup generation also primes the component
+        allocator-cache retention policy's observed-peak budget, so the
+        cold-start flushes land before real traffic.
+        """
+
+        if not getattr(self.od_config, "enable_distributed_layerwise_offload", False):
+            return None
+        recipe = get_dlo_dummy_run_recipe(self.od_config.model_class_name)
+        if recipe is None:
+            return None
+        extra_args: dict[str, Any] = {"cfg_text_scale": 1.0, "cfg_img_scale": 1.0}
+        extra_args.update({k: v for k, v in recipe.items() if k not in self._DLO_DUMMY_RUN_SAMPLING_KEYS})
+        return OmniDiffusionRequest(
+            prompt={"prompt": "dummy run"},
+            request_id=DUMMY_DIFFUSION_REQUEST_ID,
+            sampling_params=OmniDiffusionSamplingParams(
+                height=int(recipe.get("height", 512)),
+                width=int(recipe.get("width", 512)),
+                num_inference_steps=int(recipe.get("num_inference_steps", 1)),
+                num_frames=int(recipe.get("num_frames", 0)),
+                guidance_scale=float(recipe.get("guidance_scale", 0.0)),
+                num_outputs_per_prompt=1,
+                extra_args=extra_args,
+            ),
+        )
 
     def _submit_rpc(
         self,

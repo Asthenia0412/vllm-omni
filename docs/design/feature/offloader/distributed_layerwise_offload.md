@@ -184,7 +184,10 @@ the weight-reuse payload plus the transient footprint whatever the
 resolution. It starts at zero: a cold start pays one release per observation
 step while the peak climbs, after which boundaries retain steadily, and a
 workload change whose cached footprint grows by more than the margin pays one
-further release while the new peak lands. The budget is capped at a quarter
+further release while the new peak lands. Models whose request geometry opts
+out of the generic dummy run can declare `dlo_dummy_run_recipe`; MiniMax-H3
+declares one minimal t2va generation, so under DLO the engine's startup
+warmup runs it and the cold-start flushes land before real traffic. The budget is capped at a quarter
 of device capacity so a spurious observation cannot monopolize a small
 device, and detaching the last attached stager resets the learned peak so one
 workload never permanently influences another. No user-chosen fraction, no

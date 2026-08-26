@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import inspect
+from typing import Any
 
 from vllm_omni.diffusion.data import OmniDiffusionConfig
 from vllm_omni.diffusion.model_metadata import get_diffusion_model_metadata
@@ -52,6 +53,21 @@ def get_dummy_run_num_frames(model_class_name: str, supports_audio_input: bool) 
     if model_cls is not None and hasattr(model_cls, "dummy_run_num_frames"):
         return int(getattr(model_cls, "dummy_run_num_frames"))
     return 2 if supports_audio_input or supports_audio_output(model_class_name) else 1
+
+
+def get_dlo_dummy_run_recipe(model_class_name: str) -> dict[str, Any] | None:
+    """Get the model-declared DLO startup-warmup recipe, or None.
+
+    Models that opt out of the generic dummy run (``dummy_run_num_frames = 0``)
+    because their request geometry needs model-specific sampling arguments can
+    still declare a recipe used only when distributed layerwise offload is
+    enabled, where one startup generation primes the component allocator-cache
+    retention policy.
+    """
+
+    model_cls = DiffusionModelRegistry._try_load_model_cls(model_class_name)
+    recipe = getattr(model_cls, "dlo_dummy_run_recipe", None) if model_cls is not None else None
+    return dict(recipe) if recipe else None
 
 
 def get_dummy_run_num_image_inputs(model_class_name: str) -> int:

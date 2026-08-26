@@ -70,6 +70,122 @@ def test_dummy_run_image_count_resolves_hunyuan_architecture_alias() -> None:
     assert io_support.get_dummy_run_num_image_inputs("unknown") == 1
 
 
+def test_dlo_dummy_run_recipe_returns_none_without_declaration(monkeypatch: pytest.MonkeyPatch) -> None:
+    class PlainModel:
+        pass
+
+    monkeypatch.setattr(
+        io_support.DiffusionModelRegistry,
+        "_try_load_model_cls",
+        lambda model_class_name: PlainModel,
+    )
+
+    assert io_support.get_dlo_dummy_run_recipe("plain") is None
+
+
+def test_dlo_dummy_run_recipe_returns_copy_of_declaration(monkeypatch: pytest.MonkeyPatch) -> None:
+    declared = {"task": "t2va", "duration": 4.0}
+
+    class RecipeModel:
+        dlo_dummy_run_recipe = declared
+
+    monkeypatch.setattr(
+        io_support.DiffusionModelRegistry,
+        "_try_load_model_cls",
+        lambda model_class_name: RecipeModel,
+    )
+
+    recipe = io_support.get_dlo_dummy_run_recipe("recipe")
+    assert recipe == declared
+    assert recipe is not declared
+
+
+def test_minimax_h3_declares_a_valid_dlo_warmup_recipe() -> None:
+    from vllm_omni.diffusion.models.minimax_h3.pipeline_minimax_h3 import (
+        MINIMAX_H3_MAX_OUTPUT_SECONDS,
+        MiniMaxH3Pipeline,
+    )
+
+    recipe = MiniMaxH3Pipeline.dlo_dummy_run_recipe
+    assert recipe is not None
+    assert recipe["task"] == "t2va"
+    assert recipe["aspect_ratio"] == "16:9"
+    # Maximum duration makes the learned peak dominate every production
+    # request at the fixed short edge, so no real request re-learns.
+    assert float(recipe["duration"]) == MINIMAX_H3_MAX_OUTPUT_SECONDS
+    assert MiniMaxH3Pipeline.dummy_run_num_frames == 0  # generic warmup stays opted out
+
+
+def _dlo_recipe_engine(enable_dlo: bool) -> DiffusionEngine:
+    engine = object.__new__(DiffusionEngine)
+    engine.od_config = SimpleNamespace(
+        model_class_name="RecipeModel",
+        enable_distributed_layerwise_offload=enable_dlo,
+    )
+    return engine
+
+
+def test_make_dlo_dummy_request_skipped_without_dlo(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.diffusion_engine.get_dlo_dummy_run_recipe",
+        lambda model_class_name: {"task": "t2va"},
+    )
+
+    assert _dlo_recipe_engine(enable_dlo=False)._make_dlo_dummy_request() is None
+
+
+def test_make_dlo_dummy_request_builds_recipe_request(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "vllm_omni.diffusion.diffusion_engine.get_dlo_dummy_run_recipe",
+        lambda model_class_name: {
+            "task": "t2va",
+            "duration": 4.0,
+            "aspect_ratio": "16:9",
+            "num_inference_steps": 2,
+            "guidance_scale": 1.0,
+        },
+    )
+
+    request = _dlo_recipe_engine(enable_dlo=True)._make_dlo_dummy_request()
+
+    assert request is not None
+    assert request.is_dummy_run()
+    assert request.sampling_params.num_inference_steps == 2
+    assert request.sampling_params.guidance_scale == 1.0
+    extra = request.sampling_params.extra_args
+    assert extra["task"] == "t2va"
+    assert extra["duration"] == 4.0
+    assert extra["aspect_ratio"] == "16:9"
+    assert extra["cfg_text_scale"] == 1.0
+
+
+def test_dummy_run_falls_back_to_dlo_recipe_when_generic_opted_out(monkeypatch: pytest.MonkeyPatch) -> None:
+    engine = _dlo_recipe_engine(enable_dlo=True)
+    recipe_request = OmniDiffusionRequest(
+        prompt="dummy run",
+        request_id="dlo-dummy",
+        sampling_params=OmniDiffusionSamplingParams(num_inference_steps=2),
+    )
+    engine._make_dummy_request = Mock(return_value=None)
+    engine._make_dlo_dummy_request = Mock(return_value=recipe_request)
+    engine.add_req_and_wait_for_response = Mock(return_value=SimpleNamespace(error=None, request_id="dlo-dummy"))
+
+    engine._dummy_run()
+
+    engine._make_dlo_dummy_request.assert_called_once()
+    engine.add_req_and_wait_for_response.assert_called_once_with(recipe_request)
+
+
+def test_dummy_run_still_skips_without_recipe(monkeypatch: pytest.MonkeyPatch) -> None:
+    engine = _dlo_recipe_engine(enable_dlo=True)
+    engine._make_dummy_request = Mock(return_value=None)
+    engine._make_dlo_dummy_request = Mock(return_value=None)
+
+    engine._dummy_run()
+
+    engine._make_dlo_dummy_request.assert_called_once()
+
+
 def test_dense_mode_does_not_build_kv_profile_request() -> None:
     engine = object.__new__(DiffusionEngine)
     engine.od_config = SimpleNamespace(diffusion_kv_mode=DiffusionKVCacheMode.DENSE_LEGACY)
