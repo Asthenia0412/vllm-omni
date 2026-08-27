@@ -140,9 +140,7 @@ def test_ar_update_from_output_carries_ec_params_to_engine_output() -> None:
     sched = _make_finish_sched(request)
     sched._update_request_with_output.return_value = ([42], True)
 
-    engine_core_outputs = OmniARScheduler.update_from_output(
-        sched, *_finish_frame_parts(request)
-    )
+    engine_core_outputs = OmniARScheduler.update_from_output(sched, *_finish_frame_parts(request))
 
     (eco,) = engine_core_outputs[request.client_index].outputs
     assert eco.ec_transfer_params == EC_PARAMS
@@ -175,9 +173,7 @@ def test_generation_update_from_output_carries_ec_params_to_engine_output() -> N
     request.num_computed_tokens = len(request.prompt_token_ids)
     sched = _make_finish_sched(request)
 
-    engine_core_outputs = OmniGenerationScheduler.update_from_output(
-        sched, *_finish_frame_parts(request)
-    )
+    engine_core_outputs = OmniGenerationScheduler.update_from_output(sched, *_finish_frame_parts(request))
 
     (eco,) = engine_core_outputs[request.client_index].outputs
     assert eco.ec_transfer_params == EC_PARAMS

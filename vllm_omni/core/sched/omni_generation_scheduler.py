@@ -515,9 +515,7 @@ class OmniGenerationScheduler(OmniSchedulerMixin, VLLMScheduler):
             if new_token_ids or mm_output is not None or pooler_output is not None or stopped:
                 prefill_stats = request.take_prefill_stats()
                 if prefill_stats is not None:
-                    prefill_stats.finalize(
-                        self.kv_cache_manager.estimate_cached_tokens(request)
-                    )
+                    prefill_stats.finalize(self.kv_cache_manager.estimate_cached_tokens(request))
 
             if stopped:
                 if model_runner_output.routed_experts is not None:

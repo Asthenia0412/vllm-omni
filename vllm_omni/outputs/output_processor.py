@@ -587,9 +587,7 @@ class MultimodalOutputProcessor(VLLMOutputProcessor):
             prefill_stats = getattr(eco, "prefill_stats", None)
             if prefill_stats is not None:
                 req_state.num_cached_tokens = prefill_stats.num_cached_tokens
-                req_state.num_cache_creation_tokens = (
-                    prefill_stats.num_cache_creation_tokens
-                )
+                req_state.num_cache_creation_tokens = prefill_stats.num_cache_creation_tokens
             req_state.is_prefilling = False
 
             is_non_final_audio_chunk = (
