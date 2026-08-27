@@ -347,6 +347,22 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
         ec_connector_output = getattr(model_runner_output, "ec_connector_output", None)
         cudagraph_stats: CUDAGraphStat | None = model_runner_output.cudagraph_stats
 
+        # Every GPU write enqueued by this and earlier steps has completed, so
+        # it is safe to return deferred-free blocks to the pool. This is the
+        # update-side half of the upstream v0.28 deferred-free fence; the schedule
+        # half advances sched_step_seq inside super().schedule().
+        # getattr: __new__-constructed test schedulers carry no
+        # defer_block_free attribute.
+        if (
+            getattr(self, "defer_block_free", False)
+            # getattr again: SchedulerOutput is mocked field-by-field in the
+            # scheduler unit tests, and dataclass fields without defaults are
+            # invisible to MagicMock(spec=...).
+            and getattr(scheduler_output, "total_num_scheduled_tokens", 0) > 0
+        ):
+            self.processed_step_seq += 1
+            self._drain_deferred_frees()
+
         perf_stats: PerfStats | None = None
         if self.perf_metrics and self.perf_metrics.is_enabled():
             perf_stats = self.perf_metrics.get_step_perf_stats_per_gpu(scheduler_output)

@@ -312,6 +312,16 @@ class OmniGenerationScheduler(OmniSchedulerMixin, VLLMScheduler):
             ec_meta = self.ec_connector.build_connector_meta(scheduler_output)
             scheduler_output.ec_connector_metadata = ec_meta
 
+        # Advance the fence only for non-empty steps (those that actually
+        # write KV and have their output processed later in
+        # update_from_output). Must precede _update_after_schedule, which
+        # stamps request.last_sched_seq from the advanced value; the other
+        # half drains in update_from_output. The fallback path above gets
+        # both halves from super().schedule(). getattr: __new__-constructed
+        # test schedulers carry no defer_block_free attribute.
+        if getattr(self, "defer_block_free", False) and total_num_scheduled_tokens > 0:
+            self.sched_step_seq += 1
+
         # Update internal state (advance num_computed_tokens, free encoder inputs,
         # etc.)
         self._update_after_schedule(scheduler_output)
@@ -351,6 +361,23 @@ class OmniGenerationScheduler(OmniSchedulerMixin, VLLMScheduler):
         ec_connector_output = getattr(model_runner_output, "ec_connector_output", None)
 
         cudagraph_stats: CUDAGraphStat | None = model_runner_output.cudagraph_stats
+
+        # Every GPU write enqueued by this and earlier steps has completed, so
+        # it is safe to return deferred-free blocks to the pool. This is the
+        # update-side half of the upstream v0.28 deferred-free fence; the schedule
+        # half advances sched_step_seq in the fast path above.
+        # getattr: __new__-constructed test schedulers carry no
+        # defer_block_free attribute.
+        if (
+            getattr(self, "defer_block_free", False)
+            # getattr again: SchedulerOutput is mocked field-by-field in the
+            # scheduler unit tests, and dataclass fields without defaults are
+            # invisible to MagicMock(spec=...).
+            and getattr(scheduler_output, "total_num_scheduled_tokens", 0) > 0
+        ):
+            self.processed_step_seq += 1
+            self._drain_deferred_frees()
+
         perf_stats: PerfStats | None = None
         if self.perf_metrics and self.perf_metrics.is_enabled():
             perf_stats = self.perf_metrics.get_step_perf_stats_per_gpu(scheduler_output)
