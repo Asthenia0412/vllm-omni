@@ -560,6 +560,19 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
                     request.resumable = False
                     stopped = True
 
+            # Finalize prefill stats BEFORE stop handling (upstream v0.28
+            # order): _free_request below releases the KV blocks, after which
+            # estimate_cached_tokens(request) reports 0. kv_transfer_params is
+            # omitted from the emission predicate here because it only becomes
+            # non-None when stopped is already True.
+            prefill_stats = None
+            if new_token_ids or mm_output is not None or pooler_output is not None or stopped:
+                prefill_stats = request.take_prefill_stats()
+                if prefill_stats is not None:
+                    prefill_stats.finalize(
+                        self.kv_cache_manager.estimate_cached_tokens(request)
+                    )
+
             confirmed_num_computed_tokens = None
             if stopped:
                 if self.chunk_transfer_adapter is not None:
@@ -643,7 +656,7 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
                     pooling_output=pooling_output_payload,
                     multimodal_output=mm_output,
                     stop_reason=request.stop_reason,
-                    prefill_stats=request.take_prefill_stats(),
+                    prefill_stats=prefill_stats,
                     kv_transfer_params=kv_transfer_params,
                     ec_transfer_params=ec_transfer_params,
                     routed_experts=routed_experts,

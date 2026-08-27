@@ -357,6 +357,7 @@ class OmniRequestState(RequestState):
             kv_transfer_params=kv_transfer_params,
             ec_transfer_params=ec_transfer_params,
             num_cached_tokens=self.num_cached_tokens,
+            num_cache_creation_tokens=self.num_cache_creation_tokens,
             metrics=self.stats,
         )
 
@@ -586,6 +587,9 @@ class MultimodalOutputProcessor(VLLMOutputProcessor):
             prefill_stats = getattr(eco, "prefill_stats", None)
             if prefill_stats is not None:
                 req_state.num_cached_tokens = prefill_stats.num_cached_tokens
+                req_state.num_cache_creation_tokens = (
+                    prefill_stats.num_cache_creation_tokens
+                )
             req_state.is_prefilling = False
 
             is_non_final_audio_chunk = (

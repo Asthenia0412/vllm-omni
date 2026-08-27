@@ -683,3 +683,20 @@ def test_ec_transfer_params_survive_both_construction_paths():
     completion = gen_state._new_completion_output([1], None, None)
     direct = gen_state._new_request_output("r", [completion], False, {"kv": 1}, ec)
     assert direct.ec_transfer_params == ec
+
+
+def test_num_cache_creation_tokens_reaches_direct_request_output():
+    """v0.28 contract: prefix-cache creation usage must reach
+    RequestOutput.num_cache_creation_tokens through the no-detokenizer
+    direct build, which previously passed only num_cached_tokens."""
+    kwargs = dict(_DEFAULT_STATE_KWARGS)
+    kwargs.update(logprobs_processor=None, detokenizer=None)
+    gen_state = OmniRequestState(**kwargs, output_kind=RequestOutputKind.CUMULATIVE)
+    gen_state.num_cached_tokens = 3
+    gen_state.num_cache_creation_tokens = 2
+
+    completion = gen_state._new_completion_output([1], None, None)
+    direct = gen_state._new_request_output("r", [completion], False, None, None)
+
+    assert direct.num_cached_tokens == 3
+    assert direct.num_cache_creation_tokens == 2
