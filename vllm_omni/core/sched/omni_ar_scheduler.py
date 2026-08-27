@@ -508,6 +508,7 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
             mm_output = mm_outputs[req_index] if mm_outputs else None
             inter_stage_output = inter_stage_outputs[req_index] if inter_stage_outputs else None
             kv_transfer_params = None
+            ec_transfer_params = None
             finish_reason = None
             routed_experts = None
 
@@ -614,7 +615,7 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
                     request.spec_token_ids = []
                     request._output_token_ids.clear()
                 if finished:
-                    kv_transfer_params, _ = self._free_request(request)
+                    kv_transfer_params, ec_transfer_params = self._free_request(request)
                 if status_before_stop == RequestStatus.RUNNING:
                     stopped_running_reqs.add(request)
                 elif status_before_stop == RequestStatus.WAITING_FOR_CHUNK:
@@ -644,6 +645,7 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
                     stop_reason=request.stop_reason,
                     prefill_stats=request.take_prefill_stats(),
                     kv_transfer_params=kv_transfer_params,
+                    ec_transfer_params=ec_transfer_params,
                     routed_experts=routed_experts,
                     num_nans_in_logits=request.num_nans_in_logits,
                     is_segment_finished=is_segment_finished,
@@ -817,6 +819,17 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
         # 1. Standard cleanup parts from base _free_request
         connector_delay_free_blocks, kv_xfer_params = self._connector_finished(request)
 
+        # EC Connector: mirror the KV hook (upstream v0.28 _free_request).
+        # The contract requires firing before the encoder cache is freed so
+        # the connector can inspect per-request state (e.g. which mm_hashes
+        # it recorded during save_caches()) and emit ec_transfer_params for
+        # the response body. getattr: __new__-constructed test schedulers
+        # carry no ec_connector attribute.
+        ec_xfer_params: dict[str, Any] | None = None
+        if getattr(self, "ec_connector", None) is not None:
+            ec_delay_free, ec_xfer_params = self.ec_connector.request_finished(request)
+            connector_delay_free_blocks |= ec_delay_free
+
         self.encoder_cache_manager.free(request)
         request_id = request.request_id
         self.finished_req_ids.add(request_id)
@@ -842,10 +855,10 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
                         self.waiting_for_transfer_free.add(request_id)
                         self._kv_wait_start_ts[request_id] = time.monotonic()
                         kv_xfer_params = None
-                        return kv_xfer_params, None
+                        return kv_xfer_params, ec_xfer_params
                     elif request_id in self.waiting_for_transfer_free:
                         # Blocks held until KV extraction completes in a future step.
-                        return None, None
+                        return None, ec_xfer_params
                     else:
                         logger.debug(
                             f"[Omni] Request {request_id} finished and transfer no longer ACTIVE (extracted/acked). "
@@ -883,14 +896,14 @@ class OmniARScheduler(OmniSchedulerMixin, VLLMScheduler):
                         if isinstance(add_info, dict):
                             add_info.update(kv_xfer_params)
 
-                    return kv_xfer_params, None
+                    return kv_xfer_params, ec_xfer_params
 
             # 3. Standard Freeing
             delay_free_blocks |= connector_delay_free_blocks
             if not delay_free_blocks:
                 self._free_blocks(request)
 
-            return kv_xfer_params, None
+            return kv_xfer_params, ec_xfer_params
         finally:
             self._free_input_coordinator_request(request_id)
             # Normal completion runs through here, not finish_requests()
