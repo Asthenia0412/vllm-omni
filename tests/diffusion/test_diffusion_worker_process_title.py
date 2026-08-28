@@ -31,6 +31,7 @@ _GROUP_GETTERS = (
     "get_cfg_group",
     "get_tp_group",
     "get_fs_group",
+    "get_hsdp_replicate_group",
     "get_ep_group",
 )
 
@@ -73,12 +74,12 @@ def test_setup_uses_default_name_before_model_parallel_init(
 
 
 @pytest.mark.parametrize(
-    ("groups", "enable_ep", "use_hsdp", "expected_name"),
+    ("groups", "enable_ep", "use_hsdp", "hsdp_replicate_size", "expected_name"),
     [
-        ({}, False, False, "DiffusionWorker"),
-        ({"get_tp_group": _FakeGroup(2, 1)}, False, False, "DiffusionWorker_TP1"),
-        ({"get_dp_group": _FakeGroup(4, 2)}, False, False, "DiffusionWorker_DP2"),
-        ({"get_pp_group": _FakeGroup(2, 1)}, False, False, "DiffusionWorker_PP1"),
+        ({}, False, False, 1, "DiffusionWorker"),
+        ({"get_tp_group": _FakeGroup(2, 1)}, False, False, 1, "DiffusionWorker_TP1"),
+        ({"get_dp_group": _FakeGroup(4, 2)}, False, False, 1, "DiffusionWorker_DP2"),
+        ({"get_pp_group": _FakeGroup(2, 1)}, False, False, 1, "DiffusionWorker_PP1"),
         (
             {
                 "get_cfg_group": _FakeGroup(2, 1),
@@ -86,6 +87,7 @@ def test_setup_uses_default_name_before_model_parallel_init(
             },
             False,
             False,
+            1,
             "DiffusionWorker_CFG1_TP1",
         ),
         (
@@ -96,12 +98,14 @@ def test_setup_uses_default_name_before_model_parallel_init(
             },
             False,
             False,
+            1,
             "DiffusionWorker_DP1_SP2_TP1",
         ),
         (
             {"get_fs_group": _FakeGroup(4, 3)},
             False,
             True,
+            1,
             "DiffusionWorker_FS3",
         ),
         (
@@ -111,10 +115,21 @@ def test_setup_uses_default_name_before_model_parallel_init(
             },
             False,
             True,
+            1,
             "DiffusionWorker_SP1_FS3",
         ),
-        ({"get_ep_group": _FakeGroup(4, 2)}, True, False, "DiffusionWorker_EP2"),
-        ({}, True, False, "DiffusionWorker"),
+        (
+            {
+                "get_fs_group": _FakeGroup(1, 0),
+                "get_hsdp_replicate_group": _FakeGroup(2, 1),
+            },
+            False,
+            True,
+            2,
+            "DiffusionWorker_RP1",
+        ),
+        ({"get_ep_group": _FakeGroup(4, 2)}, True, False, 1, "DiffusionWorker_EP2"),
+        ({}, True, False, 1, "DiffusionWorker"),
     ],
     ids=[
         "all-singleton",
@@ -125,6 +140,7 @@ def test_setup_uses_default_name_before_model_parallel_init(
         "dp-sp-tp",
         "hsdp-only",
         "hsdp-sp",
+        "hsdp-replicated",
         "expert-parallel",
         "singleton-ep",
     ],
@@ -134,6 +150,7 @@ def test_setup_uses_initialized_parallel_groups(
     groups: dict[str, _FakeGroup],
     enable_ep: bool,
     use_hsdp: bool,
+    hsdp_replicate_size: int,
     expected_name: str,
 ) -> None:
     mocker.patch.object(
@@ -145,7 +162,11 @@ def test_setup_uses_initialized_parallel_groups(
     set_process_title = mocker.patch.object(worker_module, "set_process_title")
     decorate_logs = mocker.patch.object(worker_module, "decorate_logs")
 
-    worker_module._setup_diffusion_worker_proc_title_and_log_prefix(enable_ep=enable_ep, use_hsdp=use_hsdp)
+    worker_module._setup_diffusion_worker_proc_title_and_log_prefix(
+        enable_ep=enable_ep,
+        use_hsdp=use_hsdp,
+        hsdp_replicate_size=hsdp_replicate_size,
+    )
 
     set_process_title.assert_called_once_with(
         name=expected_name,
@@ -154,8 +175,13 @@ def test_setup_uses_initialized_parallel_groups(
     decorate_logs.assert_called_once_with(expected_name)
     if use_hsdp:
         group_getters["get_fs_group"].assert_called_once_with()
+        if hsdp_replicate_size > 1:
+            group_getters["get_hsdp_replicate_group"].assert_called_once_with()
+        else:
+            group_getters["get_hsdp_replicate_group"].assert_not_called()
     else:
         group_getters["get_fs_group"].assert_not_called()
+        group_getters["get_hsdp_replicate_group"].assert_not_called()
     if enable_ep:
         group_getters["get_ep_group"].assert_called_once_with()
     else:

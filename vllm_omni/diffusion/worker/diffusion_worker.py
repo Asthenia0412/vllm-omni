@@ -51,6 +51,7 @@ from vllm_omni.diffusion.distributed.parallel_state import (
     get_cfg_group,
     get_dp_group,
     get_fs_group,
+    get_hsdp_replicate_group,
     get_pp_group,
     get_sp_group,
     init_distributed_environment,
@@ -126,7 +127,11 @@ def _run_and_gather_rank_values(operation: str, func: Callable[[], Any]) -> list
     return [result for _, result in rank_results]
 
 
-def _setup_diffusion_worker_proc_title_and_log_prefix(enable_ep: bool, use_hsdp: bool) -> None:
+def _setup_diffusion_worker_proc_title_and_log_prefix(
+    enable_ep: bool,
+    use_hsdp: bool,
+    hsdp_replicate_size: int = 1,
+) -> None:
     """Set the worker process title and log prefix from initialized groups."""
     process_name = "DiffusionWorker"
     if model_parallel_is_initialized():
@@ -150,6 +155,10 @@ def _setup_diffusion_worker_proc_title_and_log_prefix(enable_ep: bool, use_hsdp:
             fs_group = get_fs_group()
             if fs_group.world_size > 1:
                 process_name += f"_FS{fs_group.rank_in_group}"
+            if hsdp_replicate_size > 1:
+                replicate_group = get_hsdp_replicate_group()
+                if replicate_group.world_size > 1:
+                    process_name += f"_RP{replicate_group.rank_in_group}"
         if enable_ep:
             ep_group = get_ep_group()
             if ep_group.world_size > 1:
@@ -342,6 +351,7 @@ class DiffusionWorker:
             _setup_diffusion_worker_proc_title_and_log_prefix(
                 enable_ep=parallel_config.enable_expert_parallel,
                 use_hsdp=parallel_config.use_hsdp,
+                hsdp_replicate_size=parallel_config.hsdp_replicate_size,
             )
             if (
                 getattr(self.od_config, "diffusion_kv_mode", DiffusionKVCacheMode.DENSE_LEGACY)
@@ -1448,6 +1458,7 @@ class WorkerProc:
         _setup_diffusion_worker_proc_title_and_log_prefix(
             enable_ep=od_config.parallel_config.enable_expert_parallel,
             use_hsdp=od_config.parallel_config.use_hsdp,
+            hsdp_replicate_size=od_config.parallel_config.hsdp_replicate_size,
         )
 
         load_omni_general_plugins()

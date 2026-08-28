@@ -61,6 +61,7 @@ _PP: PipelineGroupCoordinator | None = None
 _CFG: GroupCoordinator | None = None
 _DP: GroupCoordinator | None = None
 _FS: GroupCoordinator | None = None  # Fully Sharded (HSDP shard dimension)
+_HSDP_REPLICATE: GroupCoordinator | None = None  # HSDP replica dimension
 
 # Rank-layout metadata for expert parallelism. This is not a process group;
 # it is reused by platform-specific runtimes that must build companion groups
@@ -356,6 +357,11 @@ def get_data_parallel_rank():
 def get_fs_group() -> GroupCoordinator:
     assert _FS is not None, "fully shard group is not initialized"
     return _FS
+
+
+def get_hsdp_replicate_group() -> GroupCoordinator:
+    assert _HSDP_REPLICATE is not None, "HSDP replicate group is not initialized"
+    return _HSDP_REPLICATE
 
 
 def is_dp_last_group():
@@ -693,7 +699,7 @@ def _initialize_model_parallel(
     use_hsdp: bool = False,
     backend: str | None = None,
 ) -> None:
-    global _FS
+    global _FS, _HSDP_REPLICATE
 
     if backend is None:
         backend = current_omni_platform.dist_backend
@@ -914,6 +920,18 @@ def _initialize_model_parallel(
             backend=backend,
             parallel_mode="fully_shard",
         )
+        if world_size > fully_shard_degree:
+            # The HSDP mesh's columns are replica groups: each column contains
+            # the same shard position across all replica rows.
+            hsdp_replicate_group_ranks = [
+                list(range(offset, world_size, fully_shard_degree)) for offset in range(fully_shard_degree)
+            ]
+            _HSDP_REPLICATE = init_model_parallel_group(
+                group_ranks=hsdp_replicate_group_ranks,
+                local_rank=get_world_group().local_rank,
+                backend=backend,
+                parallel_mode="fully_shard",
+            )
 
     global _EXPERT_PARALLEL_GROUP_RANKS
     _EXPERT_PARALLEL_GROUP_RANKS = get_rank_groups("tp-sp-cfg-dp")
@@ -952,6 +970,7 @@ def initialize_model_parallel(
         "sp": _SP,
         "pp": _PP,
         "fs": _FS,
+        "hsdp_replicate": _HSDP_REPLICATE,
         "vllm_tp": vllm_parallel_state._TP,
         "vllm_dp": vllm_parallel_state._DP,
         "vllm_pp": vllm_parallel_state._PP,
@@ -985,7 +1004,7 @@ def initialize_model_parallel(
 
 def destroy_model_parallel():
     """Set the groups to none and destroy them."""
-    global _DP, _CFG, _SP, _PP, _FS, _EXPERT_PARALLEL_GROUP_RANKS
+    global _DP, _CFG, _SP, _PP, _FS, _HSDP_REPLICATE, _EXPERT_PARALLEL_GROUP_RANKS
 
     if vllm_parallel_state._DP and vllm_parallel_state._DP is not _DP:
         vllm_parallel_state._DP.destroy()
@@ -998,6 +1017,10 @@ def destroy_model_parallel():
     if _FS:
         _FS.destroy()
     _FS = None
+
+    if _HSDP_REPLICATE:
+        _HSDP_REPLICATE.destroy()
+    _HSDP_REPLICATE = None
 
     if _CFG:
         _CFG.destroy()
