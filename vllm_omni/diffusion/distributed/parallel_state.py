@@ -782,6 +782,12 @@ def _initialize_model_parallel(
             raise ValueError("HSDP (FSDP2) requires data_parallel_size to be 1")
         if non_dp_size not in (1, world_size):
             raise ValueError(f"HSDP non-DP parallel size must be 1 or WORLD size ({world_size}), but got {non_dp_size}")
+        if fully_shard_degree <= 0:
+            raise ValueError(f"fully_shard_degree must be positive, got {fully_shard_degree}")
+        if world_size % fully_shard_degree != 0:
+            raise ValueError(
+                f"WORLD size ({world_size}) must be divisible by fully_shard_degree ({fully_shard_degree})"
+            )
         data_parallel_size = 1
     else:
         inferred_data_parallel_size = world_size // non_dp_size
@@ -901,13 +907,6 @@ def _initialize_model_parallel(
         )
 
     if use_hsdp:
-        if fully_shard_degree <= 0:
-            raise ValueError(f"fully_shard_degree must be positive, got {fully_shard_degree}")
-        if world_size % fully_shard_degree != 0:
-            raise ValueError(
-                f"WORLD size ({world_size}) must be divisible by fully_shard_degree ({fully_shard_degree})"
-            )
-
         assert _FS is None, "fully shard group is already initialized"
         # HSDP builds its mesh from arange(world_size).reshape(replicate, shard),
         # so each consecutive rank run is one fully-sharded group.
