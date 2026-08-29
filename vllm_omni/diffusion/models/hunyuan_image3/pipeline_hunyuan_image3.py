@@ -417,7 +417,7 @@ class HunyuanImage3Pipeline(
         manager can resolve bindings to the adapter tensors.
         """
         if full_module_name.startswith("transformer."):
-            return ["model." + full_module_name[len("transformer."):]]
+            return ["model." + full_module_name[len("transformer.") :]]
         return []
 
     def _split_fused_qkv_lora_b(self, lora_b: torch.Tensor) -> list[torch.Tensor] | None:
@@ -454,8 +454,8 @@ class HunyuanImage3Pipeline(
         kv_size = num_kv_heads * attention_head_dim
         return [
             qkv_block[:q_size],
-            qkv_block[q_size:q_size + kv_size],
-            qkv_block[q_size + kv_size:],
+            qkv_block[q_size : q_size + kv_size],
+            qkv_block[q_size + kv_size :],
         ]
 
     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:

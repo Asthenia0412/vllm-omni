@@ -507,7 +507,7 @@ def _make_hunyuan_image3_pipeline(num_heads=4, num_kv_heads=2, head_dim=2, hidde
         @staticmethod
         def _lora_module_name_aliases(full_module_name):
             if full_module_name.startswith("transformer."):
-                return ["model." + full_module_name[len("transformer."):]]
+                return ["model." + full_module_name[len("transformer.") :]]
             return []
 
         @staticmethod
@@ -520,8 +520,8 @@ def _make_hunyuan_image3_pipeline(num_heads=4, num_kv_heads=2, head_dim=2, hidde
             kv_size = num_kv_heads * head_dim
             return [
                 qkv_block[:q_size],
-                qkv_block[q_size:q_size + kv_size],
-                qkv_block[q_size + kv_size:],
+                qkv_block[q_size : q_size + kv_size],
+                qkv_block[q_size + kv_size :],
             ]
 
     return _HunyuanImage3Pipeline()
