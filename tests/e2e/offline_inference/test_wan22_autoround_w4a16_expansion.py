@@ -235,8 +235,7 @@ def test_wan22_i2v_autoround_w4a16_memory_savings():
     # The engine must have reported the stage-worker peak; a zero value means the
     # output did not carry peak_memory_mb and the comparison below is meaningless.
     assert quant_peak > 0 and baseline_peak > 0, (
-        f"peak_memory_mb not populated by the engine "
-        f"(quant={quant_peak:.0f}, baseline={baseline_peak:.0f})"
+        f"peak_memory_mb not populated by the engine (quant={quant_peak:.0f}, baseline={baseline_peak:.0f})"
     )
 
     savings = baseline_peak - quant_peak
@@ -299,8 +298,7 @@ def test_wan22_t2v_autoround_w4a16_memory_savings():
     # The engine must have reported the stage-worker peak; a zero value means the
     # output did not carry peak_memory_mb and the comparison below is meaningless.
     assert quant_peak > 0 and baseline_peak > 0, (
-        f"peak_memory_mb not populated by the engine "
-        f"(quant={quant_peak:.0f}, baseline={baseline_peak:.0f})"
+        f"peak_memory_mb not populated by the engine (quant={quant_peak:.0f}, baseline={baseline_peak:.0f})"
     )
 
     savings = baseline_peak - quant_peak
