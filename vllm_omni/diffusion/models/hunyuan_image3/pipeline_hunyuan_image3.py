@@ -406,6 +406,58 @@ class HunyuanImage3Pipeline(
             enable_diffusion_pipeline_profiler=self.od_config.enable_diffusion_pipeline_profiler,
         )
 
+    def _lora_module_name_aliases(self, full_module_name: str) -> list[str]:
+        """Return model-scoped aliases for a registered DiT LoRA wrapper name.
+
+        HI3 DiT wrappers are discovered under the diffusers component name
+        ``transformer`` (``self.transformer is self.model``), so they register
+        as ``transformer.layers.<n>.self_attn.*``. HI3 PEFT adapters however
+        store their LoRA tensors under the HF model namespace
+        ``model.layers.<n>.self_attn.*``. Return the ``model.*`` alias so the
+        manager can resolve bindings to the adapter tensors.
+        """
+        if full_module_name.startswith("transformer."):
+            return ["model." + full_module_name[len("transformer."):]]
+        return []
+
+    def _split_fused_qkv_lora_b(self, lora_b: torch.Tensor) -> list[torch.Tensor] | None:
+        """De-interleave a fused ``qkv_proj`` LoRA-B into full [Q; K; V] slices.
+
+        HI3 checkpoints pack fused QKV rows per KV head
+        (``[Q-group, K, V] x num_key_value_heads``). The base-weight loader
+        (``HunyuanImage3Model._split_qkv_weight``) converts this GQA-interleaved
+        layout into the block layout ``[all Q; all K; all V]`` that
+        ``QKVParallelLinear`` expects. Apply the same conversion to a fused
+        ``qkv_proj`` LoRA-B tensor before it is installed into the packed QKV
+        LoRA layer.
+
+        Returns the three full (unsharded) Q/K/V slices, or ``None`` if the
+        tensor does not match the expected HI3 QKV row count (fail closed so a
+        mismatched adapter is never applied with wrong output rows).
+        """
+        config = self.transformer.config
+        num_attention_heads = config.num_attention_heads
+        num_kv_heads = getattr(config, "num_key_value_heads", config.num_attention_heads)
+        if hasattr(config, "head_dim"):
+            attention_head_dim = config.head_dim
+        elif hasattr(config, "attention_head_dim"):
+            attention_head_dim = config.attention_head_dim
+        else:
+            attention_head_dim = config.hidden_size // num_attention_heads
+
+        expected_rows = (num_attention_heads + 2 * num_kv_heads) * attention_head_dim
+        if lora_b.shape[0] != expected_rows:
+            return None
+
+        qkv_block = self.transformer._split_qkv_weight(lora_b)
+        q_size = num_attention_heads * attention_head_dim
+        kv_size = num_kv_heads * attention_head_dim
+        return [
+            qkv_block[:q_size],
+            qkv_block[q_size:q_size + kv_size],
+            qkv_block[q_size + kv_size:],
+        ]
+
     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
         skip_prefixes = ["lm_head."] if self.hf_config.tie_word_embeddings else []
         # List of unexpected keywords in weight names

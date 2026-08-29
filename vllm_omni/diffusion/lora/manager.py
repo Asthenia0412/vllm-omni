@@ -538,7 +538,22 @@ class DiffusionLoRAManager:
             return lora_weights
 
         module_suffix = full_module_name.split(".")[-1]
-        return lora_model.get_lora(module_suffix)
+        lora_weights = lora_model.get_lora(module_suffix)
+        if lora_weights is not None:
+            return lora_weights
+
+        # Model-scoped namespace aliases. E.g. HI3 DiT wrappers are registered
+        # under transformer.layers.* while HI3 PEFT adapters store their LoRA
+        # tensors under model.layers.*. Pipelines opt in via
+        # ``_lora_module_name_aliases`` so other models are unaffected.
+        name_aliases = getattr(self.pipeline, "_lora_module_name_aliases", None)
+        if callable(name_aliases):
+            for alias in name_aliases(full_module_name):
+                lora_weights = lora_model.get_lora(alias)
+                if lora_weights is not None:
+                    return lora_weights
+
+        return None
 
     def _is_active_at_scale(self, adapter_id: int, scale: float) -> bool:
         """True if the adapter_id is active and the current scale matches."""
@@ -631,6 +646,31 @@ class DiffusionLoRAManager:
             # Fused (non-packed) weights: if the layer is multi-slice, split B.
             n_slices = getattr(lora_layer, "n_slices", 1)
             if n_slices > 1:
+                # HI3: a fused ``qkv_proj`` LoRA-B from PEFT is packed per KV
+                # head (GQA-interleaved). De-interleave into full [Q; K; V]
+                # slices first so deltas land on the correct output rows.
+                _, _, packed_suffix = full_module_name.rpartition(".")
+                split_fused_qkv = getattr(self.pipeline, "_split_fused_qkv_lora_b", None)
+                if packed_suffix == "qkv_proj" and callable(split_fused_qkv):
+                    full_slices = split_fused_qkv(lora_weights.lora_b)
+                    if full_slices is None:
+                        logger.warning(
+                            "Skipping LoRA for %s: cannot establish fused QKV layout",
+                            full_module_name,
+                        )
+                        lora_layer.reset_lora(0)
+                        continue
+                    lora_a_list = [lora_weights.lora_a] * len(full_slices)
+                    lora_b_list = [b * scale for b in full_slices]
+                    lora_layer.set_lora(index=0, lora_a=lora_a_list, lora_b=lora_b_list)
+                    _record_bound(lora_weights)
+                    logger.debug(
+                        "Activated fused QKV LoRA for %s (scale=%.2f)",
+                        full_module_name,
+                        scale,
+                    )
+                    continue
+
                 output_slices = getattr(lora_layer, "output_slices", None)
                 if output_slices is None:
                     lora_layer.reset_lora(0)
