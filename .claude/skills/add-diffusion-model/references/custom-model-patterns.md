@@ -19,14 +19,13 @@ The transformer is loaded separately via `weights_sources` + `load_weights()`. N
 ### External adapter (not native support)
 
 ```
-vllm_omni/diffusion/models/dreamid_omni/
+vllm_omni/diffusion/models/<name>/
 ├── __init__.py                    # Exports pipeline only
-├── pipeline_dreamid_omni.py       # Pipeline: loads ALL weights in __init__ via custom helpers
-├── fusion.py                      # Custom fusion architecture (video + audio cross-attention)
-└── wan2_2.py                      # Re-implemented Wan backbone with split API
+├── pipeline_<name>.py             # Pipeline: loads ALL weights in __init__ via custom helpers
+└── <backbone>.py                  # Custom transformer / fusion architecture
 
-examples/offline_inference/x_to_video_audio/
-└── download_dreamid_omni.py       # Downloads weights from 3 HF repos + clones code repo
+examples/offline_inference/<task>/
+└── download_<name>.py             # Downloads weights and/or clones code repo
 ```
 
 All weights are loaded eagerly in `__init__`. `load_weights()` is a no-op. The
@@ -79,7 +78,7 @@ self.weights_sources = [
 ]
 ```
 
-### Pattern 3: Fully custom loading (DreamID-Omni)
+### Pattern 3: Fully custom loading
 
 ```
 init → load ALL weights eagerly via custom helpers → load_weights() = no-op
@@ -111,8 +110,8 @@ Standard diffusers `model_index.json`:
 Custom model `model_index.json` (minimal):
 ```json
 {
-    "_class_name": "DreamIDOmniPipeline",
-    "fusion": "DreamID-Omni/dreamid_omni.safetensors"
+    "_class_name": "YourCustomPipeline",
+    "fusion": "weights/model.safetensors"
 }
 ```
 
@@ -127,7 +126,7 @@ a model-name substring.
 
 ## External Dependency Management
 
-### Git clone + .pth injection (DreamID-Omni pattern)
+### Git clone + .pth injection
 
 ```python
 def download_dependency():
@@ -177,7 +176,7 @@ The engine checks `isinstance(pipeline, SupportImageInput)` at startup to config
 
 Diffusers models use `config.json` in each subfolder. Custom models often use:
 
-**Module-level config dicts** (DreamID-Omni):
+**Module-level config dicts**:
 ```python
 VIDEO_CONFIG = {
     "patch_size": [1, 2, 2], "model_type": "ti2v",
@@ -195,7 +194,7 @@ vae_cfg = bagel_cfg.get("vae_config", {})
 
 ## Custom Architecture Patterns
 
-### Split forward API (DreamID-Omni)
+### Split forward API
 
 When a fusion model needs to interleave blocks from two backbones:
 
