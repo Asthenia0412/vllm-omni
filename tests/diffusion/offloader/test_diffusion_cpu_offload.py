@@ -16,7 +16,12 @@ from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 from vllm_omni.platforms import current_omni_platform
 
 AUDIO_MODEL: dict[str, dict[str, int | None]] = {
-    "stabilityai/stable-audio-open-1.0": {"cuda": 100, "rocm": None},
+    # stable-audio-open-1.0 is a small (~1.2 GB) model, so the offload
+    # savings observed during the generation window are only ~100 MB and
+    # peak memory varies by a few MB between runs due to allocator
+    # fragmentation. Keep the threshold below the measured ~96 MB savings
+    # to avoid nightly CI flakes (see issue #6734).
+    "stabilityai/stable-audio-open-1.0": {"cuda": 80, "rocm": None},
 }
 
 IMAGE_MODELS: dict[str, dict[str, int | None]] = {
