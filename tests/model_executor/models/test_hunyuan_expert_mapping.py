@@ -132,9 +132,7 @@ def test_mapping_entries_survive_vllm_get_moe_expert_mapping_unpack() -> None:
     try:
         model = _FakeHunyuanModel(_moe_config())
         # Bind the real implementation so get_moe_expert_mapping can find it.
-        model.get_expert_mapping = lambda: module.HunyuanImage3Model.get_expert_mapping(
-            model
-        )
+        model.get_expert_mapping = lambda: module.HunyuanImage3Model.get_expert_mapping(model)
         for _, weight_name, _, _ in get_moe_expert_mapping(model):
             assert weight_name
     finally:
