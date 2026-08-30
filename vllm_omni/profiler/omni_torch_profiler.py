@@ -83,15 +83,12 @@ class OmniTorchProfilerWrapper(WorkerProfiler):
         # via _profiler_step(), and _stop() drains any remaining RECORD steps
         # before calling stop() so trace export never runs mid-capture.
         self._uses_schedule = bool(
-            getattr(profiler_config, "warmup_iterations", 0)
-            or getattr(profiler_config, "wait_iterations", 0)
+            getattr(profiler_config, "warmup_iterations", 0) or getattr(profiler_config, "wait_iterations", 0)
         )
         # Subtract 1 because start() already consumes step 0 (WAIT or WARMUP),
         # so only wait + warmup - 1 non-active steps remain to advance through.
         self._warmup_steps_remaining = max(
-            getattr(profiler_config, "wait_iterations", 0)
-            + getattr(profiler_config, "warmup_iterations", 0)
-            - 1,
+            getattr(profiler_config, "wait_iterations", 0) + getattr(profiler_config, "warmup_iterations", 0) - 1,
             0,
         )
 
@@ -115,10 +112,7 @@ class OmniTorchProfilerWrapper(WorkerProfiler):
         step and has no WAIT/WARMUP/RECORD state machine to advance.
         """
         cfg = self.profiler_config
-        if not (
-            getattr(cfg, "warmup_iterations", 0)
-            or getattr(cfg, "wait_iterations", 0)
-        ):
+        if not (getattr(cfg, "warmup_iterations", 0) or getattr(cfg, "wait_iterations", 0)):
             return None
         return schedule_fn(
             skip_first=0,
