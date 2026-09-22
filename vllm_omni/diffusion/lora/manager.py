@@ -664,13 +664,22 @@ class DiffusionLoRAManager:
                 # GQA-interleaved in the checkpoint (per-KV-head
                 # [Q-group, K, V]); de-interleave them to the block layout
                 # [all Q, all K, all V] the QKV output slices expect. The
-                # un-sharded ``output_sizes`` yield full Q/K/V slices that
-                # vLLM's set_lora() then shards across TP ranks.
+                # checkpoint sizes exclude replicated KV heads; set_lora()
+                # selects the appropriate Q shard and shared KV shard.
                 deinterleave = getattr(self.pipeline, "_deinterleave_fused_qkv_lora_b", None)
                 if isinstance(getattr(lora_layer, "base_layer", None), QKVParallelLinear) and callable(deinterleave):
                     deinterleaved = deinterleave(lora_weights.lora_b)
-                    output_sizes = getattr(lora_layer, "output_sizes", None)
-                    if deinterleaved is None or output_sizes is None or len(output_sizes) != n_slices:
+                    base = lora_layer.base_layer
+                    output_sizes = (
+                        base.total_num_heads * base.head_size,
+                        base.total_num_kv_heads * base.head_size,
+                        base.total_num_kv_heads * base.v_head_size,
+                    )
+                    if (
+                        deinterleaved is None
+                        or len(output_sizes) != n_slices
+                        or deinterleaved.shape[0] != sum(output_sizes)
+                    ):
                         logger.warning(
                             "Skipping LoRA for %s: cannot establish HunyuanImage-3 fused-QKV layout",
                             full_module_name,
