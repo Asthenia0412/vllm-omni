@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
+
 """Unit tests for StagePool.collective_rpc EngineCore control dispatch."""
 
 from __future__ import annotations
@@ -63,7 +66,7 @@ def test_collective_rpc_control_helper_honors_timeout():
             await asyncio.sleep(1.0)
             return "slept"
 
-        pool, _client = _make_pool(sleep_async=slow_sleep)
+        pool, _client = _make_pool(sleep_async=AsyncMock(side_effect=slow_sleep))
         with pytest.raises(asyncio.TimeoutError):
             await pool.collective_rpc(0, "sleep", timeout=0.01, args=(1,))
 
@@ -147,5 +150,30 @@ def test_abort_requests_does_not_commit_op_state_when_engine_abort_fails():
         assert output_processor.collected is True
         assert output_processor.committed is False
         abort.assert_awaited_once()
+
+    asyncio.run(run())
+
+
+@pytest.mark.cpu
+@pytest.mark.parametrize("method", ["reset_prefix_cache", "reset_encoder_cache", "reset_mm_cache"])
+@pytest.mark.parametrize("failure", ["error", "timeout", "missing"])
+def test_cache_reset_failure_is_serialized_and_pool_remains_usable(method, failure):
+    async def run():
+        async def reset():
+            if failure == "timeout":
+                await asyncio.Event().wait()
+            raise RuntimeError("cache reset failed")
+
+        pool, client = _make_pool()
+        if failure != "missing":
+            setattr(client, f"{method}_async", AsyncMock(side_effect=reset))
+        result = await pool.collective_rpc(0, method, timeout=0.01)
+        assert result["supported"] is False
+        assert result["error"]
+        if failure == "timeout":
+            assert "timed out" in result["error"]
+        client.collective_rpc_async.assert_not_awaited()
+        # A subsequent control request still completes on the same pool.
+        assert await pool.collective_rpc(0, "is_sleeping") == {"via": "collective"}
 
     asyncio.run(run())
