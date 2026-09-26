@@ -201,7 +201,7 @@ class TestQueueWaitExtraction:
         assert extract_queue_wait_s(
             {"queue_wait_ms": 131.0},
             {"scheduler_queue_wait_s": 135.0},
-        ) == pytest.approx(0.266)
+        ) == pytest.approx(135.131)
 
     def test_diffusion_scheduler_wait_is_reported_without_orchestrator_wait(self) -> None:
         from vllm_omni.metrics.utils import extract_queue_wait_s
