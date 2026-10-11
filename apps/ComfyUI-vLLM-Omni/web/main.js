@@ -96,17 +96,44 @@ class ModelComboController {
         setTimeout(() => this.refreshModels(), 0);
     }
 
-    setComboMode(values) {
-        this.modelWidget.options.values = values;
-        this.modelWidget.type = "combo";
+    // New-style litegraph widgets are class instances (TextWidget/ComboWidget
+    // with their own draw/mouse handlers), so flipping `widget.type` never
+    // re-renders a text field as a dropdown. Swap in a freshly created widget
+    // of the right type instead, keeping name/value/position so workflows
+    // serialize unchanged.
+    _swapModelWidget(type, values) {
+        const old = this.modelWidget;
+        if (old.type === type) {
+            if (type === "combo") {
+                old.options.values = values;
+            }
+            return
+        }
+        const widgets = this.node.widgets;
+        const index = widgets.indexOf(old);
+        old.onRemove?.();
+        widgets.splice(index, 1);
+        const widget = this.node.addWidget(
+            type,
+            "model",
+            old.value,
+            old.callback?.bind(old),
+            type === "combo" ? { values } : {},
+        );
+        // addWidget appends; move the new widget to the old one's slot.
+        widgets.splice(widgets.indexOf(widget), 1);
+        widgets.splice(index, 0, widget);
+        this.modelWidget = widget;
+        this.node.setSize([this.node.size[0], this.node.computeSize()[1]]);
         this.node.graph?.setDirtyCanvas?.(true, true);
     }
 
+    setComboMode(values) {
+        this._swapModelWidget("combo", values);
+    }
+
     setTextMode() {
-        if (this.modelWidget.type !== "text") {
-            this.modelWidget.type = "text";
-            this.node.graph?.setDirtyCanvas?.(true, true);
-        }
+        this._swapModelWidget("text");
     }
 
     async refreshModels() {
