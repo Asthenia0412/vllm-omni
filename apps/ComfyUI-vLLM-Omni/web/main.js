@@ -15,6 +15,9 @@
  * It also migrates Generate Video graphs saved before `duration` replaced the
  * `num_frames` widget. See migrateNumFramesToDuration below.
  *
+ * And it upgrades the `model` field of every node that talks to a server into a
+ * dropdown fed with the server's model list. See setupModelCombo below.
+ *
  * This file also used to host dynamic fields on vLLM-Omni nodes, driven by
  * widget (in-node form fields) and input (connection link) values and changes.
  * That is deliberately absent: it introduced too much complexity, and it even
@@ -26,6 +29,119 @@ import { app } from "../../scripts/app.js";
 
 const MARK_URL = new URL("./vllm-omni-mark.svg", import.meta.url).href;
 const MARK_ASPECT = 157 / 165;
+
+/**
+ * Same-origin proxy route served by the ComfyUI backend (see
+ * comfyui_vllm_omni/routes.py). The browser must not fetch `{url}/models`
+ * itself: for remote deployments a browser-side `localhost` resolves to the
+ * user's own machine, not to the host running ComfyUI.
+ */
+const MODELS_ROUTE = "/vllm_omni/models";
+
+/** Wait this long after the last `url` edit before refetching the model list. */
+const URL_CHANGE_DEBOUNCE_MS = 600;
+
+/**
+ * Merge the fetched model ids with the widget's current value, so a value a
+ * saved workflow carried in is never dropped just because the server does not
+ * list it (renamed deployments, stale graphs, mid-edit values).
+ */
+function mergeModelValues(models, currentValue) {
+    const values = models.map((id) => String(id));
+    const current = String(currentValue ?? "").trim();
+    if (current && !values.includes(current)) {
+        values.push(current);
+    }
+    return values;
+}
+
+/**
+ * Turns a node's free-text `model` widget into a dropdown of whatever the
+ * server in its `url` widget currently serves.
+ *
+ * The widget stays a plain text field until a fetch succeeds, and returns to
+ * one whenever a fetch fails: the dropdown is a convenience, and a server that
+ * is down (or not started yet) must never make the node unfillable. `url`
+ * edits refetch (debounced), the refresh button refetches immediately, and the
+ * button is `serialize = false` so workflows saved before it existed still
+ * restore their widget values positionally.
+ */
+class ModelComboController {
+    constructor(node) {
+        this.node = node;
+        this.urlWidget = node.widgets.find((widget) => widget.name === "url");
+        this.modelWidget = node.widgets.find((widget) => widget.name === "model");
+        // Out-of-order guard: only the latest fetch may touch the widget.
+        this.fetchTicket = 0;
+        this.debounceTimer = null;
+    }
+
+    attach() {
+        const originalUrlCallback = this.urlWidget.callback;
+        this.urlWidget.callback = (...args) => {
+            originalUrlCallback?.apply(this.urlWidget, args);
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = setTimeout(() => this.refreshModels(), URL_CHANGE_DEBOUNCE_MS);
+        };
+
+        const refreshButton = this.node.addWidget("button", "↻ refresh models", null, () => this.refreshModels());
+        refreshButton.serialize = false;
+        // addWidget appends; move the button right after the model widget.
+        const widgets = this.node.widgets;
+        widgets.splice(widgets.indexOf(this.modelWidget) + 1, 0, widgets.pop());
+        this.node.setSize([this.node.size[0], this.node.computeSize()[1]]);
+
+        // Defer past onConfigure so a value restored from a saved workflow is
+        // the one merged into the fetched list.
+        setTimeout(() => this.refreshModels(), 0);
+    }
+
+    setComboMode(values) {
+        this.modelWidget.options.values = values;
+        this.modelWidget.type = "combo";
+        this.node.graph?.setDirtyCanvas?.(true, true);
+    }
+
+    setTextMode() {
+        if (this.modelWidget.type !== "text") {
+            this.modelWidget.type = "text";
+            this.node.graph?.setDirtyCanvas?.(true, true);
+        }
+    }
+
+    async refreshModels() {
+        const ticket = ++this.fetchTicket;
+        const url = String(this.urlWidget.value ?? "").trim();
+        if (!url) {
+            this.setTextMode();
+            return
+        }
+        try {
+            const response = await fetch(`${MODELS_ROUTE}?url=${encodeURIComponent(url)}`);
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !Array.isArray(data.models) || !data.models.length) {
+                throw new Error(data.error ?? `HTTP ${response.status}`);
+            }
+            if (ticket === this.fetchTicket) {
+                this.setComboMode(mergeModelValues(data.models, this.modelWidget.value));
+            }
+        } catch (e) {
+            if (ticket === this.fetchTicket) {
+                console.warn(`vLLM-Omni: could not fetch the model list from ${url}, model stays free-text:`, e);
+                this.setTextMode();
+            }
+        }
+    }
+}
+
+function setupModelCombo(node) {
+    const urlWidget = node.widgets?.find((widget) => widget.name === "url");
+    const modelWidget = node.widgets?.find((widget) => widget.name === "model");
+    if (!urlWidget || !modelWidget) {
+        return
+    }
+    new ModelComboController(node).attach();
+}
 
 /**
  * Title bar and body tints, one per node family.
@@ -122,6 +238,15 @@ app.registerExtension({
         // written to the instance and shadows this, so manual overrides survive.
         nodeType.prototype.color = color;
         nodeType.prototype.bgcolor = bgcolor;
+
+        const inputs = { ...nodeData.input?.required, ...nodeData.input?.optional };
+        if ("url" in inputs && "model" in inputs) {
+            const onNodeCreated = nodeType.prototype.onNodeCreated;
+            nodeType.prototype.onNodeCreated = function () {
+                onNodeCreated?.apply(this, arguments);
+                setupModelCombo(this);
+            };
+        }
 
         if (nodeData.name === "VLLMOmniGenerateVideo") {
             const onConfigure = nodeType.prototype.onConfigure;
