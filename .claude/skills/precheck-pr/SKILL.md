@@ -27,6 +27,14 @@ for any missing or materially ambiguous answers and wait before implementing
 or submitting the contribution. Read-only investigation may continue to make
 the questions concrete.
 
+Before submission, verify that the PR description answers all four required
+questions in the [PR template](../../../.github/PULL_REQUEST_TEMPLATE.md),
+or provides public-safe references to the human's explicit answers. Blank
+sections, unchanged placeholders, and agent-written guesses do not satisfy
+the gate. Missing or ambiguous answers block submission and readiness for
+review; ask the human and wait. This is a contributor workflow requirement,
+not a claim that GitHub or CI mechanically enforces the template.
+
 Once the answers are clear, ask whether achieving the outcome actually needs
 a PR. Prefer an existing capability, configuration change, documentation or
 support answer, or no change when that meets the need. Documentation changes
