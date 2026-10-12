@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable
+from contextlib import nullcontext
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Self, cast
@@ -24,9 +25,39 @@ from vllm.model_executor.model_loader.weight_utils import default_weight_loader
 from vllm.model_executor.utils import set_weight_attrs
 
 from vllm_omni.diffusion.attention.layer import Attention
-from vllm_omni.diffusion.distributed.comm import SeqAllToAll4D, all_to_all_5D
+from vllm_omni.diffusion.distributed.comm import SeqAllToAll4D, all_to_all_4D, all_to_all_5D
+from vllm_omni.diffusion.layers.lingbot_qkv_sp_send_pack import prepare_qkv_sp_send
+from vllm_omni.diffusion.layers import lingbot_sp8_observe as sp8_observe
+from vllm_omni.diffusion.layers import lingbot_recv_kv_sp8 as recv_kv_sp8
 from vllm_omni.diffusion.distributed.parallel_state import get_sp_group
 from vllm_omni.diffusion.distributed.sp_plan import SequenceParallelInput, SequenceParallelOutput
+from vllm_omni.diffusion.layers.lingbot_fusion_capture import capture_fusion_operands
+from vllm_omni.diffusion.layers.lingbot_chunk_prefix_cache import (
+    lookup_chunk_prefix, prefix_cache_enabled, save_chunk_prefix,
+)
+from vllm_omni.diffusion.layers.lingbot_native_bf16_qk import (
+    native_bf16_qk, native_bf16_qk_enabled, prepare_native_bf16_qk,
+)
+from vllm_omni.diffusion.layers.lingbot_conditioning_ops import prepare_timestep_projection
+from vllm_omni.diffusion.layers import lingbot_fixed_timestep_bank_stageA_v1 as fixed_timestep_bank
+from vllm_omni.diffusion.layers.qk_single_host_integration_v1 import try_prepared_send
+from vllm_omni.diffusion.layers.lingbot_frame_conditioning import (
+    capture_frame_projection, prepare_uniform_timestep,
+)
+from vllm_omni.diffusion.layers.lingbot_npu_fusion import (
+    fusion_enabled,
+    gelu_quant,
+    layernorm_modulation,
+    qkv_norm_rope,
+)
+from vllm_omni.diffusion.layers.lingbot_npu_ops import (
+    fp32_rms_norm,
+    fp32_rotary_interleaved,
+    fused_pointwise_enabled,
+    lossy_pointwise_enabled,
+    modulate,
+    npu_attention,
+)
 from vllm_omni.diffusion.layers.norm import LayerNorm
 from vllm_omni.diffusion.layers.rope import RotaryEmbeddingWan
 from vllm_omni.experimental.ar_diffusion.kv_cache.paged_attention import (
@@ -119,6 +150,8 @@ class _LingBotRMSNorm(nn.Module):
 
     def forward(self, value: torch.Tensor) -> torch.Tensor:
         tp_size = get_tensor_model_parallel_world_size()
+        if tp_size == 1 and fused_pointwise_enabled(value):
+            return fp32_rms_norm(value, self.weight, self.eps)
         value_float = value.float()
         sum_of_squares = value_float.pow(2).sum(dim=-1, keepdim=True)
         element_count = value.shape[-1]
@@ -187,6 +220,10 @@ class LingBotSelfAttention(nn.Module):
         self.dim = dim
         self.num_heads = num_heads
         self.head_dim = dim // num_heads
+        # Per-model overrides; None retains the existing environment gates.
+        self._lingbot_npu_attention_backend = None
+        self._lingbot_npu_attention_splits = None
+        self._lingbot_npu_attention_strict = None
         self.qkv = QKVParallelLinear(
             hidden_size=dim,
             head_size=self.head_dim,
@@ -203,6 +240,9 @@ class LingBotSelfAttention(nn.Module):
                 f"heads={self.num_local_heads}, ulysses={self.ulysses_world_size}."
             )
         self.num_sp_heads = self.num_local_heads // self.ulysses_world_size
+        if __import__("os").environ.get("ROOT_LINGBOT_QK_SINGLE_HOST_INTEGRATION_V1", "0") == "1":
+            from vllm_omni.diffusion.layers.qk_single_host_integration_v1 import bind_construction_config
+            bind_construction_config(self)
         self.tp_inner_dim = self.num_local_heads * self.head_dim
         self.o = RowParallelLinear(
             dim,
@@ -318,21 +358,54 @@ class LingBotSelfAttention(nn.Module):
         rotary_emb: tuple[torch.Tensor, torch.Tensor] | None = None,
         sink_tokens: int,
         update_cache: bool = True,
+        _projection_lease=None,
     ) -> torch.Tensor:
         # Project logical [B, S, D] tokens into TP-local
         # [B, S, num_local_heads, head_dim].
         qkv, _ = self.qkv(hidden_states)
-        query, key, value = qkv.split((self.tp_inner_dim, self.tp_inner_dim, self.tp_inner_dim), dim=-1)
-        query = self.norm_q(query)
-        key = self.norm_k(key)
-
-        query = query.unflatten(2, (self.num_local_heads, self.head_dim))
-        key = key.unflatten(2, (self.num_local_heads, self.head_dim))
-        value = value.unflatten(2, (self.num_local_heads, self.head_dim))
         if rotary_emb is not None:
+            capture_fusion_operands(self, "qknorm_rope", {
+                "qkv": qkv, "query_weight": self.norm_q.weight, "key_weight": self.norm_k.weight,
+                "cosine": rotary_emb[0], "sine": rotary_emb[1],
+            }, heads=self.num_local_heads, eps=self.norm_q.eps)
+        precision_qk_fusion = fusion_enabled(self, "qknorm_rope", qkv) and rotary_emb is not None
+        native_qk = native_bf16_qk_enabled(self, qkv, rotary_emb)
+        _qk_padded_send = None
+        if native_qk:
+            if precision_qk_fusion:
+                raise ValueError("Choose one explicit QK backend; native BF16 and precision fusion cannot overlap")
+            if get_tensor_model_parallel_world_size() != 1 or self.norm_q.eps != self.norm_k.eps:
+                raise ValueError("Native BF16 QK requires TP1 and equal norm epsilon")
+            _qk_padded_send = try_prepared_send(
+                self, qkv, rotary_emb, ring_size=get_sp_group().ring_world_size,
+            )
+            if _qk_padded_send is None:
+                query, key, value = native_bf16_qk(
+                    self, qkv, self.norm_q.weight, self.norm_k.weight, *rotary_emb,
+                    heads=self.num_local_heads, eps=self.norm_q.eps,
+                )
+        elif precision_qk_fusion:
+            if get_tensor_model_parallel_world_size() != 1 or self.norm_q.eps != self.norm_k.eps:
+                raise ValueError("LingBot QK norm+RoPE fusion requires TP1 and equal norm epsilon")
+            query, key, value = qkv_norm_rope(
+                qkv, self.norm_q.weight, self.norm_k.weight, *rotary_emb,
+                heads=self.num_local_heads, eps=self.norm_q.eps,
+            )
+        else:
+            query, key, value = qkv.split((self.tp_inner_dim, self.tp_inner_dim, self.tp_inner_dim), dim=-1)
+            query = self.norm_q(query)
+            key = self.norm_k(key)
+            query = query.unflatten(2, (self.num_local_heads, self.head_dim))
+            key = key.unflatten(2, (self.num_local_heads, self.head_dim))
+            value = value.unflatten(2, (self.num_local_heads, self.head_dim))
+        if rotary_emb is not None and not precision_qk_fusion and not native_qk:
             cos, sin = rotary_emb
-            query = self.rotary_embedding(query, cos, sin)
-            key = self.rotary_embedding(key, cos, sin)
+            if fused_pointwise_enabled(query):
+                query = fp32_rotary_interleaved(query, cos, sin)
+                key = fp32_rotary_interleaved(key, cos, sin)
+            else:
+                query = self.rotary_embedding(query, cos, sin)
+                key = self.rotary_embedding(key, cos, sin)
 
         if self.ulysses_world_size > 1:
             # One fused sequence->head all-to-all for q/k/v instead of three:
@@ -340,13 +413,30 @@ class LingBotSelfAttention(nn.Module):
             # as the per-tensor 4D exchange (rank r receives head group r), so
             # the result is a pure permutation of the three-call version, with a
             # 3x larger message and one third of the latency-bound collectives.
-            qkv = all_to_all_5D(
-                torch.stack((query, key, value), dim=2),
-                scatter_idx=3,
-                gather_idx=1,
-                group=self.ulysses_group,
-            )
+            if _qk_padded_send is not None:
+                qkv = _qk_padded_send.exchange(all_to_all_5D, self.ulysses_group)
+            else:
+                if sp8_observe.ENABLED:
+                    sp8_observe.send_pre(self, query, key, value, qkv)
+                if getattr(self, "_lingbot_npu_qkv_sp_pack_enabled", False):
+                    metadata, prepared_send = prepare_qkv_sp_send(self, query, key, value)
+                    qkv = all_to_all_5D(
+                        metadata, scatter_idx=3, gather_idx=1, group=self.ulysses_group,
+                        _prepared_send=prepared_send,
+                    )
+                else:
+                    qkv = all_to_all_5D(
+                        torch.stack((query, key, value), dim=2),
+                        scatter_idx=3,
+                        gather_idx=1,
+                        group=self.ulysses_group,
+                    )
             query, key, value = qkv.unbind(2)
+            if isinstance(cache, ARDiffusionPagedLayerInputs) and recv_kv_sp8.is_active():
+                recv_kv_sp8.record_receive(self, cache, qkv, query, key, value)
+            if sp8_observe.ENABLED:
+                sp8_observe.receive(self, cache, qkv, query, key, value)
+                sp8_observe.query_for_attention(query)
 
         if isinstance(cache, ARDiffusionPagedLayerInputs):
             if query.shape[0] != 1:
@@ -359,7 +449,12 @@ class LingBotSelfAttention(nn.Module):
                 None,
                 None,
                 self.head_dim**-0.5,
+                attention_backend=self._lingbot_npu_attention_backend,
+                attention_num_splits=self._lingbot_npu_attention_splits,
+                attention_strict=self._lingbot_npu_attention_strict,
             ).unsqueeze(0)
+            if sp8_observe.ENABLED:
+                sp8_observe.attention_done(self, cache, output)
         else:
             # The direct path sees history + current K/V even when the caller
             # asks not to mutate persistent cache state.
@@ -406,11 +501,57 @@ class LingBotSelfAttention(nn.Module):
                     max_seq_len=visible_key.shape[1],
                     softmax_scale=self.head_dim**-0.5,
                 )
+            elif query.device.type == "npu" and any(
+                value is not None
+                for value in (
+                    self._lingbot_npu_attention_backend,
+                    self._lingbot_npu_attention_splits,
+                    self._lingbot_npu_attention_strict,
+                )
+            ):
+                output = npu_attention(
+                    query,
+                    visible_key,
+                    visible_value,
+                    head_num=self.num_sp_heads,
+                    scale=self.head_dim**-0.5,
+                    backend=self._lingbot_npu_attention_backend,
+                    num_splits=self._lingbot_npu_attention_splits,
+                    strict=self._lingbot_npu_attention_strict,
+                )
             else:
                 output = self.attn(query, visible_key, visible_value)
+        output_capture = getattr(self, "_lingbot_output_capture", None)
+        capture_raw = output if getattr(self, "_leased_native_capture_enabled", False) else None
+        if output_capture is not None:
+            output_capture.before(self, output)
         if self.ulysses_world_size > 1:
+            if _projection_lease is not None:
+                destination = _projection_lease.projection_input.unflatten(2, (40, 128))
+                all_to_all_4D(output, 1, 2, self.ulysses_group, _output_destination=destination)
+                _projection_lease.mark_projection_written()
+                result = _projection_lease.finish()[0]
+                return result
+            output_overlap = getattr(self, "_lingbot_output_overlap", None)
+            if output_overlap is not None:
+                projected = output_overlap.try_forward(output)
+                if projected is not None:
+                    return projected
+            output_mc2 = getattr(self, "_lingbot_output_mc2", None)
+            if output_mc2 is not None:
+                projected = output_mc2.try_forward(output)
+                if projected is not None:
+                    return projected
             output = SeqAllToAll4D.apply(self.ulysses_group, output, 1, 2, False)
-        return self.o(output.flatten(2, 3))
+        projection_input = output.flatten(2, 3)
+        result = self.o(projection_input)
+        if capture_raw is not None:
+            self._leased_native_capture_operands = (
+                capture_raw, projection_input, int(getattr(cache, "host_kv_len", 0)),
+            )
+        if output_capture is not None:
+            output_capture.after(self, projection_input, result)
+        return result
 
 
 class LingBotCrossAttention(nn.Module):
@@ -524,6 +665,9 @@ class LingBotCrossAttention(nn.Module):
             key = cache.key[:, : cache.end]
             value = cache.value[:, : cache.end]
 
+        from vllm_omni.diffusion.layers.lingbot_compute_capture import record_attention
+
+        record_attention(query, key, value, input_layout="BSND", attention_kind="cross")
         output = self.attn(query, key, value)
         return self.o(output.flatten(2, 3)), cache
 
@@ -629,6 +773,7 @@ class LingBotAttentionBlock(nn.Module):
         update_cache: bool,
         rotary_emb: tuple[torch.Tensor, torch.Tensor],
         camera_modulation: tuple[torch.Tensor, torch.Tensor] | None = None,
+        uniform_timestep: bool = False,
     ) -> tuple[torch.Tensor, LingBotAttentionCache]:
         batch_size, token_count, dim = hidden_states.shape
         if (
@@ -640,7 +785,9 @@ class LingBotAttentionBlock(nn.Module):
         num_frames = timestep_projection.shape[1]
         if num_frames == 0 or token_count % num_frames:
             raise ValueError("LingBot timestep projection must align with hidden tokens.")
-        if self.self_attn.ulysses_world_size > 1 and num_frames != token_count:
+        if uniform_timestep and num_frames != 1:
+            raise ValueError("Uniform timestep requires exactly one original frame condition row.")
+        if self.self_attn.ulysses_world_size > 1 and num_frames != token_count and not uniform_timestep:
             raise ValueError("LingBot Ulysses requires one timestep projection per local token.")
         # Without SP, broadcast per frame. With SP, each entry represents one token.
         tokens_per_frame = token_count // num_frames
@@ -649,37 +796,127 @@ class LingBotAttentionBlock(nn.Module):
         shift_msa, scale_msa, gate_msa, shift_ffn, scale_ffn, gate_ffn = modulation.chunk(6, dim=2)
 
         hidden_grid = hidden_states.unflatten(1, (num_frames, tokens_per_frame))
-        normalized = self.norm1(hidden_states.float()).unflatten(1, (num_frames, tokens_per_frame))
-        normalized = (normalized * (1 + scale_msa) + shift_msa).flatten(1, 2).to(hidden_states.dtype)
-        attention_output = self.self_attn(
-            normalized,
-            cache=self_cache,
-            current_start=current_start,
-            rotary_emb=rotary_emb,
-            sink_tokens=sink_tokens,
-            update_cache=update_cache,
-        )
-        hidden_grid = hidden_grid + attention_output.unflatten(1, (num_frames, tokens_per_frame)) * gate_msa
-        hidden_states = hidden_grid.flatten(1, 2).to(hidden_states.dtype)
+        fused_pointwise = fused_pointwise_enabled(hidden_states)
+        capture_fusion_operands(self, "layernorm_msa", {
+            "value": hidden_states, "scale": scale_msa, "shift": shift_msa,
+        }, eps=self.norm1.eps)
+        if fusion_enabled(self, "layernorm_modulation", hidden_states):
+            normalized = layernorm_modulation(hidden_states, scale_msa, shift_msa, eps=self.norm1.eps)
+        else:
+            normalized = self.norm1(hidden_states.float()).unflatten(1, (num_frames, tokens_per_frame))
+            normalized = (
+                modulate(normalized, scale_msa, shift_msa)
+                if fused_pointwise else normalized * (1 + scale_msa) + shift_msa
+            ).flatten(1, 2).to(hidden_states.dtype)
+        from vllm_omni.diffusion.layers.lingbot_pointwise_regions import dispatch as pointwise_region
+        if hasattr(self, "_lingbot_leased_post_attention"):
+            from vllm_omni.diffusion.layers.lingbot_leased_post_attention import acquire
 
-        camera_scale, camera_shift = (
-            self.camera_modulation(camera_hidden_states) if camera_modulation is None else camera_modulation
-        )
-        hidden_states = ((1 + camera_scale) * hidden_states + camera_shift).to(hidden_states.dtype)
+            camera_scale, camera_shift = (
+                self.camera_modulation(camera_hidden_states) if camera_modulation is None else camera_modulation
+            )
+            post_context = acquire(self, hidden_states, gate_msa, camera_scale, camera_shift)
+        else:
+            # Keep the native producer order when the candidate is disabled.
+            camera_scale = camera_shift = None
+            post_context = nullcontext(None)
+        with post_context as lease:
+            projection_kwargs = {"_projection_lease": lease} if lease is not None else {}
+            attention_output = self.self_attn(
+                normalized,
+                cache=self_cache,
+                current_start=current_start,
+                rotary_emb=rotary_emb,
+                sink_tokens=sink_tokens,
+                update_cache=update_cache,
+                **projection_kwargs,
+            )
+            original_hidden = hidden_states
+            if camera_scale is None:
+                camera_scale, camera_shift = (
+                    self.camera_modulation(camera_hidden_states) if camera_modulation is None else camera_modulation
+                )
+            if lease is not None:
+                attention_output, hidden_states, cross_normalized = lease.consume()
+            else:
+                post_region = pointwise_region(self, "post_attention", hidden_states, attention_output, gate_msa,
+                                               camera_scale, camera_shift)
+                if post_region is not None:
+                    hidden_states, cross_normalized = post_region
+                else:
+                    hidden_states, cross_normalized = self._post_attention_native(
+                        hidden_states, attention_output, gate_msa, camera_scale, camera_shift,
+                        num_frames=num_frames, tokens_per_frame=tokens_per_frame, fused_pointwise=fused_pointwise,
+                    )
+            captured = self.self_attn.__dict__.pop("_leased_native_capture_operands", None)
+            if captured is not None:
+                from vllm_omni.diffusion.layers.lingbot_leased_post_attention import capture_sample
 
-        attention_output, cross_cache = self.cross_attn(
-            self.norm3(hidden_states),
-            encoder_hidden_states,
-            cache=cross_cache,
-        )
-        hidden_states = hidden_states + attention_output
+                raw_attention, projection_input, history_tokens = captured
+                capture_sample(
+                    self, attention_output=raw_attention, projection_input=projection_input,
+                    hidden=original_hidden, gate_msa=gate_msa, camera_scale=camera_scale,
+                    camera_shift=camera_shift, projected=attention_output, post_hidden=hidden_states,
+                    cross_normalized=cross_normalized, context=self._leased_native_capture_context,
+                    history_tokens=history_tokens,
+                )
+            attention_output, cross_cache = self.cross_attn(
+                cross_normalized,
+                encoder_hidden_states,
+                cache=cross_cache,
+            )
+            # This independent result is the last consumer of the borrowed
+            # post-attention output. No graph view enters a long-lived cache.
+            hidden_states = hidden_states + attention_output
+        tail_region = pointwise_region(self, "ffn_tail", hidden_states, scale_ffn, shift_ffn, gate_ffn)
+        if tail_region is not None:
+            return tail_region[0], cast(LingBotAttentionCache, cross_cache)
 
         hidden_grid = hidden_states.unflatten(1, (num_frames, tokens_per_frame))
-        normalized = self.norm2(hidden_states.float()).unflatten(1, (num_frames, tokens_per_frame))
-        normalized = (normalized * (1 + scale_ffn) + shift_ffn).flatten(1, 2).to(hidden_states.dtype)
-        ffn_output = self.ffn(normalized).unflatten(1, (num_frames, tokens_per_frame))
+        capture_fusion_operands(self, "layernorm_ffn", {
+            "value": hidden_states, "scale": scale_ffn, "shift": shift_ffn,
+        }, eps=self.norm2.eps)
+        if fusion_enabled(self, "layernorm_modulation", hidden_states):
+            normalized = layernorm_modulation(hidden_states, scale_ffn, shift_ffn, eps=self.norm2.eps)
+        else:
+            normalized = self.norm2(hidden_states.float()).unflatten(1, (num_frames, tokens_per_frame))
+            normalized = (
+                modulate(normalized, scale_ffn, shift_ffn)
+                if fused_pointwise else normalized * (1 + scale_ffn) + shift_ffn
+            ).flatten(1, 2).to(hidden_states.dtype)
+        if fusion_enabled(self, "gelu_quant", normalized):
+            from .npu_quantization import quantized_linear_from_payload
+
+            if getattr(self.ffn[2], "_lingbot_quant_mode", None) != "w8a8":
+                raise ValueError("LingBot GELU+quant fusion requires W8A8 FFN output projection")
+            first_projection = self.ffn[0](normalized)
+            capture_fusion_operands(self, "gelu_quant", {"value": first_projection})
+            payload, activation_scale = gelu_quant(first_projection)
+            ffn_output = quantized_linear_from_payload(
+                self.ffn[2], payload, activation_scale, output_dtype=normalized.dtype,
+            )
+        else:
+            ffn_output = self.ffn(normalized)
+        ffn_output = ffn_output.unflatten(1, (num_frames, tokens_per_frame))
         hidden_states = (hidden_grid + ffn_output * gate_ffn).flatten(1, 2).to(hidden_states.dtype)
         return hidden_states, cast(LingBotAttentionCache, cross_cache)
+
+    def _post_attention_native(self, hidden_states, attention_output, gate_msa, camera_scale, camera_shift,
+                               *, num_frames, tokens_per_frame, fused_pointwise):
+        hidden_grid = hidden_states.unflatten(1, (num_frames, tokens_per_frame))
+        attention_grid = attention_output.unflatten(1, (num_frames, tokens_per_frame))
+        # The mixed BF16 residual/FP32 gate addcmul is slower on the measured
+        # A3 shape, so keep this sequence even with pointwise fusion enabled.
+        hidden_grid = hidden_grid + attention_grid * gate_msa
+        hidden_states = hidden_grid.flatten(1, 2).to(hidden_states.dtype)
+
+        hidden_states = (
+            modulate(hidden_states, camera_scale, camera_shift)
+            if fused_pointwise and lossy_pointwise_enabled()
+            else (1 + camera_scale) * hidden_states + camera_shift
+        ).to(hidden_states.dtype)
+
+        return hidden_states, self.norm3(hidden_states)
 
 
 class _LingBotCameraPatchEmbedding(nn.Module):
@@ -746,7 +983,10 @@ class _LingBotHead(nn.Module):
         normalized = self.norm(hidden_states.float())
         if tokens_per_frame is None:
             normalized = normalized.unflatten(1, (num_frames, -1))
-            normalized = (normalized * (1 + scale) + shift).flatten(1, 2)
+            normalized = (
+                modulate(normalized, scale, shift)
+                if fused_pointwise_enabled(hidden_states) else normalized * (1 + scale) + shift
+            ).flatten(1, 2)
         else:
             # A sequence shard can begin/end inside a frame.
             frames = (
@@ -754,7 +994,10 @@ class _LingBotHead(nn.Module):
             ) // tokens_per_frame
             scale = scale.squeeze(2).index_select(1, frames)
             shift = shift.squeeze(2).index_select(1, frames)
-            normalized = normalized * (1 + scale) + shift
+            normalized = (
+                modulate(normalized, scale, shift)
+                if fused_pointwise_enabled(hidden_states) else normalized * (1 + scale) + shift
+            )
         normalized = normalized.to(hidden_states.dtype)
         return self.head(normalized)
 
@@ -796,12 +1039,13 @@ class CameraModulationCache:
     block, ``generate_block`` one per loop, and nothing here checks the camera tensor for change.
     """
 
-    __slots__ = ("entries",)
+    __slots__ = ("entries", "prefix")
 
     def __init__(self) -> None:
         self.entries: dict[int, tuple[torch.Tensor, torch.Tensor]] = {}
 
 
+        self.prefix = None
 class CausalLingBotWorldTransformer3DModel(nn.Module):
     """Checkpoint-compatible causal LingBot World video transformer."""
 
@@ -1237,6 +1481,7 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
         start_frame: int,
         update_cache: bool,
         camera_modulation_cache: CameraModulationCache | None = None,
+        fixed_timestep_token: object | None = None,
     ) -> torch.Tensor:
         if not isinstance(update_cache, bool):
             raise ValueError("update_cache must be a boolean.")
@@ -1259,7 +1504,17 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
         # Phase 1: create absolute 3D positions for this causal block. The
         # spatial coordinates restart for every frame; temporal coordinates
         # begin at ``start_frame`` so cached blocks retain their true ordering.
-        rotary_emb = self._rotary_embedding(
+        prefix_enabled = prefix_cache_enabled(self, camera_modulation_cache, camera_hidden_states)
+        prefix_geometry = (batch_size, patched_frames, patched_height, patched_width)
+        prefix_sp_size = self.blocks[0].self_attn.ulysses_world_size
+        prefix_source_camera = camera_hidden_states
+        chunk_prefix = (
+            lookup_chunk_prefix(self, camera_modulation_cache, prefix_source_camera,
+                                start_frame=patched_start_frame, geometry=prefix_geometry,
+                                sp_size=prefix_sp_size)
+            if prefix_enabled else None
+        )
+        rotary_emb = chunk_prefix.rotary if chunk_prefix is not None else self._rotary_embedding(
             frames=patched_frames,
             height=patched_height,
             width=patched_width,
@@ -1270,24 +1525,37 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
         # Phase 2: independently patchify video and camera grids to identical
         # token layouts, then project timestep and text conditions.
         hidden_states = self.patch_embedding(hidden_states).flatten(2).transpose(1, 2)
-        camera_hidden_states = self.patch_embedding_wancamctrl(camera_hidden_states)
-        camera_hidden_states = camera_hidden_states + self.c2ws_hidden_states_layer2(
-            F.silu(self.c2ws_hidden_states_layer1(camera_hidden_states))
-        )
+        if chunk_prefix is None:
+            camera_hidden_states = self.patch_embedding_wancamctrl(camera_hidden_states)
+            camera_hidden_states = camera_hidden_states + self.c2ws_hidden_states_layer2(
+                F.silu(self.c2ws_hidden_states_layer1(camera_hidden_states))
+            )
+            if prefix_enabled:
+                save_chunk_prefix(self, camera_modulation_cache, prefix_source_camera,
+                                  camera_hidden_states, rotary_emb,
+                                  start_frame=patched_start_frame, geometry=prefix_geometry,
+                                  sp_size=prefix_sp_size)
+        else:
+            camera_hidden_states = chunk_prefix.camera
         if hidden_states.shape != camera_hidden_states.shape:
             raise ValueError("Patched video and camera token shapes must match.")
 
-        timestep_embedding, timestep_projection = self._timestep_embeddings(
-            timestep,
+        timestep_embedding, timestep_projection = fixed_timestep_bank.embeddings(
+            self, timestep,
             batch_size=batch_size,
             frames=patched_frames,
             dtype=hidden_states.dtype,
+            geometry=(patched_height, patched_width),
+            token=fixed_timestep_token,
         )
+        # Diagnostic-only original frame rows; no host copy on the normal path.
+        capture_frame_projection(self, timestep, timestep_projection)
         projected_text = (
             self.text_embedding(encoder_hidden_states)
             if any(value is None for value in cache.cross_attention)
             else None
         )
+        history_forward_context = None
         if cache.self_attention and isinstance(cache.self_attention[0], ARDiffusionPagedLayerContext):
             if batch_size != 1:
                 raise RuntimeError("LingBot AR-Diffusion paged attention requires batch_size=1.")
@@ -1305,6 +1573,7 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
                 query_len=hidden_states.shape[1],
             )
             cache.self_attention = [layer_context.to_layer_inputs() for layer_context in cache.self_attention]
+            history_forward_context = forward_context
         sp_size = self.blocks[0].self_attn.ulysses_world_size
         global_tokens = patched_frames * tokens_per_frame
         hidden_dim = hidden_states.shape[-1]
@@ -1331,8 +1600,15 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
                     "LingBot SP input hooks did not shard all conditioning tensors consistently; "
                     f"expected {local_tokens} tokens per rank. Check SP hook registration and input dimensions."
                 )
+        # Retain the original BF16 SP expansion, sharding and shape checks.
+        # Compact conditioning precedes the independently gated FP32 cast.
+        timestep_projection, uniform_timestep = prepare_uniform_timestep(self, timestep_projection, timestep)
+        # Communication remains BF16. Reuse the identical FP32 cast before
+        # optional staging so block graphs can keep a static FP32 input address.
+        timestep_projection = prepare_timestep_projection(self, timestep_projection)
         timestep_projection = self._stage_timestep_projection(timestep_projection)
         rotary_emb = (cosine, sine)
+        prepare_native_bf16_qk(self, rotary_emb)
         # Phase 3: each layer receives its own cache entry. Text K/V is passed
         # only when absent; the returned cache is stored for subsequent DMD
         # steps and causal blocks in this request. A caller-held camera cache
@@ -1350,6 +1626,7 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
                 timestep_projection,
                 camera_hidden_states,
                 camera_modulation=camera_modulation,
+                uniform_timestep=uniform_timestep,
                 self_cache=cache.self_attention[index],
                 cross_cache=cache.cross_attention[index],
                 current_start=current_start,
@@ -1370,13 +1647,16 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
         projected_dim = self.config.out_channels * math.prod(self.config.patch_size)
         if sp_size > 1 and hidden_states.shape != (batch_size, global_tokens, projected_dim):
             raise RuntimeError("LingBot SP output hook did not gather the full projected token sequence.")
-        return self._unpatchify(
+        output = self._unpatchify(
             hidden_states,
             batch_size=batch_size,
             frames=patched_frames,
             height=patched_height,
             width=patched_width,
         )
+        if history_forward_context is not None:
+            history_forward_context.mark_history_staged()
+        return output
 
     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
         """Load exact checkpoint names, delegating TP sharding to parameters."""

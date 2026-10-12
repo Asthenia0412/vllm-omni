@@ -1474,6 +1474,18 @@ def test_reuse_last_step_kv_is_fixed_per_instance(monkeypatch: pytest.MonkeyPatc
     assert reuse._dmd_blocks is reuse._dmd_blocks
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 @pytest.mark.parametrize("reuse_last_step_kv", [False, True])
 def test_fixed_dmd_transition_and_cache_commit_trace(reuse_last_step_kv: bool) -> None:
     module = _load_pipeline_module()
@@ -2163,6 +2175,38 @@ def test_condition_encoder_fixed_point_is_released_with_the_session(monkeypatch:
     assert state.condition_fixed_point is None and state.encoder_cache is None
 
 
+def test_condition_prefill_replays_transients_retries_and_releases_session(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = _load_pipeline_module()
+    config = _od_config()
+    config.model_config["lingbot_condition_prefill"] = True
+    pipeline = _pipeline(module, od_config=config)
+    inputs = pipeline._parse_request(_request())
+    state = module._LingBotARSessionState()
+    pipeline._ar_sessions["prefill-test"] = state
+    calls = []
+
+    def encode(inputs, *, start_frame, encoder_cache, dtype):
+        del inputs, encoder_cache
+        index = min(start_frame // 3, 3)
+        calls.append(start_frame)
+        condition = torch.full((1, 20, 3, 2, 2), index, dtype=dtype)
+        return condition, [torch.tensor(min(index + 1, 3))]
+
+    monkeypatch.setattr(pipeline, "_prepare_condition_chunk", encode)
+    first, pending = pipeline._next_condition_chunk(inputs, start_frame=0, session_state=state, dtype=torch.float32)
+    assert calls == [0, 3, 6, 9] and pending == []
+    first.fill_(99)
+    for index in range(8):
+        condition, pending = pipeline._next_condition_chunk(
+            inputs, start_frame=index * 3, session_state=state, dtype=torch.float32,
+        )
+        assert torch.all(condition == min(index, 3)) and pending == []
+        state.encoder_cache = pending
+    assert calls == [0, 3, 6, 9]
+    pipeline.reset_ar_diffusion_session("prefill-test")
+    assert state.condition_prefill_bank is None and state.condition_prefill_key is None
+
+
 def test_condition_encoder_interleaving_retry_and_reset(monkeypatch: pytest.MonkeyPatch) -> None:
     pipeline = _tiny_condition_pipeline(monkeypatch)
     pipeline._ar_diffusion_kv_state = object()
@@ -2368,6 +2412,54 @@ class _FakeARState:
 
 def _empty_action_script(num_chunks: int):
     return tuple(((), (), ()) for _ in range(num_chunks))
+
+
+@pytest.mark.parametrize("max_sequence_length", [None, 512])
+def test_stepwise_prompt_update_encoder_and_text_cache_retry(monkeypatch: pytest.MonkeyPatch, max_sequence_length) -> None:
+    from vllm_omni.diffusion.interaction.modality_handlers.prompt import LingBotPromptInteractionHandler
+
+    pipeline = _pipeline(_load_pipeline_module())
+    state = _stepwise_state(num_frames=45)
+    state.sampling.num_outputs_per_prompt = 1
+    state.sampling.max_sequence_length = max_sequence_length
+    with pipeline.bind_ar_diffusion_state(state.request_id, _FakeARState(state.request_id)):
+        pipeline.prepare_encode(state)
+        original = state.prompt_embeds
+        target = torch.full_like(original, 2)
+        encoder_calls = []
+
+        def encode(prompt, *, max_sequence_length, dtype):
+            assert not torch.is_grad_enabled(), "Interaction RPC must not retain a text-encoder autograd graph"
+            encoder_calls.append((prompt, max_sequence_length, dtype))
+            return target
+
+        monkeypatch.setattr(pipeline, "encode_prompt", encode)
+        handler = LingBotPromptInteractionHandler.from_pipeline(pipeline)
+        handler.enqueue(state, event_id="new-text", received_at=1.0,
+                        payload={"prompt": "new scene"}, transition_chunks=0)
+        metadata = handler.apply_at_chunk_boundary(state, boundary_at=2.0)
+        assert metadata.started_event_ids == metadata.completed_event_ids == ["new-text"]
+        assert state.prompt_embeds is target
+        assert encoder_calls == [("new scene", 512, pipeline.transformer.dtype)]
+        cache_calls = []
+        fail = True
+
+        def text_cache(embeds, *, invalidate):
+            cache_calls.append((embeds, invalidate))
+            if fail:
+                raise RuntimeError("partial text cache build")
+            return [SimpleNamespace()]
+
+        monkeypatch.setattr(pipeline, "_ar_text_caches", text_cache)
+        with pytest.raises(RuntimeError, match="partial text cache build"):
+            pipeline.prepare_next_chunk(state)
+        assert "ar_prompt_version" not in state.extra
+        fail = False
+        pipeline.prepare_next_chunk(state)
+        pipeline.prepare_next_chunk(state)
+        assert [invalidate for _, invalidate in cache_calls] == [True, True, False]
+        assert all(embeds is target for embeds, _ in cache_calls)
+        assert state.extra["ar_prompt_version"] == 1
 
 
 def _stepwise_state(

@@ -263,6 +263,47 @@ def test_runner_keeps_engine_request_id_separate_from_tick_correlation_id():
     assert parsed.request_id == "client-request-3"
 
 
+def test_idle_abort_reclaims_pages_and_batch_without_a_following_wave():
+    pipeline = CapablePipeline(lingbot_like_spec())
+    runner = make_runner(pipeline)
+    kv = runner.kv_cache
+    free_before = kv.manager.block_pool.get_num_free_blocks()
+    session = commit_one_frame(runner, "cancelled", "main")
+    k = torch.randn(1, 8, 4, 64)
+    session.populate_cross_attention("main", "text", [(k, k)] * session.num_layers)
+    runner.state_cache = {"cancelled": object()}
+    runner.input_batch = object()
+    runner._stepwise_chunk_started["cancelled"] = 1.0
+    assert runner.release_aborted_requests(["cancelled", "cancelled"]) == 1
+    assert runner._sessions == {} and runner.state_cache == {} and runner.input_batch is None
+    assert "cancelled" not in kv._cross_sessions and runner._stepwise_chunk_started == {}
+    assert kv.manager.block_pool.get_num_free_blocks() == free_before
+    assert pipeline.closes == ["cancelled"]
+    assert runner.release_aborted_requests(["cancelled", "unknown"]) == 0
+    assert pipeline.closes == ["cancelled"]
+
+
+def test_idle_abort_failed_barrier_preserves_page_owners(monkeypatch):
+    pipeline = CapablePipeline(lingbot_like_spec())
+    runner = make_runner(pipeline)
+    session = commit_one_frame(runner, "cancelled", "main")
+    owner = object()
+    runner.state_cache = {"cancelled": owner}
+    runner.input_batch = owner
+    free_before = runner.kv_cache.manager.block_pool.get_num_free_blocks()
+
+    def failed_barrier():
+        raise RuntimeError("asynchronous device error")
+
+    monkeypatch.setattr("vllm_omni.experimental.ar_diffusion.runner.current_omni_platform",
+                        SimpleNamespace(synchronize=failed_barrier))
+    with pytest.raises(RuntimeError, match="asynchronous device error"):
+        runner.release_aborted_requests(["cancelled"])
+    assert runner._sessions["cancelled"] is session and runner.state_cache["cancelled"] is owner
+    assert runner.input_batch is owner and pipeline.closes == []
+    assert runner.kv_cache.manager.block_pool.get_num_free_blocks() == free_before
+
+
 def test_lingbot_like_single_branch_session_reuse_reset_and_close():
     pipeline = CapablePipeline(lingbot_like_spec())
     runner = make_runner(pipeline)

@@ -81,6 +81,20 @@ def test_engine_class_declares_its_runner():
     assert DiffusionEngine.default_diffusion_model_runner_cls is None
 
 
+@pytest.mark.parametrize("step_execution", [False, True])
+def test_idle_abort_releases_ar_workers_after_scheduler_retirement(monkeypatch, step_execution):
+    calls = []
+    monkeypatch.setattr(DiffusionEngine, "_abort_requests", lambda self, ids: calls.append(("scheduler", ids)))
+    engine = object.__new__(ARDiffusionEngine)
+    engine.od_config = SimpleNamespace(step_execution=step_execution)
+    engine.executor = SimpleNamespace(collective_rpc=lambda method, *, args: calls.append((method, args)))
+    engine._abort_requests(["cancelled", "cancelled"])
+    expected = [("scheduler", ["cancelled"])]
+    if step_execution:
+        expected.append(("release_ar_diffusion_requests", (["cancelled"],)))
+    assert calls == expected
+
+
 def _select_runner(od_config, platform_default="PLATFORM"):
     """Mirror of the worker's runner-selection chain (override > engine > platform)."""
     runner_override = getattr(od_config, "diffusion_model_runner_cls", None)

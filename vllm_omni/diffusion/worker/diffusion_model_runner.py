@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import copy
 import gc
+import os
 import time
 from collections.abc import Callable, Sequence
 from contextlib import AbstractContextManager, nullcontext
@@ -32,7 +33,7 @@ from vllm_omni.diffusion.cache.prompt_embed_cache import (
 )
 from vllm_omni.diffusion.cache.selector import get_cache_backend
 from vllm_omni.diffusion.cancellation import check_request_cancellation, request_cancellation_scope
-from vllm_omni.diffusion.compile import regionally_compile
+from vllm_omni.diffusion.compile import regionally_compile, regionally_compile_npu_pure
 from vllm_omni.diffusion.data import DiffusionOutput, DiffusionRequestAbortedError, OmniDiffusionConfig
 from vllm_omni.diffusion.diffusion_kv.config import DiffusionKVCacheMode
 from vllm_omni.diffusion.diffusion_kv.metadata import DiffusionKVMetadata
@@ -91,6 +92,13 @@ if TYPE_CHECKING:
     from vllm_omni.inputs.data import OmniInteractionPrompt
 
 logger = init_logger(__name__)
+
+# Opt-in diagnostic markers only: no device barriers or timing are added.
+_LINGBOT_PROFILE_STAGE_RANGES = os.environ.get("LINGBOT_PROFILE_STAGE_RANGES") == "1"
+
+
+def _lingbot_profile_stage(name: str):
+    return record_function(f"lingbot.{name}") if _LINGBOT_PROFILE_STAGE_RANGES else nullcontext()
 
 
 def _dit_any_rank_failed(local_failed: bool) -> bool:
@@ -381,8 +389,60 @@ class DiffusionModelRunner(DiffusionStagePayloadMixin):
             device=self.device,
         )
 
-        # Apply torch.compile if not in eager mode
-        if not self.od_config.enforce_eager:
+        # Experimental encoder-only post-load residency. Ordinary NPU loading
+        # and quant postprocessing finish before this boundary; public offload
+        # remains disabled. No transformer/VAE hooks are installed here.
+        from vllm_omni.diffusion.offloader.lingbot_text_block_residency import (
+            install_lingbot_text_block_residency,
+        )
+        self.offload_backend = install_lingbot_text_block_residency(
+            self.od_config, self.pipeline, self.device, self.offload_backend,
+        )
+
+        # npugraph_ex is an explicit NPU backend, independent of Inductor
+        # support and the CUDA-oriented enforce_eager switch. Only pure leaves
+        # are captured; scheduler/RNG/KV/session operations remain outside.
+        model_config = getattr(self.od_config, "model_config", None) or {}
+        if self.device.type == "npu" and self.od_config.model_class_name == "LingBotWorldCausalDMDPipeline":
+            from vllm_omni.diffusion.layers.lingbot_npu_fusion import PrecisionFusionConfig
+
+            precision_fusion = PrecisionFusionConfig.from_sources(model_config)
+            if precision_fusion.backend != "off" and "vae_rms_silu" in precision_fusion.regions:
+                from vllm_omni.diffusion.distributed.autoencoders.wan_npu_decoder_fusion import (
+                    install_wan_npu_decoder_fusion,
+                )
+
+                counts = install_wan_npu_decoder_fusion(self.pipeline.vae)
+                logger.info("Configured opt-in NPU decoder norm/SiLU regions: %s", counts)
+        npu_backend = model_config.get("lingbot_npu_graph_backend")
+        if npu_backend is not None:
+            if npu_backend != "npugraph_ex" or self.device.type != "npu":
+                raise ValueError("lingbot_npu_graph_backend requires NPU device and backend='npugraph_ex'")
+            if self.od_config.model_class_name != "LingBotWorldCausalDMDPipeline":
+                raise ValueError("NPU pure regional graphs currently support only LingBotWorldCausalDMDPipeline")
+            import torch_npu  # noqa: F401 -- register the npugraph_ex compiler backend
+            from vllm.platforms import current_platform
+
+            reserve = model_config.get("lingbot_npu_graph_workspace_reserve_bytes", 2 * 1024**3)
+            if isinstance(reserve, bool) or not isinstance(reserve, int) or reserve <= 0:
+                raise ValueError("lingbot_npu_graph_workspace_reserve_bytes must be a positive integer")
+            if hasattr(self, "ar_diffusion_kv_config"):
+                from dataclasses import replace
+
+                self.ar_diffusion_kv_config = replace(
+                    self.ar_diffusion_kv_config,
+                    npu_graph_workspace_reserve_bytes=max(
+                        self.ar_diffusion_kv_config.npu_graph_workspace_reserve_bytes, reserve
+                    ),
+                )
+            regionally_compile_npu_pure(
+                self.pipeline.transformer,
+                regions=tuple(model_config.get("lingbot_npu_graph_regions", ("ffn", "qkv"))),
+                max_graphs=model_config.get("lingbot_npu_graph_max_shapes", 6),
+                graph_pool=current_platform.get_global_graph_pool(),
+            )
+        # Apply the normal CUDA/Inductor path if not in eager mode.
+        elif not self.od_config.enforce_eager:
             if current_omni_platform.supports_torch_inductor():
                 if hasattr(self.pipeline, "setup_compile"):
                     try:
@@ -923,6 +983,10 @@ class DiffusionModelRunner(DiffusionStagePayloadMixin):
             output.started_event_ids = list(meta.started_event_ids)
             output.active_event_ids = list(meta.active_event_ids)
             output.completed_event_ids = list(meta.completed_event_ids)
+            output.camera_event_samples = (
+                [dict(sample) for sample in meta.camera_event_samples]
+                if meta.camera_event_samples is not None else None
+            )
 
     def execute_model(
         self,
@@ -1394,7 +1458,8 @@ class DiffusionModelRunner(DiffusionStagePayloadMixin):
                 in_diffusion_kv_memory_profile=in_diffusion_kv_memory_profile,
             ):
                 clear_pipeline_stage_durations(pipeline)
-                noise_pred = pipeline.denoise_step(input_batch, states=states)
+                with _lingbot_profile_stage("denoise_step"):
+                    noise_pred = pipeline.denoise_step(input_batch, states=states)
                 denoise_stage_durations = consume_pipeline_stage_durations(pipeline)
                 for state in states:
                     merge_stage_durations(
@@ -1421,9 +1486,10 @@ class DiffusionModelRunner(DiffusionStagePayloadMixin):
                             raise RuntimeError(f"Stepwise request {req.request_id} has no latent state.")
                         row_num = req.latents.shape[0]
                         try:
-                            pipeline.step_scheduler(
-                                req, noise_pred[offset : offset + row_num] if noise_pred is not None else None
-                            )
+                            with _lingbot_profile_stage("step_scheduler"):
+                                pipeline.step_scheduler(
+                                    req, noise_pred[offset : offset + row_num] if noise_pred is not None else None
+                                )
                             if self.od_config.streaming_output:
                                 should_decode = req.chunk_denoise_completed or req.request_denoise_completed
                             else:
@@ -1431,19 +1497,29 @@ class DiffusionModelRunner(DiffusionStagePayloadMixin):
 
                             if should_decode:
                                 clear_pipeline_stage_durations(pipeline)
-                                result = pipeline.post_decode(req)
+                                with _lingbot_profile_stage("post_decode"):
+                                    result = pipeline.post_decode(req)
                                 if result is not None:
-                                    result = self._prepare_output_for_transport(result, req.sampling)
-                                    self._attach_stepwise_metadata(
-                                        req,
-                                        result,
-                                    )
+                                    with _lingbot_profile_stage("output_transport"):
+                                        result = self._prepare_output_for_transport(result, req.sampling)
+                                        self._attach_stepwise_metadata(
+                                            req,
+                                            result,
+                                        )
                                     # After consuming this chunk's interaction metadata, apply pending interactions and
                                     # prepare the next chunk (prepare_next_chunk may be a no-op---depending on pipeline)
                                     if supports_interaction_apply(pipeline) and not req.request_denoise_completed:
                                         pipe = cast(SupportsInteractionApply, pipeline)
-                                        pipe.apply_interaction_at_chunk_boundary(req)
-                                        pipe.prepare_next_chunk(req)
+                                        with _lingbot_profile_stage("apply_interaction"):
+                                            pipe.apply_interaction_at_chunk_boundary(req)
+                                        with _lingbot_profile_stage("prepare_next_chunk"):
+                                            pipe.prepare_next_chunk(req)
+                                    if os.environ.get("LINGBOT_NPU_MEMORY_DIAGNOSTIC_CHUNK") is not None:
+                                        from vllm_omni.diffusion.layers.lingbot_memory_diagnostic import (
+                                            report_lingbot_npu_memory,
+                                        )
+
+                                        report_lingbot_npu_memory(req, self.device, logger)
                             else:
                                 result = None
                             # finished should be computed after post_decode() advanced chunk_index

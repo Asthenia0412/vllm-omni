@@ -46,6 +46,7 @@ from vllm.logger import init_logger
 
 from vllm_omni.entrypoints.async_omni import AsyncOmni
 from vllm_omni.entrypoints.openai.errors import InvalidInputReferenceError
+from vllm_omni.entrypoints.openai.lingbot_media_profile import MEDIA_PROFILE_ENABLED, emit_media_span
 from vllm_omni.entrypoints.openai.protocol.videos import VideoGenerationRequest, VideoParams
 from vllm_omni.entrypoints.openai.stage_params import (
     build_stage_sampling_params_list,
@@ -151,8 +152,21 @@ class OmniStreamingVideoOutputHandler:
                     break
                 async with send_lock:
                     metadata["transport_chunk_index"] = chunks_sent
+                    if MEDIA_PROFILE_ENABLED:
+                        json_send_start = time.perf_counter_ns()
                     await websocket.send_json(metadata)
+                    if MEDIA_PROFILE_ENABLED:
+                        binary_send_start = time.perf_counter_ns()
                     await websocket.send_bytes(chunk)
+                    if MEDIA_PROFILE_ENABLED:
+                        binary_send_end = time.perf_counter_ns()
+                        context = dict(request_id=request_id, generation_chunk_index=metadata.get("generation_chunk_index"),
+                                       num_frames=metadata.get("num_frames"), fps=request.resolve_video_params().fps,
+                                       byte_length=len(chunk))
+                        emit_media_span("websocket_send_json", json_send_start, binary_send_start, **context,
+                            scope="Actual metadata serialization plus awaited WebSocket transport/backpressure; not pure CPU serialization")
+                        emit_media_span("websocket_send_bytes", binary_send_start, binary_send_end, **context,
+                            scope="Awaited binary WebSocket transport/backpressure; no model or encoder work")
                 chunks_sent += 1
                 progress.touch()
 
@@ -502,10 +516,12 @@ class OmniStreamingVideoOutputHandler:
             video_codec_options = request.extra_params["video_codec_options"]
 
         output_fps = vp.fps or gen_params.resolved_frame_rate or 16
+        timing_enabled = gen_params.extra_args.get("media_timing") is True
         encoder = create_streaming_video_encoder(
             output_format=output_format,
             fps=output_fps,
             video_codec_options=video_codec_options,
+            **({"media_timing": True} if timing_enabled else {}),
         )
         completed = False
         try:
@@ -514,18 +530,31 @@ class OmniStreamingVideoOutputHandler:
                     raise RuntimeError(str(result.error))
                 videos = self._extract_video_outputs(result)
                 for video in videos:
+                    if MEDIA_PROFILE_ENABLED:
+                        encoder.set_media_profile_context(request_id=request_id,
+                            generation_chunk_index=self._extract_stream_metadata(result).get("generation_chunk_index"),
+                            output_request_id=getattr(result, "request_id", None))
                     chunk = encoder.encode(video)
                     if chunk:
-                        yield (
-                            chunk,
-                            self._build_chunk_metadata(
+                        stream_metadata = self._extract_stream_metadata(result)
+                        if timing_enabled:
+                            stream_metadata["media_timing"] = encoder.last_media_timing
+                        if MEDIA_PROFILE_ENABLED:
+                            metadata_start = time.perf_counter_ns()
+                        metadata = self._build_chunk_metadata(
                                 request_id=request_id,
                                 kind="media",
                                 byte_length=len(chunk),
                                 num_frames=self._num_video_frames(video),
-                                stream_metadata=self._extract_stream_metadata(result),
-                            ),
-                        )
+                                stream_metadata=stream_metadata,
+                            )
+                        if MEDIA_PROFILE_ENABLED:
+                            metadata_end = time.perf_counter_ns()
+                            emit_media_span("chunk_metadata_build", metadata_start, metadata_end,
+                                request_id=request_id, generation_chunk_index=metadata.get("generation_chunk_index"),
+                                num_frames=metadata["num_frames"], fps=output_fps, byte_length=len(chunk),
+                                scope="Actual frame count and response metadata construction; excludes JSON serialization and transport")
+                        yield chunk, metadata
 
             completed = True
             final_chunk = encoder.close()
@@ -592,6 +621,9 @@ class OmniStreamingVideoOutputHandler:
                     status_code=HTTPStatus.BAD_REQUEST.value,
                     detail="extra_params must be a JSON object/dict.",
                 )
+            for option in ("camera_event_samples", "media_timing"):
+                if option in request.extra_params and not isinstance(request.extra_params[option], bool):
+                    raise HTTPException(HTTPStatus.BAD_REQUEST.value, detail=f"{option} must be a boolean")
             # Worker-side pre-encoding produces one progressive MP4, which this
             # path's incremental fMP4 encoder cannot consume; streaming already
             # overlaps encoding through that encoder instead.
@@ -757,7 +789,7 @@ class OmniStreamingVideoOutputHandler:
         num_frames: int,
         stream_metadata: dict[str, Any],
     ) -> dict[str, Any]:
-        return {
+        result = {
             "type": "video.chunk_metadata",
             "request_id": request_id,
             "kind": kind,
@@ -768,6 +800,10 @@ class OmniStreamingVideoOutputHandler:
             "active_event_ids": stream_metadata.get("active_event_ids", []),
             "completed_event_ids": stream_metadata.get("completed_event_ids", []),
         }
+        for option in ("camera_event_samples", "media_timing"):
+            if stream_metadata.get(option) is not None:
+                result[option] = stream_metadata[option]
+        return result
 
     @staticmethod
     async def _send_error(

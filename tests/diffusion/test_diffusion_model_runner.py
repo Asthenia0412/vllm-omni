@@ -1224,6 +1224,13 @@ def test_load_model_clears_cache_backend_for_unsupported_pipeline(monkeypatch):
     monkeypatch.setattr(model_runner_module, "LoadConfig", lambda: object())
     monkeypatch.setattr(model_runner_module, "DiffusersPipelineLoader", _DummyLoader)
     monkeypatch.setattr(model_runner_module, "DeviceMemoryProfiler", _DummyMemoryProfiler)
+    # This loader test uses a CPU dummy and no distributed model runtime,
+    # including when the host auto-selects the installed Ascend platform.
+    monkeypatch.setattr(
+        model_runner_module.current_omni_platform,
+        "init_diffusion_model_runner_runtime",
+        lambda **kwargs: None,
+    )
     monkeypatch.setattr(
         model_runner_module,
         "enable_offload_backend",

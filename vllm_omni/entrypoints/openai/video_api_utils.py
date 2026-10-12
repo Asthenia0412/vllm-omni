@@ -30,6 +30,7 @@ import binascii
 import os
 import tempfile
 import threading
+import time
 from collections import deque
 from collections.abc import Generator
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -50,6 +51,7 @@ from vllm.multimodal.video import (
 )
 
 from vllm_omni.entrypoints.openai.errors import InvalidInputReferenceError
+from vllm_omni.entrypoints.openai.lingbot_media_profile import MEDIA_PROFILE_ENABLED, emit_media_span
 from vllm_omni.entrypoints.openai.protocol.videos import (
     FileImageReference,
     FileVideoReference,
@@ -909,13 +911,23 @@ class FragmentedMP4VideoEncoder:
         *,
         fps: int | float,
         video_codec_options: dict[str, str] | None = None,
+        media_timing: bool = False,
     ) -> None:
         self._fps = float(fps)
         self._video_codec_options = video_codec_options
+        self._media_timing = media_timing
         self._muxer: Any | None = None
+        self._media_profile_context: dict[str, Any] = {}
+
+    def set_media_profile_context(self, *, request_id: str, generation_chunk_index: int | None,
+                                  output_request_id: str | None = None) -> None:
+        self._media_profile_context = dict(request_id=request_id, generation_chunk_index=generation_chunk_index,
+                                          output_request_id=output_request_id)
 
     def encode(self, video: Any) -> bytes:
         """Encode one generated video chunk and return newly emitted fMP4 bytes."""
+        if MEDIA_PROFILE_ENABLED:
+            return self._encode_profiled(video)
         from vllm_omni.diffusion.utils.media_utils import FragmentedMP4Muxer
 
         frames_u8 = _coerce_video_to_uint8_frames(video)
@@ -925,8 +937,41 @@ class FragmentedMP4VideoEncoder:
                 height=frames_u8.shape[1],
                 fps=self._fps,
                 video_codec_options=self._video_codec_options,
+                **({"media_timing": True} if self._media_timing else {}),
             )
         return self._muxer.mux_video_frames(frames_u8)
+
+    def _encode_profiled(self, video: Any) -> bytes:
+        start = time.perf_counter_ns()
+        from vllm_omni.diffusion.utils.media_utils import FragmentedMP4Muxer
+
+        frames_u8 = _coerce_video_to_uint8_frames(video)
+        normalized = time.perf_counter_ns()
+        initialized = self._muxer is None
+        if initialized:
+            self._muxer = FragmentedMP4Muxer(
+                width=frames_u8.shape[2], height=frames_u8.shape[1], fps=self._fps,
+                video_codec_options=self._video_codec_options,
+                **({"media_timing": True} if self._media_timing else {}),
+            )
+        mux_start = time.perf_counter_ns()
+        chunk = self._muxer.mux_video_frames(frames_u8)
+        end = time.perf_counter_ns()
+        emit_media_span("complete_encode", start, end, **self._media_profile_context,
+            num_frames=len(frames_u8), fps=self._fps, byte_length=len(chunk),
+            normalized_at_perf_counter_ns=normalized, mux_started_at_perf_counter_ns=mux_start,
+            normalization_ms=(normalized-start)/1e6, encoder_init_ms=(mux_start-normalized)/1e6,
+            mux_encode_ms=(end-mux_start)/1e6, initialized_this_chunk=initialized,
+            width=int(frames_u8.shape[2]), height=int(frames_u8.shape[1]),
+            input_payload_type=f"{type(video).__module__}.{type(video).__name__}",
+            configured_video_codec_options=self._video_codec_options,
+            effective_crf="18" if not self._video_codec_options else self._video_codec_options.get("crf", "18"),
+            scope="Frame normalization, first-call encoder initialization, PyAV encode and fMP4 mux; excludes model and transport")
+        return chunk
+
+    @property
+    def last_media_timing(self) -> dict[str, Any] | None:
+        return self._muxer.last_media_timing if self._muxer is not None else None
 
     def close(self) -> bytes:
         """Close the underlying fMP4 muxer and return trailing bytes, if any."""
@@ -943,10 +988,11 @@ def create_streaming_video_encoder(
     output_format: StreamingVideoFormat,
     fps: int | float,
     video_codec_options: dict[str, str] | None = None,
+    media_timing: bool = False,
 ) -> FragmentedMP4VideoEncoder:
     """Create an incremental encoder for the requested WebSocket video format."""
     if output_format == "m4s":
-        return FragmentedMP4VideoEncoder(fps=fps, video_codec_options=video_codec_options)
+        return FragmentedMP4VideoEncoder(fps=fps, video_codec_options=video_codec_options, media_timing=media_timing)
     raise ValueError(f"Unsupported streaming video format: {output_format}")
 
 

@@ -23,10 +23,19 @@ class CapturedDeviceGraph:
     graph: _ReplayGraph
     static_inputs: tuple[torch.Tensor, ...]
     static_outputs: tuple[torch.Tensor, ...]
+    borrowed_input_indices: frozenset[int] = frozenset()
 
     def replay(self, inputs: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
         with torch.inference_mode():
-            for static, current in zip(self.static_inputs, inputs, strict=True):
+            for index, (static, current) in enumerate(zip(self.static_inputs, inputs, strict=True)):
+                if static.shape != current.shape or static.dtype != current.dtype or static.device != current.device:
+                    raise ValueError("NPUGraph replay input shape/dtype/device/stride changed")
+                if index in self.borrowed_input_indices and _tensor_signature(static) != _tensor_signature(current):
+                    raise ValueError("NPUGraph borrowed input view metadata changed")
+                if static.data_ptr() == current.data_ptr():
+                    continue
+                if index in self.borrowed_input_indices:
+                    raise ValueError("NPUGraph borrowed input storage changed; retain manager-owned pool addresses")
                 static.copy_(current)
             self.graph.replay()
             # Graph outputs are persistent and overwritten by the next replay.
@@ -34,8 +43,8 @@ class CapturedDeviceGraph:
             return tuple(output.detach().clone() for output in self.static_outputs)
 
 
-def _tensor_signature(value: torch.Tensor) -> tuple[tuple[int, ...], str, str]:
-    return tuple(value.shape), str(value.dtype), str(value.device)
+def _tensor_signature(value: torch.Tensor) -> tuple[object, ...]:
+    return tuple(value.shape), tuple(value.stride()), value.storage_offset(), str(value.dtype), str(value.device)
 
 
 class NPUExactGraphRunner:
@@ -47,6 +56,7 @@ class NPUExactGraphRunner:
         max_graphs: int = 32,
         component_name: str = "device graph",
         disable_config_hint: str = "disable graph capture",
+        borrowed_input_indices: tuple[int, ...] = (),
     ) -> None:
         self.max_graphs = max(0, int(max_graphs))
         self.component_name = component_name
@@ -56,6 +66,10 @@ class NPUExactGraphRunner:
         self._failed_keys: set[tuple[object, ...]] = set()
         self._hits = 0
         self._graph_pool: object | None = None
+        if any(isinstance(index, bool) or not isinstance(index, int) or index < 0
+               for index in borrowed_input_indices):
+            raise ValueError("borrowed_input_indices must contain non-negative integer indices")
+        self.borrowed_input_indices = frozenset(borrowed_input_indices)
 
     @staticmethod
     def is_supported() -> bool:
@@ -104,7 +118,15 @@ class NPUExactGraphRunner:
         compute: Callable[..., tuple[torch.Tensor, ...]],
     ) -> CapturedDeviceGraph:
         npu = torch.npu
-        static_inputs = tuple(value.detach().clone() for value in inputs)
+        if self.borrowed_input_indices and max(self.borrowed_input_indices) >= len(inputs):
+            raise ValueError("borrowed input index is outside the graph input tuple")
+        # Only explicitly borrowed manager-owned buffers may retain their
+        # addresses. This avoids cloning a mutable KV pool into a stale private
+        # graph input; callers must keep the owners alive until graphs retire.
+        static_inputs = tuple(
+            value.detach() if index in self.borrowed_input_indices else value.detach().clone()
+            for index, value in enumerate(inputs)
+        )
         npu.synchronize()
         graph = npu.NPUGraph()
         if self._graph_pool is None:
@@ -118,6 +140,7 @@ class NPUExactGraphRunner:
             graph=graph,
             static_inputs=static_inputs,
             static_outputs=static_outputs,
+            borrowed_input_indices=self.borrowed_input_indices,
         )
 
     def run(
@@ -135,10 +158,14 @@ class NPUExactGraphRunner:
         if not self._eligible(inputs):
             return compute(*inputs)
 
+        if self.borrowed_input_indices and max(self.borrowed_input_indices) >= len(inputs):
+            raise ValueError("borrowed input index is outside the graph input tuple")
+
         key = (
             operation,
             constants,
             tuple(_tensor_signature(value) for value in inputs),
+            tuple((index, inputs[index].data_ptr()) for index in sorted(self.borrowed_input_indices)),
         )
         graph = self._graphs.get(key)
         if graph is not None:

@@ -38,3 +38,13 @@ class ARDiffusionEngine(DiffusionEngine):
     #: sets an explicit ``diffusion_model_runner_cls`` override). Declared on
     #: the class so routing needs no od_config mutation at engine init.
     default_diffusion_model_runner_cls = AR_DIFFUSION_MODEL_RUNNER_CLS
+
+    def _abort_requests(self, request_ids) -> None:
+        request_ids = [request_ids] if isinstance(request_ids, str) else list(request_ids)
+        request_ids = list(dict.fromkeys(request_ids))
+        super()._abort_requests(request_ids)
+        if request_ids and getattr(self.od_config, "step_execution", False):
+            # The busy loop drains aborts after the current executor wave has
+            # returned. An idle scheduler sends no further execute_stepwise
+            # wave, so explicitly retire the worker-owned AR sessions now.
+            self.executor.collective_rpc("release_ar_diffusion_requests", args=(request_ids,))

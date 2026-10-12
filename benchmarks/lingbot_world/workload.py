@@ -429,6 +429,10 @@ class PlaybackResult:
     total_stall_s: float
     playback_span_s: float
     first_underrun_chunk: int | None
+    # Relative to sending session.start; independent of first media arrival.
+    playback_start_s: float = 0.0
+    startup_buffer_s: float = 0.0
+    initial_buffer_frames: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -437,6 +441,10 @@ class PlaybackResult:
             "playback_span_s": self.playback_span_s,
             "stall_ratio": (self.total_stall_s / self.playback_span_s) if self.playback_span_s > 0 else 0.0,
             "first_underrun_chunk": self.first_underrun_chunk,
+            "playback_start_latency_ms": self.playback_start_s * 1000.0,
+            "startup_buffer_ms": self.startup_buffer_s * 1000.0,
+            "initial_buffer_frames": self.initial_buffer_frames,
+            "evidence": "simulated_from_client_arrivals",
         }
 
 
@@ -485,6 +493,9 @@ def simulate_playback(
         total_stall_s=total_stall,
         playback_span_s=cursor - start,
         first_underrun_chunk=first_underrun,
+        playback_start_s=start,
+        startup_buffer_s=start - ordered[0].arrival_s,
+        initial_buffer_frames=sum(record.num_frames for record in ordered[:buffer_chunks]),
     )
 
 

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 
 from typing_extensions import override
@@ -40,6 +41,15 @@ class NPUTorchProfilerWrapper(OmniTorchProfilerWrapper):
     ):
         import torch_npu
 
+        # Opt-in profiling sweep controls. Read on each capture so a single
+        # loaded model can collect independent windows/metric groups.
+        control = {}
+        control_path = os.environ.get("LINGBOT_PROFILE_CONTROL")
+        if control_path:
+            with open(control_path) as handle:
+                control = json.load(handle)
+            activities = control.get("activities", activities)
+
         # Map activity names to torch_npu profiler activities
         npu_activities = []
         for activity in activities:
@@ -53,22 +63,23 @@ class NPUTorchProfilerWrapper(OmniTorchProfilerWrapper):
             export_type=torch_npu.profiler.ExportType.Text,
             profiler_level=torch_npu.profiler.ProfilerLevel.Level1,
             msprof_tx=False,
-            aic_metrics=torch_npu.profiler.AiCMetrics.PipeUtilization,
+            aic_metrics=getattr(torch_npu.profiler.AiCMetrics, control.get("metric", "PipeUtilization")),
             l2_cache=False,
             op_attr=False,
-            data_simplification=True,
+            data_simplification=control.get("data_simplification", True),
             record_op_args=False,
             gc_detect_threshold=None,
         )
 
         # Set up trace directory for NPU - tensorboard_trace_handler creates
         # its own subdirectory structure. Use worker_name which includes stage_id.
-        npu_trace_dir = os.path.join(self._trace_dir, self._worker_name)
+        npu_trace_dir = os.path.join(control.get("trace_dir", self._trace_dir), self._worker_name)
         os.makedirs(npu_trace_dir, exist_ok=True)
         self._trace_path = npu_trace_dir
 
         return torch_npu.profiler.profile(
             activities=npu_activities,
+            record_shapes=control.get("record_shapes", profiler_config.torch_profiler_record_shapes),
             with_stack=False,
             profile_memory=profiler_config.torch_profiler_with_memory,
             # NOTE: torch_npu.profiler.with_modules is equivalent to
@@ -80,6 +91,12 @@ class NPUTorchProfilerWrapper(OmniTorchProfilerWrapper):
             # this specific handler format
             on_trace_ready=torch_npu.profiler.tensorboard_trace_handler(npu_trace_dir),
         )
+
+    @override
+    def _start(self) -> None:
+        if os.environ.get("LINGBOT_PROFILE_CONTROL"):
+            self.profiler = self._create_profiler(self.profiler_config, self._activities)
+        super()._start()
 
     @override
     def _on_stop_hook(self) -> None:

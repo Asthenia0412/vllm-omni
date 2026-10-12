@@ -87,6 +87,8 @@ class SDPAImpl(AttentionImpl):
     ) -> None:
         self.causal = causal
         self.softmax_scale = softmax_scale
+        from .cross_combined_integration_v1 import selected_adapter
+        self._lingbot_combined_cross = selected_adapter(role=extra_impl_args.get("role", "self"))
         if backend_kwargs:
             logger.warning("SDPAImpl ignoring backend_kwargs: %s", list(backend_kwargs.keys()))
 
@@ -169,4 +171,12 @@ class SDPAImpl(AttentionImpl):
         value: torch.Tensor,
         attn_metadata: AttentionMetadata | None = None,
     ) -> torch.Tensor:
+        if self._lingbot_combined_cross is not None and attn_metadata is None:
+            output = self._lingbot_combined_cross.try_forward(
+                query, key, value, role="cross", scale=self.softmax_scale,
+                attn_mask=None, dropout_p=0.0, is_causal=self.causal,
+                enable_gqa=query.shape[2] != key.shape[2],
+            )
+            if output is not None:
+                return output
         return self._forward_impl(query, key, value, attn_metadata, mask_mode="full_qk")

@@ -1808,6 +1808,7 @@ class DiffusionOutput:
     started_event_ids: list[str] = field(default_factory=list)
     active_event_ids: list[str] = field(default_factory=list)
     completed_event_ids: list[str] = field(default_factory=list)
+    camera_event_samples: list[dict[str, Any]] | None = None
 
     # logged duration of stages
     stage_durations: dict[str, float] = field(default_factory=dict)

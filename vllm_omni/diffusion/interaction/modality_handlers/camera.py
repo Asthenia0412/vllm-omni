@@ -218,7 +218,6 @@ class SE3DeltaCameraHandler(InteractionHandler):
             If future models need different scale/alignment policies, can refactor interaction registry
             to be able to mark a policy.
         """
-        del chunk_index
         if num_media_frames is None or fps is None:
             raise ValueError("SE3DeltaCameraHandler requires chunk num_media_frames and fps")
         if num_latent_frames is None:
@@ -228,6 +227,8 @@ class SE3DeltaCameraHandler(InteractionHandler):
 
         session = state.interaction_sessions.setdefault("camera", CameraSession())
         assert isinstance(session, CameraSession)
+        extra_args = getattr(state.sampling, "extra_args", {}) or {}
+        samples = [] if extra_args.get("camera_event_samples") is True else None
         with session.lock:
             poses, started, active, completed = self._step_one_chunk(
                 session,
@@ -235,6 +236,7 @@ class SE3DeltaCameraHandler(InteractionHandler):
                 fps=fps,
                 num_latent_frames=num_latent_frames,
                 boundary_at=boundary_at,
+                camera_event_samples=samples,
             )
             if poses:
                 session.last_absolute_poses = torch.stack([p.as_matrix() for p in poses], dim=0)
@@ -245,6 +247,10 @@ class SE3DeltaCameraHandler(InteractionHandler):
             started_event_ids=started,
             active_event_ids=active,
             completed_event_ids=completed,
+            camera_event_samples=(
+                [dict(sample, generation_chunk_index=chunk_index) for sample in samples]
+                if samples is not None else None
+            ),
         )
 
     def _step_one_chunk(
@@ -255,6 +261,7 @@ class SE3DeltaCameraHandler(InteractionHandler):
         fps: float,
         num_latent_frames: int,
         boundary_at: float,
+        camera_event_samples: list[dict[str, object]] | None = None,
     ) -> tuple[list[CameraPose], list[str], list[str], list[str]]:
         """Sample absolute poses for this chunk under target/velocity semantics."""
         num_media_frames = max(int(num_media_frames), 1)
@@ -295,8 +302,22 @@ class SE3DeltaCameraHandler(InteractionHandler):
                 cancelled_id = self._activate_event(session, event)
                 if cancelled_id is not None:
                     _mark_completed(cancelled_id)
+            # Capture the owner before target completion clears active_event.
+            # Commands superseded at the same latent offset are not owners.
+            owner = session.active_event if camera_event_samples is not None else None
             just_completed = self._step_one_frame(session, num_latent_frames)
             poses.append(session.current_pose.clone())
+            if owner is not None:
+                camera_event_samples.append({
+                    "event_id": owner.event_id,
+                    "mode": owner.mode,
+                    "latent_frame_index": latent_idx,
+                    "media_grid_frame_offset": math.ceil(latent_idx * num_media_frames / num_latent_frames),
+                    "translation": list(session.current_pose.translation),
+                    "rotation": list(session.current_pose.rotation),
+                    "received_at_monotonic_s": owner.received_at,
+                    "evidence": "camera_conditioning_pose_owner",
+                })
             if just_completed is not None:
                 _mark_completed(just_completed)
 

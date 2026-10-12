@@ -187,18 +187,19 @@ def _stream_metadata_from_diffusion_output(diffusion_output: DiffusionOutput) ->
         or bool(diffusion_output.started_event_ids)
         or bool(diffusion_output.active_event_ids)
         or bool(diffusion_output.completed_event_ids)
+        or diffusion_output.camera_event_samples is not None
     )
     if not has_stream_data:
         return None
-    return cast(
-        DiffusionMetadata,
-        {
-            "generation_chunk_index": diffusion_output.chunk_index,
-            "started_event_ids": diffusion_output.started_event_ids,
-            "active_event_ids": diffusion_output.active_event_ids,
-            "completed_event_ids": diffusion_output.completed_event_ids,
-        },
-    )
+    stream: dict[str, Any] = {
+        "generation_chunk_index": diffusion_output.chunk_index,
+        "started_event_ids": diffusion_output.started_event_ids,
+        "active_event_ids": diffusion_output.active_event_ids,
+        "completed_event_ids": diffusion_output.completed_event_ids,
+    }
+    if diffusion_output.camera_event_samples is not None:
+        stream["camera_event_samples"] = diffusion_output.camera_event_samples
+    return cast(DiffusionMetadata, stream)
 
 
 def _ensure_list(outputs: DiffusionPayloadValue) -> list[DiffusionPayloadValue]:

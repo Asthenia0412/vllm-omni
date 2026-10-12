@@ -307,6 +307,11 @@ class RotaryEmbeddingWan(RotaryEmbedding):
         cos: torch.Tensor,
         sin: torch.Tensor,
     ) -> torch.Tensor:
+        # LingBot supplies [sequence, half_dim] after sequence sharding.
+        # Broadcast positions over heads in [batch, sequence, heads, dim].
+        if cos.ndim == 2:
+            cos = cos.unsqueeze(-2)
+            sin = sin.unsqueeze(-2)
         x1, x2 = x.unflatten(-1, (-1, 2)).unbind(-1)
         rotated = torch.stack(
             (

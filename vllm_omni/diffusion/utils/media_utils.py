@@ -247,9 +247,12 @@ class FragmentedMP4Muxer:
         video_codec: str = "h264",
         crf: str = "18",
         video_codec_options: dict[str, str] | None = None,
+        media_timing: bool = False,
     ) -> None:
         self._buf = io.BytesIO()
         self._closed = False
+        self._media_timing = media_timing
+        self.last_media_timing: dict[str, Any] | None = None
         self._container = av.open(
             self._buf,
             mode="w",
@@ -281,10 +284,30 @@ class FragmentedMP4Muxer:
             raise RuntimeError("Cannot mux frames after FragmentedMP4Muxer.close().")
         _validate_video_chunk(video_frames, width=self._stream.width, height=self._stream.height)
 
+        packet_timing = [] if self._media_timing else None
         for frame_data in video_frames:
             frame = av.VideoFrame.from_ndarray(frame_data, format="rgb24")
             for packet in self._stream.encode(frame):
                 self._container.mux(packet)
+                if packet_timing is not None:
+                    # Read the actual packet after mux time-base rescaling.
+                    # Do not infer PTS from generation chunk numbers or FPS.
+                    base = packet.time_base
+                    packet_timing.append({
+                        "pts": packet.pts,
+                        "time_base_num": base.numerator if base is not None else None,
+                        "time_base_den": base.denominator if base is not None else None,
+                        "presentation_time_s": float(packet.pts * base)
+                        if packet.pts is not None and base is not None else None,
+                    })
+        if packet_timing is not None:
+            self.last_media_timing = {
+                "source": "encoder_packet_pts",
+                "input_frame_count": len(video_frames),
+                "frame_pts": packet_timing,
+                "complete": len(packet_timing) == len(video_frames)
+                and all(item["presentation_time_s"] is not None for item in packet_timing),
+            }
         return self._read_new_bytes()
 
     def close(self) -> bytes:

@@ -9,7 +9,7 @@ import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from threading import Lock
-from typing import Literal
+from typing import Any, Literal
 
 import torch
 
@@ -136,13 +136,19 @@ class InteractionChunkMetadata:
     started_event_ids: list[str] = field(default_factory=list)
     active_event_ids: list[str] = field(default_factory=list)
     completed_event_ids: list[str] = field(default_factory=list)
+    # Opt-in host samples of the command that actually owned each camera pose.
+    # These describe conditioning, never the first visibly changed output pixel.
+    camera_event_samples: list[dict[str, Any]] | None = None
 
-    def as_dict(self) -> dict[str, list[str]]:
-        return {
+    def as_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {
             "started_event_ids": list(self.started_event_ids),
             "active_event_ids": list(self.active_event_ids),
             "completed_event_ids": list(self.completed_event_ids),
         }
+        if self.camera_event_samples is not None:
+            result["camera_event_samples"] = [dict(sample) for sample in self.camera_event_samples]
+        return result
 
 
 def merge_interaction_metadata(
@@ -155,7 +161,12 @@ def merge_interaction_metadata(
     seen_started: set[str] = set()
     seen_active: set[str] = set()
     seen_completed: set[str] = set()
+    camera_samples: list[dict[str, Any]] | None = None
     for meta in metas:
+        if meta.camera_event_samples is not None:
+            if camera_samples is None:
+                camera_samples = []
+            camera_samples.extend(dict(sample) for sample in meta.camera_event_samples)
         for event_id in meta.started_event_ids:
             if event_id not in seen_started:
                 seen_started.add(event_id)
@@ -172,4 +183,5 @@ def merge_interaction_metadata(
         started_event_ids=started,
         active_event_ids=active,
         completed_event_ids=completed,
+        camera_event_samples=camera_samples,
     )

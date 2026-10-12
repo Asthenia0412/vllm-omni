@@ -14,7 +14,8 @@ __all__ = ["all_to_all_4D", "all_to_all_5D", "SeqAllToAll4D", "SeqAllToAll5D", "
 
 
 def all_to_all_4D(
-    input: torch.tensor, scatter_idx: int = 2, gather_idx: int = 1, group=None, use_sync: bool = False
+    input: torch.tensor, scatter_idx: int = 2, gather_idx: int = 1, group=None, use_sync: bool = False,
+    *, _output_destination: torch.Tensor | None = None,
 ) -> torch.tensor:
     """
     all-to-all for QKV
@@ -32,6 +33,16 @@ def all_to_all_4D(
     assert input.dim() == 4, f"input must be 4D tensor, got {input.dim()} and shape {input.shape}"
 
     seq_world_size = dist.get_world_size(group)
+    if _output_destination is not None:
+        bs, seqlen, shard_hc, hs = input.shape
+        expected = (bs, seqlen // seq_world_size, shard_hc * seq_world_size, hs)
+        if ((scatter_idx, gather_idx) != (1, 2) or bs != 1 or seqlen % seq_world_size
+                or tuple(_output_destination.shape) != expected
+                or _output_destination.dtype != input.dtype or _output_destination.device != input.device
+                or not _output_destination.is_contiguous()
+                or _output_destination.untyped_storage().data_ptr() == input.untyped_storage().data_ptr()):
+            raise ValueError("Owned reverse All-to-All destination contract is invalid before communication")
+        return _owned_reverse_all_to_all(input, _output_destination, group, seq_world_size, use_sync)
 
     if scatter_idx == 2 and gather_idx == 1:
         # input (torch.tensor): a tensor sharded along dim 1 (bs, seqlen/P, hc, hs) output: (bs, seqlen, hc/P, hs)
@@ -100,6 +111,30 @@ def all_to_all_4D(
         raise RuntimeError("scatter_idx must be 1 or 2 and gather_idx must be 1 or 2")
 
 
+def _owned_reverse_all_to_all(input, destination, group, world_size, use_sync):
+    """Retain all producers/receive owners after any candidate submission failure."""
+    input_t = output = None
+    try:
+        bs, seqlen, heads, width = input.shape
+        tokens = seqlen // world_size
+        input_t = (input.reshape(bs, world_size, tokens, heads, width).transpose(0, 3)
+                   .transpose(0, 1).contiguous().reshape(world_size, heads, tokens, bs, width))
+        output = torch.empty_like(input_t)
+        if world_size > 1:
+            dist.all_to_all_single(output, input_t, group=group)
+            if use_sync:
+                current_omni_platform.synchronize()
+        else:
+            output = input_t
+        destination.copy_(output.reshape(heads * world_size, tokens, bs, width).transpose(0, 2))
+        return destination
+    except BaseException as error:
+        from vllm_omni.diffusion.layers.lingbot_sp8_fatal import report_failure
+
+        report_failure("leased_reverse_a2a", str(error), (input, input_t, output, destination, group))
+        raise
+
+
 class SeqAllToAll4D(torch.autograd.Function):
     @staticmethod
     def forward(
@@ -118,7 +153,9 @@ class SeqAllToAll4D(torch.autograd.Function):
 
 
 def all_to_all_5D(
-    input: torch.tensor, scatter_idx: int = 3, gather_idx: int = 1, group=None, use_sync: bool = False
+    input: torch.tensor, scatter_idx: int = 3, gather_idx: int = 1, group=None, use_sync: bool = False,
+    _prepared_send: torch.Tensor | None = None,
+    _qk_padded_owner=None,
 ) -> torch.tensor:
     """
     all-to-all for QKV
@@ -138,6 +175,11 @@ def all_to_all_5D(
 
     seq_world_size = dist.get_world_size(group)
 
+    if _qk_padded_owner is not None and _prepared_send is None:
+        raise ValueError("K3 padded-owner lease requires its explicit prepared tensor")
+    if _prepared_send is not None and (scatter_idx, gather_idx) != (3, 1):
+        raise ValueError("Prepared QKV send supports only head-to-sequence exchange")
+
     if scatter_idx == 3 and gather_idx == 1:
         # input (torch.tensor): a tensor sharded along dim 1 (bs, seqlen/P, 3, hc, hs) output: (bs, seqlen, 3, hc/P, hs)
         bs, shard_seqlen, t_cnt, hc, hs = input.shape
@@ -149,7 +191,31 @@ def all_to_all_5D(
         # transpose groups of heads with the seq-len parallel dimension, so that we can scatter them!
         # (bs, seqlen/P, 3, hc, hs) -reshape-> (bs, seq_len/P, 3, P, hc/P, hs) -transpose(0,3)->
         #  (P, seq_len/P, 3, bs, hc/P, hs)
-        input_t = input.reshape(bs, shard_seqlen, 3, seq_world_size, shard_hc, hs).transpose(0, 3).contiguous()
+        if _prepared_send is None:
+            input_t = input.reshape(bs, shard_seqlen, 3, seq_world_size, shard_hc, hs).transpose(0, 3).contiguous()
+            # Import only under the explicit capture/profile mode. Normal
+            # serving and the existing SP4 path incur no observer import.
+            import os
+            if seq_world_size == 8 and os.environ.get("LINGBOT_SP8_OBSERVE_MODE") in ("capture", "profile"):
+                from vllm_omni.diffusion.layers import lingbot_sp8_observe as _sp8_observe
+                if _sp8_observe.ENABLED:
+                    _sp8_observe.native_send(input_t)
+        else:
+            # `input` is a shape-only view on the admitted model path. Never
+            # reshape/read it: the fresh prepared tensor already owns the send bytes.
+            sequence = {4: 1170, 8: 585}.get(seq_world_size)
+            if sequence is None or tuple(input.shape) != (1, sequence, 3, 40, 128):
+                raise ValueError("Prepared QKV send requires canonical SP4/SP8 input metadata")
+            if _qk_padded_owner is not None:
+                from vllm_omni.diffusion.layers.qk_single_host_integration_v1 import validate_padded_send
+                validate_padded_send(input, _prepared_send, _qk_padded_owner, seq_world_size)
+            else:
+                if (tuple(_prepared_send.shape) != (seq_world_size, sequence, 3, 1, 40 // seq_world_size, 128)
+                        or _prepared_send.dtype != torch.bfloat16 or input.dtype != torch.bfloat16
+                        or _prepared_send.device != input.device or input.device.type != "npu"
+                        or not _prepared_send.is_contiguous() or _prepared_send.storage_offset() != 0):
+                    raise ValueError("Prepared QKV send violates the canonical owned-output contract")
+            input_t = _prepared_send
 
         output = torch.empty_like(input_t)
         # https://pytorch.org/docs/stable/distributed.html#torch.distributed.all_to_all_single

@@ -243,6 +243,21 @@ class TestRotaryEmbeddingNativeShapeRegression:
         assert not torch.isnan(output).any()
 
 
+@pytest.mark.parametrize("batch", [1, 2])
+def test_wan_native_sequence_positions_broadcast_over_heads(batch: int) -> None:
+    """LingBot SP ranks pass 2D positions with sequence length != head count."""
+    rope = RotaryEmbeddingWan(is_neox_style=False, half_head_dim=True)
+    x = torch.randn(batch, 7, 3, 8)
+    angles = torch.randn(7, 4)
+    cosine, sine = angles.cos(), angles.sin()
+    expected_complex = torch.view_as_complex(x.unflatten(-1, (-1, 2))) * torch.polar(
+        torch.ones_like(angles), angles
+    ).unsqueeze(-2)
+    expected = torch.view_as_real(expected_complex).flatten(-2)
+    actual = rope.forward_native(x, cosine, sine)
+    torch.testing.assert_close(actual, expected)
+
+
 def test_cuda_paths_fall_back_without_vendored_rotary_kernel() -> None:
     """Source/CPU installs need not contain the wheel-vendored CUDA kernel."""
     x = torch.randn(1, 5, 2, 8)

@@ -20,6 +20,7 @@ import torch.nn.functional as F
 from diffusers.models.autoencoders.autoencoder_kl_wan import CACHE_T, WanAttentionBlock, WanResample, WanResidualBlock
 from diffusers.utils.torch_utils import randn_tensor
 from torch import nn
+from torch.profiler import record_function
 from transformers import AutoTokenizer, UMT5EncoderModel
 from vllm.logger import init_logger
 from vllm.model_executor.models.utils import AutoWeightsLoader
@@ -56,6 +57,7 @@ from vllm_omni.diffusion.models.lingbot_world.camera import (
     resolve_trusted_action_directory,
 )
 from vllm_omni.diffusion.models.lingbot_world.dmd_block import ARBlockContext, LingBotDMDBlockRunner
+from vllm_omni.diffusion.layers import lingbot_fixed_timestep_bank_stageA_v1 as fixed_timestep_bank
 from vllm_omni.diffusion.models.lingbot_world.transformer import (
     CameraModulationCache,
     CausalLingBotWorldTransformer3DModel,
@@ -90,6 +92,14 @@ from vllm_omni.experimental.ar_diffusion.tick_protocol import (
 
 logger = init_logger(__name__)
 
+# Opt-in diagnostic markers only: no device barriers or timing are added.
+_LINGBOT_PROFILE_STAGE_RANGES = os.environ.get("LINGBOT_PROFILE_STAGE_RANGES") == "1"
+
+
+def _lingbot_profile_stage(name: str):
+    return record_function(f"lingbot.{name}") if _LINGBOT_PROFILE_STAGE_RANGES else nullcontext()
+
+
 # Resident streaming-decoder cache per session, as bytes per output pixel in
 # fp32: measured once on the reference checkpoint at 37832 KiB for a 64x64
 # output. Every cached tensor is [B, C, <= CACHE_T, H/8, W/8] per causal
@@ -106,6 +116,7 @@ _VAE_SHARD_SPLIT_DIM = "width"
 if TYPE_CHECKING:
     from tqdm.std import tqdm as TqdmProgressBar
 
+    from vllm_omni.diffusion.layers.lingbot_condition_prefill import ConditionPrefillBank
     from vllm_omni.diffusion.worker.input_batch import InputBatch
     from vllm_omni.diffusion.worker.utils import StepRequestState
     from vllm_omni.experimental.ar_diffusion.kv_cache.state import (
@@ -192,6 +203,8 @@ class _LingBotARSessionState:
     # The condition the encoder settles on once its history has stopped
     # changing; see ``_next_condition_chunk``.
     condition_fixed_point: torch.Tensor | None = None
+    condition_prefill_bank: ConditionPrefillBank | None = None
+    condition_prefill_key: tuple[Any, ...] | None = None
     camera_tail: CameraTrajectory | None = None
     camera_pitch: float = 0.0
 
@@ -329,6 +342,15 @@ def _encoder_caches_identical(
     return True
 
 
+def _validate_npu_pixel_device_interleave(enabled: Any, mode: str) -> bool:
+    """Validate the explicit owned-copy experiment without enabling a backend."""
+    if type(enabled) is not bool:
+        raise ValueError("lingbot_npu_pixel_device_interleave must be a bool")
+    if enabled and mode not in ("native", "root_uint8_p2p"):
+        raise ValueError("Owned pixel interleave supports only native or root_uint8_p2p")
+    return enabled
+
+
 def _uint8_frames(video: torch.Tensor) -> np.ndarray:
     """Turn one decoded block ``(1, 3, F, H, W)`` in ``[-1, 1]`` into ``(F, H, W, 3)`` uint8 on the host.
 
@@ -340,6 +362,10 @@ def _uint8_frames(video: torch.Tensor) -> np.ndarray:
     streaming endpoint muxes, instead of as a float32 copy that is then
     converted per frame while the next block waits.
     """
+    if video.device.type == "npu" and os.environ.get("VLLM_LINGBOT_NPU_PLANAR_RGB", "0") == "1":
+        from vllm_omni.diffusion.layers.lingbot_pixels import planar_uint8_frames
+
+        return planar_uint8_frames(video)
     # Same order of operations as VideoProcessor: denormalise and clamp in
     # the decoder dtype, then widen, scale and round.
     frames = (video[0] / 2 + 0.5).clamp(0, 1).permute(1, 2, 3, 0)
@@ -607,10 +633,84 @@ class LingBotWorldCausalDMDPipeline(
         parallel_config = getattr(od_config, "parallel_config", None)
         self.od_config = od_config
         model_config = getattr(od_config, "model_config", None) or {}
+        from vllm_omni.diffusion.layers.lingbot_pixel_output import validate_mode
+
+        self._lingbot_pixel_output_mode = validate_mode(model_config.get("lingbot_npu_pixel_output_mode", "native"))
+        self._lingbot_pixel_device_interleave = _validate_npu_pixel_device_interleave(
+            model_config.get("lingbot_npu_pixel_device_interleave", False), self._lingbot_pixel_output_mode,
+        )
+        self._lingbot_vae_group_degree = model_config.get("lingbot_vae_group_degree", None)
+        if self._lingbot_vae_group_degree is not None:
+            import torch.distributed as dist
+
+            if (type(self._lingbot_vae_group_degree) is not int or self._lingbot_vae_group_degree != 8
+                    or dist.get_world_size() != 8):
+                raise ValueError("Independent LingBot VAE group currently requires all eight ranks")
+            self._lingbot_vae_group = dist.new_group(ranks=list(range(8)), backend="hccl")
+        from .npu_quantization import NpuQuantizationConfig
+
+        self._lingbot_npu_quantization_config = NpuQuantizationConfig.from_sources(model_config)
+        self._lingbot_output_mc2_enabled = model_config.get("lingbot_npu_self_output_mc2", False)
+        self._lingbot_output_overlap_tiles = model_config.get("lingbot_npu_output_overlap_tiles", 0)
+        self._lingbot_output_overlap_comm = model_config.get("lingbot_npu_output_overlap_comm", "native")
+        self._lingbot_ulysses_vector_cores = model_config.get("lingbot_npu_ulysses_vector_cores", None)
+        if self._lingbot_ulysses_vector_cores is not None:
+            if (type(self._lingbot_ulysses_vector_cores) is not int
+                    or self._lingbot_ulysses_vector_cores not in (2, 4, 8)
+                    or self._lingbot_output_overlap_comm != "aiv"):
+                raise ValueError("Ulysses Vector limits require AIV and 2/4/8 cores")
+        self._lingbot_regional_graph_enabled = model_config.get("lingbot_npu_regional_graph", False)
+        self._lingbot_leased_post_attention = model_config.get("lingbot_npu_leased_post_attention", False)
+        if type(self._lingbot_leased_post_attention) is not bool:
+            raise ValueError("lingbot_npu_leased_post_attention must be a bool")
+        if self._lingbot_leased_post_attention and (
+            os.environ.get("LINGBOT_OUTPUT_CAPTURE_DIR") or os.environ.get("LINGBOT_LEASED_GRAPH_CAPTURE_DIR")
+            or os.environ.get("VLLM_LINGBOT_NPU_LOSSY_POINTWISE", "0") == "1"
+        ):
+            raise ValueError("Leased graph requires native BF16 boundaries and native input captures in a separate run")
+        self._lingbot_pointwise_graph_regions = model_config.get("lingbot_npu_pointwise_graph_regions", [])
+        if (not isinstance(self._lingbot_pointwise_graph_regions, (list, tuple))
+                or any(r not in ("post_attention", "ffn_tail") for r in self._lingbot_pointwise_graph_regions)
+                or len(set(self._lingbot_pointwise_graph_regions)) != len(self._lingbot_pointwise_graph_regions)):
+            raise ValueError("lingbot_npu_pointwise_graph_regions requires unique post_attention/ffn_tail entries")
+        if self._lingbot_pointwise_graph_regions and self._lingbot_regional_graph_enabled:
+            raise ValueError("Pointwise and coarse regional graph candidates are mutually exclusive")
+        if self._lingbot_leased_post_attention and (
+                self._lingbot_pointwise_graph_regions or self._lingbot_regional_graph_enabled
+                or self._lingbot_output_overlap_tiles or self._lingbot_output_mc2_enabled):
+            raise ValueError("Leased post-attention requires an independent native projection path")
+        if type(self._lingbot_regional_graph_enabled) is not bool:
+            raise ValueError("lingbot_npu_regional_graph must be a bool")
+        if (type(self._lingbot_output_overlap_tiles) is not int
+                or self._lingbot_output_overlap_tiles not in (0, 2, 3)):
+            raise ValueError("lingbot_npu_output_overlap_tiles must be 0, 2 or 3")
+        if self._lingbot_output_overlap_comm not in ("native", "aiv"):
+            raise ValueError("lingbot_npu_output_overlap_comm must be native or aiv")
+        if self._lingbot_output_overlap_tiles:
+            if self._lingbot_output_mc2_enabled:
+                raise ValueError("Output overlap and MC2 are mutually exclusive")
+            from vllm_omni.diffusion.layers.lingbot_sp8_output_mc2 import validate_configuration
+
+            validate_configuration(True, self._lingbot_npu_quantization_config)
+        if not isinstance(self._lingbot_output_mc2_enabled, bool):
+            raise ValueError("model_config.lingbot_npu_self_output_mc2 must be a bool")
+        if self._lingbot_output_mc2_enabled:
+            from vllm_omni.diffusion.layers.lingbot_sp8_output_mc2 import validate_configuration
+
+            validate_configuration(True, self._lingbot_npu_quantization_config)
+        from vllm_omni.diffusion.layers.lingbot_npu_fusion import PrecisionFusionConfig
+
+        self._lingbot_npu_fusion_config = PrecisionFusionConfig.from_sources(model_config)
+        if (self._lingbot_pointwise_graph_regions or self._lingbot_leased_post_attention
+                or os.environ.get("LINGBOT_POINTWISE_CAPTURE_DIR")) and self._lingbot_npu_fusion_config.backend != "off":
+            raise ValueError("Pointwise graph candidate requires the original unfused backend")
         reuse_last_step_kv = model_config.get("lingbot_reuse_last_step_kv", False)
         if not isinstance(reuse_last_step_kv, bool):
             raise ValueError("model_config.lingbot_reuse_last_step_kv must be a bool.")
         self._reuse_last_step_kv = reuse_last_step_kv
+        self._condition_prefill = model_config.get("lingbot_condition_prefill", False)
+        if not isinstance(self._condition_prefill, bool):
+            raise ValueError("model_config.lingbot_condition_prefill must be a bool.")
         self.device = get_local_device()
         dtype = getattr(od_config, "dtype", torch.bfloat16)
         model = od_config.model
@@ -667,6 +767,30 @@ class LingBotWorldCausalDMDPipeline(
             quant_config=getattr(od_config, "quantization_config", None),
             prefix="transformer",
         )
+        from vllm_omni.diffusion.layers.lingbot_npu_attention import configure_lingbot_attention
+
+        self._lingbot_npu_attention_policy = configure_lingbot_attention(self.transformer, model_config)
+        from vllm_omni.diffusion.layers.lingbot_frame_conditioning import configure_uniform_timestep
+
+        self._lingbot_frame_conditioning_policy = configure_uniform_timestep(self.transformer, model_config)
+        from vllm_omni.diffusion.layers.lingbot_native_bf16_qk import configure_native_bf16_qk
+
+        self._lingbot_native_bf16_qk_policy = configure_native_bf16_qk(
+            self.transformer, model_config, device=self.device, logger=logger)
+        from vllm_omni.diffusion.layers.lingbot_conditioning_ops import configure_timestep_fp32_once
+
+        self._lingbot_conditioning_policy = configure_timestep_fp32_once(self.transformer, model_config)
+        fixed_timestep_bank.configure(self, model_config)
+
+
+        from vllm_omni.diffusion.layers.lingbot_chunk_prefix_cache import configure_chunk_prefix_cache
+
+        self._lingbot_chunk_prefix_policy = configure_chunk_prefix_cache(self.transformer, model_config)
+
+        from vllm_omni.diffusion.layers.lingbot_qkv_sp_send_pack import configure_qkv_sp_send_pack
+
+        self._lingbot_qkv_sp_send_pack_policy = configure_qkv_sp_send_pack(
+            self.transformer, model_config, device=self.device, logger=logger)
 
         scheduler_config = _load_json(model, "scheduler/scheduler_config.json", local_files_only)
         _validate_scheduler_config(scheduler_config)
@@ -723,6 +847,11 @@ class LingBotWorldCausalDMDPipeline(
             # already use the stage dtype, so no autocast parameter cast is needed.
             counts = install_wan_decoder_fast_path(self.vae, conv_dtype=None, level=fast_path_level)
             logger.info("LingBot World VAE decode fast path installed: %s", counts)
+        from vllm_omni.diffusion.distributed.autoencoders.wan_npu_exact_pack import configure_exact_packing
+
+        self._lingbot_vae_exact_pack_policy = configure_exact_packing(
+            self.vae, model_config, device=self.device, logger=logger
+        )
         self.setup_diffusion_pipeline_profiler(
             profiler_targets=[
                 "vae.encode",
@@ -801,6 +930,7 @@ class LingBotWorldCausalDMDPipeline(
                 + camera_bytes_per_session
                 + 2 * self._condition_encoder_cache_bytes()  # Committed and in-flight histories.
                 + self._streaming_decode_bytes_per_session()
+                + fixed_timestep_bank.reservation_bytes(self)
             ),
         )
 
@@ -880,12 +1010,18 @@ class LingBotWorldCausalDMDPipeline(
         finally:
             self._ar_diffusion_kv_state = None
 
+    def _seal_fixed_timestep_bank_after_worker_load(self, worker_owner) -> None:
+        fixed_timestep_bank.seal_after_worker_load(self, worker_owner)
+
     def _release_condition_encoder_state(self, session_id: str) -> None:
+        fixed_timestep_bank.retire_session(self, session_id)
         state = self._ar_sessions.pop(session_id, None)
         if state is not None:
             state.encoder_cache = None
             state.pending_encoder_cache = None
             state.condition_fixed_point = None
+            state.condition_prefill_bank = None
+            state.condition_prefill_key = None
 
     def reset_ar_diffusion_session(self, session_id: str) -> None:
         self._release_condition_encoder_state(session_id)
@@ -1168,6 +1304,36 @@ class LingBotWorldCausalDMDPipeline(
         The opening block resets the fixed point, so a session that restarts
         from a new source image encodes again until it settles.
         """
+        if self._condition_prefill:
+            from vllm_omni.diffusion.layers.lingbot_condition_prefill import (
+                build_condition_prefill,
+                condition_source_digest,
+            )
+
+            block_frames = int(self.transformer.config.num_frames_per_block)
+            if start_frame == 0:
+                key = (
+                    id(session_state), condition_source_digest(inputs.image), inputs.height, inputs.width,
+                    block_frames, str(dtype), str(self.vae.dtype), str(self.device), id(self.vae),
+                )
+                if session_state.condition_prefill_key != key:
+                    with _lingbot_profile_stage("condition_prefill"):
+                        bank = build_condition_prefill(
+                            key=key, block_frames=block_frames,
+                            encode_chunk=lambda start, cache: self._prepare_condition_chunk(
+                                inputs, start_frame=start, encoder_cache=cache, dtype=dtype,
+                            ),
+                            caches_identical=_encoder_caches_identical,
+                        )
+                    session_state.condition_prefill_bank = bank
+                    session_state.condition_prefill_key = key
+                    session_state.condition_fixed_point = None
+                    logger.info("LingBot condition prefill settled at chunk %d; %.3f MiB retained",
+                                bank.settled_chunk_index, bank.resident_bytes / 2**20)
+            bank = session_state.condition_prefill_bank
+            if bank is None:
+                raise RuntimeError("LingBot condition prefill requires the session opening block first.")
+            return bank.replay(start_frame=start_frame, key=session_state.condition_prefill_key)
         if start_frame == 0:
             session_state.condition_fixed_point = None
         elif session_state.condition_fixed_point is not None:
@@ -1175,12 +1341,13 @@ class LingBotWorldCausalDMDPipeline(
             # The history is unchanged by construction; the pending copy is
             # what post_decode commits, exactly as an encoded block's would be.
             return session_state.condition_fixed_point.clone(), list(session_state.encoder_cache)
-        condition, pending_cache = self._prepare_condition_chunk(
-            inputs,
-            start_frame=start_frame,
-            encoder_cache=session_state.encoder_cache,
-            dtype=dtype,
-        )
+        with _lingbot_profile_stage("condition_encoder"):
+            condition, pending_cache = self._prepare_condition_chunk(
+                inputs,
+                start_frame=start_frame,
+                encoder_cache=session_state.encoder_cache,
+                dtype=dtype,
+            )
         if start_frame > 0 and _encoder_caches_identical(session_state.encoder_cache, pending_cache):
             session_state.condition_fixed_point = condition.clone()
         return condition, pending_cache
@@ -1387,6 +1554,7 @@ class LingBotWorldCausalDMDPipeline(
     # (``denoise_step`` / ``step_scheduler`` / ``post_decode``) share one copy.
     # The pipeline's only jobs here are building the runner and translating
     # the bound AR session into an ``ARBlockContext``.
+
 
     @property
     def _dmd_blocks(self) -> LingBotDMDBlockRunner:
@@ -1718,7 +1886,7 @@ class LingBotWorldCausalDMDPipeline(
         """The Ulysses ranks the decoder is sharded across, and how many there are."""
         from vllm_omni.diffusion.distributed.parallel_state import get_sp_group
 
-        group = get_sp_group().device_group
+        group = getattr(self, "_lingbot_vae_group", None) or get_sp_group().device_group
         return group, torch.distributed.get_world_size(group=group)
 
     def _install_sharded_vae_decode(self, sequence_parallel_size: int) -> None:
@@ -1749,9 +1917,10 @@ class LingBotWorldCausalDMDPipeline(
         (max abs diff 0.0195 on [-1, 1] at 480x832).
         """
         group, world_size = self._vae_shard_group()
-        if world_size != sequence_parallel_size:
+        expected_degree = self._lingbot_vae_group_degree or sequence_parallel_size
+        if world_size != expected_degree:
             raise RuntimeError(
-                f"LingBot World sequence_parallel_size={sequence_parallel_size} but the Ulysses group has "
+                f"LingBot World VAE degree={expected_degree} but the selected group has "
                 f"{world_size} ranks."
             )
         install_wan_spatial_shard_decode(self.vae, group, split_dim=_VAE_SHARD_SPLIT_DIM, dst=None)
@@ -1808,7 +1977,7 @@ class LingBotWorldCausalDMDPipeline(
         if state is not None:
             state.release()
 
-    def _decode_chunk_to_pixels(self, latents: torch.Tensor, *, session_id: str | None = None) -> np.ndarray:
+    def _decode_chunk_to_pixels(self, latents: torch.Tensor, *, session_id: str | None = None) -> np.ndarray | None:
         """Decode one AR block so streaming consumers receive pixels, not latents.
 
         The block comes back as ``(F, H, W, 3)`` uint8 whatever pixel output
@@ -1838,14 +2007,158 @@ class LingBotWorldCausalDMDPipeline(
         decoder = None
         if session_id is not None and not self._vae_would_tile(vae_latents):
             decoder = self._streaming_decoder()
-        if decoder is None:
-            video = self.vae.decode(vae_latents, return_dict=False)[0]
-        else:
-            video = self._streaming_decode_chunk(decoder, vae_latents, cast(str, session_id))
-        return _uint8_frames(video)
+        pixel_policy = None
+        mode = getattr(self, "_lingbot_pixel_output_mode", "native")
+        # Decide ordinary unsupported inputs before the decoder advances any
+        # temporal cache or joins a collective. Latent output never enters here.
+        if (mode != "native" and decoder is not None and latents.device.type == "npu"
+                and getattr(self.vae, "_vllm_omni_wan_spatial_shard_installed", False)
+                and getattr(self.vae.config, "patch_size", None) is None
+                and getattr(self, "_vae_shard_split_dim", None) == "width"):
+            import torch.distributed as dist
+            from vllm_omni.diffusion.layers.lingbot_pixel_output import PixelOutputPolicy
+
+            group, degree = self._vae_shard_group()
+            if degree == 8:
+                pixel_policy = PixelOutputPolicy(mode, group, dist.get_rank(group), degree)
+        # Record the selected path once, before decode/cache writes. A configured
+        # candidate can otherwise silently take the ordinary unsupported path.
+        if mode != "native" and not getattr(self, "_lingbot_pixel_output_reported", False):
+            logger.info(
+                "LingBot pixel output selected: requested=%s actual=%s group_rank=%s world_size=%s produce_output=%s",
+                mode, pixel_policy.mode if pixel_policy is not None else "native",
+                pixel_policy.rank if pixel_policy is not None else None,
+                pixel_policy.world_size if pixel_policy is not None else None,
+                pixel_policy.produce_output if pixel_policy is not None else True,
+            )
+            self._lingbot_pixel_output_reported = True
+        pack_requested = getattr(self, "_lingbot_pixel_device_interleave", False)
+        pack_rank = pixel_policy.rank if pixel_policy is not None else None
+        pack_world = pixel_policy.world_size if pixel_policy is not None else None
+        pack_eligible = False
+        if (pack_requested and decoder is not None and latents.device.type == "npu"
+                and getattr(self.vae, "_vllm_omni_wan_spatial_shard_installed", False)
+                and getattr(self.vae.config, "patch_size", None) is None
+                and getattr(self, "_vae_shard_split_dim", None) == "width"
+                and os.environ.get("VLLM_LINGBOT_NPU_PLANAR_RGB", "0") == "1"
+                and os.environ.get("VLLM_LINGBOT_NPU_PINNED_RGB", "0") == "0"
+                and (mode == "native" or (pixel_policy is not None and mode == "root_uint8_p2p"))):
+            if pixel_policy is not None:
+                pack_eligible = True
+            else:
+                import torch.distributed as dist
+
+                group, pack_world = self._vae_shard_group()
+                if pack_world == 8:
+                    pack_rank = dist.get_rank(group)
+                    pack_eligible = True
+        # For native decode this context is only activated by a prepare error
+        # or an accepted owned copy. Ordinary native/fallback errors retain the
+        # original behavior below; the decoder's commit sequence is unchanged.
+        failure_context = (dict(reported=False, owners=[self, vae_latents, decoder, pixel_policy])
+                           if pixel_policy is not None or pack_eligible else None)
+        try:
+            with _lingbot_profile_stage("streaming_vae_decode"):
+                if decoder is None:
+                    video = self.vae.decode(vae_latents, return_dict=False)[0]
+                else:
+                    video = self._streaming_decode_chunk(
+                        decoder, vae_latents, cast(str, session_id), pixel_policy=pixel_policy,
+                        _failure_context=failure_context,
+                    )
+            if failure_context is not None:
+                failure_context["owners"].append(video)
+            if pixel_policy is not None and not pixel_policy.produce_output:
+                if not isinstance(video, torch.Tensor) or video.numel() != 0:
+                    raise RuntimeError("Non-output pixel rank returned a nonempty decoder payload")
+                if pack_requested:
+                    self._log_pixel_device_interleave("nonproducer", mode, pack_rank, pack_world, False,
+                                                      "non_output_rank")
+                return None
+            with _lingbot_profile_stage("rgb_copy"):
+                if pack_eligible:
+                    if pixel_policy is not None and pixel_policy.planar_uint8:
+                        planar = video
+                    else:
+                        from vllm_omni.diffusion.layers.lingbot_pixels import planar_uint8_tensor
+
+                        planar = planar_uint8_tensor(video)
+                    failure_context["owners"].append(planar)
+                    owned_pixels = self._owned_pixel_interleave(
+                        planar, session_id=cast(str, session_id), context=failure_context,
+                        mode=mode, rank=pack_rank, world_size=pack_world,
+                    )
+                    if owned_pixels is not None:
+                        return owned_pixels
+                elif pack_requested:
+                    self._log_pixel_device_interleave("native_host", mode, pack_rank, pack_world, True,
+                                                      "unsupported_runtime")
+                if pixel_policy is not None and pixel_policy.planar_uint8:
+                    from vllm_omni.diffusion.layers.lingbot_pixel_output import planar_pixels_to_host
+
+                    return planar_pixels_to_host(video)
+                return _uint8_frames(video)
+        except BaseException as error:
+            if pixel_policy is not None or (failure_context is not None and failure_context["reported"]):
+                self._report_pixel_output_failure(error, cast(str, session_id), failure_context)
+                self._release_streaming_decode_state(cast(str, session_id))
+            raise
+
+    def _log_pixel_device_interleave(self, actual, mode, rank, world_size, produce_output, reason) -> None:
+        reported = getattr(self, "_lingbot_pixel_device_interleave_reports", None)
+        if reported is None:
+            reported = set()
+            self._lingbot_pixel_device_interleave_reports = reported
+        key = (actual, reason)
+        if key in reported:
+            return
+        logger.info(
+            "LingBot pixel device interleave selected: requested=True actual=%s mode=%s "
+            "group_rank=%s world_size=%s produce_output=%s reason=%s",
+            actual, mode, rank, world_size, produce_output, reason,
+        )
+        reported.add(key)
+
+    def _owned_pixel_interleave(self, planar, *, session_id: str, context, mode, rank, world_size):
+        """Prepare before writing; retain request/cache and actual owners on failure."""
+        try:
+            from vllm_omni.diffusion.layers.lingbot_device_interleave import prepare_region, execute_to_host
+
+            region = prepare_region(planar)
+            if region is None:
+                self._log_pixel_device_interleave("native_host", mode, rank, world_size, True,
+                                                  "unsupported_descriptor")
+                return None
+            context["owners"].append(region)
+            result = execute_to_host(region)
+            self._log_pixel_device_interleave("owned_clone_out", mode, rank, world_size, True,
+                                              "supported_descriptor")
+            return result
+        except BaseException as error:
+            # prepare errors are invalid owner/metadata; started errors already
+            # retain helper buffers and poison it. Neither may fall back after
+            # decode advanced the request's temporal cache.
+            self._report_pixel_output_failure(error, session_id, context)
+            raise
+
+    def _report_pixel_output_failure(self, error: BaseException, session_id: str, context: dict[str, Any]) -> None:
+        """Quarantine real cache/output/traceback owners before clearing state."""
+        if context["reported"]:
+            return
+        state = self._streaming_decode_states.get(session_id)
+        cache = getattr(state, "feat_map", None)
+        cache_owners = tuple(cache) if isinstance(cache, (list, tuple)) else (cache,)
+        # The traceback owns locals in failed conversion/copy frames, including
+        # a uint8 D2H source that the outer BF16 decoder output does not own.
+        context["owners"].extend((state, cache_owners, error, error.__traceback__))
+        from vllm_omni.diffusion.layers.lingbot_sp8_fatal import report_failure
+
+        report_failure("streaming_pixel_output", str(error), tuple(context["owners"]))
+        context["reported"] = True
 
     def _streaming_decode_chunk(
-        self, decoder: WanStreamingDecoder, vae_latents: torch.Tensor, session_id: str
+        self, decoder: WanStreamingDecoder, vae_latents: torch.Tensor, session_id: str, *, pixel_policy=None,
+        _failure_context=None,
     ) -> torch.Tensor:
         """Decode one chunk through ``session_id``'s temporal cache.
 
@@ -1855,11 +2168,23 @@ class LingBotWorldCausalDMDPipeline(
         """
         state = self._streaming_decode_state(decoder, session_id)
         try:
+            if pixel_policy is not None:
+                from vllm_omni.diffusion.layers.lingbot_pixel_output import pixel_output_context
+
+                with pixel_output_context(pixel_policy):
+                    return decoder.decode_chunk(
+                        vae_latents, state,
+                        output_format="planar_uint8" if pixel_policy.planar_uint8 else "video",
+                        produce_output=pixel_policy.produce_output,
+                    )
             return decoder.decode_chunk(vae_latents, state)
-        except Exception:
+        except Exception as error:
             # A half-advanced cache cannot be resumed: the session's next chunk
             # would continue from a temporal context that was never completed,
             # so drop it here rather than at close.
+            if pixel_policy is not None:
+                context = _failure_context or dict(reported=False, owners=[self, vae_latents, decoder, pixel_policy])
+                self._report_pixel_output_failure(error, session_id, context)
             self._release_streaming_decode_state(session_id)
             raise
 
@@ -1870,6 +2195,14 @@ class LingBotWorldCausalDMDPipeline(
     def prepare_encode(self, state: StepRequestState, **kwargs: Any) -> StepRequestState:
         del kwargs
         self._require_bound_ar_state()
+        if os.environ.get("LINGBOT_CAPTURE_DIR"):
+            from vllm_omni.diffusion.layers.lingbot_capture import begin_capture
+
+            begin_capture(self, state.request_id)
+        if os.environ.get("LINGBOT_CAPTURE_COMPUTE", "0") == "1":
+            from vllm_omni.diffusion.layers.lingbot_compute_capture import begin_compute_capture
+
+            begin_compute_capture(self, phase="startup", chunk=-1)
         req = DiffusionRequestBatch(
             requests=[
                 OmniDiffusionRequest(
@@ -1939,9 +2272,25 @@ class LingBotWorldCausalDMDPipeline(
         }
         self._ar_text_caches(prompt_embeds, invalidate=False)
         self._ar_sessions[state.request_id] = _LingBotARSessionState()
+        state.extra["fixed_timestep_bank_session"] = fixed_timestep_bank.begin_session(
+            self, state.request_id, schedule=state.extra["schedule"], flow_shift=inputs.flow_shift,
+            height=inputs.height, width=inputs.width, block_frames=block_frames,
+        )
+        if os.environ.get("LINGBOT_CAPTURE_COMPUTE", "0") == "1":
+            from vllm_omni.diffusion.layers.lingbot_compute_capture import finish_compute_capture
+
+            finish_compute_capture(self)
         return state
 
     def _prepare_next_chunk(self, state: StepRequestState) -> None:
+        from vllm_omni.diffusion.layers import lingbot_sp8_observe as sp8_observe
+
+        if sp8_observe.ENABLED:
+            sp8_observe.prepare(self, state)
+        if os.environ.get("LINGBOT_CAPTURE_COMPUTE", "0") == "1":
+            from vllm_omni.diffusion.layers.lingbot_compute_capture import begin_compute_capture
+
+            begin_compute_capture(self, phase="prepare", chunk=state.chunk_index)
         extra = state.extra
         inputs: _LingBotRequestInputs = extra["inputs"]
         block_frames = int(extra["block_frames"])
@@ -2055,10 +2404,15 @@ class LingBotWorldCausalDMDPipeline(
         extra["camera_cache"] = CameraModulationCache()
         extra["camera_tail"] = camera_tail
         extra["start_frame"] = start_frame
+        prompt_session = state.interaction_sessions.get("prompt")
+        prompt_version = getattr(prompt_session, "version", 0)
         extra["ar_cross_attention"] = self._ar_text_caches(
             cast(torch.Tensor, state.prompt_embeds),
-            invalidate=False,
+            invalidate=prompt_version != extra.get("ar_prompt_version", 0),
         )
+        # Publish the version only after every layer's text K/V was rebuilt.
+        # Self-attention history, VAE and camera caches remain request-owned.
+        extra["ar_prompt_version"] = prompt_version
         state.latents = randn_tensor(
             (
                 1,
@@ -2092,8 +2446,19 @@ class LingBotWorldCausalDMDPipeline(
             raise ValueError("LingBot step execution supports a single request, not a batched request.")
         self._require_bound_ar_state()
         state = states[0]
+        if os.environ.get("LINGBOT_LEASED_GRAPH_CAPTURE_DIR"):
+            if not hasattr(self, "_leased_graph_capture_session"):
+                self._leased_graph_capture_session = state.request_id
+            context = ((state.request_id, state.chunk_index, state.step_in_chunk)
+                       if (state.request_id == self._leased_graph_capture_session
+                           and 0 <= state.chunk_index < 6 and 0 <= state.step_in_chunk < 4) else None)
+            self.transformer.blocks[0]._leased_native_capture_context = context
+            self.transformer.blocks[0].self_attn._leased_native_capture_enabled = context is not None
         extra = state.extra
         latents = state.latents
+        output_capture = getattr(self, "_lingbot_output_capture", None)
+        if output_capture is not None:
+            output_capture.bind(state)
         if latents is None:
             raise RuntimeError("LingBot step execution requires latents before denoise_step.")
         timestep = state.current_timestep
@@ -2101,18 +2466,41 @@ class LingBotWorldCausalDMDPipeline(
             raise RuntimeError("LingBot step execution requires a current timestep before denoise_step.")
         schedule = extra["schedule"]
         step_in_chunk = state.step_in_chunk
-        return self._dmd_blocks.probe_step(
-            current_latents=latents,
-            condition=extra["condition"],
-            camera=extra["camera"],
-            prompt_embeds=cast(torch.Tensor, state.prompt_embeds),
-            cache=None,
-            ar=self._ar_block_context(extra["ar_cross_attention"]),
-            start_frame=int(extra["start_frame"]),
-            timestep_value=float(schedule[step_in_chunk][0]),
-            step_index=step_in_chunk,
-            camera_cache=extra["camera_cache"],
-        )
+        from vllm_omni.diffusion.layers import lingbot_sp8_observe as sp8_observe
+
+        if sp8_observe.ENABLED:
+            sp8_observe.probe(state.chunk_index, step_in_chunk)
+        if os.environ.get("LINGBOT_CAPTURE_DIR"):
+            from vllm_omni.diffusion.layers.lingbot_capture import begin_probe
+
+            begin_probe(self, state.chunk_index, step_in_chunk)
+        if os.environ.get("LINGBOT_CAPTURE_COMPUTE", "0") == "1":
+            from vllm_omni.diffusion.layers.lingbot_compute_capture import begin_compute_capture
+
+            begin_compute_capture(self, phase="probe", chunk=state.chunk_index, probe=step_in_chunk)
+        try:
+            return self._dmd_blocks.probe_step(
+                current_latents=latents,
+                condition=extra["condition"],
+                camera=extra["camera"],
+                prompt_embeds=cast(torch.Tensor, state.prompt_embeds),
+                cache=None,
+                ar=self._ar_block_context(extra["ar_cross_attention"]),
+                start_frame=int(extra["start_frame"]),
+                timestep_value=float(schedule[step_in_chunk][0]),
+                step_index=step_in_chunk,
+                camera_cache=extra["camera_cache"],
+                fixed_timestep_token=fixed_timestep_bank.probe_token(
+                    extra.get("fixed_timestep_bank_session"), schedule=schedule, index=step_in_chunk,
+                    timestep_value=float(schedule[step_in_chunk][0]),
+                ),
+            )
+        finally:
+            if os.environ.get("LINGBOT_LEASED_GRAPH_CAPTURE_DIR"):
+                block = self.transformer.blocks[0]
+                block._leased_native_capture_context = None
+                block.self_attn._leased_native_capture_enabled = False
+                block.self_attn.__dict__.pop("_leased_native_capture_operands", None)
 
     def step_scheduler(self, state: StepRequestState, noise_pred: torch.Tensor, **kwargs: Any) -> None:
         del kwargs
@@ -2146,16 +2534,17 @@ class LingBotWorldCausalDMDPipeline(
         session_state = self._ar_sessions[state.request_id]
         if session_state.pending_encoder_cache is None:
             raise RuntimeError("LingBot condition encoder has no prepared chunk to commit.")
-        self._dmd_blocks.commit_block_kv(
-            latents=latents,
-            condition=extra["condition"],
-            camera=extra["camera"],
-            prompt_embeds=cast(torch.Tensor, state.prompt_embeds),
-            cache=None,
-            ar=self._ar_block_context(extra["ar_cross_attention"]),
-            start_frame=int(extra["start_frame"]),
-            camera_cache=extra.pop("camera_cache"),
-        )
+        with _lingbot_profile_stage("clean_kv_commit"):
+            self._dmd_blocks.commit_block_kv(
+                latents=latents,
+                condition=extra["condition"],
+                camera=extra["camera"],
+                prompt_embeds=cast(torch.Tensor, state.prompt_embeds),
+                cache=None,
+                ar=self._ar_block_context(extra["ar_cross_attention"]),
+                start_frame=int(extra["start_frame"]),
+                camera_cache=extra.pop("camera_cache"),
+            )
         completed_chunk_index = state.chunk_index
         inputs: _LingBotRequestInputs = extra["inputs"]
         # "video" is the payload key the output formatter treats as primary, so
@@ -2164,7 +2553,20 @@ class LingBotWorldCausalDMDPipeline(
         if inputs.output_type == "latent":
             payload: dict[str, Any] = {"latents": latents}
         else:
-            payload = {"video": self._decode_chunk_to_pixels(latents, session_id=state.request_id)}
+            if os.environ.get("LINGBOT_CAPTURE_COMPUTE", "0") == "1":
+                from vllm_omni.diffusion.layers.lingbot_compute_capture import begin_compute_capture
+
+                begin_compute_capture(self, phase="decode", chunk=completed_chunk_index)
+            pixels = self._decode_chunk_to_pixels(latents, session_id=state.request_id)
+            payload = {} if pixels is None else {"video": pixels}
+        if os.environ.get("LINGBOT_CAPTURE_COMPUTE", "0") == "1":
+            from vllm_omni.diffusion.layers.lingbot_compute_capture import finish_compute_capture
+
+            finish_compute_capture(self)
+        if os.environ.get("LINGBOT_CAPTURE_DIR"):
+            from vllm_omni.diffusion.layers.lingbot_capture import capture_output
+
+            capture_output(self, completed_chunk_index, latents, payload.get("video"))
         output = {
             "payload": payload,
             "metadata": {
@@ -2224,4 +2626,58 @@ class LingBotWorldCausalDMDPipeline(
 
     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
         loader = AutoWeightsLoader(self)
-        return cast(set[str], loader.load_weights(weights))
+        loaded = loader.load_weights(weights)
+        from .npu_quantization import install_lingbot_npu_quantization
+
+        install_lingbot_npu_quantization(self.transformer, self._lingbot_npu_quantization_config)
+        from vllm_omni.diffusion.layers.lingbot_npu_fusion import install_precision_fusion
+
+        install_precision_fusion(self.transformer, self._lingbot_npu_fusion_config)
+        if self._lingbot_leased_post_attention:
+            from vllm_omni.diffusion.layers.lingbot_leased_post_attention import install as install_leased_graph
+
+            install_leased_graph(self.transformer, enabled=True)
+        if self._lingbot_output_mc2_enabled:
+            from vllm_omni.diffusion.layers.lingbot_sp8_output_mc2 import install as install_output_mc2
+
+            install_output_mc2(self.transformer)
+        if self._lingbot_output_overlap_comm == "aiv":
+            from vllm_omni.diffusion.layers.lingbot_sp8_output_overlap import install_ulysses_aiv
+
+            install_ulysses_aiv(self.transformer, self._lingbot_ulysses_vector_cores)
+        if self._lingbot_output_overlap_tiles:
+            from vllm_omni.diffusion.layers.lingbot_sp8_output_overlap import install as install_output_overlap
+
+            install_output_overlap(self.transformer, tiles=self._lingbot_output_overlap_tiles,
+                                   communication="native")
+        if self._lingbot_regional_graph_enabled:
+            from vllm_omni.diffusion.layers.lingbot_regional_graph import install as install_regional_graph
+
+            install_regional_graph(self.transformer)
+        if self._lingbot_pointwise_graph_regions or os.environ.get("LINGBOT_POINTWISE_CAPTURE_DIR"):
+            from vllm_omni.diffusion.layers.lingbot_pointwise_regions import install as install_pointwise_regions
+
+            install_pointwise_regions(self.transformer, self._lingbot_pointwise_graph_regions)
+        if os.environ.get("LINGBOT_REGION_CAPTURE_DIR"):
+            from vllm_omni.diffusion.layers.lingbot_region_capture import install as install_region_capture
+
+            install_region_capture(self.transformer)
+        from vllm_omni.diffusion.distributed.autoencoders.wan_npu_exact_pack4d import configure as configure_vae4d
+
+        configure_vae4d(self.vae, self.od_config.model_config or {})
+        queued_recv = (self.od_config.model_config or {}).get("lingbot_npu_recv_queued_manifest")
+        if queued_recv is not None:
+            if not isinstance(queued_recv, str) or not queued_recv:
+                raise ValueError("lingbot_npu_recv_queued_manifest requires an explicit manifest path")
+            from vllm_omni.diffusion.layers.lingbot_recv_queued import configure as configure_queued_recv
+
+            configure_queued_recv(queued_recv)
+        if os.environ.get("LINGBOT_OUTPUT_CAPTURE_DIR"):
+            from vllm_omni.diffusion.layers.lingbot_output_capture import install as install_output_capture
+
+            install_output_capture(self)
+        if os.environ.get("LINGBOT_TAIL_DIAGNOSTIC_DIR"):
+            from vllm_omni.diffusion.layers.lingbot_tail_diagnostic import install as install_tail_diagnostic
+
+            install_tail_diagnostic(self)
+        return cast(set[str], loaded)

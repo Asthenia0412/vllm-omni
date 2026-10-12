@@ -34,6 +34,7 @@ from vllm_omni.experimental.ar_diffusion.kv_cache.config import (
     KV_GATHER_ENV,
     ARDiffusionKVConfig,
     contiguous_kv_gather_enabled,
+    npu_history_staging_enabled,
 )
 from vllm_omni.experimental.ar_diffusion.kv_cache.paged import (
     ChunkWindowManager,
@@ -129,6 +130,31 @@ def compute_num_blocks(
     return max(0, budget // page_size_bytes)
 
 
+def select_npu_staging_layers(
+    *, usable_bytes: int, base_session_bytes: int, layer_bytes: int,
+    num_layers: int, requested: Sequence[int] | None,
+) -> tuple[int, ...]:
+    """Pin layers against actual post-weight free memory; never use an LRU.
+
+    ``usable_bytes`` already excludes graph/workspace and the >=4 GiB free
+    headroom. The base includes managed KV, scratch, cross KV and model state.
+    Explicit selections fail rather than silently changing the user's arm.
+    """
+    if layer_bytes <= 0 or num_layers <= 0:
+        raise ValueError("staging layer bytes and layer count must be positive")
+    if requested is None:
+        count = max(0, min(num_layers, (usable_bytes - base_session_bytes) // layer_bytes))
+        return tuple(range(count))
+    selected = tuple(requested)
+    if len(set(selected)) != len(selected) or any(
+        isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < num_layers for index in selected
+    ):
+        raise ValueError("npu_history_staging_layers must contain unique valid layer indices")
+    if base_session_bytes + len(selected) * layer_bytes > usable_bytes:
+        raise ValueError("explicit NPU staging layers exceed the graph/workspace/free-headroom budget")
+    return selected
+
+
 def build_kv_manager(
     spec: KVCacheSpec,
     layer_names: Sequence[str],
@@ -173,6 +199,8 @@ class HistoryStagingState:
 
     adapter: Any | None = None  # weakref to the session adapter the window was staged for
     signature: tuple[Any, ...] | None = None
+    ready: bool = False  # all layers completed the forward that staged this signature
+    forward_owner: object | None = None  # identity lease; no tensor/context ownership
 
 
 class ARDiffusionKVCache:
@@ -325,17 +353,49 @@ class ARDiffusionKVCache:
         # contiguous-gather attention path consumes it.
         self.history_staging_reserved_bytes = 0
         self.history_staging_tokens = 0
+        self.history_staging_layer_indices: tuple[int, ...] = ()
+        npu_device = device is not None and torch.device(device).type == "npu"
+        for name in ("npu_graph_workspace_reserve_bytes", "npu_min_free_headroom_bytes"):
+            value = getattr(config, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{name} must be a non-negative integer")
+        if npu_device and config.npu_min_free_headroom_bytes < 4 * 1024**3:
+            raise ValueError("NPU graph/staging free headroom must be at least 4 GiB")
+        self.graph_workspace_reserved_bytes = config.npu_graph_workspace_reserve_bytes if npu_device else 0
+        guard_enabled = npu_device and (config.reuse_history_staging or self.graph_workspace_reserved_bytes > 0)
+        self.free_headroom_reserved_bytes = config.npu_min_free_headroom_bytes if guard_enabled else 0
+        usable_available_bytes = (
+            available_bytes - self.graph_workspace_reserved_bytes - self.free_headroom_reserved_bytes
+        )
+        self.configured_memory_budget_bytes = min(self.configured_memory_budget_bytes, usable_available_bytes)
         if config.reuse_history_staging:
-            if contiguous_kv_gather_enabled():
+            npu_staging = (
+                device is not None and torch.device(device).type == "npu" and npu_history_staging_enabled()
+            )
+            if contiguous_kv_gather_enabled() or npu_staging:
                 self.history_staging_tokens = (
                     self.spec.sliding_window + config.sink_chunks * config.chunk_size + block_size
                 )
-                self.history_staging_reserved_bytes = int(
-                    2 * num_layers * self.history_staging_tokens * num_kv_heads * head_size * dtype.itemsize
-                )
+                layer_bytes = int(2 * self.history_staging_tokens * num_kv_heads * head_size * dtype.itemsize)
+                selected = tuple(range(num_layers))
+                if npu_device:
+                    base_bytes = (
+                        self.scratch_reserved_bytes + self.cross_attention_bytes_per_session
+                        + self.model_owned_state_bytes_per_session + _required_managed_blocks(1) * page_size_bytes
+                    )
+                    selected = select_npu_staging_layers(
+                        usable_bytes=usable_available_bytes, base_session_bytes=base_bytes,
+                        layer_bytes=layer_bytes, num_layers=num_layers, requested=config.npu_history_staging_layers,
+                    )
+                self.history_staging_layer_indices = selected
+                self.history_staging_reserved_bytes = layer_bytes * len(selected)
+                if not selected:
+                    self.history_staging_tokens = 0
+                    _log.warning("NPU history staging disabled: no layer fits the graph/workspace/headroom budget")
             else:
                 _log.warning(
-                    "reuse_history_staging is set but the contiguous K/V gather path (%s=1) is off: "
+                    "reuse_history_staging is set but neither the contiguous K/V gather path (%s=1) "
+                    "nor NPU history staging is on: "
                     "staging has no consumer and is neither budgeted nor allocated.",
                     KV_GATHER_ENV,
                 )
@@ -350,10 +410,12 @@ class ARDiffusionKVCache:
             )
 
         one_session_bytes = _required_bytes(1)
-        if one_session_bytes > available_bytes:
+        if one_session_bytes > usable_available_bytes:
             raise ValueError(
                 "AR-Diffusion available device memory cannot fit one session: "
-                f"available={available_bytes} bytes, required={one_session_bytes} bytes "
+                f"available={available_bytes} bytes, usable={usable_available_bytes} bytes, "
+                f"required={one_session_bytes} bytes, graph/workspace={self.graph_workspace_reserved_bytes} bytes, "
+                f"free headroom={self.free_headroom_reserved_bytes} bytes "
                 "(managed self-attention + cross-attention + scratch + model-owned state + K/V staging)."
             )
         self.memory_budget_bytes = max(self.configured_memory_budget_bytes, one_session_bytes)
@@ -413,6 +475,21 @@ class ARDiffusionKVCache:
         self.managed_num_blocks = num_blocks
         self.num_blocks = num_blocks
         self.num_blocks_total = self.managed_num_blocks + self.scratch_num_blocks
+        self.planned_device_bytes = (
+            self.num_blocks_total * page_size_bytes + self.history_staging_reserved_bytes
+            + self.cross_attention_reserved_bytes + self.model_owned_state_reserved_bytes
+        )
+        self.unreserved_device_bytes = available_bytes - self.planned_device_bytes - self.graph_workspace_reserved_bytes
+        if guard_enabled and self.unreserved_device_bytes < self.free_headroom_reserved_bytes:
+            raise RuntimeError("NPU KV admission violated the actual free-memory headroom guard")
+        if guard_enabled:
+            _log.info(
+                "NPU KV budget: staged_layers=%s staging=%.3f GiB graph/workspace=%.3f GiB "
+                "planned_device=%.3f GiB remaining_headroom=%.3f GiB",
+                self.history_staging_layer_indices, self.history_staging_reserved_bytes / 1024**3,
+                self.graph_workspace_reserved_bytes / 1024**3, self.planned_device_bytes / 1024**3,
+                self.unreserved_device_bytes / 1024**3,
+            )
         self.null_block_id = self.manager.block_pool.null_block.block_id
 
         # Allocate the per-layer paged K/V pools on the given device.
@@ -434,10 +511,13 @@ class ARDiffusionKVCache:
         # reuse_history_staging: one contiguous (K, V) pair per layer, sized to the padded visible window this
         # cache admits and budgeted above, owned here next to the pools it stages from. Allocated outside any
         # capture and marked static, so compiled regions treat it as a stable input rather than a new tensor.
-        self.history_staging: list[tuple[torch.Tensor, torch.Tensor]] = []
+        self.history_staging: list[tuple[torch.Tensor, torch.Tensor] | None] = []
         self.history_staging_state = HistoryStagingState()
         if self.history_staging_tokens and device is not None:
-            for _ in range(num_layers):
+            for layer in range(num_layers):
+                if layer not in self.history_staging_layer_indices:
+                    self.history_staging.append(None)
+                    continue
                 pair = (
                     torch.empty((self.history_staging_tokens, num_kv_heads, head_size), device=device, dtype=dtype),
                     torch.empty((self.history_staging_tokens, num_kv_heads, head_size), device=device, dtype=dtype),

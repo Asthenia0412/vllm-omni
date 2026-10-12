@@ -23,6 +23,7 @@ from diffusers.utils.torch_utils import randn_tensor
 from vllm.logger import init_logger
 
 from vllm_omni.diffusion.forward_context import set_forward_context_denoise_step_idx
+from vllm_omni.diffusion.layers import lingbot_fixed_timestep_bank_stageA_v1 as fixed_timestep_bank
 from vllm_omni.diffusion.models.lingbot_world.transformer import (
     CameraModulationCache,
     LingBotAttentionCache,
@@ -120,6 +121,7 @@ class LingBotDMDBlockRunner:
         timestep_value: float,
         step_index: int,
         camera_cache: CameraModulationCache | None = None,
+        fixed_timestep_token: object | None = None,
     ) -> torch.Tensor:
         """Predict flow for one denoise step.
 
@@ -134,6 +136,9 @@ class LingBotDMDBlockRunner:
             torch.compiler.cudagraph_mark_step_begin()
         set_forward_context_denoise_step_idx(step_index)
         timestep = torch.full((1,), float(timestep_value), device=self.device, dtype=torch.float32)
+        fixed_timestep_call = fixed_timestep_bank.bind_timestep(
+            fixed_timestep_token, timestep, timestep_value=timestep_value, step_index=step_index,
+        )
         # Checkpoint channel contract:
         # [noise/x_t(16), temporal_mask(4), image_latent(16)] -> 36.
         model_input = torch.cat((current_latents.to(dtype=condition.dtype), condition), dim=1)
@@ -147,6 +152,7 @@ class LingBotDMDBlockRunner:
             start_frame=start_frame,
             update_cache=commit_probe,
             camera_modulation_cache=camera_cache,
+            fixed_timestep_token=fixed_timestep_call,
         )
         if flow_prediction.shape != current_latents.shape:
             raise RuntimeError(

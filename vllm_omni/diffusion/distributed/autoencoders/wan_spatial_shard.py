@@ -20,6 +20,7 @@ already-loaded decoder.
 from __future__ import annotations
 
 import math
+import os
 from contextlib import nullcontext
 from contextvars import ContextVar
 from dataclasses import dataclass
@@ -35,7 +36,9 @@ from diffusers.models.autoencoders.vae import DecoderOutput
 from vllm.logger import init_logger
 
 from vllm_omni.diffusion.distributed.autoencoders.wan_decoder_utils import _persistent_input_buffer
+from vllm_omni.diffusion.distributed.autoencoders.wan_decode_workspace import FinalGatherWorkspace
 from vllm_omni.diffusion.models.interface import DecodedChunkConsumer
+from vllm_omni.diffusion.layers import lingbot_sp8_observe as sp8_observe
 
 logger = init_logger(__name__)
 
@@ -180,18 +183,23 @@ def all_gather_along_dim(
     group: dist.ProcessGroup,
     dim: int,
     dst: int | None = None,
+    workspace: FinalGatherWorkspace | None = None,
 ) -> torch.Tensor:
     rank, world_size = _rank_world(group)
     if world_size <= 1:
         return x
     x = _maybe_contiguous_for_shard_gather(x)
-    gathered = [torch.empty_like(x) for _ in range(world_size)]
-    # NCCL has no rank-local gather, so every rank joins the collective; only ``dst``
-    # keeps the assembled tensor while the rest drop their copies.
-    dist.all_gather(gathered, x.contiguous(), group=group)
-    if dst is not None and rank != dst:
-        return x.new_zeros(0)
-    return torch.cat(gathered, dim=dim)
+    lease = workspace.lease(x, group=group, world_size=world_size) if workspace is not None else nullcontext(None)
+    with lease as gathered:
+        if gathered is None:
+            gathered = [torch.empty_like(x) for _ in range(world_size)]
+        # Every rank joins the collective. Output storage remains owned: the
+        # next latent frame may reuse receive buffers while callers retain this
+        # frame until the final temporal cat. Never return a borrowed buffer.
+        dist.all_gather(gathered, x.contiguous(), group=group)
+        if dst is not None and rank != dst:
+            return x.new_zeros(0)
+        return torch.cat(gathered, dim=dim)
 
 
 def reshard_from_trimmed_extent(
@@ -230,10 +238,11 @@ def gather_and_trim_extent(
     split_dim: str,
     group: dist.ProcessGroup,
     dst: int | None = None,
+    workspace: FinalGatherWorkspace | None = None,
 ) -> torch.Tensor:
     dim = _spatial_dim(split_dim)
     rank, _ = _rank_world(group)
-    out = all_gather_along_dim(x, group=group, dim=dim, dst=dst)
+    out = all_gather_along_dim(x, group=group, dim=dim, dst=dst, workspace=workspace)
     if dst is not None and rank != dst:
         return out
     if expected_extent is not None and out.shape[dim] != expected_extent:
@@ -456,7 +465,18 @@ class WanDistConv2d(nn.Conv2d):
         total_height = halo_h + top + height + bottom + halo_h
         total_width = halo_w + left + width + right + halo_w
         buf = _persistent_input_buffer(self, (batch, channels, total_height, total_width), x)
-        buf[:, :, halo_h + top : halo_h + top + height, halo_w + left : halo_w + left + width].copy_(x)
+        interior = buf[:, :, halo_h + top : halo_h + top + height, halo_w + left : halo_w + left + width]
+        if getattr(self, "_lingbot_vae4d_observer", False):
+            from .wan_npu_exact_pack4d import capture
+
+            capture(self, buf, interior, x)
+        packed = False
+        if getattr(self, "_lingbot_vae4d_policy", None) is not None:
+            from .wan_npu_exact_pack4d import try_pack
+
+            packed = try_pack(self, buf, interior, x)
+        if not packed:
+            interior.copy_(x)
         local_extent = buf.shape[dim] - 2 * halo
         if halo:
             # What halo_exchange sends: the padded activation's first and last ``halo`` rows along the
@@ -637,11 +657,24 @@ class WanDistCausalConv3d(nn.Conv3d):
             if pad_w1:
                 buf[:, :, :, :, total_width - halo_w - pad_w1 : total_width - halo_w].zero_()
         interior = buf[:, :, pad_t0 : pad_t0 + cache_frames + frames, top : top + height, left : left + width]
+        exact_pack_policy = getattr(self, "_lingbot_exact_pack_policy", None)
+        observation = None
+        if sp8_observe.ENABLED and cache_frames:
+            observation = sp8_observe.vae_before(
+                self, "interior", buf, interior[:, :, :cache_frames], cache_x,
+                interior[:, :, cache_frames:], x,
+            )
         if cache_frames:
-            interior[:, :, :cache_frames].copy_(cache_x)
-            interior[:, :, cache_frames:].copy_(x)
+            if exact_pack_policy is None or not exact_pack_policy.try_pair(
+                "interior", buf, interior[:, :, :cache_frames], cache_x, interior[:, :, cache_frames:], x
+            ):
+                interior[:, :, :cache_frames].copy_(cache_x)
+                interior[:, :, cache_frames:].copy_(x)
         else:
             interior.copy_(x)
+
+        if observation is not None:
+            sp8_observe.vae_after(observation, buf)
 
         dim = self.split_tensor_dim
         local_extent = buf.shape[dim] - 2 * halo
@@ -661,8 +694,20 @@ class WanDistCausalConv3d(nn.Conv3d):
                 recv_top_buf=self._halo_recv_top_buf,
                 recv_bottom_buf=self._halo_recv_bottom_buf,
             )
-            _narrow_along_dim(buf, dim, 0, halo).copy_(self._halo_recv_top_buf)
-            _narrow_along_dim(buf, dim, buf.shape[dim] - halo, halo).copy_(self._halo_recv_bottom_buf)
+            observation = None
+            if sp8_observe.ENABLED:
+                observation = sp8_observe.vae_before(
+                    self, "halo", buf, _narrow_along_dim(buf, dim, 0, halo), self._halo_recv_top_buf,
+                    _narrow_along_dim(buf, dim, buf.shape[dim] - halo, halo), self._halo_recv_bottom_buf,
+                )
+            if exact_pack_policy is None or not exact_pack_policy.try_pair(
+                "halo", buf, _narrow_along_dim(buf, dim, 0, halo), self._halo_recv_top_buf,
+                _narrow_along_dim(buf, dim, buf.shape[dim] - halo, halo), self._halo_recv_bottom_buf,
+            ):
+                _narrow_along_dim(buf, dim, 0, halo).copy_(self._halo_recv_top_buf)
+                _narrow_along_dim(buf, dim, buf.shape[dim] - halo, halo).copy_(self._halo_recv_bottom_buf)
+            if observation is not None:
+                sp8_observe.vae_after(observation, buf)
         return buf, local_extent
 
     def _get_trim_params(self, local_extent: int) -> tuple[int, int, int]:
@@ -857,6 +902,7 @@ def install_wan_spatial_shard_decode(
     split_dim: str = "height",
     *,
     dst: int | None = 0,
+    reuse_gather_buffers: bool | None = None,
 ) -> None:
     """Patch ``vae.decoder`` once for spatially-sharded decode.
 
@@ -874,7 +920,19 @@ def install_wan_spatial_shard_decode(
     keep the assembled frame, for a caller whose every rank goes on to
     consume the decoded pixels; the gather is an all-gather either way, so
     this costs no extra communication.
+
+    ``reuse_gather_buffers`` optionally retains at most two final-output
+    receive shapes within 32 MiB, while returning owned output tensors. Its
+    default reads ``VLLM_LINGBOT_VAE_REUSE_GATHER_BUFFERS`` (off unless "1").
+    The policy is fixed for this VAE's lifetime and changes require a reload.
     """
+    if reuse_gather_buffers is None:
+        flag = os.environ.get("VLLM_LINGBOT_VAE_REUSE_GATHER_BUFFERS", "0")
+        if flag not in ("0", "1"):
+            raise ValueError("VLLM_LINGBOT_VAE_REUSE_GATHER_BUFFERS must be 0 or 1")
+        reuse_gather_buffers = flag == "1"
+    if type(reuse_gather_buffers) is not bool:
+        raise ValueError("Wan gather buffer reuse must be boolean")
     _spatial_dim(split_dim)
     _, world_size = _rank_world(group)
     if dst is not None and (not isinstance(dst, int) or not 0 <= dst < world_size):
@@ -892,6 +950,8 @@ def install_wan_spatial_shard_decode(
                 "Wan spatial-shard VAE decoder was already patched to assemble on "
                 f"{installed_dst!r}; create a fresh VAE instance to assemble on {dst!r}."
             )
+        if getattr(vae, "_vllm_omni_wan_reuse_gather_buffers", False) != reuse_gather_buffers:
+            raise ValueError("Wan gather workspace policy changed; create a fresh VAE instance")
         return
     decoder = getattr(vae, "decoder", None)
     if decoder is None:
@@ -900,6 +960,7 @@ def install_wan_spatial_shard_decode(
     _patch_decoder_modules(decoder, group, split_dim)
     upsample_count = _decoder_upsample_count(decoder)
     orig_forward = decoder.forward
+    workspace = FinalGatherWorkspace(group, world_size) if reuse_gather_buffers and world_size > 1 else None
 
     def _forward(
         self: nn.Module,
@@ -932,12 +993,33 @@ def install_wan_spatial_shard_decode(
             out = orig_forward(x, feat_cache=feat_cache, feat_idx=feat_idx, first_chunk=first_chunk)
         finally:
             _SPATIAL_SHARD_CONTEXT.reset(token)
-        return gather_and_trim_extent(out, expected_extent=expected_extent, split_dim=split_dim, group=group, dst=dst)
+        from vllm_omni.diffusion.layers.lingbot_pixel_output import current_pixel_output_policy, capture_final_output
+
+        capture_final_output(out, group=group, split_dim=split_dim, expected_extent=expected_extent)
+
+        pixel_policy = current_pixel_output_policy()
+        if pixel_policy is not None:
+            if pixel_policy.group is not group or (pixel_policy.rank, pixel_policy.world_size) != (rank, world_size):
+                raise RuntimeError("Pixel output policy owner/group changed during VAE execution")
+            if pixel_policy.planar_uint8:
+                from vllm_omni.diffusion.layers.lingbot_pixel_output import gather_final_pixels
+
+                return gather_final_pixels(
+                    out, policy=pixel_policy, split_dim=split_dim, expected_extent=expected_extent,
+                )
+            return gather_and_trim_extent(
+                out, expected_extent=expected_extent, split_dim=split_dim, group=group, dst=0, workspace=workspace,
+            )
+        return gather_and_trim_extent(
+            out, expected_extent=expected_extent, split_dim=split_dim, group=group, dst=dst, workspace=workspace
+        )
 
     decoder.forward = MethodType(_forward, decoder)
     vae._vllm_omni_wan_spatial_shard_installed = True
     vae._vllm_omni_wan_spatial_shard_split_dim = split_dim
     vae._vllm_omni_wan_spatial_shard_dst = dst
+    vae._vllm_omni_wan_reuse_gather_buffers = reuse_gather_buffers
+    vae._vllm_omni_wan_output_gather_workspace = workspace
     logger.info("Installed Wan VAE %s-sharded decode.", split_dim)
 
 

@@ -445,6 +445,9 @@ class DiffusionWorker:
         # When load_format is "dummy", pipeline will init with custom pipeline later
         if load_format != "dummy":
             assert self.model_runner.pipeline is not None
+            seal = getattr(self.model_runner.pipeline, "_seal_fixed_timestep_bank_after_worker_load", None)
+            if callable(seal):
+                seal(self)
 
     def get_kv_cache_specs(self) -> list[dict[str, KVCacheSpec]]:
         """Return native rank-local specs for every diffusion Worker."""
@@ -558,6 +561,14 @@ class DiffusionWorker:
 
         assert self.model_runner is not None, "Model runner not initialized"
         return self.model_runner.remove_diffusion_kv_requests(request_ids)
+
+    def release_ar_diffusion_requests(self, request_ids: list[str]) -> int:
+        """Retire aborted stepwise AR state after the current executor wave."""
+        assert self.model_runner is not None, "Model runner not initialized"
+        release = getattr(self.model_runner, "release_aborted_requests", None)
+        if not callable(release):
+            raise RuntimeError("AR cleanup RPC requires an AR-Diffusion model runner")
+        return release(request_ids)
 
     def prepare_kv_for_forward(self, scheduler_output: DiffusionSchedulerOutput):
         return _run_and_gather_rank_values(

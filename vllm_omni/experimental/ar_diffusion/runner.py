@@ -310,6 +310,26 @@ class ARDiffusionModelRunner(DiffusionModelRunner):
                     suppress_errors=True,
                 )
 
+    def release_aborted_requests(self, request_ids: list[str]) -> int:
+        """Explicit idle cleanup; tick sessions retain their separate identity."""
+        if any(request_id in self.state_cache or request_id in self._sessions for request_id in request_ids):
+            # Grouped LingBot waves already synchronize at a chunk boundary.
+            # Other AR pipelines can return between probes with work pending;
+            # finish those writes before returning any pages to the pool.
+            # A failed barrier leaves the owners intact for worker shutdown.
+            current_omni_platform.synchronize()
+        released = 0
+        for request_id in dict.fromkeys(request_ids):
+            had_state = request_id in self.state_cache or request_id in self._sessions
+            self._stepwise_chunk_started.pop(request_id, None)
+            self.state_cache.pop(request_id, None)
+            if request_id in self._sessions:
+                self._release_session(request_id, reset_model=False, reason="close")
+                released += 1
+            if had_state:
+                self.input_batch = None
+        return released
+
     def execute_model(
         self,
         req: OmniDiffusionRequest,

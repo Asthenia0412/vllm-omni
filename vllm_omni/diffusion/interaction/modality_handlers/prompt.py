@@ -285,3 +285,24 @@ class PromptInteractionHandler(InteractionHandler):
             active_event_ids=active_event_ids,
             completed_event_ids=completed_event_ids,
         )
+
+
+class LingBotPromptInteractionHandler(PromptInteractionHandler):
+    """Use LingBot's conditional-only tensor encoder with the shared prompt track."""
+
+    @classmethod
+    @override
+    def from_pipeline(cls, pipeline: Any) -> LingBotPromptInteractionHandler:
+        @torch.no_grad()
+        def encode_prompt(*, prompt, negative_prompt, do_classifier_free_guidance,
+                          num_videos_per_prompt, max_sequence_length, device, dtype):
+            if negative_prompt is not None or do_classifier_free_guidance or num_videos_per_prompt != 1:
+                raise ValueError("LingBot prompt updates require one conditional-only output")
+            del device  # LingBot's encoder uses its pipeline-owned device.
+            # Match LingBot's request parser: omitted sampling length resolves
+            # to its fixed512-token encoder geometry.
+            if max_sequence_length is None:
+                max_sequence_length = 512
+            return pipeline.encode_prompt(prompt, max_sequence_length=max_sequence_length, dtype=dtype), None
+
+        return cls(encode_prompt=encode_prompt, device=pipeline.device, dtype=pipeline.transformer.dtype)

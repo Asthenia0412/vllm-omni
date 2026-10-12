@@ -46,7 +46,7 @@ import platform
 import subprocess
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -72,6 +72,9 @@ from benchmarks.lingbot_world.workload import (  # noqa: E402
     default_workload,
     load_workload,
     steady_chunk_deadline_ms,
+)
+from benchmarks.lingbot_world.interaction_telemetry import (  # noqa: E402
+    camera_replay_plan, camera_replay_summary, event_payload, record_camera_owners,
 )
 
 # The shared vLLM asset keeps the default workload runnable with no setup and
@@ -150,6 +153,8 @@ class SessionResult:
     video_start_s: float | None
     wall_s: float
     done_event: dict[str, Any]
+    interaction_telemetry: dict[str, Any] | None = None
+    chunk_metadata: list[dict[str, Any]] = field(default_factory=list)
 
 
 async def _keepalive(websocket: Any, send_lock: asyncio.Lock, interval: float) -> None:
@@ -175,6 +180,8 @@ async def run_session(
     ping_interval: float,
     collect_media: bool,
     print_chunks: bool,
+    camera_event_replay: bool = False,
+    interaction_telemetry: bool = False,
 ) -> SessionResult:
     """Drive one rollout and timestamp every chunk as its bytes land."""
     try:
@@ -186,6 +193,20 @@ async def run_session(
             raise BenchmarkError("This benchmark needs the websockets package: pip install websockets") from exc
 
     payload = workload.session_start_payload(model)
+    if camera_event_replay:
+        if workload.num_chunks != 600:
+            raise BenchmarkError("Camera replay requires exactly 600 chunks")
+        payload["extra_params"].pop("camera_action_script", None)
+        payload["extra_params"].update(camera_event_samples=True, media_timing=True)
+    camera_events = camera_replay_plan() if camera_event_replay else []
+    telemetry_enabled = camera_event_replay or interaction_telemetry
+    prompt_events = [{"event_id": f"chunk-{update.after_chunk}", "prompt": update.prompt,
+                      "sent_at_ms": None, "queued_at_ms": None,
+                      "started_media_arrival_ms": None, "completed_media_arrival_ms": None}
+                     for update in workload.prompt_updates] if telemetry_enabled else []
+    chunk_metadata: list[dict[str, Any]] = []
+    camera_tasks: list[asyncio.Task[None]] = []
+    generation_done = False
     records: list[ChunkRecord] = []
     media = bytearray()
     pending: dict[str, Any] | None = None
@@ -204,6 +225,16 @@ async def run_session(
         async with send_lock:
             await websocket.send(json.dumps(payload, ensure_ascii=False))
         started = time.perf_counter()
+        async def send_camera(row: dict[str, Any], predecessor: asyncio.Task[None] | None) -> None:
+            due = started + row["trigger_arrival_ms"] / 1000 + row["delay_ms"] / 1000
+            await asyncio.sleep(max(0, due - time.perf_counter()))
+            if predecessor is not None:
+                await predecessor
+            async with send_lock:
+                if generation_done:
+                    return
+                row["sent_at_ms"] = (time.perf_counter() - started) * 1000
+                await websocket.send(json.dumps(event_payload(row)))
         if ping_interval > 0:
             keepalive = asyncio.create_task(_keepalive(websocket, send_lock, ping_interval))
 
@@ -243,6 +274,21 @@ async def run_session(
                             )
                         )
                         last_arrival = arrival
+                        if telemetry_enabled:
+                            chunk_metadata.append(dict(pending, binary_arrival_ms=arrival * 1000))
+                            for row in prompt_events:
+                                if row["event_id"] in pending.get("started_event_ids", []) and row["started_media_arrival_ms"] is None:
+                                    row["started_media_arrival_ms"] = arrival * 1000
+                                    row["first_affected_chunk_index"] = index
+                                if row["event_id"] in pending.get("completed_event_ids", []):
+                                    row["completed_media_arrival_ms"] = arrival * 1000
+                        if camera_event_replay:
+                            record_camera_owners(camera_events, pending, arrival * 1000)
+                            if index % 10 == 0 and index <= 590:
+                                row = camera_events[index // 10]
+                                row["trigger_arrival_ms"] = arrival * 1000
+                                previous = camera_tasks[-1] if camera_tasks else None
+                                camera_tasks.append(asyncio.create_task(send_camera(row, previous)))
                         if print_chunks:
                             print(
                                 f"  chunk {index:3d}  t={arrival:8.3f}s  "
@@ -252,6 +298,9 @@ async def run_session(
                             )
                         while update_index < len(updates) and updates[update_index].after_chunk <= index:
                             async with send_lock:
+                                for row in prompt_events:
+                                    if row["event_id"] == f"chunk-{updates[update_index].after_chunk}":
+                                        row["sent_at_ms"] = (time.perf_counter() - started) * 1000
                                 await websocket.send(json.dumps(updates[update_index].to_payload(), ensure_ascii=False))
                             update_index += 1
                     pending = None
@@ -275,8 +324,25 @@ async def run_session(
                     )
                 elif event_type == "session.done":
                     done_event = event
+                    generation_done = True
                     break
+                elif event_type == "session.interaction.queued" and telemetry_enabled:
+                    for row in prompt_events:
+                        if row["event_id"] == event.get("event_id"):
+                            row["queued_at_ms"] = (now - started) * 1000
+                    for row in camera_events:
+                        if row["event_id"] == event.get("event_id"):
+                            if row["queued_at_ms"] is not None:
+                                row["errors"].append("duplicate_queued_ack")
+                            row["queued_at_ms"] = (now - started) * 1000
+                            break
         finally:
+            generation_done = True
+            for task in camera_tasks:
+                if not task.done():
+                    task.cancel()
+            if camera_tasks:
+                await asyncio.gather(*camera_tasks, return_exceptions=True)
             if keepalive is not None:
                 keepalive.cancel()
                 try:
@@ -306,6 +372,9 @@ async def run_session(
         video_start_s=video_start_s,
         wall_s=wall_s,
         done_event=done_event,
+        interaction_telemetry=dict(camera_replay_summary(camera_events), prompt_events=prompt_events)
+        if telemetry_enabled else None,
+        chunk_metadata=chunk_metadata,
     )
 
 
@@ -459,6 +528,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     run = parser.add_argument_group("run")
     run.add_argument("--sessions", type=int, default=1, help="Sequential measured rollouts.")
     run.add_argument("--warmup-sessions", type=int, default=0, help="Unmeasured rollouts first (pays compile cost).")
+    run.add_argument("--camera-event-replay", action="store_true",
+                     help="Opt-in 60 real camera events over 600 chunks; generation remains fast-push.")
+    run.add_argument("--interaction-telemetry", action="store_true",
+                     help="Record prompt queued/start/completion latency separately from steady generation.")
     run.add_argument(
         "--warmup-chunks",
         type=int,
@@ -570,6 +643,8 @@ async def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             ping_interval=args.ping_interval,
             collect_media=args.save_video is not None,
             print_chunks=args.print_chunks,
+            camera_event_replay=args.camera_event_replay,
+            interaction_telemetry=args.interaction_telemetry,
         )
         last_result = result
         metrics = compute_metrics(
@@ -591,6 +666,9 @@ async def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
                 "metrics": metrics,
             }
         )
+        if result.interaction_telemetry is not None:
+            session_payloads[-1]["interaction_telemetry"] = result.interaction_telemetry
+            session_payloads[-1]["chunk_metadata"] = result.chunk_metadata
 
     aggregate = aggregate_metrics(session_metrics, fps=target_fps)
     print_report(aggregate, workload=workload, endpoint=url, sessions=args.sessions, target_fps=target_fps)

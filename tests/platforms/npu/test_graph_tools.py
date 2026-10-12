@@ -38,6 +38,38 @@ def test_captured_graph_replay_clones_persistent_outputs():
     assert first.data_ptr() != second.data_ptr()
 
 
+def test_borrowed_mutable_pool_replay_uses_original_storage_and_rejects_rebinding():
+    pool = torch.zeros(3)
+    output = torch.zeros(3)
+
+    class _Graph:
+        def replay(self):
+            output.copy_(pool * 2)
+
+    graph = CapturedDeviceGraph(
+        graph=_Graph(), static_inputs=(pool,), static_outputs=(output,), borrowed_input_indices=frozenset({0}),
+    )
+    pool.fill_(2)
+    first = graph.replay((pool,))[0]
+    pool.fill_(3)
+    second = graph.replay((pool,))[0]
+    torch.testing.assert_close(first, torch.full((3,), 4.0))
+    torch.testing.assert_close(second, torch.full((3,), 6.0))
+    with pytest.raises(ValueError, match="borrowed input storage changed"):
+        graph.replay((pool.clone(),))
+
+
+def test_owned_graph_input_copy_accepts_offset_views_with_matching_shape():
+    static, output = torch.zeros(2), torch.zeros(2)
+
+    class _Graph:
+        def replay(self):
+            output.copy_(static)
+
+    graph = CapturedDeviceGraph(graph=_Graph(), static_inputs=(static,), static_outputs=(output,))
+    torch.testing.assert_close(graph.replay((torch.arange(5.0)[2:4],))[0], torch.tensor([2.0, 3.0]))
+
+
 def test_capture_uses_vllm_global_graph_pool(monkeypatch):
     runner = NPUExactGraphRunner()
     global_pool = object()

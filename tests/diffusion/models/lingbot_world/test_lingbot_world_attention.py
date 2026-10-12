@@ -38,6 +38,7 @@ _STUBBED_MODULE_NAMES = (
     "vllm_omni.diffusion.distributed.parallel_state",
     "vllm_omni.diffusion.distributed.sp_plan",
     "vllm_omni.diffusion.layers",
+    "vllm_omni.diffusion.layers.lingbot_npu_ops",
     "vllm_omni.diffusion.layers.norm",
     "vllm_omni.diffusion.layers.rope",
     "vllm_omni.experimental",
@@ -56,6 +57,16 @@ def _inference_context():
 def _install_vllm_stubs() -> None:
     for name in _STUBBED_MODULE_NAMES:
         sys.modules[name] = ModuleType(name)
+
+    # The fast-path module depends only on torch and remains disabled for the
+    # CPU fixtures. Load its real device/gate checks rather than stubbing them.
+    fast_ops_name = "vllm_omni.diffusion.layers.lingbot_npu_ops"
+    fast_ops_path = _MODULE_PATH.parents[2] / "layers/lingbot_npu_ops.py"
+    fast_ops_spec = importlib.util.spec_from_file_location(fast_ops_name, fast_ops_path)
+    assert fast_ops_spec is not None and fast_ops_spec.loader is not None
+    fast_ops = importlib.util.module_from_spec(fast_ops_spec)
+    sys.modules[fast_ops_name] = fast_ops
+    fast_ops_spec.loader.exec_module(fast_ops)
 
     distributed = sys.modules["vllm.distributed"]
     distributed.get_tensor_model_parallel_rank = lambda: 0

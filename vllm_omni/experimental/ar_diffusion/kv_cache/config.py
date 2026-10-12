@@ -8,6 +8,18 @@ import os
 from dataclasses import dataclass
 
 KV_GATHER_ENV = "VLLM_OMNI_AR_DIFFUSION_KV_GATHER"
+NPU_HOST_METADATA_ENV = "VLLM_LINGBOT_NPU_HOST_METADATA"
+NPU_HISTORY_STAGING_ENV = "VLLM_LINGBOT_NPU_HISTORY_STAGING"
+
+
+def npu_host_metadata_enabled() -> bool:
+    """Use the exact host-known sequence length rather than reading device metadata."""
+    return os.environ.get(NPU_HOST_METADATA_ENV, "0") == "1"
+
+
+def npu_history_staging_enabled() -> bool:
+    """Enable the NPU consumer of manager-owned, budgeted history staging."""
+    return os.environ.get(NPU_HISTORY_STAGING_ENV, "0") == "1"
 
 
 def contiguous_kv_gather_enabled() -> bool:
@@ -50,6 +62,14 @@ class ARDiffusionKVConfig:
     # Off by default: it costs two max-sequence buffers per layer, per rank. See
     # ARDiffusionPagedForwardContext.history_staging.
     reuse_history_staging: bool = False
+    # NPU staging may pin a subset of layers rather than allocate the full
+    # window for every layer. None chooses the largest prefix that fits the
+    # actual free-memory guard; an explicit list is never silently truncated.
+    npu_history_staging_layers: tuple[int, ...] | None = None
+    # Pending graph pools and temporary CANN workspaces are outside the KV
+    # manager. Reserve them separately from the free headroom below.
+    npu_graph_workspace_reserve_bytes: int = 0
+    npu_min_free_headroom_bytes: int = 4 * 1024**3
     # Also capture the post-window-boundary (reset-cycle) forward during warm-up.
     warmup_capture_reset: bool = False
 
