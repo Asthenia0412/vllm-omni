@@ -1,0 +1,22 @@
+{
+  "nonce": "c74f7d46c6525d30988ec074eff6c131",
+  "leader": {
+    "pid": 873365,
+    "uid": 1003,
+    "pgid": 873365,
+    "start": 8787484
+  },
+  "command": [
+    "python",
+    "-m",
+    "torch.distributed.run",
+    "--standalone",
+    "--nproc-per-node=8",
+    "recovery/check_hccl.py"
+  ],
+  "mode": "correctness",
+  "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host/host_manifest.json",
+  "fatal": null,
+  "exit_code": 0,
+  "remaining_owned_processes": []
+}

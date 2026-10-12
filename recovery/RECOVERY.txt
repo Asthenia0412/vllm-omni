@@ -1,0 +1,151 @@
+LingBot SP8 recovery, 2026-10-12
+================================
+
+Persistent workspace
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree
+Branch
+  recovery/lingbot-sp8-20261012
+Git common directory
+  ../vllm-omni.git
+
+The user's container mapping is:
+  /mnt/sfs_turbo/ascend-ci-share-nv-action-vllm-benchmarks -> /root/.cache
+This worktree is a sibling on the same persistent SFS, not inside that bind
+mount. A container must explicitly mount the recovery root to access it.
+The original /mnt/data directory was unavailable and was not recreated.
+
+Recovered source
+----------------
+3,285 files were SHA-checked against the retained StageA frozen source tree.
+98 files differed from the September base; all were copied without deleting
+other baseline files. Historical source/configuration/evidence is retained in
+this directory. The original snapshot was not modified.
+Source restoration commit: 318e63bd.
+Base: 5b3abe2f4d51560382146e955935f9e2e936e096.
+
+The recovered Python includes FFN W8A8 NZ, native BF16 QK, history staging and
+prefix reuse, fixed-timestep StageA, primary-only uint8 pixel collection,
+device interleave, graph/overlap experiments, diagnostics and media handling.
+Existing disabled experimental routes retain their historical interfaces.
+
+Reimplemented missing runtime dependencies
+-----------------------------------------
+csrc/lingbot_recovery/ contains versioned source for:
+  - Actual NPU storage descriptor, including physical format and full extent.
+  - One C++ QK entrypoint: native BF16 RMSNorm and interleaved RoPE followed by
+    an Ascend C send pack [8,585,3,1,5,128]. Fresh output per call.
+  - BF16 cross-attention C++ validation/native BSND FIA dispatch, H40/D128.
+  - Ascend C recv-to-dense-Q/current-KV-pool/staging, H5/D128, actual capacities.
+  - Bit-preserving 4D/5D row-strided pair copies; 5D VAE model integration.
+
+The QK arithmetic uses public native operators; it does NOT reproduce the
+lost custom RMS/RoPE OPP binary or claim its exact kernel schedule/performance.
+The 4D copy primitive is tested, but the old independent 4D VAE experiment is
+not automatically enabled. The candidate enables the reconstructed 5D path.
+The old custom attention resident-O/UnitFlag experiments remain unadmitted.
+
+All reconstructed features default off. New config keys are
+lingbot_npu_recovery_{qk,cross,vae_pack,descriptor}. Old provider flags cannot
+enable these paths, and old binary SHA/admission claims are never inherited.
+Runtime loading checks source, ABI-header and binary hashes, loaded kernel
+dependency, framework versions, actual SoC and runtime policy. The kernel
+target is Ascend910_9392/arch22, with at most 32 KiB UB per Vector core here.
+The framework queue callback uses stream(false), avoiding a recursive queue
+drain. Kernel submission errors propagate. Owners are retained and recorded
+on their consuming stream. Pool ownership and scratch/managed page authority
+remain with the original manager; no new cache commit logic is introduced.
+
+recovery/supervise.py owns a fresh uid/pgid/start-time/nonce-scoped service and
+retires all its workers after a fatal record or service exit. It never selects
+or signals another job by executable name or NPU number.
+
+Build and configuration
+-----------------------
+  cd /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree
+  source recovery/env.sh
+  bash recovery/build.sh
+
+env.sh exposes LINGBOT_RECOVERY_ROOT, LINGBOT_CANN_ROOT and LINGBOT_VENV for
+relocation. The installed SDK/venv must match the pinned versions. Rebuild
+after relocation; manifests bind actual source and library paths.
+
+  python recovery/make_config.py --output recovery/native.yaml
+  python recovery/make_config.py --candidate --output recovery/candidate.yaml
+
+native.yaml uses retained native operations for missing library routes and
+disables StageA. It keeps the other recovered Python optimizations, including
+FFN W8A8 and primary-only pixel output. candidate.yaml opts into the rebuilt
+paths and StageA. Neither configuration contains a missing /mnt/data library.
+
+After weights finish and physical NPUs 0-3 are verified free, a correctness
+service can be started with:
+
+  ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python recovery/supervise.py \
+    --runs "$LINGBOT_RECOVERY_ROOT/model-runs" --mode correctness --recv \
+    --manifest "$LINGBOT_RECOVERY_ROOT/build/host/host_manifest.json" -- \
+    vllm serve "$LINGBOT_RECOVERY_ROOT/models/lingbot-world" --omni \
+    --deploy-config recovery/candidate.yaml --port 7816 \
+    --init-timeout 1800 --stage-init-timeout 1800
+
+For rollback use native.yaml and omit --recv. The new candidate remains an
+experimental reconstruction until model, lifecycle, quality and timing gates
+pass. Keep BF16 attention, four DMD steps, full history and actual 12 FPS.
+
+Validation completed
+--------------------
+  - CPU: 73 pixel/quantization/history-staging tests.
+  - CPU: 198 attention/pipeline/VAE tests. Restored stale CPU mocks were updated
+    for the existing all_to_all_4D import, paged backend arguments, independent
+    VAE group error text and CPU profiler synchronization contract.
+  - CPU: 3 recovery tests, including reclamation of eight owned children while
+    an unrelated process remains alive.
+  - NPU: 42 checks on each of eight die, JITFalse/internal-format enabled.
+    Copy sources, full destination arenas/canaries, pre-write alias rejection;
+    recv actual pool capacities, full pool/staging comparisons; QK and cross
+    bitwise comparison with native arithmetic; descriptor extent/address.
+  - HCCL: all eight ranks matched the original complete All-to-All output
+    bitwise; reused send leases rejected; supervisor exited with zero owned
+    processes left alive.
+  - Model import succeeds with the retained vllm-ascend A3 build dependency.
+
+These use synthetic operator inputs. They do NOT replace real-model descriptor
+capture, four-probe/six-history coverage, paired 80-chunk latent/RGB checking,
+video quality, lifecycle or performance tests. No reconstructed model FPS or
+latency result is claimed. Historical ~895-899 ms results belong to the old
+lost binary combination, not this rebuild.
+
+Existing environment logs also contain optional Triton constexpr_function and
+libz3/libstdc++ compatibility warnings. Eager model import and the tested native
+paths work; graph/compile routes require separate compatibility validation.
+
+Model download
+--------------
+User authorized re-download. The download is running separately on SFS:
+  ../models/lingbot-world
+  ../download-model.log
+Repository: robbyant/lingbot-world-v2-14b-causal-fast-diffusers
+Pinned revision: 59cccf49f2d2dd27418ae7a04b82b10868d455c2
+Manifest total: 86,071,995,490 bytes.
+Completion is recorded in models/lingbot-world/recovery_download.json.
+The old checkpoint's exact file hashes were not recovered; historical weight
+identity is therefore explicitly unverified.
+
+To resume after interruption:
+  source recovery/env.sh
+  python recovery/download_model.py "$LINGBOT_RECOVERY_ROOT/models/lingbot-world" \
+    --revision 59cccf49f2d2dd27418ae7a04b82b10868d455c2
+
+Dependencies and backup
+-----------------------
+vllm-ascend source was copied as an independent local Git clone at
+../dependencies/vllm-ascend, commit b185282b417e1c52ecaff125154cf86e3e9c46be.
+Its retained A3 generated metadata, two shared libraries and custom OPP were
+copied with SHA records in ascend_dependency.json. Build outputs and model
+weights are outside the worktree. Source and validation evidence are in Git.
+The additional Git bundle is ../lingbot-recovery.bundle; it contains source,
+not weights or binary dependencies. A source-and-runtime archive also lives
+alongside it. No new GitHub push or PR is claimed for this recovery branch.
+
+Official API references used to reconstruct queued launches and byte copies:
+https://github.com/Ascend/op-plugin/tree/master/examples/cpp_extension
+https://www.hiascend.com/document/detail/en/CANNCommunityEdition/910/API/ascendcopapi/docs/en/api/SIMD-API/basic_api/memory_vector_compute/data_move/DataCopyPad_GMToUB.md

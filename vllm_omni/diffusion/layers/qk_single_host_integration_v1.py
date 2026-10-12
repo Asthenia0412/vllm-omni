@@ -522,5 +522,8 @@ def configure_hccl_smoke(manifest_pin):
 
 
 def try_prepared_send(module, raw, rotary, *, ring_size):
+    if getattr(module, "_lingbot_recovery_qk", False):
+        from .lingbot_recovery import prepare_send
+        return prepare_send(module, raw, rotary, ring_size)
     route = selected_route()
     return None if route is None else route.prepare(module, raw, rotary, ring_size)

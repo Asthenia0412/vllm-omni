@@ -1,0 +1,142 @@
+{
+  "build": {
+    "package_build": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/actual_package_build_CPU_v3.json",
+      "bytes": 3628,
+      "sha256": "29104ef944480bdb3a1de81c7134d1e2c7245a944ca00f0da83105e403df7fe4"
+    },
+    "bridge_build": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/actual_bridge_build_CPU_v3.json",
+      "bytes": 7335,
+      "sha256": "4f687487ae02530ae241dba5589efe6c5d721914172b4726551016a0c2d11555"
+    },
+    "generated_review": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/actual_generated_CPU_review_v3.json",
+      "sha256": "b8114a4c2772e6888b451447bf3874bf6783226c5a57cab2766ad3b5238a0e57",
+      "bytes": 4324
+    },
+    "deployment": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/actual_deployment_CPU_v3.json",
+      "sha256": "f0379fd60111812477384816e9d706937b22767cdcbcde3339f7bba0dded0ce4",
+      "bytes": 172996
+    },
+    "library": {
+      "path": "/tmp/lingbot-generated-h200-gap-qk-native-rms-rope-send-v1/bridge_v3/liblingbot_qk_native_rms_rope_sp8_send_v1.so",
+      "sha256": "cbfe73017ea1999a961122dddb625212299625f257450165519bf4c6c60fa024",
+      "bytes": 256968
+    },
+    "provider": {
+      "path": "/tmp/lingbot-generated-h200-gap-qk-native-rms-rope-send-v1/extracted_v3/vendors/lingbot_qk_native_rms_rope_sp8_send_v1_transformer/op_api/lib/libcust_opapi.so",
+      "sha256": "bedd721aaab8bec6f4b22aa7ac91e1dbb38a8a3d7aa400512dcade7d8c4d6cf2",
+      "bytes": 67784
+    },
+    "cache_ELF": {
+      "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libnnopbase.so",
+      "bytes": 4328144,
+      "sha256": "308dda461704a6e5f70de6e0eac4495e9829b9cec3328563b75a5b382c6e438b"
+    },
+    "vendor_path": "/tmp/lingbot-generated-h200-gap-qk-native-rms-rope-send-v1/extracted_v3/vendors/lingbot_qk_native_rms_rope_sp8_send_v1_transformer"
+  },
+  "descriptor_library": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261002-fixed4-realtime-implementation/qkv_exchange_descriptor_cpu_build_v1/liblingbot_storage_descriptor.so",
+    "sha256": "23127093ca55147fddd0d961b397f3f1b0ec2fe6ea6c6b320b7bed9a61cbbdae",
+    "bytes": 89376
+  },
+  "cache_function_owner": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64/libnnopbase.so",
+  "fatal_source": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-sp8-output-ownership/source_v5/vllm_omni/diffusion/layers/lingbot_sp8_fatal.py",
+    "bytes": 5134,
+    "sha256": "f1eb2cd74bf680d14c8a4d43ef3632c976a0686bf0413238da16f2bfc0414baa"
+  },
+  "patched_source_relative": {
+    "transformer": "vllm_omni/diffusion/models/lingbot_world/transformer.py",
+    "comm": "vllm_omni/diffusion/distributed/comm.py"
+  },
+  "schema": "lingbot_QK_single_host_model_integration_actual_startup_v4",
+  "source_contract_verified": true,
+  "model_admitted": false,
+  "helper": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/model_integration_single_host_v4/qk_single_host_integration_v1.py",
+    "bytes": 31741,
+    "sha256": "d449a3d1e0d137bf66fa1bc13d60eaa857e23cda13063736299a69e274d63626"
+  },
+  "adapter": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/single_host_framework_policy_v2/adapter_v2.py",
+    "bytes": 15262,
+    "sha256": "44fb26c182aeeeadf4f76a2b7f102640f9230b158520dcd008046677a6dc1a54"
+  },
+  "new_host_build": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/single_host_admission_v1/actual_build_CPU_v1.json",
+    "sha256": "7e7dbe93056e902d524f76442b0c134a653eb6e5427c9f506c25c058926cded0",
+    "bytes": 13022
+  },
+  "host_runtime_manifest": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/single_host_framework_policy_v2/runtime_manifest_v2.json",
+    "bytes": 5821,
+    "sha256": "3f609a63bc6607494e9a3d4698fb75197aaff2182528b4b20fc1895e5bfc528c"
+  },
+  "host_namespace": "lingbot_qk_single_host_admission_v1",
+  "parent_runtime_manifest": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/single_host_admission_v1/runtime_manifest_v1.json",
+    "bytes": 4190,
+    "sha256": "1614f36695938218534d95e8dad330ea46fdb18ca06563546f5f790c7a976050"
+  },
+  "parent_adapter": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/single_host_admission_v1/adapter_v1.py",
+    "bytes": 9979,
+    "sha256": "2c48bc6709f40c88b374845439951718c8b050c9db0978c3f19207026372a671"
+  },
+  "framework_policy": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/single_host_framework_policy_v2/framework_policy_CPU_v2.json",
+    "bytes": 8664,
+    "sha256": "22c1574852e45cfcf04f6b1e21532e3e286970e7b120251298268f9bd5fa0356"
+  },
+  "framework_import_probe": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/actual_framework_OPP_CPU_pair_proof_v2.json",
+    "bytes": 2459,
+    "sha256": "13f7bf16a9d57f91c4ea985cf2abe7008cb57a1962700c191e0329fd1a39b0e0"
+  },
+  "expected_search_path": "/tmp/lingbot-generated-h200-gap-qk-native-rms-rope-send-v1/extracted_v3/vendors/lingbot_qk_native_rms_rope_sp8_send_v1_transformer:/home/zhoutaichang/project/lingbot-world/vllm-ascend/vllm_ascend/_cann_ops_custom/vendors/custom_transformer",
+  "patched_source_sha256": {
+    "transformer": "38ba04998d86e0691daf14f10019a7b89a8753e82c9c3aad4204eed8e50b4b5c",
+    "comm": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f"
+  },
+  "operator_correctness_proof": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/operator192_single_host_v2/actual_correctness_admission_proof_v2.json",
+    "bytes": 7661,
+    "sha256": "cc319687a05754f04f953a178bba2460d4bf74cca4b1cbee124f04a4101e29b5"
+  },
+  "operator_three_round_review": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/operator192_single_host_v2/actual_three_round_independent_timing_CPU_review_v2.json",
+    "bytes": 65784,
+    "sha256": "77ddb38d92c2dd27e56bf51375dd427c8dcba4d57ea784652d37f581bc582fb0"
+  },
+  "padded_hccl_cold_review": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/hccl_single_host_cold8_v4/independent_actual_raw_CPU_review_v5.json",
+    "bytes": 162011,
+    "sha256": "57bf39f06cc7d26dc1a186667f84ca67fd1c9a560b7de5b08d670323d1d2a4ae"
+  },
+  "template_only": false,
+  "runnable": true,
+  "missing_actual_evidence": [],
+  "fixed_timestep_stageA_source_derivation": {
+    "parent_startup_manifest": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/model_production_single_host_v2/actual_production_v2/startup_manifest_v2.json",
+      "bytes": 7356,
+      "sha256": "eae346e2273c23d1a30be5a1add957618c58b2aaaba857b66fdeeeb52262454b"
+    },
+    "source_admission": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_stageA_SOURCE_admission_CPU_v89.json",
+      "bytes": 3775,
+      "sha256": "c96b7339d0f0fab5b8c0645ea73b6f7ecd6890ac11205c33c97a546d616f0e48"
+    },
+    "exact_inverse_patch": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/integration.patch",
+      "bytes": 30737,
+      "sha256": "d196227455c4536cb2d5a19ee6d41fe5432ae9e1df87300c4ff01f802135e7e8"
+    },
+    "only_original_QK_guard_transformer_SHA_rebound": true,
+    "bank_numeric_or_model_PASS_inherited": false,
+    "bank_candidate_admitted": false
+  }
+}

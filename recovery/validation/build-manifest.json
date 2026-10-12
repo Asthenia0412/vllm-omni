@@ -1,0 +1,130 @@
+{
+  "schema": "lingbot_recovery_build_v1",
+  "source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/host.cpp",
+    "bytes": 12247,
+    "sha256": "97813767a61cbf80e6c985cd6fb421f4ef47b16c8f4e2162a0534adfdc642130"
+  },
+  "library": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host/liblingbot_recovery_host.so",
+    "bytes": 182624,
+    "sha256": "644ddae48022f5c4065ae67bed501ca9658f8a496e0a29e07fa7f6fb2eca2055"
+  },
+  "kernels": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib/liblingbot_recovery_copy.so",
+    "bytes": 401288,
+    "sha256": "075fd3e9f25fc2339f1a0c562b0718db1d62314bd7a86c8e0b2375fc91744c7d"
+  },
+  "kernel_sources": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/CMakeLists.txt",
+      "bytes": 516,
+      "sha256": "0bbb8cb537668641599f507e6914861ecbfe1d0fbcbc0f2191bf724b408ce712"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/copy_kernel.cpp",
+      "bytes": 5169,
+      "sha256": "2dcdefed1ddc08825a1294a7c65104bfb14fe30272aa337328937c9d3d9f57bb"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/copy_spec.h",
+      "bytes": 208,
+      "sha256": "380cab3d2ce7f3b26f84faeb1df52d865dba515e7f8eb484797c6c224f948bea"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/host.cpp",
+      "bytes": 12247,
+      "sha256": "97813767a61cbf80e6c985cd6fb421f4ef47b16c8f4e2162a0534adfdc642130"
+    }
+  ],
+  "torch": "2.10.0+cpu",
+  "torch_npu": "2.10.0.post4",
+  "sdk": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0",
+  "command": [
+    "g++",
+    "-std=c++17",
+    "-shared",
+    "-fPIC",
+    "-O2",
+    "-D_GLIBCXX_USE_CXX11_ABI=1",
+    "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/host.cpp",
+    "-o",
+    "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host/liblingbot_recovery_host.so",
+    "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include",
+    "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/torch/csrc/api/include",
+    "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include",
+    "-I/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/include",
+    "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
+    "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
+    "-L/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
+    "-L/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib",
+    "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
+    "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
+    "-Wl,-rpath,/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
+    "-Wl,-rpath,/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib",
+    "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib/liblingbot_recovery_copy.so",
+    "-ltorch_npu",
+    "-ltorch_cpu",
+    "-ltorch",
+    "-lc10",
+    "-lascendcl"
+  ],
+  "registration_passed": true,
+  "device_validated": false,
+  "model_validated": false,
+  "historical_admission_inherited": false,
+  "runtime_sources": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 8649,
+      "sha256": "c30a5ae7dbfd9f951ed7aa19dbdb4731a78408bffa28dc647978caabcec0e42d"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recv_kv_sp8.py",
+      "bytes": 25035,
+      "sha256": "4ef14801a29547e298fb6b34ed667b6115a8ddc786abbafc11e82c7a362c5598"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_sp8_fatal.py",
+      "bytes": 5357,
+      "sha256": "df806bfabff834cff31ea1f11965e24886163cf1489dce9ee933ee55dbce050a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 31907,
+      "sha256": "141c9df524f334e095f20c56cc2df04b0046e1508e83470a16a3f80d6a5ee937"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_fixed_timestep_bank_stageA_v1.py",
+      "bytes": 23392,
+      "sha256": "3ea53af8a7f4bdc3e0a78137d235c8019c20f262549f6acc0c951c4c44ad24cc"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/models/lingbot_world/transformer.py",
+      "bytes": 78023,
+      "sha256": "bee22e068e23296290c5c89ae5574ce00f3edd78ffa4ca373d47b6a340a049e6"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/backends/cross_combined_integration_v1.py",
+      "bytes": 6221,
+      "sha256": "aa9a23fda53a2f98788d23e795085477bd725700166c26d2889edb6ccd8880ee"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/distributed/autoencoders/wan_npu_exact_pack.py",
+      "bytes": 16900,
+      "sha256": "9aa67ab133d179bb9ecf80a4b79b7375a63628667df041332d7260134811a84a"
+    }
+  ],
+  "abi_headers": [
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/NPUStorageImpl.h",
+      "bytes": 1719,
+      "sha256": "c4c488410e53760739c32de25dc00bcd53d0d55a55d48247d248671ccb06e9f1"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/aten/CustomFunctions.h",
+      "bytes": 157695,
+      "sha256": "eda9b02f53d526bbbb5429d38f5bf98fb3b09b2d02a3b9aef80abc855e13655c"
+    }
+  ]
+}

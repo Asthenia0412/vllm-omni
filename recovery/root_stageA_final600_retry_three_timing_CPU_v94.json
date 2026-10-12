@@ -1,0 +1,1651 @@
+{
+  "schema": "lingbot_fixed_timestep_StageA_independent_final600_retry_model_timing_CPU_v1",
+  "passed": true,
+  "protocol_validated": true,
+  "tool": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/retry_v1/read_final600_retry_model_timing_CPU_SOURCE_v1.py",
+    "bytes": 23205,
+    "sha256": "57d177f97a19c3308987a090020d16b84c9dd5a31685098a8d8d0c36b75b1c58"
+  },
+  "source_parent": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/read_final600_model_timing_CPU_SOURCE_v1.py",
+    "bytes": 37861,
+    "sha256": "8fb1e1037b5623966796d1914f097f5644650915e08849914233b119dd05c01e"
+  },
+  "prepared": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json",
+    "bytes": 19691,
+    "sha256": "ebf2ddcaf307feb31bdd4374126a85e5fa2ea7355583ef0cdddb4e841fac4a76"
+  },
+  "retry_prepared": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/prepared_final600_CPU_v1.json",
+    "bytes": 19691,
+    "sha256": "8354779e6d3a258dfa1a39095a2c8e5fb91b5b936def49fa2af86d40ad79ea18"
+  },
+  "selected_prepareds": {
+    "F1": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json",
+      "bytes": 19691,
+      "sha256": "ebf2ddcaf307feb31bdd4374126a85e5fa2ea7355583ef0cdddb4e841fac4a76"
+    },
+    "F2": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json",
+      "bytes": 19691,
+      "sha256": "ebf2ddcaf307feb31bdd4374126a85e5fa2ea7355583ef0cdddb4e841fac4a76"
+    },
+    "F3": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/prepared_final600_CPU_v1.json",
+      "bytes": 19691,
+      "sha256": "8354779e6d3a258dfa1a39095a2c8e5fb91b5b936def49fa2af86d40ad79ea18"
+    }
+  },
+  "preparations_equivalent_except_launch_locators": true,
+  "terminal_index": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_retry_terminal_index_CPU_v94.json",
+    "bytes": 6709,
+    "sha256": "03c67745b74c6596f47bf89ebe2a454955ace2aa2991adaf4bc50e0fdf7e9b90"
+  },
+  "terminal_index_is_root_supplied_locator_only": true,
+  "order": [
+    "F1",
+    "F2",
+    "F3"
+  ],
+  "closures": {
+    "F1": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_closure_CPU.json",
+      "bytes": 15284,
+      "sha256": "99d9e830c51c8b8092cc63298c74ef731907f7f86800e81deeaae63e5ac3e9f4"
+    },
+    "F2": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_closure_CPU.json",
+      "bytes": 15284,
+      "sha256": "370a62196414b62fe5b5006bc796750b88800a475ea030230b8aa889678c1bed"
+    },
+    "F3": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_closure_CPU.json",
+      "bytes": 15284,
+      "sha256": "dd801d39dbb22b2a29158c06255e2f88797bda7fc6953f16a5eddf5208a86817"
+    }
+  },
+  "launches": [
+    {
+      "label": "F1",
+      "arm": "candidate",
+      "round": 1,
+      "prepared": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json",
+        "bytes": 19691,
+        "sha256": "ebf2ddcaf307feb31bdd4374126a85e5fa2ea7355583ef0cdddb4e841fac4a76"
+      },
+      "closure": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_closure_CPU.json",
+        "bytes": 15284,
+        "sha256": "99d9e830c51c8b8092cc63298c74ef731907f7f86800e81deeaae63e5ac3e9f4"
+      },
+      "journals": {
+        "outer": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_wrapper_receipt.json",
+          "bytes": 3046,
+          "sha256": "095017f43359476b751662cf15784c1027f36d2a0710067443cfb9aada8166d1"
+        },
+        "execute": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_execute-journal.json",
+          "bytes": 1724,
+          "sha256": "6539bb8f4bef9066ac8abe891e66d2ae0643c9af13d4d86317464624274e2d27"
+        },
+        "restore": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_restore-journal.json",
+          "bytes": 1833,
+          "sha256": "791fb4e9ee4608e9b59c5f6f2d724f02de1fe80942cf2dac30205875ae2cf1d5"
+        },
+        "live": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live-journal.json",
+          "bytes": 1540,
+          "sha256": "f59a49e3820d6e6d5111aec72abea6452d27fb73c7484698313db209c57dfaf1"
+        }
+      },
+      "warmup": {
+        "result": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/warmup.json",
+          "bytes": 12246,
+          "sha256": "9db34ec3bd1b306639635f34929b2305c725685919e5fcaf43bd2d14c3ffef7d"
+        },
+        "command": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/warmup_command.json",
+          "bytes": 997,
+          "sha256": "ec66eebfaec69b5cf60889534c27e6aa1cea010ae04b583b7e050d13ac314702"
+        },
+        "request_id": "video_stream-ea0fe25c9c164e2fbd9f6cb95dfceedc",
+        "chunk_count": 40,
+        "frame_count": 477,
+        "ttfc_ms": 9378.194259479642,
+        "video_start_ms": 66.38148333877325,
+        "full_session_wall_ms": 43994.659246876836,
+        "delivered_fps_session_wall": 10.842225128357189,
+        "delivered_fps_last_arrival": 10.846938943408775,
+        "full_inter_arrival_summary": {
+          "count": 40,
+          "mean_ms": 1099.3885060306638,
+          "p99_ms": 6075.669886590908,
+          "max_ms": 9378.194259479642,
+          "over_1000ms_count": 1,
+          "longest_consecutive_over_1000ms": 1
+        },
+        "excluded_transition_chunks": [
+          {
+            "arrival_s": 9.378194259479642,
+            "byte_length": 725377,
+            "index": 0,
+            "inter_arrival_ms": 9378.194259479642,
+            "num_frames": 9
+          },
+          {
+            "arrival_s": 10.085191946476698,
+            "byte_length": 1031477,
+            "index": 1,
+            "inter_arrival_ms": 706.997686997056,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 10.827595922164619,
+            "byte_length": 1016879,
+            "index": 2,
+            "inter_arrival_ms": 742.403975687921,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 11.620109197683632,
+            "byte_length": 1019557,
+            "index": 3,
+            "inter_arrival_ms": 792.5132755190134,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 12.463142826221883,
+            "byte_length": 1002993,
+            "index": 4,
+            "inter_arrival_ms": 843.0336285382509,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 13.373325873166323,
+            "byte_length": 998170,
+            "index": 5,
+            "inter_arrival_ms": 910.1830469444394,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 14.268180505372584,
+            "byte_length": 994543,
+            "index": 6,
+            "inter_arrival_ms": 894.8546322062612,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 15.16781426500529,
+            "byte_length": 997957,
+            "index": 7,
+            "inter_arrival_ms": 899.6337596327066,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 16.066809121519327,
+            "byte_length": 1007925,
+            "index": 8,
+            "inter_arrival_ms": 898.9948565140367,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 16.968943431973457,
+            "byte_length": 1014028,
+            "index": 9,
+            "inter_arrival_ms": 902.1343104541302,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 17.874122108332813,
+            "byte_length": 1017596,
+            "index": 10,
+            "inter_arrival_ms": 905.1786763593554,
+            "num_frames": 12
+          }
+        ],
+        "excluded_terminal_chunk": {
+          "arrival_s": 43.975540241226554,
+          "byte_length": 1020246,
+          "index": 39,
+          "inter_arrival_ms": 896.4876756072044,
+          "num_frames": 12
+        },
+        "completion_after_last_media_ms": 19.119005650281906,
+        "main_nonterminal_summary": {
+          "count": 28,
+          "mean_ms": 900.1760877602335,
+          "p99_ms": 904.4215849693865,
+          "max_ms": 904.669382609427,
+          "over_1000ms_count": 0,
+          "longest_consecutive_over_1000ms": 0
+        }
+      },
+      "measured": {
+        "result": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/measured.json",
+          "bytes": 122191,
+          "sha256": "89677b8355b6a6ac95faf12352c61f1ecad6f17724cd95a9883b1247e8e471b9"
+        },
+        "command": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/measured_command.json",
+          "bytes": 1000,
+          "sha256": "0c9c11d96190544723aa0b8adc877cfe92470c7e3c809f8fc54e1d5c8e4a304f"
+        },
+        "request_id": "video_stream-49a9eefffac140f89258fe4d734dd7ef",
+        "chunk_count": 600,
+        "frame_count": 7197,
+        "ttfc_ms": 4021.4611971750855,
+        "video_start_ms": 66.98589771986008,
+        "full_session_wall_ms": 541979.4760635123,
+        "delivered_fps_session_wall": 13.279100626232227,
+        "delivered_fps_last_arrival": 13.279445472062704,
+        "full_inter_arrival_summary": {
+          "count": 600,
+          "mean_ms": 903.2756695477292,
+          "p99_ms": 912.6690171845257,
+          "max_ms": 4021.4611971750855,
+          "over_1000ms_count": 1,
+          "longest_consecutive_over_1000ms": 1
+        },
+        "excluded_transition_chunks": [
+          {
+            "arrival_s": 4.0214611971750855,
+            "byte_length": 725377,
+            "index": 0,
+            "inter_arrival_ms": 4021.4611971750855,
+            "num_frames": 9
+          },
+          {
+            "arrival_s": 4.754123812541366,
+            "byte_length": 1031477,
+            "index": 1,
+            "inter_arrival_ms": 732.6626153662801,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 5.492452184669673,
+            "byte_length": 1016879,
+            "index": 2,
+            "inter_arrival_ms": 738.3283721283078,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 6.292825614102185,
+            "byte_length": 1019557,
+            "index": 3,
+            "inter_arrival_ms": 800.3734294325113,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 7.132030600681901,
+            "byte_length": 1002993,
+            "index": 4,
+            "inter_arrival_ms": 839.2049865797162,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 8.044134083203971,
+            "byte_length": 998170,
+            "index": 5,
+            "inter_arrival_ms": 912.1034825220704,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 8.945524977520108,
+            "byte_length": 994543,
+            "index": 6,
+            "inter_arrival_ms": 901.3908943161368,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 9.853154983371496,
+            "byte_length": 997957,
+            "index": 7,
+            "inter_arrival_ms": 907.630005851388,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 10.750558785162866,
+            "byte_length": 1007925,
+            "index": 8,
+            "inter_arrival_ms": 897.4038017913699,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 11.657307642512023,
+            "byte_length": 1014028,
+            "index": 9,
+            "inter_arrival_ms": 906.7488573491573,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 12.55639517866075,
+            "byte_length": 1017596,
+            "index": 10,
+            "inter_arrival_ms": 899.0875361487269,
+            "num_frames": 12
+          }
+        ],
+        "excluded_terminal_chunk": {
+          "arrival_s": 541.9654017286375,
+          "byte_length": 669222,
+          "index": 599,
+          "inter_arrival_ms": 888.2649298757315,
+          "num_frames": 12
+        },
+        "completion_after_last_media_ms": 14.074334874749184,
+        "main_nonterminal_summary": {
+          "count": 588,
+          "mean_ms": 898.8447986736412,
+          "p99_ms": 910.9039865620434,
+          "max_ms": 918.9268071204424,
+          "over_1000ms_count": 0,
+          "longest_consecutive_over_1000ms": 0
+        }
+      },
+      "controller_elapsed_ms": 699253.1054252759,
+      "wrapper_including_native_restore_elapsed_ms": 797861.8102250621,
+      "native_restore_elapsed_ms": 96297.3872423172,
+      "native_live_verifier_elapsed_ms": 1965.4656685888767,
+      "controller_wall_outside_two_client_sessions_ms": 113278.97011488676,
+      "residual_scope": "Model load/seal/setup, transitions and cleanup combined; no causal subtraction"
+    },
+    {
+      "label": "F2",
+      "arm": "candidate",
+      "round": 2,
+      "prepared": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json",
+        "bytes": 19691,
+        "sha256": "ebf2ddcaf307feb31bdd4374126a85e5fa2ea7355583ef0cdddb4e841fac4a76"
+      },
+      "closure": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_closure_CPU.json",
+        "bytes": 15284,
+        "sha256": "370a62196414b62fe5b5006bc796750b88800a475ea030230b8aa889678c1bed"
+      },
+      "journals": {
+        "outer": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_wrapper_receipt.json",
+          "bytes": 3046,
+          "sha256": "ce6e57c7c7e10d8cf5999fd22d5800bd99e65f63c61bc216effa6e4b09a0dfad"
+        },
+        "execute": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_execute-journal.json",
+          "bytes": 1724,
+          "sha256": "3d07a10f36e0247902076a1063779165464097de37743a7da7c31a3d027303f9"
+        },
+        "restore": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_restore-journal.json",
+          "bytes": 1833,
+          "sha256": "2b4ac44d9a93ed28b791431840d263b5aae358ef1792bd76ef5a8166c7a9a741"
+        },
+        "live": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live-journal.json",
+          "bytes": 1540,
+          "sha256": "c590953cab8ca48e7196fcaf530efa330eff76908d2b52cf1b5e29320cb9beef"
+        }
+      },
+      "warmup": {
+        "result": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/warmup.json",
+          "bytes": 12244,
+          "sha256": "d6bfe8417ba77a67749da330478aa847dad25804266923916d44b89ae42ffbd3"
+        },
+        "command": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/warmup_command.json",
+          "bytes": 997,
+          "sha256": "a6daac388c38ad4489ef16bc46abb4851278f436afcdd17e8cd2a5fa8a7c14e8"
+        },
+        "request_id": "video_stream-96f74346946b4e969a166c639435d702",
+        "chunk_count": 40,
+        "frame_count": 477,
+        "ttfc_ms": 9586.652701720595,
+        "video_start_ms": 66.1938302218914,
+        "full_session_wall_ms": 44145.10418754071,
+        "delivered_fps_session_wall": 10.805275211800861,
+        "delivered_fps_last_arrival": 10.809771335965323,
+        "full_inter_arrival_summary": {
+          "count": 40,
+          "mean_ms": 1103.1685712281615,
+          "p99_ms": 6202.514603920276,
+          "max_ms": 9586.652701720595,
+          "over_1000ms_count": 1,
+          "longest_consecutive_over_1000ms": 1
+        },
+        "excluded_transition_chunks": [
+          {
+            "arrival_s": 9.586652701720595,
+            "byte_length": 725377,
+            "index": 0,
+            "inter_arrival_ms": 9586.652701720595,
+            "num_frames": 9
+          },
+          {
+            "arrival_s": 10.3063351130113,
+            "byte_length": 1031477,
+            "index": 1,
+            "inter_arrival_ms": 719.6824112907052,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 11.05371693894267,
+            "byte_length": 1016879,
+            "index": 2,
+            "inter_arrival_ms": 747.3818259313703,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 11.84456351120025,
+            "byte_length": 1019557,
+            "index": 3,
+            "inter_arrival_ms": 790.8465722575784,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 12.686201555654407,
+            "byte_length": 1002993,
+            "index": 4,
+            "inter_arrival_ms": 841.6380444541574,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 13.587055345065892,
+            "byte_length": 998170,
+            "index": 5,
+            "inter_arrival_ms": 900.8537894114852,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 14.483662648126483,
+            "byte_length": 994543,
+            "index": 6,
+            "inter_arrival_ms": 896.6073030605912,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 15.374338254332542,
+            "byte_length": 997957,
+            "index": 7,
+            "inter_arrival_ms": 890.6756062060595,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 16.2688620807603,
+            "byte_length": 1007925,
+            "index": 8,
+            "inter_arrival_ms": 894.5238264277577,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 17.162684401497245,
+            "byte_length": 1014028,
+            "index": 9,
+            "inter_arrival_ms": 893.8223207369447,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 18.064743420109153,
+            "byte_length": 1017596,
+            "index": 10,
+            "inter_arrival_ms": 902.059018611908,
+            "num_frames": 12
+          }
+        ],
+        "excluded_terminal_chunk": {
+          "arrival_s": 44.12674284912646,
+          "byte_length": 1020246,
+          "index": 39,
+          "inter_arrival_ms": 889.5850675180554,
+          "num_frames": 12
+        },
+        "completion_after_last_media_ms": 18.361338414251804,
+        "main_nonterminal_summary": {
+          "count": 28,
+          "mean_ms": 899.0147986249732,
+          "p99_ms": 908.9150850381702,
+          "max_ms": 909.3755278736353,
+          "over_1000ms_count": 0,
+          "longest_consecutive_over_1000ms": 0
+        }
+      },
+      "measured": {
+        "result": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/measured.json",
+          "bytes": 122259,
+          "sha256": "a776e82ceb9b78d8683da63c24124f522117bdeee1330ae9c114fc534d2f4f55"
+        },
+        "command": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/measured_command.json",
+          "bytes": 1000,
+          "sha256": "a9c6fb45bea78cbc935cf4a00bd471471744707b06903f2352101efb71b2cc15"
+        },
+        "request_id": "video_stream-7f9abdb0592848ea8359fa6ff27ab9e3",
+        "chunk_count": 600,
+        "frame_count": 7197,
+        "ttfc_ms": 4910.208971239626,
+        "video_start_ms": 66.81621540337801,
+        "full_session_wall_ms": 542770.1941132545,
+        "delivered_fps_session_wall": 13.259755377242163,
+        "delivered_fps_last_arrival": 13.260104985286302,
+        "full_inter_arrival_summary": {
+          "count": 600,
+          "mean_ms": 904.5931395950416,
+          "p99_ms": 920.133927995339,
+          "max_ms": 4910.208971239626,
+          "over_1000ms_count": 1,
+          "longest_consecutive_over_1000ms": 1
+        },
+        "excluded_transition_chunks": [
+          {
+            "arrival_s": 4.910208971239626,
+            "byte_length": 725377,
+            "index": 0,
+            "inter_arrival_ms": 4910.208971239626,
+            "num_frames": 9
+          },
+          {
+            "arrival_s": 5.717986389994621,
+            "byte_length": 1031477,
+            "index": 1,
+            "inter_arrival_ms": 807.7774187549949,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 6.4617443876340985,
+            "byte_length": 1016879,
+            "index": 2,
+            "inter_arrival_ms": 743.7579976394773,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 7.324754546396434,
+            "byte_length": 1019557,
+            "index": 3,
+            "inter_arrival_ms": 863.0101587623358,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 8.167985844425857,
+            "byte_length": 1002993,
+            "index": 4,
+            "inter_arrival_ms": 843.2312980294228,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 9.069816040806472,
+            "byte_length": 998170,
+            "index": 5,
+            "inter_arrival_ms": 901.8301963806152,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 9.967669694684446,
+            "byte_length": 994543,
+            "index": 6,
+            "inter_arrival_ms": 897.8536538779736,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 10.864873612299562,
+            "byte_length": 997957,
+            "index": 7,
+            "inter_arrival_ms": 897.2039176151156,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 11.76692520081997,
+            "byte_length": 1007925,
+            "index": 8,
+            "inter_arrival_ms": 902.0515885204077,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 12.667091712355614,
+            "byte_length": 1014028,
+            "index": 9,
+            "inter_arrival_ms": 900.1665115356445,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 13.563197521492839,
+            "byte_length": 1017596,
+            "index": 10,
+            "inter_arrival_ms": 896.1058091372252,
+            "num_frames": 12
+          }
+        ],
+        "excluded_terminal_chunk": {
+          "arrival_s": 542.755883757025,
+          "byte_length": 669222,
+          "index": 599,
+          "inter_arrival_ms": 890.1861477643251,
+          "num_frames": 12
+        },
+        "completion_after_last_media_ms": 14.310356229543686,
+        "main_nonterminal_summary": {
+          "count": 588,
+          "mean_ms": 898.4736396050473,
+          "p99_ms": 913.7329046893865,
+          "max_ms": 942.8920093923807,
+          "over_1000ms_count": 0,
+          "longest_consecutive_over_1000ms": 0
+        }
+      },
+      "controller_elapsed_ms": 696276.0657528415,
+      "wrapper_including_native_restore_elapsed_ms": 789848.1893865392,
+      "native_restore_elapsed_ms": 91269.5404086262,
+      "native_live_verifier_elapsed_ms": 1947.9716885834932,
+      "controller_wall_outside_two_client_sessions_ms": 109360.76745204628,
+      "residual_scope": "Model load/seal/setup, transitions and cleanup combined; no causal subtraction"
+    },
+    {
+      "label": "F3",
+      "arm": "candidate",
+      "round": 3,
+      "prepared": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/prepared_final600_CPU_v1.json",
+        "bytes": 19691,
+        "sha256": "8354779e6d3a258dfa1a39095a2c8e5fb91b5b936def49fa2af86d40ad79ea18"
+      },
+      "closure": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_closure_CPU.json",
+        "bytes": 15284,
+        "sha256": "dd801d39dbb22b2a29158c06255e2f88797bda7fc6953f16a5eddf5208a86817"
+      },
+      "journals": {
+        "outer": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_wrapper_receipt.json",
+          "bytes": 3046,
+          "sha256": "f791f13d1764de522f9074efb8604c6dbf3b0270a0410695a837cfdedb1a3b51"
+        },
+        "execute": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_execute-journal.json",
+          "bytes": 1724,
+          "sha256": "6da12eb27eef0e0223e3f224b43f59d21d4762d49c18744fda3d7a3f4cccabc8"
+        },
+        "restore": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_restore-journal.json",
+          "bytes": 1834,
+          "sha256": "2f343f38a5fa94f83955b883d1484142923e270dc1513bdb78e1acf30ab2817a"
+        },
+        "live": {
+          "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live-journal.json",
+          "bytes": 1539,
+          "sha256": "3ececbacec69cf2ef5438952cd1d0ef1a06aa46dd16247395a5d9e3218fa0f05"
+        }
+      },
+      "warmup": {
+        "result": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/warmup.json",
+          "bytes": 12253,
+          "sha256": "731dfe1237c6916a990d726274a78a718b5fa8eee1ca01515790bb4fd095ef8f"
+        },
+        "command": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/warmup_command.json",
+          "bytes": 997,
+          "sha256": "1ac0fe026b8028e338692ad1ed14e128c5f52968463b4448b3a66ecf0bac2f21"
+        },
+        "request_id": "video_stream-edcc6f02be0d4bda8eb2326000787489",
+        "chunk_count": 40,
+        "frame_count": 477,
+        "ttfc_ms": 10200.94816479832,
+        "video_start_ms": 65.82778226584196,
+        "full_session_wall_ms": 44937.32234835625,
+        "delivered_fps_session_wall": 10.614784661673285,
+        "delivered_fps_last_arrival": 10.619191588939866,
+        "full_inter_arrival_summary": {
+          "count": 40,
+          "mean_ms": 1122.9668379295617,
+          "p99_ms": 6603.996754456306,
+          "max_ms": 10200.94816479832,
+          "over_1000ms_count": 1,
+          "longest_consecutive_over_1000ms": 1
+        },
+        "excluded_transition_chunks": [
+          {
+            "arrival_s": 10.20094816479832,
+            "byte_length": 725377,
+            "index": 0,
+            "inter_arrival_ms": 10200.94816479832,
+            "num_frames": 9
+          },
+          {
+            "arrival_s": 10.93555704690516,
+            "byte_length": 1031477,
+            "index": 1,
+            "inter_arrival_ms": 734.6088821068406,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 11.67815401405096,
+            "byte_length": 1016879,
+            "index": 2,
+            "inter_arrival_ms": 742.5969671458006,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 12.460998675785959,
+            "byte_length": 1019557,
+            "index": 3,
+            "inter_arrival_ms": 782.8446617349982,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 13.308296529576182,
+            "byte_length": 1002993,
+            "index": 4,
+            "inter_arrival_ms": 847.2978537902236,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 14.214101697318256,
+            "byte_length": 998170,
+            "index": 5,
+            "inter_arrival_ms": 905.8051677420735,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 15.112878747284412,
+            "byte_length": 994543,
+            "index": 6,
+            "inter_arrival_ms": 898.7770499661565,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 16.07691527530551,
+            "byte_length": 997957,
+            "index": 7,
+            "inter_arrival_ms": 964.0365280210972,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 16.97475023753941,
+            "byte_length": 1007925,
+            "index": 8,
+            "inter_arrival_ms": 897.834962233901,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 17.869002470746636,
+            "byte_length": 1014028,
+            "index": 9,
+            "inter_arrival_ms": 894.2522332072258,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 18.767547690309584,
+            "byte_length": 1017596,
+            "index": 10,
+            "inter_arrival_ms": 898.5452195629478,
+            "num_frames": 12
+          }
+        ],
+        "excluded_terminal_chunk": {
+          "arrival_s": 44.91867351718247,
+          "byte_length": 1020246,
+          "index": 39,
+          "inter_arrival_ms": 890.6874656677246,
+          "num_frames": 12
+        },
+        "completion_after_last_media_ms": 18.64883117377758,
+        "main_nonterminal_summary": {
+          "count": 28,
+          "mean_ms": 902.1585129001843,
+          "p99_ms": 960.8804974518716,
+          "max_ms": 977.9958305880427,
+          "over_1000ms_count": 0,
+          "longest_consecutive_over_1000ms": 0
+        }
+      },
+      "measured": {
+        "result": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/measured.json",
+          "bytes": 122190,
+          "sha256": "70a5cd9e807aa67b1c0cace4d434704b9be50baae539f114bc423491ba9ae0ca"
+        },
+        "command": {
+          "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/measured_command.json",
+          "bytes": 1000,
+          "sha256": "43183275375e7a4f2c4dfc6abb7e0d2727a68601b357749fef8dbe8c86fe3bba"
+        },
+        "request_id": "video_stream-996ffb80c2e744f094045ffd44973779",
+        "chunk_count": 600,
+        "frame_count": 7197,
+        "ttfc_ms": 3964.6652610972524,
+        "video_start_ms": 66.4454773068428,
+        "full_session_wall_ms": 539835.850989446,
+        "delivered_fps_session_wall": 13.331830382900419,
+        "delivered_fps_last_arrival": 13.33218050658886,
+        "full_inter_arrival_summary": {
+          "count": 600,
+          "mean_ms": 899.7027901078885,
+          "p99_ms": 913.131742971018,
+          "max_ms": 3964.6652610972524,
+          "over_1000ms_count": 1,
+          "longest_consecutive_over_1000ms": 1
+        },
+        "excluded_transition_chunks": [
+          {
+            "arrival_s": 3.9646652610972524,
+            "byte_length": 725377,
+            "index": 0,
+            "inter_arrival_ms": 3964.6652610972524,
+            "num_frames": 9
+          },
+          {
+            "arrival_s": 4.690327419899404,
+            "byte_length": 1031477,
+            "index": 1,
+            "inter_arrival_ms": 725.6621588021517,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 5.430594808422029,
+            "byte_length": 1016879,
+            "index": 2,
+            "inter_arrival_ms": 740.267388522625,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 6.22148100566119,
+            "byte_length": 1019557,
+            "index": 3,
+            "inter_arrival_ms": 790.8861972391605,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 7.061867813579738,
+            "byte_length": 1002993,
+            "index": 4,
+            "inter_arrival_ms": 840.3868079185486,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 7.95756867993623,
+            "byte_length": 998170,
+            "index": 5,
+            "inter_arrival_ms": 895.700866356492,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 8.851978534832597,
+            "byte_length": 994543,
+            "index": 6,
+            "inter_arrival_ms": 894.4098548963666,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 9.738514536060393,
+            "byte_length": 997957,
+            "index": 7,
+            "inter_arrival_ms": 886.5360012277961,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 10.633408354595304,
+            "byte_length": 1007925,
+            "index": 8,
+            "inter_arrival_ms": 894.8938185349107,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 11.527157413773239,
+            "byte_length": 1014028,
+            "index": 9,
+            "inter_arrival_ms": 893.7490591779351,
+            "num_frames": 12
+          },
+          {
+            "arrival_s": 12.42624170705676,
+            "byte_length": 1017596,
+            "index": 10,
+            "inter_arrival_ms": 899.0842932835221,
+            "num_frames": 12
+          }
+        ],
+        "excluded_terminal_chunk": {
+          "arrival_s": 539.8216740647331,
+          "byte_length": 669222,
+          "index": 599,
+          "inter_arrival_ms": 886.8812453001738,
+          "num_frames": 12
+        },
+        "completion_after_last_media_ms": 14.176924712955952,
+        "main_nonterminal_summary": {
+          "count": 588,
+          "mean_ms": 895.4227059734288,
+          "p99_ms": 912.4684912804514,
+          "max_ms": 921.9445185735822,
+          "over_1000ms_count": 0,
+          "longest_consecutive_over_1000ms": 0
+        }
+      },
+      "controller_elapsed_ms": 696969.3274786696,
+      "wrapper_including_native_restore_elapsed_ms": 795468.3264475316,
+      "native_restore_elapsed_ms": 96262.64523342252,
+      "native_live_verifier_elapsed_ms": 1920.688720420003,
+      "controller_wall_outside_two_client_sessions_ms": 112196.1541408673,
+      "residual_scope": "Model load/seal/setup, transitions and cleanup combined; no causal subtraction"
+    }
+  ],
+  "original_successful_journals_validated": 12,
+  "excluded_failed_journals_validated": 3,
+  "recovery_successful_journals_validated": 2,
+  "original_journals_validated": 17,
+  "excluded_attempt": {
+    "original_prepared_launch": "F3",
+    "reason": "ROOT_ATTESTED_INFRASTRUCTURE_QUOTA_ERR122",
+    "journals": {
+      "outer": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_wrapper_receipt.json",
+        "bytes": 3046,
+        "sha256": "99a3db0594201864b94b5c7c8ef7c99467373cfc7a00b3e77a5b71baedb776ef"
+      },
+      "execute": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_execute-journal.json",
+        "bytes": 1724,
+        "sha256": "7f026b9c744c6c1b80e5ce6886592a4176b1dc4024b54167606da52a3c808e4a"
+      },
+      "restore": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore-journal.json",
+        "bytes": 1836,
+        "sha256": "ff7ae7eb50e98472428b2ab6b0de7f76f317ebab9d7193cec1fcadc745270bbc"
+      }
+    },
+    "outer_command": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_wrapper_argv.json",
+      "bytes": 2200,
+      "sha256": "6e250b12d41a36250b23bdc1edb796adf377ce0399a22132ded9062f05e629eb"
+    },
+    "wrapper_summary": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_summary.json",
+      "bytes": 3312,
+      "sha256": "37222bbf9aee8e819958fed0830198f807693c7cc2c5cbead45de4c44338306d"
+    },
+    "failed_restore_log": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore-log.log",
+      "bytes": 643,
+      "sha256": "709cd98bba0629fd34c2919433f02e8dc23475122b25ec1b0140274f6233929b"
+    },
+    "exact_Errno122_observed": true,
+    "root_failure_cause_attested": true,
+    "complete_failure_cause_independently_proven": false,
+    "failed_benchmark_read": false,
+    "failed_attempt_measured_chunk_count": null,
+    "recovery_journals": {
+      "restore": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_restore_receipt.json",
+        "bytes": 1881,
+        "sha256": "3f833daa4c083c54ac3a9884c7b78ae69c8013b0b0de59f3971979f4d062e590"
+      },
+      "live": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_live_receipt.json",
+        "bytes": 1612,
+        "sha256": "91499c43863df528b1e9ca5923f6c0beb25313a1e1938e68319742d88a5edd28"
+      }
+    },
+    "recovery_argv": {
+      "restore": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_restore_argv.json",
+        "bytes": 1080,
+        "sha256": "464363b53aaab0a8e5050f75453eb8e8997453abb8a57ad6fe8ea50e20ef4ad6"
+      },
+      "live": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_live_argv.json",
+        "bytes": 819,
+        "sha256": "d2df823220608c0bd44284e9f2b9b59b0da9d691181285698ac3e3c8bb63dc47"
+      }
+    },
+    "recovery_ready": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F3_infrastructure_recovery_v92.json",
+      "bytes": 8935,
+      "sha256": "f4721071c5a4c6b5aa792cae4373036975c581ab22bf08dc2c86ed20c8de2ea5"
+    },
+    "recovery_live": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F3_infrastructure_recovery_v92.json",
+      "bytes": 5994,
+      "sha256": "a2fe22c08b59b09e2ae00e355ffe91cdcf4ce80a84c05a15a489226a3a7e9aeb"
+    }
+  },
+  "unused_retry_F1_F2_runs_not_selected": true,
+  "worker_count": 24,
+  "original_owner_count": 30,
+  "fatal_nonce_count": 3,
+  "request_count": 6,
+  "measured_chunks_per_launch": 600,
+  "warmup_chunks_per_launch": 40,
+  "measured_frames_per_launch": 7197,
+  "main_window_inclusive": [
+    11,
+    598
+  ],
+  "main_samples_per_launch": 588,
+  "total_main_samples": 1764,
+  "rounds": [
+    {
+      "label": "F1",
+      "mean_ms": 898.8447986736412,
+      "p99_ms": 910.9039865620434,
+      "mean_within900": true,
+      "p99_within950": true
+    },
+    {
+      "label": "F2",
+      "mean_ms": 898.4736396050473,
+      "p99_ms": 913.7329046893865,
+      "mean_within900": true,
+      "p99_within950": true
+    },
+    {
+      "label": "F3",
+      "mean_ms": 895.4227059734288,
+      "p99_ms": 912.4684912804514,
+      "mean_within900": true,
+      "p99_within950": true
+    }
+  ],
+  "no_round_averaging": true,
+  "each_service_mean_limit_ms": 900,
+  "each_service_linear_P99_limit_ms": 950,
+  "mean_gate_pass": true,
+  "p99_gate_pass": true,
+  "final600_throughput_gate_pass": true,
+  "decision": "PASS_FINAL600_THROUGHPUT_GATE_ONLY",
+  "valid_gate_failure_is_not_reader_error": true,
+  "independent_RAW_prerequisite": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_full_RAW_comparison_CPU_v89.json",
+    "bytes": 7074,
+    "sha256": "ee03868e619901b5c123b63cc0eef505b85bf65c4ec66ff394bd025546e6ba02"
+  },
+  "six_screen_gate_passed": true,
+  "six_screen_review": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_six_screen_CPU_v90.json",
+    "bytes": 66594,
+    "sha256": "a03b4d76399f1be0ea36dca65b8b1fc1a2c84fb92317432621c5a08b74e00a3f"
+  },
+  "six_screen_terminal": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_six_screen_CPU_v90_receipt.json",
+    "bytes": 3115,
+    "sha256": "47a838e1d43e649bb4976dabafd10bb4388c280b28af0cb08880cd78363a9870"
+  },
+  "six_screen_prepared": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/prepared_clean_timing_CPU_v1.json",
+    "bytes": 27240,
+    "sha256": "d290e3940ed62c8b33f0e7c55e3b332a64847dac60e493a9f563ff0a225d9089"
+  },
+  "root_quota_failure_attested": true,
+  "metrics_field_basis": "Unchanged original rollout: (arrival_s-previous_arrival_s)*1000, serialized intervals crosschecked",
+  "percentile_basis": "Unchanged original linear interpolation over588 samples at position0.99*(588-1)",
+  "bank_setup_first_fill_retirement_costs_individually_instrumented": false,
+  "root_tool_terminal_consumption_independently_observed": false,
+  "recorded_cleanup_revalidated": true,
+  "current_proc_absence_reobserved": false,
+  "current_restored_native_health_reobserved": false,
+  "full_SOURCE_tree_rehashed": false,
+  "one_bounded_failed_restore_log_read": true,
+  "other_logs_read": false,
+  "RAW_or_media_or_libraries_read": false,
+  "failed_F3_benchmark_read": false,
+  "final_three_600_throughput_statistics_recomputed": true,
+  "browser_playback_proven": false,
+  "media_PTS_proven": false,
+  "quality15_proven": false,
+  "final_acceptance_proven": false,
+  "requirements39_modified": false,
+  "numeric_recomputed": false,
+  "global_lifetime_proven": false,
+  "production_cache_compatibility_proven": false,
+  "actual_device_dispatch_proven": false,
+  "model_admitted": false,
+  "published": false,
+  "goal_complete": false,
+  "framework_imported": false,
+  "foreign_processes_signalled": false,
+  "device_calls": 0,
+  "explicit_input_fullpins": {
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/read_final600_model_timing_CPU_SOURCE_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/read_final600_model_timing_CPU_SOURCE_v1.py",
+      "bytes": 37861,
+      "sha256": "8fb1e1037b5623966796d1914f097f5644650915e08849914233b119dd05c01e"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_retry_terminal_index_CPU_v94.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_retry_terminal_index_CPU_v94.json",
+      "bytes": 6709,
+      "sha256": "03c67745b74c6596f47bf89ebe2a454955ace2aa2991adaf4bc50e0fdf7e9b90"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_wrapper_receipt.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_wrapper_receipt.json",
+      "bytes": 3046,
+      "sha256": "095017f43359476b751662cf15784c1027f36d2a0710067443cfb9aada8166d1"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_execute-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_execute-journal.json",
+      "bytes": 1724,
+      "sha256": "6539bb8f4bef9066ac8abe891e66d2ae0643c9af13d4d86317464624274e2d27"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_restore-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_restore-journal.json",
+      "bytes": 1833,
+      "sha256": "791fb4e9ee4608e9b59c5f6f2d724f02de1fe80942cf2dac30205875ae2cf1d5"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live-journal.json",
+      "bytes": 1540,
+      "sha256": "f59a49e3820d6e6d5111aec72abea6452d27fb73c7484698313db209c57dfaf1"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_wrapper_receipt.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_wrapper_receipt.json",
+      "bytes": 3046,
+      "sha256": "ce6e57c7c7e10d8cf5999fd22d5800bd99e65f63c61bc216effa6e4b09a0dfad"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_execute-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_execute-journal.json",
+      "bytes": 1724,
+      "sha256": "3d07a10f36e0247902076a1063779165464097de37743a7da7c31a3d027303f9"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_restore-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_restore-journal.json",
+      "bytes": 1833,
+      "sha256": "2b4ac44d9a93ed28b791431840d263b5aae358ef1792bd76ef5a8166c7a9a741"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live-journal.json",
+      "bytes": 1540,
+      "sha256": "c590953cab8ca48e7196fcaf530efa330eff76908d2b52cf1b5e29320cb9beef"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_wrapper_receipt.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_wrapper_receipt.json",
+      "bytes": 3046,
+      "sha256": "f791f13d1764de522f9074efb8604c6dbf3b0270a0410695a837cfdedb1a3b51"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_execute-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_execute-journal.json",
+      "bytes": 1724,
+      "sha256": "6da12eb27eef0e0223e3f224b43f59d21d4762d49c18744fda3d7a3f4cccabc8"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_restore-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_restore-journal.json",
+      "bytes": 1834,
+      "sha256": "2f343f38a5fa94f83955b883d1484142923e270dc1513bdb78e1acf30ab2817a"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live-journal.json",
+      "bytes": 1539,
+      "sha256": "3ececbacec69cf2ef5438952cd1d0ef1a06aa46dd16247395a5d9e3218fa0f05"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_wrapper_receipt.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_wrapper_receipt.json",
+      "bytes": 3046,
+      "sha256": "99a3db0594201864b94b5c7c8ef7c99467373cfc7a00b3e77a5b71baedb776ef"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_execute-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_execute-journal.json",
+      "bytes": 1724,
+      "sha256": "7f026b9c744c6c1b80e5ce6886592a4176b1dc4024b54167606da52a3c808e4a"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore-journal.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore-journal.json",
+      "bytes": 1836,
+      "sha256": "ff7ae7eb50e98472428b2ab6b0de7f76f317ebab9d7193cec1fcadc745270bbc"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_restore_receipt.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_restore_receipt.json",
+      "bytes": 1881,
+      "sha256": "3f833daa4c083c54ac3a9884c7b78ae69c8013b0b0de59f3971979f4d062e590"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_live_receipt.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_live_receipt.json",
+      "bytes": 1612,
+      "sha256": "91499c43863df528b1e9ca5923f6c0beb25313a1e1938e68319742d88a5edd28"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json",
+      "bytes": 19691,
+      "sha256": "ebf2ddcaf307feb31bdd4374126a85e5fa2ea7355583ef0cdddb4e841fac4a76"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/prepared_final600_CPU_v1.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/prepared_final600_CPU_v1.json",
+      "bytes": 19691,
+      "sha256": "8354779e6d3a258dfa1a39095a2c8e5fb91b5b936def49fa2af86d40ad79ea18"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/prepare_final600_CPU_SOURCE_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/prepare_final600_CPU_SOURCE_v1.py",
+      "bytes": 16977,
+      "sha256": "31f88117c5b7cea7967874db5641c948c68bd27304b826b5a90bd92f509d6baf"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F1_command.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F1_command.json",
+      "bytes": 912,
+      "sha256": "1c3e63b1e6a49b00e17104d1c403b3ae4f0265d86ba9306eb0b189cd9182a1c7"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F1_command.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F1_command.json",
+      "bytes": 912,
+      "sha256": "a8b75567da276078ef9d8d033ea4dad1506fb9a8f440bdd06f699d689894e982"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F2_command.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F2_command.json",
+      "bytes": 912,
+      "sha256": "487a624b696039e73c8932f9becd736737f5b032db9110cbb9be97d5f51224f0"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F2_command.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F2_command.json",
+      "bytes": 912,
+      "sha256": "bed1d10ca09de6f844a0a31611d04bae873ccc8e689d4c0b97b304be3df2c213"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F3_command.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F3_command.json",
+      "bytes": 912,
+      "sha256": "260c0bab52286b6bec5d0809543b80077eec77e34e159c3f290c6a64121d7ddb"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F3_command.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F3_command.json",
+      "bytes": 912,
+      "sha256": "8d2fafec934ccbea12a82bfd268641679c34f59d9d4a13d0972b76d391b67a2e"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_wrapper_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_wrapper_argv.json",
+      "bytes": 2200,
+      "sha256": "6e250b12d41a36250b23bdc1edb796adf377ce0399a22132ded9062f05e629eb"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_summary.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_summary.json",
+      "bytes": 3312,
+      "sha256": "37222bbf9aee8e819958fed0830198f807693c7cc2c5cbead45de4c44338306d"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/run_model_with_native_restore_SOURCE_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/run_model_with_native_restore_SOURCE_v1.py",
+      "bytes": 11405,
+      "sha256": "b9090646daa89dacf225fcf73b3f4c60f9bbecaaf65dddb37bcc8c6097bb5696"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/run_lingbot_sp8_experiment_device_map_v3.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/run_lingbot_sp8_experiment_device_map_v3.py",
+      "bytes": 22692,
+      "sha256": "ee77c9b92c8ea27f8ad648a99d47cb5432b92bb068298cb6aee910eeb091e75a"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/restore_native_available_packages4to7_v2.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/restore_native_available_packages4to7_v2.py",
+      "bytes": 7715,
+      "sha256": "42c5e932deb7e74fc8f4f6ce60675ae0f769ef06cb6907bd3ed2d7decabd0ae9"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/verify_native_packages4to7_live_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/verify_native_packages4to7_live_v1.py",
+      "bytes": 5660,
+      "sha256": "054d563101921691cf74590837b85306c2b8013a6f6879e2c988e5cd486969ab"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/root_receipted_subprocess_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/root_receipted_subprocess_v1.py",
+      "bytes": 3623,
+      "sha256": "9dc459c15cee6baf9e20f491e81d5c68f333f3aa5ddfaf2e2b8991232b6cdf3c"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore_argv.json",
+      "bytes": 1032,
+      "sha256": "3974194ecd4cb8b0dcb43c6078021ab6bf1fca3c017028b7dbe973a8251237db"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_live_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_live_argv.json",
+      "bytes": 747,
+      "sha256": "f7e68a33c2e85a36152b4a28f5b3d8ebd246d6f0e56f9cfd4446d9f3e6a6a5ff"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore-log.log": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_restore-log.log",
+      "bytes": 643,
+      "sha256": "709cd98bba0629fd34c2919433f02e8dc23475122b25ec1b0140274f6233929b"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F3_v91.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F3_v91.json",
+      "bytes": 9118,
+      "sha256": "02ad3fa3dc87b2fcafe965117fc785d73706ccd3fdc36930e52713a0eb917b02"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_restore_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_restore_argv.json",
+      "bytes": 1080,
+      "sha256": "464363b53aaab0a8e5050f75453eb8e8997453abb8a57ad6fe8ea50e20ef4ad6"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_live_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_infrastructure_recovery_v92_live_argv.json",
+      "bytes": 819,
+      "sha256": "d2df823220608c0bd44284e9f2b9b59b0da9d691181285698ac3e3c8bb63dc47"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F3_infrastructure_recovery_v92.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F3_infrastructure_recovery_v92.json",
+      "bytes": 8935,
+      "sha256": "f4721071c5a4c6b5aa792cae4373036975c581ab22bf08dc2c86ed20c8de2ea5"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F3_infrastructure_recovery_v92.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F3_infrastructure_recovery_v92.json",
+      "bytes": 5994,
+      "sha256": "a2fe22c08b59b09e2ae00e355ffe91cdcf4ce80a84c05a15a489226a3a7e9aeb"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_closure_CPU.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_closure_CPU.json",
+      "bytes": 15284,
+      "sha256": "99d9e830c51c8b8092cc63298c74ef731907f7f86800e81deeaae63e5ac3e9f4"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/close_final600_model_SOURCE_CPU_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/close_final600_model_SOURCE_CPU_v1.py",
+      "bytes": 32106,
+      "sha256": "7c4b4232a3850506a4a82142411f970d548d4c2d4f2ecfeb7036af4031d9b074"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/observe_final600_live_CPU_SOURCE_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/observe_final600_live_CPU_SOURCE_v1.py",
+      "bytes": 28144,
+      "sha256": "750f0b17dc28525b127b7b845d861caea791fc6d4886fb4d69e10a07229b9ad7"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/candidate_clean_deploy.yaml": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/candidate_clean_deploy.yaml",
+      "bytes": 2534,
+      "sha256": "f3b564cd30974a7415182ca59f2c2d10b06358ad801ae78d6ccc30537357e171"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/environment_fixed_timestep_stageA_clean_v89.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/environment_fixed_timestep_stageA_clean_v89.json",
+      "bytes": 2128,
+      "sha256": "7056e7200b8ec37142ac06d9d7707c67cf952aab3aa1c6747fb4918fa1318cff"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_stageA_startup_CPU_v89.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_stageA_startup_CPU_v89.json",
+      "bytes": 8477,
+      "sha256": "7d2d91cf20ac4a4189d8b99edbd742eafe84dad2a00fc3474972a7d34bb1e356"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/worker/diffusion_worker.py": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/worker/diffusion_worker.py",
+      "bytes": 84053,
+      "sha256": "d4eb551842e14cb7d08d7a43ae12902f34a801a4f005d367ce2618db92ae1ab7"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/models/lingbot_world/pipeline.py": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/models/lingbot_world/pipeline.py",
+      "bytes": 137117,
+      "sha256": "7b51788aa3aae23c049b4c3eee163ee061bddfc90318fd8556db7eec23a73671"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/models/lingbot_world/dmd_block.py": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/models/lingbot_world/dmd_block.py",
+      "bytes": 11477,
+      "sha256": "ed733d82ed4626117a9feed53a245716d9a0e6de64eedc8f5ce72d3c820cf537"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/models/lingbot_world/transformer.py": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/models/lingbot_world/transformer.py",
+      "bytes": 77895,
+      "sha256": "38ba04998d86e0691daf14f10019a7b89a8753e82c9c3aad4204eed8e50b4b5c"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/layers/lingbot_fixed_timestep_bank_stageA_v1.py": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/layers/lingbot_fixed_timestep_bank_stageA_v1.py",
+      "bytes": 23218,
+      "sha256": "504ed380b46a84ea7da408c64c1337612f21d3fd5d0c4f6dbed65922137bbcc3"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/distributed/comm.py": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/distributed/comm.py",
+      "bytes": 15443,
+      "sha256": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 31741,
+      "sha256": "d449a3d1e0d137bf66fa1bc13d60eaa857e23cda13063736299a69e274d63626"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_wrapper_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_wrapper_argv.json",
+      "bytes": 2200,
+      "sha256": "8e082a702c8760aebb1e1779bfb010a7da2cf7f3c77418ef40cf1e2346565d04"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_summary.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_summary.json",
+      "bytes": 3618,
+      "sha256": "94383b45b1d2d1d7726beea5eb239861b256dba2a829012c1df689e160906a67"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_restore_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_restore_argv.json",
+      "bytes": 1032,
+      "sha256": "7793b8dd37d1b6fe5f03c984ed310e884bfc59616bb86023244d601c61ad73ee"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live_argv.json",
+      "bytes": 747,
+      "sha256": "ffc3c9639a1f601900ca6d82d6bf653e4d6a0b7e4a2e075ae98ea5e768ec6442"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live_identity.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live_identity.json",
+      "bytes": 13390,
+      "sha256": "495609c5e2e5932c2e5599b9910c7cb2f864df2ffcaab9f73a6c7a07d580bbd0"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/manifest.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/manifest.json",
+      "bytes": 222145,
+      "sha256": "b460a83c708c8d4e93a14a2d1c141ad9900fa75c90d74d7232043b2eee64d255"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_cleanup_CPU.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_cleanup_CPU.json",
+      "bytes": 8022,
+      "sha256": "15fb6defa116eafa25adb2a7375fe2fcbcabb609ae1cd0c95b079cd84cbcefd8"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/status.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/status.json",
+      "bytes": 312,
+      "sha256": "4dcb8f01d4df5f0b7b2319a6cb07ee88f97702c0ecd79d7f36e8b53387ecbda2"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/device_availability_after.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/device_availability_after.json",
+      "bytes": 964,
+      "sha256": "dd003c8d31c398db9e7f5ec1fb292cc1f58649869a65e24e22f18c3c235a1e0b"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F1_v91.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F1_v91.json",
+      "bytes": 8863,
+      "sha256": "0f4b27f4bb0451a75f7a584c06c1512d22651f96ab18b206610f7790f2a5d9d5"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F1_v91.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F1_v91.json",
+      "bytes": 5946,
+      "sha256": "3a39014719e7c915bbf7027dd825d98bb65292ffbb67af3ec279dc68566d0d1b"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F1_v91.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F1_v91.json",
+      "bytes": 9118,
+      "sha256": "fbbe4e3e7234ffb0d01bbbe92616be0d025454f77b93dbe05511161a081b9f1c"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_closure_CPU.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_closure_CPU.json",
+      "bytes": 15284,
+      "sha256": "370a62196414b62fe5b5006bc796750b88800a475ea030230b8aa889678c1bed"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_wrapper_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_wrapper_argv.json",
+      "bytes": 2200,
+      "sha256": "22c5780fda36ba19422e1d58fa494108a819ee4f0c5daa1beedcbd7164852c4b"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_summary.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_summary.json",
+      "bytes": 3618,
+      "sha256": "652a6c85c419eb4f4f6008b1ccbd3a2dce8126ef47dd9990f894cc7bb64600b1"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_restore_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_restore_argv.json",
+      "bytes": 1032,
+      "sha256": "1b30f97937ef84bd142e5fa8b26853f568e4a7ed1c21da16d85ec42ffc539afe"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live_argv.json",
+      "bytes": 747,
+      "sha256": "b523da9ada8f6bea8dc4b77b1ca9f23296271ab3426bc815a13711cef1ef8a46"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live_identity.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live_identity.json",
+      "bytes": 13390,
+      "sha256": "372ab53ebfa3be8b86ed390cb241f666e414b67f04c281433cc067a092fb95a6"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/manifest.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/manifest.json",
+      "bytes": 222145,
+      "sha256": "346ec21d7f36dec1829a8d8bd6fee8995a553cb8918a0713570b7ebc6897b73c"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_cleanup_CPU.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_cleanup_CPU.json",
+      "bytes": 8022,
+      "sha256": "75bcb2cecc48bf93f3664c2fa4c48f113ef0e95d5830ddfafd37ed21c6531a10"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/status.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/status.json",
+      "bytes": 312,
+      "sha256": "7ecf9aa6c39ed7c7df249ecf07a0e814774f81156bea76c3c0176375db934418"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/device_availability_after.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/device_availability_after.json",
+      "bytes": 964,
+      "sha256": "dd003c8d31c398db9e7f5ec1fb292cc1f58649869a65e24e22f18c3c235a1e0b"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F2_v91.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F2_v91.json",
+      "bytes": 8863,
+      "sha256": "8f3620457a63419f6e3ef55efcd96b1b8a910a904ed6b015ac0f6d04f3d704b4"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F2_v91.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F2_v91.json",
+      "bytes": 5946,
+      "sha256": "d824f2f29ffad010dd19febb4aae91ea5b266a24087678bf49d6ac563414aaca"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F2_v91.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F2_v91.json",
+      "bytes": 9118,
+      "sha256": "6cb6d4be3bd13b8101b9793b4e7404dc02782cda7c04f31e86c4e0d35c9c92a4"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_closure_CPU.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_closure_CPU.json",
+      "bytes": 15284,
+      "sha256": "dd801d39dbb22b2a29158c06255e2f88797bda7fc6953f16a5eddf5208a86817"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_wrapper_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_wrapper_argv.json",
+      "bytes": 2200,
+      "sha256": "e2c2de9f225bb6b020ea584886d8c89a6cd86144b230755424a237143f6d1c8a"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_summary.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_summary.json",
+      "bytes": 3618,
+      "sha256": "6ffcc543c5024ea4bfce3810095a4fab7a8e9e101d60d01c08558b60d06dc326"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_restore_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_restore_argv.json",
+      "bytes": 1032,
+      "sha256": "f95645852254e7bb24e535fa8402e0bdc10d148c105d34da4379f608db6f549d"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live_argv.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live_argv.json",
+      "bytes": 747,
+      "sha256": "26df4bf82050be5be770d86e624562108ba6d7d7db3c3cd107aee31816440257"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live_identity.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live_identity.json",
+      "bytes": 13390,
+      "sha256": "0930882078ac2f22af67592ec3de184ce4ff2bdd816586c57a3243f0d9e194b5"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/manifest.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/manifest.json",
+      "bytes": 222145,
+      "sha256": "429bf7c29f6a29b762422ba47192245eb918409872c16b717027ccc5b445d960"
+    },
+    "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_cleanup_CPU.json": {
+      "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_cleanup_CPU.json",
+      "bytes": 8022,
+      "sha256": "53ebb4a9bc13e80fd718362b29dee515f1fbee3570574cca4d561685716806d8"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/status.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/status.json",
+      "bytes": 312,
+      "sha256": "d435178725c8502aee77b5beb956f0bd9c302ee12e5373c7fdf79d09d0fdbfc3"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/device_availability_after.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/device_availability_after.json",
+      "bytes": 964,
+      "sha256": "dd003c8d31c398db9e7f5ec1fb292cc1f58649869a65e24e22f18c3c235a1e0b"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F3_v93.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_restoration_after_stageA_final_F3_v93.json",
+      "bytes": 8887,
+      "sha256": "081a68e0fe517fc94ba189d0cbe20a1ea7eaabbd82c61f3b62a816731f970442"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F3_v93.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/native_service_packages4to7_live_after_stageA_final_F3_v93.json",
+      "bytes": 5946,
+      "sha256": "49520a3fc803d2c938e4a8808b457e7228160c38e3dcbed06ddf6b3ee64acc22"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F3_v93.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/stop_native_packages4to7_before_stageA_final_F3_v93.json",
+      "bytes": 9190,
+      "sha256": "baad8c08648d4b6d88d4801b886f0f70be385276061ac81461fa08fa656a45a0"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/warmup_command.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/warmup_command.json",
+      "bytes": 997,
+      "sha256": "ec66eebfaec69b5cf60889534c27e6aa1cea010ae04b583b7e050d13ac314702"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/warmup.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/warmup.json",
+      "bytes": 12246,
+      "sha256": "9db34ec3bd1b306639635f34929b2305c725685919e5fcaf43bd2d14c3ffef7d"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/measured_command.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/measured_command.json",
+      "bytes": 1000,
+      "sha256": "0c9c11d96190544723aa0b8adc877cfe92470c7e3c809f8fc54e1d5c8e4a304f"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/measured.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/measured.json",
+      "bytes": 122191,
+      "sha256": "89677b8355b6a6ac95faf12352c61f1ecad6f17724cd95a9883b1247e8e471b9"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/warmup_command.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/warmup_command.json",
+      "bytes": 997,
+      "sha256": "a6daac388c38ad4489ef16bc46abb4851278f436afcdd17e8cd2a5fa8a7c14e8"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/warmup.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/warmup.json",
+      "bytes": 12244,
+      "sha256": "d6bfe8417ba77a67749da330478aa847dad25804266923916d44b89ae42ffbd3"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/measured_command.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/measured_command.json",
+      "bytes": 1000,
+      "sha256": "a9c6fb45bea78cbc935cf4a00bd471471744707b06903f2352101efb71b2cc15"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/measured.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/measured.json",
+      "bytes": 122259,
+      "sha256": "a776e82ceb9b78d8683da63c24124f522117bdeee1330ae9c114fc534d2f4f55"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/warmup_command.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/warmup_command.json",
+      "bytes": 997,
+      "sha256": "1ac0fe026b8028e338692ad1ed14e128c5f52968463b4448b3a66ecf0bac2f21"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/warmup.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/warmup.json",
+      "bytes": 12253,
+      "sha256": "731dfe1237c6916a990d726274a78a718b5fa8eee1ca01515790bb4fd095ef8f"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/measured_command.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/measured_command.json",
+      "bytes": 1000,
+      "sha256": "43183275375e7a4f2c4dfc6abb7e0d2727a68601b357749fef8dbe8c86fe3bba"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/measured.json": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/measured.json",
+      "bytes": 122190,
+      "sha256": "70a5cd9e807aa67b1c0cace4d434704b9be50baae539f114bc423491ba9ae0ca"
+    },
+    "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/retry_v1/read_final600_retry_model_timing_CPU_SOURCE_v1.py": {
+      "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/final600_v1/retry_v1/read_final600_retry_model_timing_CPU_SOURCE_v1.py",
+      "bytes": 23205,
+      "sha256": "57d177f97a19c3308987a090020d16b84c9dd5a31685098a8d8d0c36b75b1c58"
+    }
+  }
+}

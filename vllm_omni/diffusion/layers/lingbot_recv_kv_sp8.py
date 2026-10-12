@@ -103,6 +103,16 @@ def _sha(path):
 def bind_from_manifest():
     global _BOUND
     require(enabled() and _BOUND is None, "SP8 ingress binds once")
+    if os.environ.get("LINGBOT_RECOVERY_RECV", "0") == "1":
+        from .lingbot_recovery import load
+        provider = load()
+        pins = {p["path"]: p["sha256"] for p in provider.manifest["runtime_sources"]}
+        def ingress(q, k, v, kp, vp, ks, vs, slots, table, first, reuse):
+            # All authoritative table/scratch/managed checks above remain active.
+            return provider.call("ingress", q, k, v, kp, vp, ks, vs, slots, first)
+        _BOUND = {"torch": provider.torch, "npu": provider.backend, "library": provider,
+                  "manifest": {"source_and_header_pins": pins}, "ingress": ingress}
+        return
     path = Path(os.environ.get(MANIFEST, "")).resolve(strict=True)
     expected = os.environ.get(MANIFEST_SHA, "")
     require(len(expected) == 64 and _sha(path) == expected, "explicit SP8 build manifest SHA required")

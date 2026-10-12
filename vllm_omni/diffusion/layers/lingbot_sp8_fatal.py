@@ -12,6 +12,7 @@ import threading
 import time
 
 _DIRECTORY = os.environ.get("ROOT_LINGBOT_SP8_FATAL_DIR", "")
+_BASE = os.environ.get("ROOT_LINGBOT_SP8_FATAL_BASE", "/mnt/data")
 _NONCE = os.environ.get("ROOT_LINGBOT_SP8_FATAL_NONCE", "")
 ENABLED = bool(_DIRECTORY or _NONCE)
 _MODE = os.environ.get("ROOT_LINGBOT_SP8_EXPERIMENT_MODE", "")
@@ -34,7 +35,10 @@ def ensure_protocol():
     if len(_NONCE) != 32 or any(value not in "0123456789abcdef" for value in _NONCE):
         raise RuntimeError("SP8 fatal channel requires a root-configured 32-hex nonce")
     directory = Path(_DIRECTORY)
-    if not directory.is_absolute() or not directory.is_dir() or not directory.resolve().is_relative_to("/mnt/data"):
+    base = Path(_BASE)
+    if (not base.is_absolute() or not directory.is_absolute() or not directory.is_dir()
+            or not directory.resolve().is_relative_to(base.resolve())
+            or directory.stat().st_uid != os.getuid() or directory.stat().st_mode & 0o022):
         raise RuntimeError("SP8 fatal channel must be an existing root-owned persistent run directory")
     return True
 

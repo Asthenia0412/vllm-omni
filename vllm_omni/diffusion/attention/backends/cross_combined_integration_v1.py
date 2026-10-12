@@ -70,6 +70,9 @@ def selected_adapter(*, role):
     global _BOUND
     if role != 'cross':
         return None
+    from vllm_omni.diffusion.layers.lingbot_recovery import configured, Cross
+    if configured("cross"):
+        return Cross()
     enabled = os.environ.get(ENABLE, '0')
     _need(enabled in ('0', '1'), ENABLE + ' must be 0 or 1')
     if enabled == '0':

@@ -1,0 +1,16 @@
+........................................................................ [ 36%]
+........................................................................ [ 72%]
+......................................................                   [100%]
+=============================== warnings summary ===============================
+../../../../home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/jit/_script.py:362: 14 warnings
+  /home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/jit/_script.py:362: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+../../../../home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/_pytest/config/__init__.py:1437
+  /home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/_pytest/config/__init__.py:1437: PytestConfigWarning: Unknown config option: asyncio_mode
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--- Running Summary
+198 passed, 15 warnings in 14.87s

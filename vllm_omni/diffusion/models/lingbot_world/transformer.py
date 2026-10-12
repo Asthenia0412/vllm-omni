@@ -240,6 +240,8 @@ class LingBotSelfAttention(nn.Module):
                 f"heads={self.num_local_heads}, ulysses={self.ulysses_world_size}."
             )
         self.num_sp_heads = self.num_local_heads // self.ulysses_world_size
+        from vllm_omni.diffusion.layers.lingbot_recovery import configured
+        self._lingbot_recovery_qk = configured("qk")
         if __import__("os").environ.get("ROOT_LINGBOT_QK_SINGLE_HOST_INTEGRATION_V1", "0") == "1":
             from vllm_omni.diffusion.layers.qk_single_host_integration_v1 import bind_construction_config
             bind_construction_config(self)

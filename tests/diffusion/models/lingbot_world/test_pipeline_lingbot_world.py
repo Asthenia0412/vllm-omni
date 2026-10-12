@@ -825,7 +825,7 @@ def test_vae_shard_refuses_a_group_of_the_wrong_size(monkeypatch) -> None:
     module = _load_pipeline_module()
     installs, _ = _record_shard_install(monkeypatch, module, world_size=4)
 
-    with pytest.raises(RuntimeError, match="sequence_parallel_size=2 but the Ulysses group has 4 ranks"):
+    with pytest.raises(RuntimeError, match="VAE degree=2 but the selected group has 4 ranks"):
         module.LingBotWorldCausalDMDPipeline(od_config=_ulysses_config(2))
     assert installs == []
 
@@ -3042,6 +3042,8 @@ def test_streaming_decode_is_reported_to_the_profiler(monkeypatch) -> None:
     its own stage the one stage this path changes would be invisible -- and a
     perf regression in the streaming decoder would be too.
     """
+    from vllm_omni.diffusion.profiler import diffusion_pipeline_profiler
+    monkeypatch.setattr(diffusion_pipeline_profiler, "current_omni_platform", SimpleNamespace(is_available=lambda: False))
     module = _load_pipeline_module()
     _capture_pixel_conversion(monkeypatch)
     pipeline = _pipeline(

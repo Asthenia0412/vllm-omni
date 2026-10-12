@@ -236,6 +236,25 @@ class _Backend:
 
 
 def configure_exact_packing(vae, model_config, *, device, logger=None):
+    recovery = model_config.get("lingbot_npu_recovery_vae_pack", False)
+    if type(recovery) is not bool:
+        raise ValueError("lingbot_npu_recovery_vae_pack must be bool")
+    if recovery and device.type == "npu":
+        if model_config.get("lingbot_npu_vae_exact_pack", False):
+            raise ValueError("Choose old screened packing or reconstructed packing")
+        from vllm_omni.diffusion.layers.lingbot_recovery import ExactPacking
+        owners = [(name, module) for name, module in vae.named_modules() if _decoder_conv(name, module)]
+        if not owners:
+            raise ValueError("Reconstructed packing requires spatial decoder owners")
+        import torch.distributed as dist
+        if {dist.get_world_size(module.group) for _, module in owners} != {8}:
+            raise ValueError("Reconstructed packing is limited to SP8")
+        policy = ExactPacking()
+        for _, module in owners:
+            module._lingbot_exact_pack_policy = policy
+            module._lingbot_exact_pack_enabled = True
+        return dict(enabled=True, reconstructed=True, historical_admission_inherited=False,
+                    modules=[name for name, _ in owners])
     enabled = enabled_from_sources(model_config)
     if not enabled or device.type != "npu":
         return dict(enabled=False, platform=device.type, eligible_geometry_pairs=7)

@@ -1,0 +1,9 @@
+{
+  "source": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1",
+  "source_files_verified": 3285,
+  "copied_or_replaced": 98,
+  "already_identical": 3187,
+  "original_snapshot_unchanged": true,
+  "base_commit": "5b3abe2f4d51560382146e955935f9e2e936e096",
+  "full_acceptance_inherited": false
+}

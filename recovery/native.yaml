@@ -1,0 +1,97 @@
+async_chunk: false
+distributed_executor_backend: mp
+dtype: bfloat16
+pipeline: lingbot_world
+stages:
+- default_sampling_params:
+    extra_args:
+      flow_shift: 5.0
+    num_inference_steps: 4
+    output_type: pil
+  devices: 0,1,2,3,4,5,6,7
+  enforce_eager: true
+  engine_backend: vllm_omni.experimental.ar_diffusion.engine.ARDiffusionEngine
+  max_num_seqs: 1
+  model_class_name: LingBotWorldCausalDMDPipeline
+  model_config:
+    ar_diffusion_height: 480
+    ar_diffusion_kv_config:
+      gpu_memory_fraction: 0.4
+      npu_history_staging_layers:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      npu_min_free_headroom_bytes: 4294967296
+      reuse_history_staging: true
+      warmup_cudagraph: false
+    ar_diffusion_width: 832
+    lingbot_condition_prefill: true
+    lingbot_npu_chunk_prefix_cache: true
+    lingbot_npu_fusion_backend: 'off'
+    lingbot_npu_native_bf16_qk: true
+    lingbot_npu_qkv_sp_pack: false
+    lingbot_npu_quant: w8a8
+    lingbot_npu_quant_scope: ffn
+    lingbot_npu_quant_weight_format: nz
+    lingbot_npu_text_block_offload: true
+    lingbot_npu_uniform_timestep: true
+    lingbot_npu_vae_exact_pack: false
+    lingbot_reuse_last_step_kv: true
+    lingbot_vae_decode_fast_path: exact
+    lingbot_vae_spatial_sharding: true
+    lingbot_npu_pixel_output_mode: root_uint8_p2p
+    lingbot_npu_leased_post_attention: false
+    lingbot_npu_cross_combined_guard_cpp_v1: false
+    lingbot_npu_qk_single_host_admission_v1: false
+    lingbot_npu_pixel_device_interleave: true
+    lingbot_npu_fixed_timestep_bank: false
+    lingbot_npu_fixed_timestep_bank_diagnostics: false
+    lingbot_npu_recovery_qk: false
+    lingbot_npu_recovery_cross: false
+    lingbot_npu_recovery_vae_pack: false
+    lingbot_npu_recovery_descriptor: false
+  parallel_config:
+    ring_degree: 1
+    sequence_parallel_size: 8
+    tensor_parallel_size: 1
+    ulysses_degree: 8
+  stage_id: 0
+  step_execution: true
+  streaming_output: true

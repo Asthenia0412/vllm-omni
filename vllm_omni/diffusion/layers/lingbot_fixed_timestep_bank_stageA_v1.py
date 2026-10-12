@@ -140,6 +140,10 @@ def _descriptor_at_startup(pipeline):
     registration-only or zero-device-work operation. StageA adds no DSO loader.
     """
     config = pipeline.od_config.model_config or {}
+    if config.get("lingbot_npu_recovery_descriptor") is True:
+        from .lingbot_recovery import load
+        provider = load()
+        return provider.describe, provider
     if config.get("lingbot_npu_qk_single_host_admission_v1") is True:
         from vllm_omni.diffusion.layers.qk_single_host_integration_v1 import selected_route
         from vllm_omni.platforms import current_omni_platform

@@ -84,6 +84,9 @@ def _install_vllm_stubs() -> None:
         "SeqAllToAll4D",
         _SeqAllToAll4D,
     )
+    sys.modules["vllm_omni.diffusion.distributed.comm"].all_to_all_4D = (
+        lambda value, scatter_idx=2, gather_idx=1, group=None, use_sync=False: value
+    )
 
     def _all_to_all_5D(value, scatter_idx=3, gather_idx=1, group=None, use_sync=False):
         # Single-rank stub: the fused q/k/v exchange is the identity when N == 1.
@@ -423,7 +426,11 @@ def test_self_attention_routes_paged_inputs_through_engine_owned_cache() -> None
     paged_inputs = module.ARDiffusionPagedLayerInputs()
     calls = []
 
-    def paged_write(inputs, query, key, value, k_act, v_act, scale):
+    def paged_write(inputs, query, key, value, k_act, v_act, scale, *,
+                    attention_backend, attention_num_splits, attention_strict):
+        assert attention_backend == attention._lingbot_npu_attention_backend
+        assert attention_num_splits == attention._lingbot_npu_attention_splits
+        assert attention_strict == attention._lingbot_npu_attention_strict
         calls.append((inputs, query.clone(), key.clone(), value.clone(), k_act, v_act, scale))
         return query
 
