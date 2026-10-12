@@ -1,10 +1,10 @@
 {
-  "nonce": "c74f7d46c6525d30988ec074eff6c131",
+  "nonce": "72ed91588962a8595f757677de959d2f",
   "leader": {
-    "pid": 873365,
+    "pid": 995741,
     "uid": 1003,
-    "pgid": 873365,
-    "start": 8787484
+    "pgid": 995741,
+    "start": 8860201
   },
   "command": [
     "python",
@@ -15,7 +15,7 @@
     "recovery/check_hccl.py"
   ],
   "mode": "correctness",
-  "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host/host_manifest.json",
+  "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.Y0gl1K3v/host_manifest.json",
   "fatal": null,
   "exit_code": 0,
   "remaining_owned_processes": []

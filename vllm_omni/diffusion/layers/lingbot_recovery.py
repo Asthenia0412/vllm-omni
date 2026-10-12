@@ -86,6 +86,11 @@ class Provider:
                 and not self.torch.npu.is_current_stream_capturing()
                 and self.torch.npu.current_stream(tensor.device) == self.torch.npu.default_stream(tensor.device))
 
+    def unblocked(self, tensors):
+        # An ordinary unsupported format refuses before submission; invalid
+        # extent/alias/owner metadata still raises in the C++ admission guard.
+        return all(self.ordinary(t) and self.backend.get_npu_format(t) in (0,2,30) for t in tensors)
+
     def call(self, name, *args):
         _check(not self.poisoned, "worker poisoned")
         try:
@@ -148,6 +153,8 @@ def prepare_send(module, raw, rotary, ring_size):
         return None
     cosine, sine = module._lingbot_native_bf16_qk_coefficients.get(*rotary)
     owners = (raw, module.norm_q.weight, module.norm_k.weight, cosine, sine)
+    if not provider.unblocked(owners):
+        return None
     send = provider.call("qk_send", *owners)
     return Send(provider, raw.view(1, 585, 3, 40, 128), send, owners)
 
@@ -159,7 +166,8 @@ class Cross:
                 or not provider.ordinary(q) or tuple(q.shape) != (1,585,40,128)
                 or k.ndim != 4 or tuple(k.shape) != tuple(v.shape)
                 or tuple(k.shape[:1] + k.shape[2:]) != (1,40,128) or not 0 < k.shape[1] <= 512
-                or any(not t.is_contiguous() for t in (q,k,v))):
+                or any(not t.is_contiguous() for t in (q,k,v))
+                or not provider.unblocked((q,k,v))):
             return None
         return provider.call("cross", q, k, v, scale)
 
@@ -174,6 +182,12 @@ class ExactPacking:
             return False
         if not base.is_contiguous() or any(tuple(t.stride()) != tuple(base.stride()) for t in (da,db)):
             return False
+        for source in (sa,sb):
+            span = source.shape[-1]
+            for axis in range(source.ndim-2, -1, -1):
+                if source.stride(axis) < span:
+                    return False
+                span += (source.shape[axis]-1)*source.stride(axis)
         for t in values:
             desc = provider.describe(t)
             if desc[0] not in (0,2,30) or desc[1] != desc[0] or desc[2] != desc[4]:

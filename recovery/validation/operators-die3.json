@@ -44,7 +44,7 @@
     "descriptor_extent_owner"
   ],
   "device": 3,
-  "manifest_sha256": "8112c4700f789257092a2d6ed3c2a835808e641a86f58cc4ed20f46179419ab7",
+  "manifest_sha256": "7d16a3aa47f2bbf85ddf0e32c0177e326923822daf418a01e1f7074f549b68a5",
   "model_validated": false,
   "performance_validated": false
 }

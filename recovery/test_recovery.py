@@ -20,6 +20,15 @@ def module(path):
 
 
 class RecoveryTests(unittest.TestCase):
+    def test_unsupported_format_is_a_prestart_refusal(self):
+        from types import SimpleNamespace
+        recovery = module(ROOT / "vllm_omni/diffusion/layers/lingbot_recovery.py")
+        provider = object.__new__(recovery.Provider)
+        provider.ordinary = lambda tensor: True
+        provider.backend = SimpleNamespace(get_npu_format=lambda tensor: tensor.format)
+        self.assertFalse(provider.unblocked([SimpleNamespace(format=29)]))
+        self.assertTrue(provider.unblocked([SimpleNamespace(format=f) for f in (0,2,30)]))
+
     def test_unpinned_provider_fails_before_loading_framework(self):
         provider = module(ROOT / "vllm_omni/diffusion/layers/lingbot_recovery.py")
         with patch.dict(os.environ, {"LINGBOT_RECOVERY_MANIFEST":"", "LINGBOT_RECOVERY_MANIFEST_SHA256":""}):

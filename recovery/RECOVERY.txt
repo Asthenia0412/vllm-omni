@@ -64,10 +64,14 @@ Build and configuration
   cd /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree
   source recovery/env.sh
   bash recovery/build.sh
+  bash recovery/check_all.sh
 
 env.sh exposes LINGBOT_RECOVERY_ROOT, LINGBOT_CANN_ROOT and LINGBOT_VENV for
 relocation. The installed SDK/venv must match the pinned versions. Rebuild
 after relocation; manifests bind actual source and library paths.
+Each build uses a fresh directory because the SDK's legacy incremental linking
+rewrites object files in place. Previous DSOs are retained. The latest manifest
+path is written to ../build/latest-manifest.txt after successful registration.
 
   python recovery/make_config.py --output recovery/native.yaml
   python recovery/make_config.py --candidate --output recovery/candidate.yaml
@@ -82,7 +86,7 @@ service can be started with:
 
   ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python recovery/supervise.py \
     --runs "$LINGBOT_RECOVERY_ROOT/model-runs" --mode correctness --recv \
-    --manifest "$LINGBOT_RECOVERY_ROOT/build/host/host_manifest.json" -- \
+    --manifest "$(cat "$LINGBOT_RECOVERY_ROOT/build/latest-manifest.txt")" -- \
     vllm serve "$LINGBOT_RECOVERY_ROOT/models/lingbot-world" --omni \
     --deploy-config recovery/candidate.yaml --port 7816 \
     --init-timeout 1800 --stage-init-timeout 1800
@@ -97,7 +101,7 @@ Validation completed
   - CPU: 198 attention/pipeline/VAE tests. Restored stale CPU mocks were updated
     for the existing all_to_all_4D import, paged backend arguments, independent
     VAE group error text and CPU profiler synchronization contract.
-  - CPU: 3 recovery tests, including reclamation of eight owned children while
+  - CPU: 4 recovery tests, including reclamation of eight owned children while
     an unrelated process remains alive.
   - NPU: 42 checks on each of eight die, JITFalse/internal-format enabled.
     Copy sources, full destination arenas/canaries, pre-write alias rejection;

@@ -6,12 +6,12 @@
     "sha256": "97813767a61cbf80e6c985cd6fb421f4ef47b16c8f4e2162a0534adfdc642130"
   },
   "library": {
-    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host/liblingbot_recovery_host.so",
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.Y0gl1K3v/liblingbot_recovery_host.so",
     "bytes": 182624,
-    "sha256": "644ddae48022f5c4065ae67bed501ca9658f8a496e0a29e07fa7f6fb2eca2055"
+    "sha256": "56d10afc5a0a70c2db169453aa04c2b3a572468dace29901e38538c0ed194b41"
   },
   "kernels": {
-    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib/liblingbot_recovery_copy.so",
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.ca3dGt7v/lib/liblingbot_recovery_copy.so",
     "bytes": 401288,
     "sha256": "075fd3e9f25fc2339f1a0c562b0718db1d62314bd7a86c8e0b2375fc91744c7d"
   },
@@ -49,7 +49,7 @@
     "-D_GLIBCXX_USE_CXX11_ABI=1",
     "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/host.cpp",
     "-o",
-    "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host/liblingbot_recovery_host.so",
+    "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.Y0gl1K3v/liblingbot_recovery_host.so",
     "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include",
     "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/torch/csrc/api/include",
     "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include",
@@ -57,12 +57,12 @@
     "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
     "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
     "-L/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
-    "-L/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib",
+    "-L/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.ca3dGt7v/lib",
     "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
     "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
     "-Wl,-rpath,/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
-    "-Wl,-rpath,/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib",
-    "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels-release/lib/liblingbot_recovery_copy.so",
+    "-Wl,-rpath,/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.ca3dGt7v/lib",
+    "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.ca3dGt7v/lib/liblingbot_recovery_copy.so",
     "-ltorch_npu",
     "-ltorch_cpu",
     "-ltorch",
@@ -76,8 +76,8 @@
   "runtime_sources": [
     {
       "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
-      "bytes": 8649,
-      "sha256": "c30a5ae7dbfd9f951ed7aa19dbdb4731a78408bffa28dc647978caabcec0e42d"
+      "bytes": 9318,
+      "sha256": "8d64271008597f7d7cc5223745dfcc778a7979ffa7a0bfb0ad1def304128d595"
     },
     {
       "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recv_kv_sp8.py",

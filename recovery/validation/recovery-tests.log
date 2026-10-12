@@ -1,8 +1,9 @@
 test_config_has_no_lost_paths_and_mutually_exclusive_providers (test_recovery.RecoveryTests.test_config_has_no_lost_paths_and_mutually_exclusive_providers) ... ok
 test_fatal_reclaims_only_the_owned_eight_workers (test_recovery.RecoveryTests.test_fatal_reclaims_only_the_owned_eight_workers) ... ok
 test_unpinned_provider_fails_before_loading_framework (test_recovery.RecoveryTests.test_unpinned_provider_fails_before_loading_framework) ... ok
+test_unsupported_format_is_a_prestart_refusal (test_recovery.RecoveryTests.test_unsupported_format_is_a_prestart_refusal) ... ok
 
 ----------------------------------------------------------------------
-Ran 3 tests in 2.422s
+Ran 4 tests in 2.402s
 
 OK
