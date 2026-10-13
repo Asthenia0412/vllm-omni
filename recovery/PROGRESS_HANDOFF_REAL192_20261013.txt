@@ -194,6 +194,27 @@ wall窗口及A/B阶段顺序；checker16项、聚合器10项CPU测试均通过�
    GitHub分支codex/lingbot-qk-record-once-20261013，提交aca2f5393fc508aacea69eb6db8d552e1dc0bdf6；
    与本地2cbd068296a6050a1774d4bb3fc2fc495666b08a的tree一致。
    这不是模型性能样本，QK正式gate仍失败，ASYNC_METADATA仍0。
+   后续v3诊断进一步分开两个public C binding：46,080行中alltoall_base
+   有45次>2ms，最长7.915553ms；Work.wait最长0.125061ms，无>2ms。
+   baseline/combined分别26/19次长alltoall，八rank均有，不能按数量差算收益。
+   同次peer已结束post-sync、迟返rank拖晚下次提交的例子已保留。C binding
+   区间包含GIL释放/重新获得及转换/观察开销，不等于网络或纯C++执行时间。
+   v3新正确性和profile各自独立启动且clean退出，不再扩大侵入式诊断。
+   报告：ROOT/qk-record-once-worktree/recovery/QK_PUBLIC_DIST_V3_RESULTS_20261013.txt。
+   GitHub同一独立分支提交7aef641757155c5afe47d69ed3ed6d2ce4f99778，
+   与本地ad92c8ee822012a0f647f58db1c40a5f4f622efe的tree一致。
+   独立repeatable-plan候选v1已经CPU构建，并通过rank0/layer0/KV4680的
+   两个真实probe API支持检查：不同值、五个输入的新地址、native bitwise、
+   完整source/arena/canary及关闭后旧输出保留均通过；4 native计划均支持
+   SetRepeatable，capacity1复用1次，workspace75.428MiB，关闭后resident0。
+   run e693996edcd6eb620fccd73e739ff051 exit0、fatal=null、owned[]。
+   尚未测HCCL、actual192、inflight、队列压力或性能。审查发现v1在consumer
+   callback最后释放recordStream Tensor可能再次排队allocator event；满队列
+   下存在等待自身consumer的可达风险，未观测到死锁，不能将小测试升为准入。
+   v1被冻结归档；下一版将owner释放移到producer锁外并使用两阶段close。
+   说明：ROOT/qk-record-once-worktree/recovery/QK_REPEATABLE_EVENT_POOL_SUPPORT_V1_20261013.txt。
+   独立分支最新归档提交21ac09a16502c494344cae5398a05078111f5396，
+   与本地3b980ac2f73097ec12891ac7a597a8a80b176501的tree一致。
 3. 对已通过筛选的恢复部分冻结新build/config/env，并验证实际dispatch。QK保持
    当前baseline，低调度路径缺口继续单列，不能称历史完整获胜组合已恢复。
    新的候选仍须匹配参考做paired80；纯搬运latent/RGB要求逐位相同。旧构建结果
