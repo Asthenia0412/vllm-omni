@@ -1,0 +1,114 @@
+{
+  "schema": "lingbot_qk_record_once_build_cpu_receipt_v1",
+  "worktree": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree",
+  "branch": "codex/lingbot-qk-record-once-20261013",
+  "base_head": "1fa61bd93ebaeef8172cdc6dd49b0bedae632ce6",
+  "scope": "Only remove8 duplicate Python source/target record_stream calls; keep result registration",
+  "implementation": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_qk_combined.py",
+    "bytes": 10282,
+    "sha256": "d9c83b3d394cb7fd4cfc777b6c52374d384260446ffa5ffbec77dd161c53d756"
+  },
+  "proof": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_RECORD_ONCE_PROOF_20261013.txt",
+    "bytes": 9233,
+    "sha256": "dbf6565afa136e6ceec989e6845f20cb25e07bcc8c89f8cdd237dd350d9aa145"
+  },
+  "checker": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_real_matrix.py",
+    "bytes": 24351,
+    "sha256": "2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519"
+  },
+  "version_stamp": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/_version.py",
+    "bytes": 570,
+    "sha256": "358d0d0a80b2622193222537c11e511d0f22a23df886cf5a55bd8752a83a6124"
+  },
+  "build_manifests": {
+    "provider": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qk-record-once.20261013v1/host_manifest.json",
+      "bytes": 8496,
+      "sha256": "9c04e585968fba131aa3c18b7805117caf0b7b7d12af0be4568a03753c413e97"
+    },
+    "qk": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+      "bytes": 8320,
+      "sha256": "19d282194022d7c6544a2c06ac738e9fa1ce1f1c23e952b0698e5e8e757b0bbd"
+    }
+  },
+  "build_evidence": {
+    "provider_registration_passed": true,
+    "qk_registration_passed": true,
+    "qk_cpu_refusal_passed": true,
+    "qk_build_initialized_npu": false,
+    "provider_library": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qk-record-once.20261013v1/liblingbot_recovery_host.so",
+      "bytes": 253976,
+      "sha256": "a93cc7f3df56c1517409cc9a9161d05baad5a9b877aeac91ded7dc9848ff753c"
+    },
+    "qk_library": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/liblingbot_qk_combined.so",
+      "bytes": 187552,
+      "sha256": "b5362d78d0120dc760c27a3cda91c983002a66eda7de9661e73fb20563711059"
+    },
+    "shared_kernel": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+      "bytes": 402128,
+      "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+    },
+    "cpp_source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/csrc/lingbot_qk_combined/host.cpp",
+      "bytes": 11396,
+      "sha256": "c8de691287fcecfd2331466ca64d9f4a61f364b2709f2cdc8fde401bd91eff11"
+    }
+  },
+  "cpu_tests": [
+    {
+      "source": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_record_once_cpu.py",
+        "bytes": 3961,
+        "sha256": "b286636d03c5ea082529014f9668d8ab86441733eefc87f7edb25b509965c258"
+      },
+      "tests": 3,
+      "passed": 3,
+      "evidence": "root coordinator reported execution before this receipt; no raw test stdout artifact supplied"
+    },
+    {
+      "source": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_combined_cpu.py",
+        "bytes": 2937,
+        "sha256": "8444c6eb153344a29b19f8d08948fac76aecaeb3a9a786425d50e007eb0b6caf"
+      },
+      "tests": 3,
+      "passed": 3,
+      "evidence": "root coordinator reported execution before this receipt; no raw test stdout artifact supplied"
+    }
+  ],
+  "infrastructure_parity": {
+    "python_files": 228,
+    "byte_identical": true,
+    "evidence": "root coordinator verification; not rerun by this receipt writer"
+  },
+  "separate_device_launch": {
+    "launch": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-runs/d216cb0eb4afb560083051a161e5095f/launch.json",
+      "bytes": 882,
+      "sha256": "528449a6dec66231c44b0f25f5d583a510e573e2e063639e624e37879c80f442"
+    },
+    "result": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-runs/d216cb0eb4afb560083051a161e5095f/result.json",
+      "bytes": 935,
+      "sha256": "b4c8144345da1e3997fa9af3ad2b7e22c424d994cef7517689a888f1d4fb3ce8"
+    },
+    "exit_code": 0,
+    "fatal": null,
+    "remaining_owned_processes": [],
+    "candidate_device_cases_aggregated_by_this_receipt": false
+  },
+  "device_executed_by_this_update": false,
+  "extra_tests_run_by_this_update": false,
+  "historical_admission_inherited": false,
+  "prior_v1_pass_inherited": false,
+  "model_admitted": false,
+  "performance_validated": false
+}

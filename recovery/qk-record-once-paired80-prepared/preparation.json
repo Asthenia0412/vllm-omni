@@ -1,0 +1,121 @@
+{
+  "schema": "lingbot_qk_record_once_paired80_preparation_v1",
+  "prepared_only": true,
+  "admitted": false,
+  "ready_to_launch": false,
+  "service_started": false,
+  "operator_gates_passed": false,
+  "model_admitted": false,
+  "performance_validated": false,
+  "source_capture_plan": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/plan.frozen-before-request.json",
+    "bytes": 3230,
+    "sha256": "e2db90b949c34a03a3ca1ae79852ba1f3c9ed75f415147b971555891e011ef4f"
+  },
+  "source_config": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/config.yaml",
+    "bytes": 2401,
+    "sha256": "0936fc60eea35c23acd8be0689e20ee51ad57dca2e197cf217746e50cf49b2d5"
+  },
+  "generator": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/prepare_qk_record_once_paired80.py",
+    "bytes": 9986,
+    "sha256": "a2db4cdaf0af845cff498f7366d1c1834cd62dc24444e6ff03bbaa3a9adfd193"
+  },
+  "worktree": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree",
+  "configs": {
+    "reference": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/qk-record-once-paired80-prepared/reference.yaml",
+      "bytes": 2619,
+      "sha256": "9f46eca95822ee93089b4dcfeb84914c73fa136bf18eae01d68292cba11d0cb3"
+    },
+    "candidate": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/qk-record-once-paired80-prepared/candidate.yaml",
+      "bytes": 2619,
+      "sha256": "832ae5725062a1eb70c9263490d28abcff09e2abbd73fa7043a3e9196b6a88ae"
+    }
+  },
+  "only_config_differences": [
+    "stages[0].model_config.lingbot_npu_recovery_cross",
+    "stages[0].model_config.lingbot_npu_recovery_cross_combined",
+    "stages[0].model_config.lingbot_npu_recovery_qk",
+    "stages[0].model_config.lingbot_npu_recovery_qk_combined"
+  ],
+  "reference_flags": {
+    "lingbot_npu_recovery_qk": true,
+    "lingbot_npu_recovery_qk_combined": false,
+    "lingbot_npu_recovery_cross": true,
+    "lingbot_npu_recovery_cross_combined": false
+  },
+  "candidate_flags": {
+    "lingbot_npu_recovery_qk": false,
+    "lingbot_npu_recovery_qk_combined": true,
+    "lingbot_npu_recovery_cross": false,
+    "lingbot_npu_recovery_cross_combined": true
+  },
+  "model": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+  "model_download_required": false,
+  "model_identity_caveat": "Use retained current model/integrity receipt; original historical full checkpoint identity remains unproven.",
+  "new_host_manifest": null,
+  "new_qk_manifest": null,
+  "prerequisites": [
+    "New record-once QK source-pinned actual192 correctness/HCCL/full-owner/canary and finite gates pass.",
+    "New record-once QK three independent complete-call rounds pass the pre-frozen mean and worst-case gates; old failed QK receipts do not admit this route.",
+    "Bind fresh host/QK manifests to this worktree; provider_manifest relationship and actual loaded module/library paths must match.",
+    "Cross combined actual192 correctness/full-call screen passed previously; verify unchanged arithmetic/runtime or repeat required checks for the new pinned build.",
+    "Root owns and verifies all8 available dies; prepare fresh separate service and capture directories for both arms."
+  ],
+  "source_environment": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/env.sh",
+  "pythonpath_after_source": {
+    "prepend": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree",
+    "reason": "The copied env.sh prepends the old main worktree; the isolated worktree must take precedence.",
+    "verify_actual_import_paths": true
+  },
+  "environment_after_source": {
+    "ASCEND_RT_VISIBLE_DEVICES": "8,9,10,11,12,13,14,15",
+    "VLLM_LINGBOT_NPU_ASYNC_METADATA": "0",
+    "VLLM_LINGBOT_NPU_HISTORY_STAGING": "1",
+    "VLLM_LINGBOT_NPU_PLANAR_RGB": "1",
+    "VLLM_LINGBOT_NPU_PINNED_RGB": "0",
+    "OMP_NUM_THREADS": "8",
+    "MKL_NUM_THREADS": "8",
+    "LINGBOT_REAL_FIXTURE_CAPTURE": "0",
+    "LINGBOT_CAPTURE_RANK": "-1",
+    "LINGBOT_CAPTURE_ACTIVATIONS": "0"
+  },
+  "per_arm_capture_environment": "LINGBOT_CAPTURE_DIR must be a new dedicated persistent path for that arm.",
+  "unset_environment": [
+    "LINGBOT_OUTPUT_CAPTURE_DIR",
+    "LINGBOT_REAL_FIXTURE_DIR",
+    "LINGBOT_SP8_OBSERVE_MODE",
+    "LINGBOT_COMPUTE_CAPTURE_DIR"
+  ],
+  "no_extra_instrumentation": "Disable any other profiler/activation/fixture dump not required by paired80.",
+  "runtime_import_gate": {
+    "must_resolve_under": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree",
+    "modules": [
+      "vllm_omni.diffusion.layers.lingbot_recovery",
+      "vllm_omni.diffusion.layers.lingbot_qk_combined",
+      "vllm_omni.diffusion.attention.layer"
+    ]
+  },
+  "supervisor": {
+    "mode": "correctness",
+    "recv": true,
+    "host_manifest": "REQUIRED_NEW_PINNED_MANIFEST"
+  },
+  "candidate_manifest_environment": [
+    "LINGBOT_QK_COMBINED_MANIFEST",
+    "LINGBOT_QK_COMBINED_MANIFEST_SHA256"
+  ],
+  "request_protocol": {
+    "chunks": 80,
+    "requests_per_arm": 1,
+    "warmup_requests": 0,
+    "expected_latent_chunks_per_rank": 80,
+    "expected_root_rgb_frames": 957,
+    "other_rank_rgb_frames": 0,
+    "comparison": "bitwise latent and pre-encode RGB"
+  },
+  "pair_scope": "Reference plain QK/plain cross versus candidate new QK combined/cross combined; this pair alone cannot attribute separate QK and cross speedups."
+}

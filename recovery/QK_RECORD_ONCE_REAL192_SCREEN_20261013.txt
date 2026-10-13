@@ -1,0 +1,79 @@
+QK record-once actual192 complete-call screen (2026-10-13)
+
+Outcome: strict performance screen FAILED in all three independent launches.
+The six scope/round combinations all fail the worst-case limit. Only round1
+producer-inclusive passes its aggregate limit. Correctness remains passed;
+no winning-model or end-to-end performance admission follows.
+
+This standalone candidate removes repeated same-stream owner registration
+within the combined route. The benchmark baseline remains the native recovery
+route. These rounds do not compare record-once directly against the prior
+combined-v1 candidate; differences across the two three-round experiments
+are not paired or isolated record-once gains.
+
+Unchanged predefined method:
+- case = max over8 ranks of that rank's mean of all30 complete-call wall calls;
+- scope aggregate = equal-weight mean of24 actual history/probe case metrics;
+- every scope in each of3 rounds requires aggregate B/A<=0.90 AND every case
+  B/A<=1.05, using exact integer nanosecond sums for threshold comparisons;
+- producer-inclusive and cached scopes remain separate; no outlier removal,
+  cross-round pooling, producer-times40 extrapolation or threshold change;
+- event30 is a separate batch and diagnostic only. Eight ranks in one sample
+  are correlated collective participants, not240 independent observations.
+
+Round / scope                       baseline_ms combined_ms improvement worst_B/A
+1 / producer + layer0 + HCCL     1.081461 0.953522 11.830% 1.155784
+1 / cached + layer0 + HCCL       1.008366 0.963391 4.460% 1.331459
+2 / producer + layer0 + HCCL     1.039310 0.973260 6.355% 1.183138
+2 / cached + layer0 + HCCL       0.956025 0.872109 8.778% 1.086325
+3 / producer + layer0 + HCCL     1.009583 0.945343 6.363% 1.234703
+3 / cached + layer0 + HCCL       0.937660 0.853717 8.952% 1.112566
+
+Worst cases (same predeclared complete-call metric):
+  Round1 producer: KV=14040, probe=0, B/A=1.155784
+  Round1 cached: KV=9360, probe=0, B/A=1.331459
+  Round2 producer: KV=28080, probe=3, B/A=1.183138
+  Round2 cached: KV=23400, probe=2, B/A=1.086325
+  Round3 producer: KV=14040, probe=2, B/A=1.234703
+  Round3 cached: KV=4680, probe=0, B/A=1.112566
+
+Evidence binding:
+- Eight ranks, four probes, six actual histories4680..28080:192 real layer0
+  payload cases. All40 descriptor coverage does not mean all40 payload replay.
+- All24 timing rank reports bind the same fixture matrix, exact case identities,
+  candidate/provider manifest, eight correctness receipts and captured source
+  pins. This is run-record source pin consistency, not a rehash of every current
+  source file. The candidate/provider manifest bytes were rechecked.
+- Correctness and3 timing supervisors have four distinct nonces, natural exit0,
+  no fatal marker and no owned processes remaining. Producer generation deltas
+  and separate20warm/30wall/30event contracts pass every case/rank.
+- Host start/return/end skews and interval union/envelopes remain descriptive:
+  they do not identify device collective arrival or transfer time. No host wait
+  is added to device events. This screen makes no statistical significance,
+  model-quality, lifecycle, full historical identity or final600 claim.
+
+Frozen aggregator SHA verified before this execution:
+  4f06e233fb36bf849f536d625f1e971c04ecbd35084d01a9bb02d74808dfda24
+  recovery/aggregate_qk_real_matrix.py (same bytes as original v1 method)
+No aggregator or runtime edits and no new device calls were made by aggregation.
+
+Compact report (versioned; includes all24 cases per scope/round and raw pins):
+  recovery/validation/qk-record-once-real192-three-round-screen-20261013.json
+Full derived sample report (outside git):
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/record-once-actual192-aggregate-v1.json
+Candidate manifest:
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json
+  SHA256 19d282194022d7c6544a2c06ac738e9fa1ce1f1c23e952b0698e5e8e757b0bbd
+
+Reproduce with the frozen recovery/aggregate_qk_real_matrix.py in
+ROOT/qk-record-once-worktree using:
+  --correctness-dir ROOT/qk-record-once-checks/correctness
+  --correctness-run ROOT/qk-record-once-runs/d216cb0eb4afb560083051a161e5095f
+  --timing-dirs ROOT/qk-record-once-checks/timing-round1
+                ROOT/qk-record-once-checks/timing-round2
+                ROOT/qk-record-once-checks/timing-round3
+  --timing-runs ROOT/qk-record-once-runs/55bdc3fdfa57e3c721549a7b29e75941
+                ROOT/qk-record-once-runs/285de23f61610121433ddb57025b93cd
+                ROOT/qk-record-once-runs/f2840a0ac6d43e07516f8bf104017ffa
+  --output <new-output-file>
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012

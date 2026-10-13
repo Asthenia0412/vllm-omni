@@ -1,0 +1,151 @@
+QK host-cost candidate: remove eight duplicate Python record_stream calls
+
+Implementation status (2026-10-13)
+  Applied ONLY in the independent codex/lingbot-qk-record-once-20261013 worktree:
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree
+  Base HEAD: 1fa61bd93ebaeef8172cdc6dd49b0bedae632ce6.
+  The original full-combo/cross worktree remains independently reproducible.
+  The implementation changes only the post-collective registration loop in
+  Lease.exchange: eight repeated source/target calls removed, result once kept.
+  C++ arithmetic, producer/policy, metadata admission, HCCL and checker unchanged.
+
+  Current Python SHA: d9c83b3d394cb7fd4cfc777b6c52374d384260446ffa5ffbec77dd161c53d756
+  Original v1 Python SHA: 80cc9509e008f9a28255cfcbb29a1f0c8601b930f4726db0e6daa29f7864634f
+  Frozen actual192 checker SHA: 2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519
+
+Build and CPU evidence
+  Parent build: /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qk-record-once.20261013v1/host_manifest.json
+  SHA: 9c04e585968fba131aa3c18b7805117caf0b7b7d12af0be4568a03753c413e97
+  QK build: /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json
+  SHA: 19d282194022d7c6544a2c06ac738e9fa1ce1f1c23e952b0698e5e8e757b0bbd
+  Both registration checks passed. New QK CPU refusal passed without NPU init,
+  as recorded by its independent build manifest. Root executed the three new
+  consumer-ownership tests and the three existing QK CPU tests: all six passed.
+  This document update did not rerun tests or execute a device operation.
+  Exact pins and evidence attribution are in
+  recovery/validation/qk-record-once-build-cpu-20261013.json.
+
+  The ignored _version.py was copied to preserve the original environment;
+  SHA: 358d0d0a80b2622193222537c11e511d0f22a23df886cf5a55bd8752a83a6124
+  Root verified the228 infrastructure Python files byte-identical to the original
+  worktree. The correctness launch d216cb0eb4afb560083051a161e5095f now has a clean
+  exit0/fatal-null/empty-owned-process result; its192-case device outcome and
+  finite proof are separate evidence, not inferred from these CPU/build checks.
+  No prior v1 PASS or performance result is inherited. No model/performance
+  admission is claimed here. Original proposal derivation follows unchanged;
+  its words 'proposal' and planned future steps describe the pre-implementation
+  reasoning, superseded only by this explicit status header.
+
+1. Exact storage coverage
+
+Let S be the caller's admitted default stream. native_impl in
+WORKTREE/csrc/lingbot_qk_combined/host.cpp:137-152 adds the five arguments, four
+native intermediate outputs, V view, fresh padded owner and send view to a
+shared Owners container, then records every storage on S before enqueueing pack.
+The callback retains that Owners container. The Python Lease also retains the
+original arguments, metadata, send and full owner; no reference is removed here.
+
+Removed Python expression       Earlier C++ storage record / preserved binding
+self.args[0] raw                initial owners[0]
+self.args[1] query gamma        initial owners[1]
+self.args[2] key gamma          initial owners[2]
+self.args[3] expanded cosine    initial owners[3]
+self.args[4] expanded sine      initial owners[4]
+self.metadata                  same StorageImpl as raw (validate_lease:170-175)
+self.send                      explicit send in owners vector (150)
+self.owner                     explicit full owner in owners vector (150)
+
+send and owner share one StorageImpl; send offset256 and complete8986112-element
+extent are still checked. metadata/raw share storage and offset, but their view
+shapes/strides remain individually validated. V aliases raw. These aliases are
+facts of construction plus the existing consumer admission, not equality of
+tensor values or coincident data pointers.
+
+The existing C++ loop has12 record calls for10 distinct storages in canonical
+inputs. The old Python loop adds9 calls: these8 and result. The proposal removes
+only those8; it does not deduplicate or remove ANY C++ registration.
+
+2. Stream and consumer dependency boundary
+
+admitted() requires current device = raw device, current stream = default, and
+no capture. native_impl records and enqueues its callback using the same captured
+S. The ordinary native ops, metadata view construction and Lease constructor
+do not introduce a stream context switch on this canonical model path. Lease
+captures the current stream after the call. validate_padded_send still requires
+current stream == lease.stream before allowing the unchanged collective; C++
+still checks exact source/owner metadata and captured pointers. No current-stream
+guard, device guard, poison check or single-use state transition is removed.
+
+The proposal relies on this admitted canonical path, not on a new promise that
+any arbitrary consumer/custom tensor hook may switch streams without admission.
+HCCL and receive order remain owned by original all_to_all_5D in comm.py; the
+patch does not substitute a custom collective or modify its group/async mode.
+
+3. Framework allocator / HCCL evidence
+
+Exact installed torch_npu source commit:
+5dd8ef3f9b375b5ae4a83538d5785754148c3302; downloaded files are pinned in
+source-pins.json (primary Ascend repository URLs).
+
+NPUCachingAllocator.cpp:1588-1595 inserts a stream into a per-block set under a
+lock; repeated membership is not a new use position. Its public wrapper at3411
+looks up the allocation before that insertion. It does not skip same-stream
+registrations. free():1501-1510 can later schedule events for the set. Therefore
+removing a duplicate registration saves its host work but does NOT establish
+that fewer free-time events will be emitted: the original C++ membership stays.
+
+ProcessGroupHCCL.cpp:4104 preserves producer-to-communication dependencies;
+4210-4235 records or stashes input storage for the internal communication stream.
+alltoall_base():7069-7080 protects receive storage; WorkHCCL::synchronizeInternal
+at1055-1062 orders the caller behind HCCL completion. These mechanisms and their
+memory-reuse policy branches are untouched. Framework HCCL registrations are
+not replaced by the Python caller-stream registration being deduplicated here.
+
+4. Result and exception lifetime
+
+result may own a receive allocation or alias a reordered receive; neither is
+assumed to have appeared in native_impl's argument/target list. Its Python
+record_stream remains exactly once, on the existing lease stream.
+
+All original exception paths remain: C++ poison/quarantine retains Owners on
+submission failure; Python Route adds returned send/owner to keep immediately;
+Lease.exchange failure poisons the shared provider and quarantines the lease,
+collective and group. A result-registration failure follows that same exception
+path. No write/communication-started fallback is introduced. Source/target owners
+are not shortened, rebound, reused or released by this patch.
+
+5. Revalidation, not inherited admission
+
+Root applies only after cross timing completes, then creates fresh parent and
+QK source-pinned builds. Keep actual192 fixture bytes and the frozen checker;
+run a NEW complete correctness/HCCL matrix, finite implication receipt linked
+to the new correctness, and three fresh timing rounds with the same gate.
+The old v1 correctness/performance receipts and manifest SHA do not admit this
+change. Model comparison is still contingent on the complete-call gate.
+
+6. Other host-cost findings — not included in this patch
+
+Policy: steady Route.prepare makes11 environment mapping reads and two effective
+native getter calls. The first cold load checks policy twice, but that occurs in
+warmup and cannot explain the steady timing gate. The pinned Module.cpp getter
+for JIT at1229 releases the GIL and reads jitCompile/jitCompileInit; _getOption at
+1912 reads the option registry. No explicit stream synchronization is shown in
+these getters. Do not label their latency device wait without a trace.
+
+A future C++ front admission could own immutable construction policy, source
+Tensor owners and coefficient snapshot identity/generation, performing one
+physical-owner scan per unique storage plus each view's bounds/shape checks.
+The current consumer scans raw/metadata and send/owner separately despite two
+StorageImpls. Per-view checks, expected raw/send pointer association, default
+stream, current device, fresh independent owner, poison and single-use checks
+must remain. Caching pointer/shape alone across forwards is unsafe.
+
+Moving policy/gamma/coefficient validation to once-per-forward is NOT yet proven:
+SharedCoefficients fields and config dictionaries are mutable, and inference
+tensors may lack version counters. It needs an authoritative forward token,
+immutable snapshot owners and a ban/enforcement against mid-forward policy
+changes; merely trusting a repeated generation integer would weaken admission.
+Direct C++ access to effective framework getters also requires a verified
+exported API; the current wheel's public Python getters cannot be replaced by
+guessed symbols or a raw registry interpretation. Keep these checks unchanged
+for this single-variable candidate.

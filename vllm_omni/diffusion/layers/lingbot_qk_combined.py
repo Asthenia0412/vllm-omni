@@ -187,8 +187,9 @@ class Lease:
             result = collective(self.metadata, scatter_idx=3, gather_idx=1, group=group,
                                 _prepared_send=self.send, _qk_padded_owner=self)
             need(self.used, "collective omitted the required padded-lease admission")
-            for owner in (*self.args, self.metadata, self.send, self.owner, result):
-                owner.record_stream(self.stream)
+            # Input/send owners were already recorded on this stream in C++.
+            # Keep the result registration: its storage comes from the consumer.
+            result.record_stream(self.stream)
             return result
         except BaseException as error:
             self.provider.fail(error, (self, collective, group))
