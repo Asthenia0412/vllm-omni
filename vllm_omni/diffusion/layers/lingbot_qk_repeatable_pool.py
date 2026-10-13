@@ -205,6 +205,9 @@ class PoolProvider:
         self.torch, self.backend = base.torch, base.backend
         self.producer_tid = threading.get_native_id()
         self.pools = {}  # Non-address descriptor keys -> handles; shared across all routes/layers.
+        # Published only after the sole cold pool passes its budget checks.
+        # Warm run still validates the actual descriptors/context in C++.
+        self._warm_handle = None
         self.cold_records = []  # create wall only; no explicit synchronization or hot instrumentation.
         self._stat_names = tuple(manifest["statistics_fields"])
         self._closing = self._closed = False
@@ -266,6 +269,7 @@ class PoolProvider:
             started = time.perf_counter_ns()
             handle = self.ops.create(*args, POOL_POLICY["plan_capacity"], POOL_POLICY["retirement_capacity"])
             ended = time.perf_counter_ns()
+            need(type(handle) is int and handle > 0, "native pool returned an invalid handle")
             self.pools[key] = handle  # Retain registry handle before any post-create validation can fail.
             stats = self.snapshot(handle)
             self.cold_records.append(dict(handle=handle, create_start_ns=started, create_end_ns=ended,
@@ -274,6 +278,7 @@ class PoolProvider:
                  and stats["workspace_initial_bytes"] == POOL_POLICY["workspace_budget_bytes"]
                  and stats["workspace_resident_bytes"] == stats["workspace_initial_bytes"],
                  "cold pool capacity/workspace/thread differs")
+            self._warm_handle = handle
             return handle
         except BaseException as error:
             self.fail(error, (args, self.pools))
@@ -354,7 +359,12 @@ class PoolRoute:
             provider.check_policy()
             if not provider.ordinary(args):
                 return None
-            handle = provider.ensure_pool(args)
+            handle = provider._warm_handle
+            if handle is None:
+                handle = provider.ensure_pool(args)
+            # The frozen native run checks every original descriptor, owner
+            # extent, thread and ACL context/stream before allocation or writes.
+            # A mismatch is terminal; never retry with another pool or fallback.
             send, owner = provider.ops.run(handle, *args)
             keep = (*keep, send, owner)  # Quarantine returned owners even if subsequent validation fails.
             need(send is not None and owner is not None, "pool returned incomplete output after submission")

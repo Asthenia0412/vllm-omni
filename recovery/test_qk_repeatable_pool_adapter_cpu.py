@@ -190,6 +190,98 @@ class PoolAdapterContracts(unittest.TestCase):
         self.assertEqual(len(p.pools),1)
         self.assertEqual(len(p.cold_records),1)
         self.assertGreaterEqual(p.cold_records[0]["create_wall_ns"],0)
+        self.assertEqual(p._warm_handle,7)
+
+    def test_warm_route_has_one_policy_and_admission_without_descriptor_key_work(self):
+        p=provider();r,a,s=route(p)
+        first=r.prepare(a[0],(s.cosine,s.sine),1)
+        # Stream's pointer getter and hash already raise in this CPU fixture.
+        with patch.object(p,'check_policy',wraps=p.check_policy) as policy, \
+             patch.object(p,'ordinary',wraps=p.ordinary) as ordinary, \
+             patch.object(p,'ensure_pool',side_effect=AssertionError('warm ensure_pool')), \
+             patch.object(p.base,'describe',side_effect=AssertionError('warm describe')), \
+             patch.object(qk,'_tuple',side_effect=AssertionError('warm descriptor key')):
+            second=r.prepare(a[0],(s.cosine,s.sine),1)
+        self.assertEqual(policy.call_count,1);self.assertEqual(ordinary.call_count,1)
+        self.assertEqual(len(p.ops.creates),1);self.assertEqual(len(p.ops.runs),2)
+        self.assertIsNot(first.owner,second.owner)
+        self.assertEqual(p.ops.runs[-1],(7,a))
+
+    def test_public_ensure_pool_keeps_full_checks_after_warm_publication(self):
+        p=provider();a=args();p.ensure_pool(a)
+        with patch.object(p,'check_policy',wraps=p.check_policy) as policy, \
+             patch.object(p,'ordinary',wraps=p.ordinary) as ordinary, \
+             patch.object(p.base,'describe',wraps=p.base.describe) as describe:
+            self.assertEqual(p.ensure_pool(a),7)
+        self.assertEqual(policy.call_count,1);self.assertEqual(ordinary.call_count,1)
+        self.assertEqual(describe.call_count,5);self.assertEqual(len(p.ops.creates),1)
+        self.assertEqual(p.ops.runs,[])
+
+    def test_warm_ordinary_refusals_do_not_run_or_poison(self):
+        for mode in ('cpu','dtype','stream','grad','format','shape','snapshot'):
+            p=provider();r,a,s=route(p)
+            r.prepare(a[0],(s.cosine,s.sine),1)
+            rotary=(s.cosine,s.sine)
+            if mode=='cpu': a[0].device=SimpleNamespace(type='cpu',index=0)
+            if mode=='dtype': a[0].dtype='FP32'
+            if mode=='stream': p.torch.npu.default_stream=lambda device:object()
+            if mode=='grad': p.torch.is_grad_enabled=lambda:True
+            if mode=='format': p.backend.get_npu_format=lambda value:29
+            if mode=='shape': a[0].shape=(1,586,15360)
+            if mode=='snapshot': rotary=(object(),object())
+            with patch.object(p,'ensure_pool',side_effect=AssertionError('unexpected cold/key path')):
+                self.assertIsNone(r.prepare(a[0],rotary,1),mode)
+            self.assertFalse(p.base.poisoned,mode)
+            self.assertEqual(len(p.ops.creates),1);self.assertEqual(len(p.ops.runs),1)
+            self.assertEqual(s.generation,1)
+
+    def test_warm_foreign_thread_policy_config_and_device_fail_before_native_run(self):
+        for mode in ('thread','policy','config','owner_device','current_device'):
+            p=provider();r,a,s=route(p)
+            r.prepare(a[0],(s.cosine,s.sine),1)
+            if mode=='policy': p.policy=('changed launch policy',)
+            if mode=='config': r.values['lingbot_npu_recovery_qk_combined']=True
+            if mode=='owner_device': a[1].device=SimpleNamespace(type='npu',index=1)
+            if mode=='current_device': p.torch.npu.current_device=lambda:1
+            tid=p.producer_tid+1 if mode=='thread' else p.producer_tid
+            with patch.object(qk.threading,'get_native_id',return_value=tid):
+                with self.assertRaises(RuntimeError,msg=mode):
+                    r.prepare(a[0],(s.cosine,s.sine),1)
+            self.assertTrue(p.base.poisoned,mode);self.assertTrue(p.reports,mode)
+            self.assertEqual(len(p.ops.creates),1);self.assertEqual(len(p.ops.runs),1)
+
+    def test_warm_native_key_rejection_poison_is_propagated_without_retry(self):
+        p=provider();r,a,s=route(p)
+        r.prepare(a[0],(s.cosine,s.sine),1)
+        # This fake exception tests propagation only. It is not physical-layout
+        # validation, which remains the unchanged C++ run's device-tested duty.
+        with patch.object(p.ops,'run',side_effect=RuntimeError('Input descriptor differs from cold key')) as run, \
+             patch.object(p,'ensure_pool',side_effect=AssertionError('must not retry/rekey')):
+            with self.assertRaisesRegex(RuntimeError,'descriptor differs'):
+                r.prepare(a[0],(s.cosine,s.sine),1)
+            self.assertTrue(p.base.poisoned);self.assertTrue(p.reports)
+            keep=qk._QUARANTINE[-1][1]
+            self.assertTrue(any(value is a[0] for value in keep))
+            with self.assertRaisesRegex(RuntimeError,'poisoned'):
+                r.prepare(a[0],(s.cosine,s.sine),1)
+            self.assertEqual(run.call_count,1)
+            self.assertEqual(run.call_args.args,(7,*a))
+        self.assertEqual(len(p.ops.creates),1)
+
+    def test_cold_handle_is_not_published_before_native_budget_validation(self):
+        for field,value in (('initialized',23),('workspace_initial_bytes',1),
+                            ('workspace_resident_bytes',0),('producer_tid',0)):
+            p=provider();create=p.ops.create
+            def invalid_create(*values):
+                handle=create(*values);p.ops.state[field]=value
+                return handle
+            p.ops.create=invalid_create
+            with self.assertRaisesRegex(RuntimeError,'cold pool capacity/workspace/thread'):
+                p.ensure_pool(args())
+            self.assertIsNone(p._warm_handle);self.assertTrue(p.base.poisoned)
+            # Native handle remains registered for failure quarantine; it must
+            # never be advertised as an eligible warm handle.
+            self.assertEqual(list(p.pools.values()),[7]);self.assertEqual(p.ops.runs,[])
 
     def test_different_descriptor_is_terminal_no_growth_or_fallback(self):
         p=provider();p.ensure_pool(args())
@@ -257,6 +349,15 @@ class PoolAdapterContracts(unittest.TestCase):
         p.finalize_all_drained()
         self.assertEqual(p.ops.closed,[7]);self.assertEqual(p.ops.finalized,[7])
         self.assertTrue(p._closed);self.assertEqual(p.snapshot(7)['workspace_resident_bytes'],0)
+
+    def test_warm_cached_handle_cannot_bypass_completed_close(self):
+        p=provider();r,a,s=route(p)
+        r.prepare(a[0],(s.cosine,s.sine),1)
+        p.close_all_drained();p.finalize_all_drained()
+        with self.assertRaisesRegex(RuntimeError,'closing/closed'):
+            r.prepare(a[0],(s.cosine,s.sine),1)
+        self.assertEqual(len(p.ops.runs),1)
+        self.assertEqual(p.ops.closed,[7]);self.assertEqual(p.ops.finalized,[7])
 
     def test_early_finalize_is_terminal_no_cleanup_retry(self):
         p=provider();p.ensure_pool(args())

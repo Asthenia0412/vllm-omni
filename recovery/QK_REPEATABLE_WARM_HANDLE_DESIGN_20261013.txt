@@ -1,0 +1,54 @@
+QK repeatable pool: independent Python warm-handle candidate
+2026-10-13
+
+Scope
+This candidate changes only Python selection of an already-created native pool.
+It is separate from the completed fixed-24-plan qualification. No prior speed
+or correctness result is inherited. Production model construction remains
+disabled, and full actual-192 correctness plus complete-call timing remain due.
+
+Design
+PoolProvider starts with _warm_handle=None. Public ensure_pool retains its full
+policy/admission checks, five descriptor reads and bounded descriptor-key map.
+Native create must return a positive integer. The map retains that handle before
+post-create checks so a failure keeps the native pool reachable for quarantine.
+Only after the existing producer-TID, initialized-capacity and workspace checks
+pass is _warm_handle published.
+
+PoolRoute.prepare still verifies the construction config, canonical coefficient
+snapshot, one launch-policy check and one ordinary-input admission on every
+eligible call. When the validated handle exists it calls the unchanged C++ run
+directly; otherwise it uses full ensure_pool. The warm path does not repeat the
+Python policy/admission pass, call describe, or reconstruct descriptor keys.
+Only an integer is cached; no input/output Tensor or borrowed arena is cached.
+
+The frozen v2 C++ run remains authoritative for device, inference, physical
+owner, full input signature, producer thread, default stream and ACL context.
+Original-input checks occur before allocation; native input/output signature
+checks occur before reclaim/recordStream/queue submission. A changed descriptor
+or invalid owner causes the existing terminal failure, with no pool growth,
+retry or native fallback. Ordinary unsupported inputs still return None before
+native run. The hint does not bypass the poisoned/closing/closed provider checks.
+
+Unchanged boundaries
+One provider pool; 24 plans; 32 retirement slots; 79,092,224 workspace bytes per
+plan and 1,898,213,376 bytes total. C++ source, DSO, arithmetic, fresh allocations,
+recordStream calls, events, retirement/reclaim, two-phase close, Lease, HCCL and
+benchmark definitions are unchanged. The provider's original map still owns
+the handles used for close/finalize. No raw ACL stream getter or Stream hash is
+introduced. Frozen v2 host SHA-256:
+fd65a7c9856f1e8726cd7350b257a0f9e11bde570632405cbb25fd179120e724
+
+CPU contract coverage
+Tests count exactly one warm policy and ordinary check and reject any warm
+ensure_pool/describe/key work. Public ensure_pool remains fully checked.
+Tests cover 40 routes sharing the same handle, independent returned owners,
+ordinary refusals, missing snapshots, foreign thread, changed config/policy,
+device-owner mismatch, post-submit owner quarantine and stale hints after close.
+A simulated native descriptor-key exception verifies poisoning and no retry;
+it explicitly does not prove physical-layout correctness. Cold capacity,
+workspace or TID mismatch must leave the warm hint unpublished.
+
+No device run or performance benefit is claimed by this design. Root owns a
+fresh source binding, actual-192 qualification and three-round complete-call
+screen; this source-only change does not grant model admission.
