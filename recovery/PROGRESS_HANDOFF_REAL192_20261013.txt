@@ -1,18 +1,23 @@
 LingBot 910C 恢复交接：真实192输入、独立正确性与当前性能边界
-2026-10-13；cross 三轮串行 rank clean timing 已完成并通过算子筛选
+2026-10-13；cross 算子筛选通过，但最新六次模型启动筛选失败
 
 当前结论
 
-完整历史获胜组合尚未恢复。当前可引用的干净模型计时仍是 partial：
-mean 944.15885 ms、P99 963.03828 ms/chunk，warm40 +161、窗口11–159。
-该运行启用重建 QK/recv、batched VAE、StageA 等，关闭 cross BSND/combined；
-不是完整组合，也不是三轮 final600 验收。历史 mean895–899 ms、P99911–914 ms
-属于旧二进制组合，不能移植到新实现的结果声明中。
+完整历史获胜组合尚未恢复。最新干净模型筛选每次warm40+161、窗口11–159：
+plain BSND参考A三轮mean为928.262885 /927.063994 /924.638337 ms，P99为
+942.128100 /944.020571 /939.464344 ms；combined候选B三轮mean为926.096251 /
+927.916780 /925.794271 ms，P99为944.014427 /945.198977 /940.703155 ms。
+三对平均仅改善0.052638 ms，后两对mean退化，未通过模型筛选；combined保持默认关闭。
+两臂均保留旧重建QK、recv、batched VAE、StageA，QK combined与async metadata关闭。
+先前944.15885 /963.03828 ms是cross关闭的SDPA配置，不是这次配对的A。
+上述均不是三轮final600验收。历史mean895–899 ms、P99911–914 ms属于旧二进制
+组合，不能移植为新实现的结果。完整表格与SHA见CROSS_ONLY_MODEL_SCREEN_20261013.txt。
 
 本轮新增了可信的真实输入矩阵：QK 与 cross 各192个 layer0 实际输入，均已
 完成独立设备正确性；QK combined 的完整调用三轮筛选失败。Cross combined 的
 完整 Attention.forward 三轮筛选通过，wall平均改善38.6%–39.5%，每轮最差case
-仍改善至少11.1%。这是串行die的独立调用证据，不代表模型chunk收益或最终达标。
+仍改善至少11.1%；最新模型paired80逐位检查通过，但六次启动未得到合格收益。
+独立算子收益不能相乘或移植为模型chunk收益。
 ASYNC_METADATA 继续显式0，不在当前恢复工作中混入新的变量。
 
 一、迁移时保存什么
@@ -72,7 +77,8 @@ Cross：plain public-native H40 BSND 与 combined C++ guard 都已重建；SDPA
 不是该恢复路径的逐位参考。旧 source-pinned构建已完成 BSND→BSND paired80，
 8x80 latent 与957 primary RGB 帧逐位相同；新的真实192验证还证明正常
 Attention.forward入口实际调用预期 provider。最新构建的独立完整调用筛选已通过；
-下一步是最新组合的模型paired80、六次启动筛选，不能直接沿用旧构建的模型资格。
+最新构建也已完成paired80和六次启动筛选：640份latent及957帧RGB逐位相同，
+但平均改善仅0.052638 ms，后两对mean退化，combined未获模型性能资格。
 
 engine58 + distributed38 + entrypoints114 + worker18 =228个历史 Python 文件
 曾逐文件验证与 frozen StageA source 一致；不能为掩盖恢复问题改动这些文件。
@@ -172,15 +178,16 @@ checker：recovery/check_cross_real_matrix.py；聚合：recovery/summarize_cros
 汇总校验精确serial8启动命令、capture/fixture/source/build身份、30个整数且不重叠
 wall窗口及A/B阶段顺序；checker16项、聚合器10项CPU测试均通过。
 
-1. Cross combined已获得进入模型验证的资格；使用当前baseline QK配对验证
-   plain BSND与combined。尚未获得最新完整模型的发布或最终性能资格。
+1. Cross combined已完成当前baseline QK上的paired80及六次模型启动。正确性通过、
+   性能筛选失败；保持默认关闭，不能从38–39%的孤立调用收益推算模型收益。
+   证据：recovery/validation/cross-only-six-model-screen-20261013.json。
 2. QK已有候选没有赢，保持当前baseline。利用完整调用证据重新定位Python
    admission、提交路径与rank迟到；只有明确修改执行路径才建立下一候选，
    不把旧失败实现原样重跑或默认启用。
 3. 对已通过筛选的恢复部分冻结新build/config/env，并验证实际dispatch。QK保持
    当前baseline，低调度路径缺口继续单列，不能称历史完整获胜组合已恢复。
-   做匹配BSND参考的paired80；纯搬运latent/RGB要求逐位相同。旧构建结果不能
-   自动给新源码组合继承资格。
+   新的候选仍须匹配参考做paired80；纯搬运latent/RGB要求逐位相同。旧构建结果
+   不能自动给新源码组合继承资格。本次cross-only配对已完成，无需原样重跑。
 4. 用完整八rank trace做因果关联、独立干净六次启动A1/B1/B2/A2/A3/B3筛选，
    每次warm40+161，主窗口11–159；只能将已测获胜路径组合。
 5. 完整组合再做三次独立warm40+600，窗口11–598，每轮mean<=900 ms且P99<=950 ms；
@@ -196,9 +203,11 @@ kernel工作量及270 ms copy不可重复相加。不要用这些旧trace证明9
 证据：recovery/TRACE_DEPENDENCY_AUDIT_20261013.txt；异步metadata边界见
 recovery/METADATA_TRANSFER_AUDIT_20261013.txt。
 
-六、只读整理的现有模型paired80 / clean timing入口（未执行）
+六、原始模型paired80 / clean timing命令模板
 
-以下是root协调后可使用的参数，不表示当前未过门槛的候选被准入。每个服务
+本节保留原始命令模板；最新cross-only两臂80块及六次计时已经执行，冻结计划位于
+ROOT/audits/cross-model-screen/20261013-v1/plan.json，执行器为
+recovery/run_cross_model_screen.py。未通过模型筛选的候选不能直接晋升。每个服务
 选择独立run/capture目录，只停自己supervisor记录的uid/pgid/start/nonce进程。
 不在Cross clean timing期间跑大文件哈希、CPU tests、offline exporter或其他设备工作。
 
