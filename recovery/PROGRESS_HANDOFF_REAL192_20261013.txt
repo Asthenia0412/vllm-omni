@@ -184,6 +184,16 @@ wall窗口及A/B阶段顺序；checker16项、聚合器10项CPU测试均通过�
 2. QK已有候选没有赢，保持当前baseline。利用完整调用证据重新定位Python
    admission、提交路径与rank迟到；只有明确修改执行路径才建立下一候选，
    不把旧失败实现原样重跑或默认启用。
+   新的独立八rank窄诊断已完成：46,080个相关rank-sample中，public
+   all_to_all_single host调用49次>2ms、5次>5ms；初始receive allocation、
+   guard和bridge均无>2ms，output layout有2次。两臂均有迟返，不能据此
+   判定网络或allocator锁。rank6的7.22ms迟返与下一调用7.14ms到达差、
+   peers随后7.3–7.4ms等待具有传播关联，不能相加算收益。
+   源码、24项CPU tests、新correctness-v2/profile-v2及完整收据保存在
+   ROOT/qk-record-once-worktree/recovery/QK_COLLECTIVE_BOUNDARIES_DIAGNOSTIC_20261013.txt。
+   GitHub分支codex/lingbot-qk-record-once-20261013，提交aca2f5393fc508aacea69eb6db8d552e1dc0bdf6；
+   与本地2cbd068296a6050a1774d4bb3fc2fc495666b08a的tree一致。
+   这不是模型性能样本，QK正式gate仍失败，ASYNC_METADATA仍0。
 3. 对已通过筛选的恢复部分冻结新build/config/env，并验证实际dispatch。QK保持
    当前baseline，低调度路径缺口继续单列，不能称历史完整获胜组合已恢复。
    新的候选仍须匹配参考做paired80；纯搬运latent/RGB要求逐位相同。旧构建结果
