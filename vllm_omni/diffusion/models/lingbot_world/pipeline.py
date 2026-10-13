@@ -58,6 +58,8 @@ from vllm_omni.diffusion.models.lingbot_world.camera import (
 )
 from vllm_omni.diffusion.models.lingbot_world.dmd_block import ARBlockContext, LingBotDMDBlockRunner
 from vllm_omni.diffusion.layers import lingbot_fixed_timestep_bank_stageA_v1 as fixed_timestep_bank
+from vllm_omni.diffusion.layers import lingbot_fixed_modulation_stageB as fixed_modulation
+from vllm_omni.diffusion.layers import lingbot_fixed_modulation_screen as fixed_modulation_screen
 from vllm_omni.diffusion.models.lingbot_world.transformer import (
     CameraModulationCache,
     CausalLingBotWorldTransformer3DModel,
@@ -781,6 +783,8 @@ class LingBotWorldCausalDMDPipeline(
 
         self._lingbot_conditioning_policy = configure_timestep_fp32_once(self.transformer, model_config)
         fixed_timestep_bank.configure(self, model_config)
+        fixed_modulation.configure(self, model_config)
+        fixed_modulation_screen.configure(self, model_config)
 
 
         from vllm_omni.diffusion.layers.lingbot_chunk_prefix_cache import configure_chunk_prefix_cache
@@ -931,6 +935,7 @@ class LingBotWorldCausalDMDPipeline(
                 + 2 * self._condition_encoder_cache_bytes()  # Committed and in-flight histories.
                 + self._streaming_decode_bytes_per_session()
                 + fixed_timestep_bank.reservation_bytes(self)
+                + fixed_modulation.reservation_bytes(self)
             ),
         )
 
@@ -1012,9 +1017,12 @@ class LingBotWorldCausalDMDPipeline(
 
     def _seal_fixed_timestep_bank_after_worker_load(self, worker_owner) -> None:
         fixed_timestep_bank.seal_after_worker_load(self, worker_owner)
+        fixed_modulation.seal_after_worker_load(self, worker_owner)
 
     def _release_condition_encoder_state(self, session_id: str) -> None:
+        fixed_modulation.begin_retire(self, session_id)
         fixed_timestep_bank.retire_session(self, session_id)
+        fixed_modulation.retire_after_stageA(self, session_id)
         state = self._ar_sessions.pop(session_id, None)
         if state is not None:
             state.encoder_cache = None

@@ -778,6 +778,7 @@ class LingBotAttentionBlock(nn.Module):
         rotary_emb: tuple[torch.Tensor, torch.Tensor],
         camera_modulation: tuple[torch.Tensor, torch.Tensor] | None = None,
         uniform_timestep: bool = False,
+        fixed_modulation_parts: tuple[torch.Tensor, ...] | None = None,
     ) -> tuple[torch.Tensor, LingBotAttentionCache]:
         batch_size, token_count, dim = hidden_states.shape
         if (
@@ -796,8 +797,10 @@ class LingBotAttentionBlock(nn.Module):
         # Without SP, broadcast per frame. With SP, each entry represents one token.
         tokens_per_frame = token_count // num_frames
         # Timestep, camera, and text remain separate conditioning paths.
-        modulation = self.modulation.unsqueeze(1) + timestep_projection.float()
-        shift_msa, scale_msa, gate_msa, shift_ffn, scale_ffn, gate_ffn = modulation.chunk(6, dim=2)
+        if fixed_modulation_parts is None:
+            modulation = self.modulation.unsqueeze(1) + timestep_projection.float()
+            fixed_modulation_parts = modulation.chunk(6, dim=2)
+        shift_msa, scale_msa, gate_msa, shift_ffn, scale_ffn, gate_ffn = fixed_modulation_parts
 
         hidden_grid = hidden_states.unflatten(1, (num_frames, tokens_per_frame))
         fused_pointwise = fused_pointwise_enabled(hidden_states)
@@ -1552,6 +1555,8 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
             geometry=(patched_height, patched_width),
             token=fixed_timestep_token,
         )
+        # Retain the actual StageA producer owner for StageB capability checks.
+        fixed_modulation_source = timestep_projection
         # Diagnostic-only original frame rows; no host copy on the normal path.
         capture_frame_projection(self, timestep, timestep_projection)
         projected_text = (
@@ -1611,56 +1616,80 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
         # optional staging so block graphs can keep a static FP32 input address.
         timestep_projection = prepare_timestep_projection(self, timestep_projection)
         timestep_projection = self._stage_timestep_projection(timestep_projection)
+        from vllm_omni.diffusion.layers import lingbot_fixed_modulation_stageB as fixed_modulation
+
+        fixed_modulation_forward = fixed_modulation.prepare_forward(
+            self, fixed_timestep_token, timestep, fixed_modulation_source,
+            timestep_projection, uniform_timestep,
+        )
+        modulation_screen = getattr(self, "_lingbot_stageB_operator_screen", None)
+        if modulation_screen is not None:
+            fixed_modulation_forward = modulation_screen.capture(
+                self, fixed_timestep_token, timestep, fixed_modulation_source,
+                timestep_projection, uniform_timestep,
+                history_forward_context.kv_len if history_forward_context is not None else 0,
+                fixed_modulation_forward,
+            )
         rotary_emb = (cosine, sine)
         prepare_native_bf16_qk(self, rotary_emb)
-        # Phase 3: each layer receives its own cache entry. Text K/V is passed
-        # only when absent; the returned cache is stored for subsequent DMD
-        # steps and causal blocks in this request. A caller-held camera cache
-        # gives every block its modulation once per AR block.
-        for index, block in enumerate(self.blocks):
-            camera_modulation = None
-            if camera_modulation_cache is not None:
-                camera_modulation = camera_modulation_cache.entries.get(index)
-                if camera_modulation is None:
-                    camera_modulation = block.camera_modulation(camera_hidden_states)
-                    camera_modulation_cache.entries[index] = camera_modulation
-            hidden_states, cross_cache = block(
-                hidden_states,
-                projected_text if cache.cross_attention[index] is None else None,
-                timestep_projection,
-                camera_hidden_states,
-                camera_modulation=camera_modulation,
-                uniform_timestep=uniform_timestep,
-                self_cache=cache.self_attention[index],
-                cross_cache=cache.cross_attention[index],
-                current_start=current_start,
-                sink_tokens=sink_tokens,
-                update_cache=update_cache,
-                rotary_emb=rotary_emb,
-            )
-            cache.cross_attention[index] = cross_cache
+        try:
+            # Phase 3: each layer receives its own cache entry. Text K/V is passed
+            # only when absent; the returned cache is stored for subsequent DMD
+            # steps and causal blocks in this request. A caller-held camera cache
+            # gives every block its modulation once per AR block.
+            for index, block in enumerate(self.blocks):
+                camera_modulation = None
+                if camera_modulation_cache is not None:
+                    camera_modulation = camera_modulation_cache.entries.get(index)
+                    if camera_modulation is None:
+                        camera_modulation = block.camera_modulation(camera_hidden_states)
+                        camera_modulation_cache.entries[index] = camera_modulation
+                hidden_states, cross_cache = block(
+                    hidden_states,
+                    projected_text if cache.cross_attention[index] is None else None,
+                    timestep_projection,
+                    camera_hidden_states,
+                    camera_modulation=camera_modulation,
+                    uniform_timestep=uniform_timestep,
+                    fixed_modulation_parts=(
+                        fixed_modulation_forward.get(index, block, timestep_projection)
+                        if fixed_modulation_forward is not None else None
+                    ),
+                    self_cache=cache.self_attention[index],
+                    cross_cache=cache.cross_attention[index],
+                    current_start=current_start,
+                    sink_tokens=sink_tokens,
+                    update_cache=update_cache,
+                    rotary_emb=rotary_emb,
+                )
+                cache.cross_attention[index] = cross_cache
 
-        # Phase 4: project local tokens before gathering the much narrower flow values.
-        hidden_states = self.head(
-            hidden_states,
-            timestep_embedding,
-            tokens_per_frame=tokens_per_frame if sp_size > 1 else None,
-            token_offset=get_sp_group().ulysses_rank * (global_tokens // sp_size) if sp_size > 1 else 0,
-        )
-        hidden_states = self.sp_output_gather(hidden_states)
-        projected_dim = self.config.out_channels * math.prod(self.config.patch_size)
-        if sp_size > 1 and hidden_states.shape != (batch_size, global_tokens, projected_dim):
-            raise RuntimeError("LingBot SP output hook did not gather the full projected token sequence.")
-        output = self._unpatchify(
-            hidden_states,
-            batch_size=batch_size,
-            frames=patched_frames,
-            height=patched_height,
-            width=patched_width,
-        )
-        if history_forward_context is not None:
-            history_forward_context.mark_history_staged()
-        return output
+            # Phase 4: project local tokens before gathering the much narrower flow values.
+            hidden_states = self.head(
+                hidden_states,
+                timestep_embedding,
+                tokens_per_frame=tokens_per_frame if sp_size > 1 else None,
+                token_offset=get_sp_group().ulysses_rank * (global_tokens // sp_size) if sp_size > 1 else 0,
+            )
+            hidden_states = self.sp_output_gather(hidden_states)
+            projected_dim = self.config.out_channels * math.prod(self.config.patch_size)
+            if sp_size > 1 and hidden_states.shape != (batch_size, global_tokens, projected_dim):
+                raise RuntimeError("LingBot SP output hook did not gather the full projected token sequence.")
+            output = self._unpatchify(
+                hidden_states,
+                batch_size=batch_size,
+                frames=patched_frames,
+                height=patched_height,
+                width=patched_width,
+            )
+            if history_forward_context is not None:
+                history_forward_context.mark_history_staged()
+            fixed_modulation.finish_forward(fixed_modulation_forward)
+            return output
+        except BaseException as error:
+            if fixed_modulation_forward is not None:
+                fixed_modulation.abort_forward(fixed_modulation_forward, error)
+            raise
 
     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
         """Load exact checkpoint names, delegating TP sharding to parameters."""

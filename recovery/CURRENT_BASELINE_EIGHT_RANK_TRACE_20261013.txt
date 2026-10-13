@@ -1,0 +1,87 @@
+Current recovery baseline: eight-rank Level1 dependency analysis,2026-10-13
+
+This is the new batched-VAE/StageA/plain-BSND baseline, not the old slow-row-copy
+trace. Four packages4–7/eight dies8–15,SP8/TP1/ring1,832x480,DMD4,full history,
+BF16 attention,FFN W8A8 NZ,12FPS,pixelP2P+deviceinterleave. QK-combined/cross
+combined/async metadata OFF. MatchingCANN9.1 exporter,Level1 CPU+NPU with one
+PipeUtilization metric group. Separate warm40 then capture16 complete chunks;
+all eight raw profiles exported successfully.
+
+Scope limitation: stage-range environment was accidentally omitted. There are
+no lingbot stage markers. The default stage analyzer correctly rejected this;
+that failure is retained. A separate explicit reconstruction finds the unique
+16 uint8 aten::_to_copy RGB-shaped calls on rank0:9 frames then15x12 frames,
+same thread, ordered/non-overlapping. Source supports the device-interleave
+host=result.cpu() interpretation. D2H direction, explicit request/chunk ID and
+globally calibrated clocks are not independently proved. Treat the boundaries
+as reconstructed evidence, not explicit stage-marker proof.
+
+Windows11–14 each contain160 send and160 recv anchors,320 common eight-rank
+AlltoAll operations. All8 exports and CSVs are present; no kernel crosses a
+selected boundary. 'complete_eight_rank_evidence=true' means this precise
+coverage/count test passed, not that boundary/clock/event identity is proved.
+
+Mean profiled window1187.967ms. Interval-union partitions per rank,ms/chunk:
+rank  compute-only  communication-only  overlap  neither
+0       727.400          291.951         90.960   77.657
+1       735.472          237.451         83.758  131.287
+2       733.038          261.074         86.392  107.462
+3       732.200          271.344         90.625   93.798
+4       726.731          323.292         95.228   42.715
+5       729.270          309.353         93.268   56.076
+6       726.086          318.163         94.398   49.320
+7       722.659          327.127         94.251   43.930
+
+Do not compare/add1188ms profiling latency to the clean925–928ms service metric.
+Communication includes waits; neither does not mean CPU idle. The new classifier
+recognizes hcom and BatchSendRecv previously omitted by narrower heuristics;
+old communication-only ranges are not directly comparable. Event/task waits
+are diagnostics and are never added to kernel interval unions.
+
+Actual common communication per reconstructed chunk:
+ 320 AlltoAll
+ 102 BatchSendRecv (99 BF16 halo candidates +3 UINT8 final-pixel collections)
+ 7 AllGather (4 BF16 count37440,3 BF16 count299520)
+Count37440 is source-consistent with585x64 final DiT flow; count299520 is
+consistent with384x1x60x13 VAE attention. The99 BF16 operations need their
+specific source dependencies before assigning removable halo time. Counts are
+not bytes or predicted end-to-end savings.
+
+AlltoAll exported start spread: per-chunk mean0.543–0.774ms,max5.411ms. This
+capture does not reproduce the old90ms lateness. Largest forward target at
+chunk12,count1123200 has rank2 last; host-submit spread5.711ms,exported start
+spread5.411ms. Second reverse target atchunk14,count374400 has rank0 last;
+host-submit spread48.614ms but exported start spread4.851ms. Submission-ahead
+and queued producer dependencies therefore differ from device start skew.
+Connection IDs uniquely link these targets to HcclAlltoAll and CANN launch.
+Temporal neighboring kernels are not proven causal edges; exact event-handle
+identity, CPU scheduling/GIL cause and network arrival are not established.
+
+Long stream synchronizations overlap nearly all their upstream device work,
+so their wall durations cannot be added as independent engine losses. Narrow
+input-shape checks also find4680-element int64 metadata copies in long waits
+on non-root ranks, while rank0's longest RGB copy is12x480x832x3 uint8. The
+async metadata experiment remains OFF; shape evidence is not a saving estimate.
+
+New source-supported optimization tested separately: original block modulation
+is repeated160x/chunk despite StageA. See STAGE_B_MODULATION_SCREEN_20261013.txt
+for its first full-call rejection; removing arithmetic alone did not speed the
+first guarded cache implementation.
+
+Reproduction scripts copied unchanged under recovery/diagnostics/eight_rank/:
+ analyze_eight.py (11 CPU tests passed)
+ test_analyze_eight.py
+ alltoall_dependencies.py
+The source SHA in the original JSON refers to the frozen external copy.
+Inputs and large trace/report artifacts remain in the persistent ROOT:
+ ROOT/profiles/current-baseline-v1/diffusion_rank0..7/
+ ROOT/audits/current-baseline-profile-v1/analysis/eight-rank-dependencies.json
+ ROOT/audits/current-baseline-profile-v1/analysis/alltoall-dependencies.json
+ ROOT/audits/current-baseline-profile-v1/plan.json
+ ROOT/audits/current-baseline-profile-v1/controller-result.json
+ ROOT/profiles/current-baseline-v1/export-receipt.json
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+
+The16-chunk request completed. Owned retirement ultimately requiredSIGKILL;
+fatal=null and owned process set empty. This is not healthy-shutdown acceptance.
+Current full-stack performance and final acceptance status remain unchanged.

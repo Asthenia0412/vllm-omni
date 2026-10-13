@@ -1,0 +1,112 @@
+"""Freeze an independent runtime binding and actual40-layer region screen."""
+from __future__ import annotations
+import argparse
+import copy
+import json
+from pathlib import Path
+import shlex
+
+from run_cross_model_screen import need, pin, read, source_check, write
+
+FLAG = "lingbot_npu_fixed_modulation_stageB"
+
+
+def prepare(parent_plan, output, port):
+    import yaml
+    root = Path(__file__).resolve().parents[1]
+    parent_plan = Path(parent_plan).resolve(strict=True)
+    parent = read(parent_plan)
+    output = Path(output).resolve()
+    need(not (output / "plan.json").exists(), "Frozen experiment already exists")
+    source_check(parent["manifest"])
+    need(pin(parent["configs"]["A"]["path"]) == parent["configs"]["A"], "Parent baseline config changed")
+    output.mkdir(parents=True, exist_ok=True)
+    ancestry = read(parent["manifest"]["path"])
+    manifest = copy.deepcopy(ancestry)
+    old_root = Path(parent["worktree"])
+    # Preserve the qualified native libraries and their exact source bytes.
+    manifest["compilation_ancestor"] = parent["manifest"]
+    manifest.update(runtime_binding_only=True, recompiled=False,
+                    device_validated=False, model_validated=False,
+                    historical_admission_inherited=False)
+    for key in ("source",):
+        relative = Path(manifest[key]["path"]).relative_to(old_root)
+        new = pin(root / relative)
+        need((new["bytes"], new["sha256"]) == (manifest[key]["bytes"], manifest[key]["sha256"]),
+             "Unchanged native source required")
+        manifest[key] = new
+    paths = [Path(item["path"]).relative_to(old_root) for item in ancestry["runtime_sources"]]
+    paths += [Path(p) for p in (
+        "vllm_omni/diffusion/models/lingbot_world/pipeline.py",
+        "vllm_omni/diffusion/models/lingbot_world/dmd_block.py",
+        "vllm_omni/diffusion/layers/lingbot_fixed_modulation_stageB.py",
+        "vllm_omni/diffusion/layers/lingbot_fixed_modulation_screen.py",
+        "vllm_omni/diffusion/layers/lingbot_fixed_timestep_bank_stageA_v1.py",
+        "vllm_omni/diffusion/hooks/base.py",
+        "vllm_omni/diffusion/hooks/sequence_parallel.py",
+        "vllm_omni/diffusion/distributed/sp_plan.py",
+        "vllm_omni/diffusion/layers/lingbot_conditioning_ops.py",
+        "vllm_omni/diffusion/layers/lingbot_frame_conditioning.py")]
+    manifest["runtime_sources"] = [pin(root / p) for p in sorted(set(paths))]
+    manifest_path = output / "host_manifest.json"
+    write(manifest_path, manifest)
+    source_check(pin(manifest_path))
+    parity = read(root / "recovery/validation/historical-infrastructure-source-parity-20261013.json")
+    need(parity["passed"] and len(parity["files"]) == 228, "Historical file list must cover228")
+    protected = []
+    for item in parity["files"]:
+        actual = pin(root / item["relative_path"])
+        need(actual["sha256"] == item["historical_sha256"], "Protected Python changed: " + item["relative_path"])
+        protected.append(actual)
+    configs = {}
+    for arm in ("A", "B"):
+        config = yaml.safe_load(Path(parent["configs"]["A"]["path"]).read_text())
+        config["stages"][0]["model_config"][FLAG] = arm == "B"
+        path = output / f"config-{arm}.yaml"
+        path.write_text(yaml.safe_dump(config, sort_keys=False))
+        configs[arm] = pin(path)
+    env = dict(parent["base_environment"])
+    env["PYTHONPATH"] = env["PYTHONPATH"].replace(str(old_root), str(root), 1)
+    env.update(LINGBOT_RECOVERY_MANIFEST=str(manifest_path),
+               LINGBOT_RECOVERY_MANIFEST_SHA256=pin(manifest_path)["sha256"])
+    need(env["VLLM_LINGBOT_NPU_ASYNC_METADATA"] == "0", "Metadata must remain OFF")
+    harness = ["prepare_stageB_operator.py", "run_stageB_operator.py", "run_smoke.py", "supervise.py",
+               "run_cross_model_screen.py", "summarize_timing.py"]
+    plan = dict(schema="lingbot_actual_stageB_operator_plan_v1", worktree=str(root), output=str(output),
+                parent_plan=pin(parent_plan), parent_baseline_config=parent["configs"]["A"],
+                manifest=pin(manifest_path), protected=protected, configs=configs,
+                base_environment=env, port=port, model=parent["model"], image=parent["image"],
+                integrity=parent["integrity"], model_revision=parent["model_revision"],
+                harness=[pin(root / "recovery" / name) for name in harness],
+                benchmark=[pin(root / "benchmarks/lingbot_world" / name) for name in (
+                    "benchmark_lingbot_world_realtime.py", "workload.py", "interaction_telemetry.py")],
+                env_script=pin(root / "recovery/env.sh"), rounds=3,
+                histories=[4680, 9360, 14040, 18720, 23400, 28080], probes=4, ranks=8,
+                actual_layers=40, warmups=20, wall_samples=30, event_samples=30,
+                speed_gate=dict(mean_ratio_max=0.90, worst_case_ratio_max=1.05),
+                model_admitted=False, final_acceptance=False)
+    for number in (1, 2, 3):
+        stage = output / f"operator{number}"
+        stage.mkdir(exist_ok=True)
+        selected = dict(env, LINGBOT_STAGEB_OPERATOR_SCREEN_DIR=str(stage / "checks"))
+        shell = "#!/usr/bin/env bash\nset -eo pipefail\ncd " + shlex.quote(str(root)) + "\nsource recovery/env.sh\n"
+        shell += 'while IFS= read -r key; do\n case "$key" in LINGBOT_*|VLLM_LINGBOT_*|ROOT_LINGBOT_*|OMP_NUM_THREADS|MKL_NUM_THREADS|ASCEND_RT_VISIBLE_DEVICES|TASK_QUEUE_ENABLE|PYTORCH_NPU_ALLOC_CONF|ASCEND_CUSTOM_OPP_PATH|PYTHONPATH|VLLM_TARGET_DEVICE|VLLM_WORKER_MULTIPROC_METHOD) unset "$key";; esac\ndone < <(compgen -e)\n'
+        for key, value in selected.items():
+            shell += "export " + key + "=" + shlex.quote(value) + "\n"
+        shell += "exec " + shlex.join(["python", "recovery/supervise.py", "--runs", str(stage / "services"),
+            "--mode", "profile", "--recv", "--manifest", str(manifest_path), "--", "vllm", "serve", plan["model"],
+            "--omni", "--deploy-config", configs["B"]["path"], "--port", str(port), "--init-timeout", "1800",
+            "--stage-init-timeout", "1800"]) + "\n"
+        (stage / "launch.sh").write_text(shell)
+    plan["launch_scripts"] = [pin(output / f"operator{i}/launch.sh") for i in (1,2,3)]
+    write(output / "plan.json", plan)
+    return output / "plan.json"
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--parent-plan", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--port", type=int, default=7816)
+    args = parser.parse_args()
+    print(prepare(args.parent_plan, args.output, args.port))

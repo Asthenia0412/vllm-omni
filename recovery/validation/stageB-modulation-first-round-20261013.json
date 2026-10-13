@@ -1,0 +1,268 @@
+{
+  "schema": "lingbot_stageB_operator_first_round_rejection_v1",
+  "plan": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/plan.json",
+    "bytes": 67967,
+    "sha256": "4c7bc33d133bf680912b6b560da7844eeba75d55c8eede1d3365e1da9bcaca07"
+  },
+  "report_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank0.json",
+      "bytes": 83737,
+      "sha256": "6ba134e7372f943330f690ce9f712a7a2008cc66230027b38908312131a2eb1f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank1.json",
+      "bytes": 83763,
+      "sha256": "8c75a2e2caf2266902b6e9b0db999f06724abb283689798f3c8957eb523d2144"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank2.json",
+      "bytes": 83760,
+      "sha256": "c6a075af8fd7a338bbffd22a7a036650ff1b60abb924ffca83f00bcd9a473768"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank3.json",
+      "bytes": 83764,
+      "sha256": "3aad93b3c6cf31b30abc3cc5d1cca32e8e99ead527bdb049976a2941ff5d7e08"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank4.json",
+      "bytes": 83836,
+      "sha256": "e9094c6d9a82eb4af2feeb77414237f99dfc726a77fb65af2bf6094a4ebb980f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank5.json",
+      "bytes": 83783,
+      "sha256": "bec72d691bdb044f675c64ca10034b1912c1a4e3351fde73c14d9ae98a536879"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank6.json",
+      "bytes": 83735,
+      "sha256": "1a4948bc349193f0d1c9885a42f65572e97c509de8465234add19b5c7ea6b2bd"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank7.json",
+      "bytes": 83700,
+      "sha256": "31972337843ca4631d152fdfc778a1b4447674dce5984ac5863622801beac908"
+    }
+  ],
+  "controller": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/controller-result.json",
+    "bytes": 780,
+    "sha256": "1421932c6501a4b4807c77e61dbd96ba1ead3844e78f7333c200a6f19350e49f"
+  },
+  "actual_ranks": 8,
+  "actual_histories": 6,
+  "actual_probes": 4,
+  "actual_layers": 40,
+  "actual_cases": 192,
+  "cpu_tests": 38,
+  "rounds_completed": 1,
+  "rounds_planned": 3,
+  "remaining_rounds": "not executed; first round fails every case by>4x",
+  "correctness_scope": "in-service all six original FP32 logical views/stride/offset and readonly parameter/source checks on all40 layers; not full allocation padding or canary qualification",
+  "full_arena_proven": false,
+  "outer_canary_proven": false,
+  "mean_native_ms": 1.9029906375,
+  "mean_candidate_ms": 8.487324226388889,
+  "mean_ratio": 4.4599926342984375,
+  "worst_case_ratio": 4.760422644695986,
+  "failed_cases": 24,
+  "mean_gate_passed": false,
+  "worst_gate_passed": false,
+  "strict_gate_passed": false,
+  "model_admitted": false,
+  "baseline_enabled": false,
+  "final_acceptance": false,
+  "cases": [
+    {
+      "history": 4680,
+      "probe": 0,
+      "native_ms": 1.8955250333333333,
+      "candidate_ms": 8.4526454,
+      "ratio": 4.45926339740066
+    },
+    {
+      "history": 4680,
+      "probe": 1,
+      "native_ms": 1.8640815333333334,
+      "candidate_ms": 8.524772366666667,
+      "ratio": 4.5731756976438405
+    },
+    {
+      "history": 4680,
+      "probe": 2,
+      "native_ms": 2.0971754,
+      "candidate_ms": 8.5182662,
+      "ratio": 4.061780526321261
+    },
+    {
+      "history": 4680,
+      "probe": 3,
+      "native_ms": 2.0553736000000002,
+      "candidate_ms": 8.478166533333333,
+      "ratio": 4.124878578441083
+    },
+    {
+      "history": 9360,
+      "probe": 0,
+      "native_ms": 2.002946333333333,
+      "candidate_ms": 8.4627494,
+      "ratio": 4.225150349343693
+    },
+    {
+      "history": 9360,
+      "probe": 1,
+      "native_ms": 2.014956666666667,
+      "candidate_ms": 8.467783166666665,
+      "ratio": 4.202464155556694
+    },
+    {
+      "history": 9360,
+      "probe": 2,
+      "native_ms": 1.9990924333333333,
+      "candidate_ms": 8.514768733333332,
+      "ratio": 4.259317173811522
+    },
+    {
+      "history": 9360,
+      "probe": 3,
+      "native_ms": 2.0079742,
+      "candidate_ms": 8.478722733333333,
+      "ratio": 4.222525734311393
+    },
+    {
+      "history": 14040,
+      "probe": 0,
+      "native_ms": 1.8843395666666667,
+      "candidate_ms": 8.469551433333333,
+      "ratio": 4.494705510172821
+    },
+    {
+      "history": 14040,
+      "probe": 1,
+      "native_ms": 1.8763539666666667,
+      "candidate_ms": 8.498684366666668,
+      "ratio": 4.529360940230556
+    },
+    {
+      "history": 14040,
+      "probe": 2,
+      "native_ms": 1.7845438666666666,
+      "candidate_ms": 8.495183033333333,
+      "ratio": 4.760422644695986
+    },
+    {
+      "history": 14040,
+      "probe": 3,
+      "native_ms": 1.8475506000000002,
+      "candidate_ms": 8.529713966666666,
+      "ratio": 4.616768800089516
+    },
+    {
+      "history": 18720,
+      "probe": 0,
+      "native_ms": 1.8823036333333334,
+      "candidate_ms": 8.471095966666667,
+      "ratio": 4.500387619007766
+    },
+    {
+      "history": 18720,
+      "probe": 1,
+      "native_ms": 1.8811535666666666,
+      "candidate_ms": 8.4645677,
+      "ratio": 4.499668634176898
+    },
+    {
+      "history": 18720,
+      "probe": 2,
+      "native_ms": 1.9254842666666665,
+      "candidate_ms": 8.4654802,
+      "ratio": 4.396546025616275
+    },
+    {
+      "history": 18720,
+      "probe": 3,
+      "native_ms": 1.8544430333333335,
+      "candidate_ms": 8.485030633333333,
+      "ratio": 4.575514308509988
+    },
+    {
+      "history": 23400,
+      "probe": 0,
+      "native_ms": 1.8303177666666666,
+      "candidate_ms": 8.482514333333334,
+      "ratio": 4.634448994494272
+    },
+    {
+      "history": 23400,
+      "probe": 1,
+      "native_ms": 1.8530583333333333,
+      "candidate_ms": 8.4765446,
+      "ratio": 4.574353892439077
+    },
+    {
+      "history": 23400,
+      "probe": 2,
+      "native_ms": 1.8438462333333334,
+      "candidate_ms": 8.450385,
+      "ratio": 4.583020453242061
+    },
+    {
+      "history": 23400,
+      "probe": 3,
+      "native_ms": 1.8504551,
+      "candidate_ms": 8.538485166666666,
+      "ratio": 4.614262278866786
+    },
+    {
+      "history": 28080,
+      "probe": 0,
+      "native_ms": 1.8486612333333334,
+      "candidate_ms": 8.475792466666666,
+      "ratio": 4.584827286816584
+    },
+    {
+      "history": 28080,
+      "probe": 1,
+      "native_ms": 1.8612255,
+      "candidate_ms": 8.5217695,
+      "ratio": 4.578579812064685
+    },
+    {
+      "history": 28080,
+      "probe": 2,
+      "native_ms": 1.8548503333333333,
+      "candidate_ms": 8.488232633333332,
+      "ratio": 4.576235872400127
+    },
+    {
+      "history": 28080,
+      "probe": 3,
+      "native_ms": 1.8560631,
+      "candidate_ms": 8.4848759,
+      "ratio": 4.5714371995219345
+    }
+  ],
+  "current_model_performance_unchanged": true,
+  "closure": {
+    "completed": true,
+    "exit_code": -9,
+    "intentional_retirement": true,
+    "fatal": null,
+    "supervisor_return_code": 247,
+    "remaining_owned_processes": [],
+    "launch": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/services/aa8cbc73fe4315c6a37cebf8cb73075c/launch.json",
+      "bytes": 697,
+      "sha256": "ae7455a624f6d295fbdf2c42b6ff26b45e7e87d0a0fd4fee1f688c07d1998aea"
+    },
+    "result": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/services/aa8cbc73fe4315c6a37cebf8cb73075c/result.json",
+      "bytes": 751,
+      "sha256": "d20a3a4579f20f62088464fcff0802078c1a3a5f2157e0129c55857ffd9fe5d8"
+    },
+    "end_boot_ns": 204324944736048
+  }
+}

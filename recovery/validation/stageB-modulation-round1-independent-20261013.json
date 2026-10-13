@@ -1,0 +1,429 @@
+{
+  "schema": "lingbot_stageB_round1_independent_review_v1",
+  "review_passed": true,
+  "scope": "CPU-only verification and recomputation of the frozen first operator round",
+  "plan": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/plan.json",
+    "bytes": 67967,
+    "sha256": "4c7bc33d133bf680912b6b560da7844eeba75d55c8eede1d3365e1da9bcaca07"
+  },
+  "nonce": "aa8cbc73fe4315c6a37cebf8cb73075c",
+  "verification": {
+    "pins_checked": 293,
+    "all_verified": true,
+    "protected228_exact_historical": true,
+    "stageA_byte_identical_to": "c8acebe",
+    "stageA": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/stage-b-modulation-worktree/vllm_omni/diffusion/layers/lingbot_fixed_timestep_bank_stageA_v1.py",
+      "bytes": 23392,
+      "sha256": "3ea53af8a7f4bdc3e0a78137d235c8019c20f262549f6acc0c951c4c44ad24cc"
+    },
+    "runtime_binding_only": true,
+    "recompiled": false,
+    "historical_admission_inherited": false,
+    "controller_completed": true,
+    "fatal": null,
+    "remaining_owned_processes": [],
+    "intentional_service_exit_code": -9,
+    "supervisor_return_code": 247
+  },
+  "request": {
+    "chunks": 8,
+    "frames": 93,
+    "frame_counts": [
+      9,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12
+    ],
+    "encoding_fps": 12,
+    "model_timing_eligible": false
+  },
+  "method": {
+    "case_metric": "max over eight ranks of that ranks mean of all30 wall samples",
+    "aggregate_metric": "equal-weight mean of the24 case metrics; stageB/native ratio",
+    "aggregate_ratio_max": 0.9,
+    "worst_case_ratio_max": 1.05,
+    "wall_event_batches": "independent; no addition or per-sample matching",
+    "all_samples_included": true,
+    "eight_ranks_are_not_240_independent_samples": true
+  },
+  "round1": {
+    "native_ms": 1.9029906375,
+    "stageB_ms": 8.487324226388889,
+    "ratio": 4.459992634298438,
+    "aggregate_ratio_gate_pass": false,
+    "worst_case_ratio": 4.760422644695986,
+    "worst_case": {
+      "history": 14040,
+      "probe": 2
+    },
+    "worst_case_gate_pass": false,
+    "failed_case_count": 24,
+    "retained_case_count": 24
+  },
+  "cases": [
+    {
+      "history": 4680,
+      "probe": 0,
+      "native_max_rank_mean_wall_ms": 1.8955250333333333,
+      "stageB_max_rank_mean_wall_ms": 8.4526454,
+      "ratio": 4.459263397400661,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 0
+    },
+    {
+      "history": 4680,
+      "probe": 1,
+      "native_max_rank_mean_wall_ms": 1.8640815333333334,
+      "stageB_max_rank_mean_wall_ms": 8.524772366666667,
+      "ratio": 4.5731756976438405,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 4,
+      "stageB_slowest_rank": 4
+    },
+    {
+      "history": 4680,
+      "probe": 2,
+      "native_max_rank_mean_wall_ms": 2.0971754,
+      "stageB_max_rank_mean_wall_ms": 8.5182662,
+      "ratio": 4.06178052632126,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 1,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 4680,
+      "probe": 3,
+      "native_max_rank_mean_wall_ms": 2.0553736000000002,
+      "stageB_max_rank_mean_wall_ms": 8.478166533333333,
+      "ratio": 4.124878578441084,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 1,
+      "stageB_slowest_rank": 7
+    },
+    {
+      "history": 9360,
+      "probe": 0,
+      "native_max_rank_mean_wall_ms": 2.002946333333333,
+      "stageB_max_rank_mean_wall_ms": 8.4627494,
+      "ratio": 4.225150349343692,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 4
+    },
+    {
+      "history": 9360,
+      "probe": 1,
+      "native_max_rank_mean_wall_ms": 2.014956666666667,
+      "stageB_max_rank_mean_wall_ms": 8.467783166666665,
+      "ratio": 4.2024641555566955,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 9360,
+      "probe": 2,
+      "native_max_rank_mean_wall_ms": 1.9990924333333333,
+      "stageB_max_rank_mean_wall_ms": 8.514768733333332,
+      "ratio": 4.259317173811523,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 0
+    },
+    {
+      "history": 9360,
+      "probe": 3,
+      "native_max_rank_mean_wall_ms": 2.0079742,
+      "stageB_max_rank_mean_wall_ms": 8.478722733333333,
+      "ratio": 4.222525734311394,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 5
+    },
+    {
+      "history": 14040,
+      "probe": 0,
+      "native_max_rank_mean_wall_ms": 1.8843395666666667,
+      "stageB_max_rank_mean_wall_ms": 8.469551433333333,
+      "ratio": 4.494705510172821,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 14040,
+      "probe": 1,
+      "native_max_rank_mean_wall_ms": 1.8763539666666667,
+      "stageB_max_rank_mean_wall_ms": 8.498684366666668,
+      "ratio": 4.529360940230556,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 14040,
+      "probe": 2,
+      "native_max_rank_mean_wall_ms": 1.7845438666666666,
+      "stageB_max_rank_mean_wall_ms": 8.495183033333333,
+      "ratio": 4.760422644695986,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 0,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 14040,
+      "probe": 3,
+      "native_max_rank_mean_wall_ms": 1.8475506000000002,
+      "stageB_max_rank_mean_wall_ms": 8.529713966666666,
+      "ratio": 4.616768800089517,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 18720,
+      "probe": 0,
+      "native_max_rank_mean_wall_ms": 1.8823036333333334,
+      "stageB_max_rank_mean_wall_ms": 8.471095966666667,
+      "ratio": 4.500387619007766,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 18720,
+      "probe": 1,
+      "native_max_rank_mean_wall_ms": 1.8811535666666666,
+      "stageB_max_rank_mean_wall_ms": 8.4645677,
+      "ratio": 4.499668634176897,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 18720,
+      "probe": 2,
+      "native_max_rank_mean_wall_ms": 1.9254842666666665,
+      "stageB_max_rank_mean_wall_ms": 8.4654802,
+      "ratio": 4.396546025616274,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 18720,
+      "probe": 3,
+      "native_max_rank_mean_wall_ms": 1.8544430333333335,
+      "stageB_max_rank_mean_wall_ms": 8.485030633333333,
+      "ratio": 4.575514308509989,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 0
+    },
+    {
+      "history": 23400,
+      "probe": 0,
+      "native_max_rank_mean_wall_ms": 1.8303177666666666,
+      "stageB_max_rank_mean_wall_ms": 8.482514333333334,
+      "ratio": 4.634448994494271,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 23400,
+      "probe": 1,
+      "native_max_rank_mean_wall_ms": 1.8530583333333333,
+      "stageB_max_rank_mean_wall_ms": 8.4765446,
+      "ratio": 4.574353892439076,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 4
+    },
+    {
+      "history": 23400,
+      "probe": 2,
+      "native_max_rank_mean_wall_ms": 1.8438462333333334,
+      "stageB_max_rank_mean_wall_ms": 8.450385,
+      "ratio": 4.583020453242061,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 23400,
+      "probe": 3,
+      "native_max_rank_mean_wall_ms": 1.8504551,
+      "stageB_max_rank_mean_wall_ms": 8.538485166666666,
+      "ratio": 4.614262278866786,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 28080,
+      "probe": 0,
+      "native_max_rank_mean_wall_ms": 1.8486612333333334,
+      "stageB_max_rank_mean_wall_ms": 8.475792466666666,
+      "ratio": 4.5848272868165845,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 28080,
+      "probe": 1,
+      "native_max_rank_mean_wall_ms": 1.8612255,
+      "stageB_max_rank_mean_wall_ms": 8.5217695,
+      "ratio": 4.578579812064685,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    },
+    {
+      "history": 28080,
+      "probe": 2,
+      "native_max_rank_mean_wall_ms": 1.8548503333333333,
+      "stageB_max_rank_mean_wall_ms": 8.488232633333332,
+      "ratio": 4.576235872400127,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 0
+    },
+    {
+      "history": 28080,
+      "probe": 3,
+      "native_max_rank_mean_wall_ms": 1.8560631,
+      "stageB_max_rank_mean_wall_ms": 8.4848759,
+      "ratio": 4.5714371995219345,
+      "case_ratio_gate_pass": false,
+      "native_slowest_rank": 6,
+      "stageB_slowest_rank": 6
+    }
+  ],
+  "scope_proof": {
+    "actual_rank_history_probe_contexts": 192,
+    "layers_per_context": 40,
+    "views_per_layer": 6,
+    "all_reported_logical_view_checks_passed": true,
+    "old_token_replay": "Pinned capture retains original active-session StageA _CallToken/timestep/source owners and actual post-SP staging snapshot; replay rechecks session/model generations and original published source identity, then restages actual snapshot. No synthetic token or substituted layer input is created.",
+    "history_caveat": "Modulation is independent of KV length. These are actual recorded history contexts for one constant-conditioning region, not192 independent attention workloads.",
+    "source_enforced_provenance_not_payload_fixture_export": true
+  },
+  "decision": {
+    "rounds_completed": 1,
+    "planned_rounds": 3,
+    "rounds2_and3": "not executed after round1 rejection",
+    "operator_gate_pass": false,
+    "three_round_pass": false,
+    "proceed_to_model": false,
+    "model_admitted": false,
+    "end_to_end_performance_claim": false
+  },
+  "limitations": [
+    "The six logical FP32 views and recorded view layouts were checked; complete allocation padding, exterior canaries and complete source-owner arenas were not proved.",
+    "_WrappedForward.module is not separately sealed against manual in-place reassignment; this frozen experiment disallows hot-hook changes. Do not claim detection of all possible owner mutations.",
+    "No full paired80 model correctness, six-launch model speed screen or warm40+600 final acceptance was run for this candidate.",
+    "The eight-chunk request contains in-service diagnostic replay and its latency/FPS are not clean model performance.",
+    "Scope and owner provenance are enforced by pinned source and real runtime checks; no standalone192-payload fixture corpus was exported."
+  ],
+  "evidence": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/plan.json",
+      "bytes": 67967,
+      "sha256": "4c7bc33d133bf680912b6b560da7844eeba75d55c8eede1d3365e1da9bcaca07"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/host_manifest.json",
+      "bytes": 11184,
+      "sha256": "6f76639179c1dd40a70a63239130000e717567b1cfb72fc1e6be64188dbba6aa"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/launch-intent.json",
+      "bytes": 291,
+      "sha256": "f01eff5d62eaa70dcb3853df6c8269a722ba92d91866a4eccdc97aa8c2576fe2"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks-completed.json",
+      "bytes": 3083,
+      "sha256": "0f06dacabc9d67b7476ee7ff9ed96df1a1688abe72b4c22b151c97a10358d08b"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/controller-result.json",
+      "bytes": 780,
+      "sha256": "1421932c6501a4b4807c77e61dbd96ba1ead3844e78f7333c200a6f19350e49f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/services/aa8cbc73fe4315c6a37cebf8cb73075c/launch.json",
+      "bytes": 697,
+      "sha256": "ae7455a624f6d295fbdf2c42b6ff26b45e7e87d0a0fd4fee1f688c07d1998aea"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/services/aa8cbc73fe4315c6a37cebf8cb73075c/result.json",
+      "bytes": 751,
+      "sha256": "d20a3a4579f20f62088464fcff0802078c1a3a5f2157e0129c55857ffd9fe5d8"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/services/aa8cbc73fe4315c6a37cebf8cb73075c/smoke-command.json",
+      "bytes": 658,
+      "sha256": "6eb5e20a17574a038ad8262ee9a882dfec2052da02867be927a464ed0de09d7e"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/services/aa8cbc73fe4315c6a37cebf8cb73075c/smoke-exit.json",
+      "bytes": 17,
+      "sha256": "e89df0eae5ec7db81135aed16463968955c578bcc4f2ec43172eff351f080c17"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/services/aa8cbc73fe4315c6a37cebf8cb73075c/rollout8.json",
+      "bytes": 6067,
+      "sha256": "64ec173ed2363a0e2e38b644bdf444dd466708b08d29db70cd826dcf7e3d2957"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank0.json",
+      "bytes": 83737,
+      "sha256": "6ba134e7372f943330f690ce9f712a7a2008cc66230027b38908312131a2eb1f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank1.json",
+      "bytes": 83763,
+      "sha256": "8c75a2e2caf2266902b6e9b0db999f06724abb283689798f3c8957eb523d2144"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank2.json",
+      "bytes": 83760,
+      "sha256": "c6a075af8fd7a338bbffd22a7a036650ff1b60abb924ffca83f00bcd9a473768"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank3.json",
+      "bytes": 83764,
+      "sha256": "3aad93b3c6cf31b30abc3cc5d1cca32e8e99ead527bdb049976a2941ff5d7e08"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank4.json",
+      "bytes": 83836,
+      "sha256": "e9094c6d9a82eb4af2feeb77414237f99dfc726a77fb65af2bf6094a4ebb980f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank5.json",
+      "bytes": 83783,
+      "sha256": "bec72d691bdb044f675c64ca10034b1912c1a4e3351fde73c14d9ae98a536879"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank6.json",
+      "bytes": 83735,
+      "sha256": "1a4948bc349193f0d1c9885a42f65572e97c509de8465234add19b5c7ea6b2bd"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank7.json",
+      "bytes": 83700,
+      "sha256": "31972337843ca4631d152fdfc778a1b4447674dce5984ac5863622801beac908"
+    }
+  ]
+}

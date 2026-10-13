@@ -1,0 +1,116 @@
+Stage B original-modulation cache — first-round rejection, 2026-10-13
+
+Decision: this implementation remains OFF. Do not enter the paired model screen.
+One actual8 service completed; the other2 planned operator rounds were not run
+because every case in round1 fails the speed gate by more than4x. This is an
+early rejection, not a completed three-round screen or end-to-end speedup.
+
+New mechanism
+StageA retains the original three-row BF16 timestep outputs. The block still
+performs parameter.unsqueeze(1) + projection.float(), then chunk(6,dim2),160
+times/chunk. StageB independently caches the original FP32 result and its six
+original views per layer/probe/session. It preserves mixed BF16+FP32 add order.
+It changes no norm, attention, FFN, rounding, camera, KV, VAE or head arithmetic.
+
+Implementation is default-off: lingbot_npu_fixed_modulation_stageB=false.
+Original StageA bytes and all228 historical top-level engine/distributed/
+entrypoints/worker Python files remain unchanged. Pipeline/transformer hooks
+and an independent helper carry the new behavior. Reserve24MiB per session
+before KV sizing; at most2 session banks, counting actual allocation extents.
+Published StageA source identity and real DMD capabilities authorize reuse.
+All160 entries and four successful all40/head/gather/unpatchify forwards must
+complete before B hits are enabled. Retirement deactivates B before StageA's
+original stream drain; B owners release only after that drain/removal succeeds.
+Exceptions retain owners, poison the worker and report through restart8 fatal
+supervision. No candidate-started fallback or installed-OPP change is introduced.
+
+Evidence motivating this experiment
+Fresh current-baseline Level1 trace shows160 original casts, adds, chunks and
+unsqueezes/chunk/rank at [1,1,6,5120]. Selected non-nested host spans total about
+17.3–22.5ms/chunk in that profiled request. These are profiled call spans, not
+clean serialized savings. The independent actual-region result below supersedes
+any expectation based solely on removing those operations.
+
+Actual operator screen
+Four physical910C packages4–7 / driver dies8–15, SP8/TP1/ring1,832x480,DMD4,
+full history,BF16 attention,FFN W8A8 NZ,12FPS. QK-combined/cross-combined and
+async metadata remain OFF. Native libraries were preserved byte-for-byte and
+rebound to independently pinned runtime source; no native library recompiled.
+
+An owned diagnostic service executes an8-chunk request:93 frames,12FPS, ordered
+chunks. It captures the actual six history contexts x four probes on each rank,
+including real tokens/timestep/source owners and a compact BF16 staging snapshot.
+Once the immutable bank is published, it replays each saved actual context in
+that same active session. This is constant-modulation preparation, not an
+attention benchmark or export of192 attention fixtures. Each complete region
+includes staging-copy cost and either40 original expressions or B prepare plus
+all40 lookups/checks. Actual current staging bytes AND forward identity are
+restored before the normal model continues. No KV/cache state is advanced by
+operator replay. Torch/CANN profiling and model capture are disabled; 'profile'
+is the supervisor's diagnostic ownership label.
+
+Each case/arm:20 warm,30 complete-call wall samples, separate30 device-event
+samples. No per-layer drain, trimming, pooling or outlier removal. Metric for a
+case=max over8 ranks of that rank's mean30 wall samples;24 cases have equal
+weight. Gate requires overall B/A<=0.90 and every case B/A<=1.05.
+
+                         Native          Candidate
+40-layer full region     1.9029906375ms   8.4873242264ms
+Overall B/A              4.4599926343
+Worst-case B/A           4.7604226447 (history14040,probe2)
+Cases exceeding1.05      24/24
+Round1 gate              FAIL
+
+In-service correctness checks pass all192 actual contexts across40 layers:
+all six FP32 logical output views are bitwise equal, including strides and
+offsets, before and after replay. Readonly parameter, timestep, source and
+snapshot checks pass. These checks do NOT prove allocation padding/outer
+canaries, full video quality, cancellation/disconnect or final lifecycle
+acceptance. Source pin/guard tests are not NPU correctness by themselves.
+38 CPU tests passed under normal Python and python -O. An independent reviewer
+recomputed all wall samples and verified260 small-file pins,228 source files,
+nonce/config/request binding and retirement. One known scope limitation is
+arbitrary in-place mutation of _WrappedForward.module: frozen-worker policy
+forbids hot hook changes; that particular mutation is not independently guarded.
+
+Closure: request and operator reports completed; intentional owned retirement
+ultimately returned service-9/supervisor247, fatal=null, remaining owners=[].
+This proves owned-process cleanup, not healthy graceful-shutdown acceptance.
+
+Current generation performance is unchanged
+Qualified plain-BSND baseline warm40+161 (window11–159,client media interarrival):
+ A1 mean928.263/P99942.128ms
+ A2 mean927.064/P99944.021ms
+ A3 mean924.638/P99939.464ms
+No new model timing is inferred from this diagnostic. mean<=900 is still unmet;
+three warm40+600 services and playback/lifecycle acceptance remain outstanding.
+
+Next evidence-supported mechanism
+The per-layer retained-owner checks and Python packaging are more costly than
+the removed native preparation in this implementation. Investigate a separately
+namespaced C++ host admission that batches the same metadata/owner checks,
+with explicit frozen-producer and consumer-lifetime contracts. Do not remove
+checks, inherit v1 qualification, or declare a chunk saving before screening.
+
+Reproduction / sources
+ recovery/prepare_stageB_operator.py
+ recovery/run_stageB_operator.py
+ vllm_omni/diffusion/layers/lingbot_fixed_modulation_stageB.py
+ vllm_omni/diffusion/layers/lingbot_fixed_modulation_screen.py
+ recovery/test_fixed_modulation_stageB_cpu.py
+ recovery/test_stageB_screen_cpu.py
+ recovery/validation/stageB-modulation-first-round-20261013.json
+ recovery/validation/stageB-modulation-round1-independent-20261013.json
+
+Persistent artifacts (ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012):
+ ROOT/audits/stageB-modulation-v1/execution-v1/plan.json
+ ROOT/audits/stageB-modulation-v1/execution-v1/operator1/checks/rank0..7.json
+ ROOT/audits/stageB-modulation-v1/execution-v1/operator1/services/
+   aa8cbc73fe4315c6a37cebf8cb73075c/
+ ROOT/audits/stageB-modulation-v1/ROUND1_INDEPENDENT_REVIEW.json
+
+CPU checks (no device backend autoload):
+ TORCH_DEVICE_BACKEND_AUTOLOAD=0 OMP_NUM_THREADS=1 python -m unittest discover
+   -s recovery -p 'test*stageB*cpu.py'
+Repeat with python -O. Launch scripts generated by the frozen plan use only
+the explicit four packages and fresh launch-owned fatal directories.
