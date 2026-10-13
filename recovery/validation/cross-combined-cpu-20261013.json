@@ -1,0 +1,21 @@
+{
+  "passed": [
+    "grad_enabled_refuses_without_device",
+    "incompatible_route_refuses_without_device",
+    "cpu_input_refuses_without_device",
+    "invalid_scale_raises_before_device"
+  ],
+  "cpu_only": true,
+  "device": null,
+  "manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+    "bytes": 7452,
+    "sha256": "d62fe29c616b53f3bf81421018620e9ed8da91f862fa524d2f319fc6b3a9a80e"
+  },
+  "actual_operator": "lingbot_recovery_v1.try_cross_combined",
+  "scope": "registered CPU refusals",
+  "historical_exact_options_proven": false,
+  "real_model_inputs": false,
+  "model_validated": false,
+  "performance_validated": false
+}

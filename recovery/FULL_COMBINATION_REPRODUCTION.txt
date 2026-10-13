@@ -1,0 +1,64 @@
+Historical full-combination reproduction contract — 2026-10-13
+=============================================================
+User priority: restore the complete winning execution path before extending
+optimization scope. A faster replacement copy kernel alone is not success.
+Original referenced plan is still missing; this contract records the latest
+explicit user direction and retained evidence, not a substitute original plan.
+
+Fixed workload / software scope
+-------------------------------
+Four910C packages, eight dies, SP8/TP1/ring1,832x480, fourDMD probes, full
+history, BF16 attention, FFN W8A8 NZ,12FPS encoding. This recovery uses physical
+packages4–7 (driver devices8–15); package0 remains occupied by another job.
+Engine58 + distributed38 + entrypoints114 + worker18 Python files are byte
+identical to the frozen StageA clean snapshot (228total). Do not change these
+files to mask a restoration failure. Diffusion-specific provider hooks differ
+and are audited separately. Runtime/environment can still change dispatch.
+
+Required combination, including host work
+----------------------------------------
+- QK RMSNorm/RoPE/send: restore one typed host admission/submission path, not
+  only numerical equivalence. Lost provider implementation is not yet found.
+  Frozen adapter proves fresh padded output ABI and retained owners/HCCL
+  order; it does not prove one device kernel. Current trace's rotary API is
+  aclnnRotaryPositionEmbeddingV2. Preserve its exact BF16 rounding contract.
+- Cross H40 BSND + combined C++ guard: restore actual FIA backend plus reduced
+  repeated Python runtime/descriptor checks. Current1184ms run disabled this
+  route and used SDPA. SDPA is not the historical bit-equivalence reference.
+- recv/Q/current-KV/staging and VAE exact pack: restore physical layout,
+  capacities, owner validation and efficient bulk transfers. New libraries
+  require new independent checks and cannot inherit old SHA admission.
+- Fixed timestep StageA, FFN W8A8 NZ, history staging/prefix reuse, local uint8,
+  root P2P collection and device interleave: verify actual paths plus source.
+Regional graphs, leased post-attention, output communication pipelines and MC2
+were not enabled in the historical winning combination. They are not missing
+proven optimizations and stay outside reproduction work.
+
+Attribution discipline
+----------------------
+Align complete chunks across all8 ranks and match collective order/payloads.
+For a long host synchronization, identify the parent operation, upstream
+kernels, collective submission/arrival spread and downstream consumer before
+assigning a cause. Communication duration includes waiting. Device activity
+unions distinguish compute-only, communication-only, overlap and unclassified
+wall intervals. Unclassified time is not automatically CPU idle. Host wait is
+usually another view of in-flight work and must not be added again to kernel
+time. Current270ms copy workload is not a proven270ms endpoint regression.
+Profiled1.35–1.39s chunks are not directly comparable to clean1.184s timing.
+
+Verification sequence
+---------------------
+1. Immutable historical-vs-current contract and actual-dispatch inventory.
+2. Independent restoration candidates with correct mathematical references;
+   exact source/full arena/canary and real80chunk latent/RGB for pure copies.
+3. Independent A/B isolates endpoint contributions; partial combination tests
+   remain diagnostic and must never be called historical reproduction.
+4. Complete restored combination, then original three independent warm40+
+   600chunk runs (window11–598), each mean<=900ms,P99<=950ms. Historical mean
+   895–899ms/P99911–914ms is the reproduction comparison, not current evidence.
+5. Preserve original lifecycle/playback/quality acceptance scope. No release
+   or complete-goal claim from a short run or synthetic operator checks.
+
+Current artifacts are backed up on recovery/lingbot-sp8-20261012, remote
+commit e9414e428e4fcb876f5a7edec4c703cf69646078 (source tree matches local
+f9aef297 snapshot). That backup does not establish performance reproduction.

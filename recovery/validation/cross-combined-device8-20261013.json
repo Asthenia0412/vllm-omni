@@ -1,0 +1,662 @@
+{
+  "schema": "lingbot_recovery_cross_combined_serial_device8_v1",
+  "date": "2026-10-13",
+  "passed": true,
+  "check_count": 96,
+  "checks_per_device": 12,
+  "logical_devices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "physical_packages": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "driver_dies": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "declared_visible_devices": "8,9,10,11,12,13,14,15",
+  "mapping_evidence": {
+    "basis": "Root controller launch mapping plus retained hardware topology; checker records logical id only",
+    "hardware_topology": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/validation/hardware-topology.log",
+      "bytes": 7623,
+      "sha256": "181542ccd55163b1166b1e97d2c30d961b7a5341c5c9e2f7f76f4a60f7ca0d97"
+    },
+    "check_worker_environment_persisted": false,
+    "runtime_logical_to_driver_translation_independently_queried": false
+  },
+  "serial_execution_verified_from_receipt_timestamps": true,
+  "all_supervisor_runs_successfully_retired": true,
+  "manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+    "bytes": 7452,
+    "sha256": "d62fe29c616b53f3bf81421018620e9ed8da91f862fa524d2f319fc6b3a9a80e"
+  },
+  "source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/host.cpp",
+    "bytes": 16218,
+    "sha256": "856c685e36c69d8fd6b6111ce647ce4e067b9f402ae1dd536537d729ee7322ca"
+  },
+  "host_dso": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/liblingbot_recovery_host.so",
+    "bytes": 253976,
+    "sha256": "f7aa61305ce465f3b387dd5130f1978660c4707e7b1a1d018d931f8f7baca5f6"
+  },
+  "kernel_dso": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+    "bytes": 402128,
+    "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+  },
+  "kernel_sources": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/CMakeLists.txt",
+      "bytes": 516,
+      "sha256": "0bbb8cb537668641599f507e6914861ecbfe1d0fbcbc0f2191bf724b408ce712"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/copy_kernel.cpp",
+      "bytes": 7447,
+      "sha256": "12145a71e98f563085b2401a29a6fb09fde3c2129d4d09200715d5775593c7d5"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/copy_spec.h",
+      "bytes": 208,
+      "sha256": "380cab3d2ce7f3b26f84faeb1df52d865dba515e7f8eb484797c6c224f948bea"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/host.cpp",
+      "bytes": 16218,
+      "sha256": "856c685e36c69d8fd6b6111ce647ce4e067b9f402ae1dd536537d729ee7322ca"
+    }
+  ],
+  "runtime_sources": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 11282,
+      "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recv_kv_sp8.py",
+      "bytes": 25035,
+      "sha256": "4ef14801a29547e298fb6b34ed667b6115a8ddc786abbafc11e82c7a362c5598"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_sp8_fatal.py",
+      "bytes": 5357,
+      "sha256": "df806bfabff834cff31ea1f11965e24886163cf1489dce9ee933ee55dbce050a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 31907,
+      "sha256": "141c9df524f334e095f20c56cc2df04b0046e1508e83470a16a3f80d6a5ee937"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_fixed_timestep_bank_stageA_v1.py",
+      "bytes": 23392,
+      "sha256": "3ea53af8a7f4bdc3e0a78137d235c8019c20f262549f6acc0c951c4c44ad24cc"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/models/lingbot_world/transformer.py",
+      "bytes": 78023,
+      "sha256": "bee22e068e23296290c5c89ae5574ce00f3edd78ffa4ca373d47b6a340a049e6"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/backends/cross_combined_integration_v1.py",
+      "bytes": 6304,
+      "sha256": "690cb787e550e5db411255e6cd234fa01b361414061b3431fce9b5d8215334cc"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/distributed/autoencoders/wan_npu_exact_pack.py",
+      "bytes": 16900,
+      "sha256": "9aa67ab133d179bb9ecf80a4b79b7375a63628667df041332d7260134811a84a"
+    }
+  ],
+  "abi_headers": [
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/NPUStorageImpl.h",
+      "bytes": 1719,
+      "sha256": "c4c488410e53760739c32de25dc00bcd53d0d55a55d48247d248671ccb06e9f1"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/aten/CustomFunctions.h",
+      "bytes": 157695,
+      "sha256": "eda9b02f53d526bbbb5429d38f5bf98fb3b09b2d02a3b9aef80abc855e13655c"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUStream.h",
+      "bytes": 4726,
+      "sha256": "4d0b32e2bffeda7a69713a5e679e1298015dcde35c3c07ac48823f26a649d21c"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUGraphsUtils.h",
+      "bytes": 4167,
+      "sha256": "84054ef102fffdc76092e9066b39b9ef124206329a8a02a3440148278803acd4"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUFunctions.h",
+      "bytes": 4957,
+      "sha256": "14bfce4bcb2e53e0094e1208d596994224ffe0b0084b46315f88912ef7795ecf"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/c10/core/GradMode.h",
+      "bytes": 1915,
+      "sha256": "cfdfec89042dc0ae11c56004d9e1d4caddb42085201a975f18ba7f2db3332a31"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/c10/core/InferenceMode.h",
+      "bytes": 4017,
+      "sha256": "5a28204782690888acbef7ca221b6ced032f241b14bc6dee92cc86401024519c"
+    }
+  ],
+  "all_current_build_pins_match": true,
+  "checker_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_cross_combined.py",
+    "bytes": 6203,
+    "sha256": "1a9fd1c23e62973d15fd4d6ecb0b18519900933c2ffdbcb52c66984fd0e6ca9e"
+  },
+  "actual_operator": "lingbot_recovery_v1.try_cross_combined",
+  "input_contract": {
+    "q": [
+      1,
+      585,
+      40,
+      128
+    ],
+    "k": [
+      1,
+      512,
+      40,
+      128
+    ],
+    "v": [
+      1,
+      512,
+      40,
+      128
+    ],
+    "dtype": "bfloat16",
+    "seed": 1327,
+    "owner_offset_elements": 256,
+    "canary_elements_each_side": 256,
+    "reference": "explicit public npu_fused_infer_attention_score BSND and existing C++ recovery cross",
+    "scale": 0.08838834764831845,
+    "num_heads": 40,
+    "num_key_value_heads": 40,
+    "pre_tokens": 2147483647,
+    "next_tokens": 2147483647,
+    "sparse_mode": 0,
+    "inner_precise": 0,
+    "softmax_lse_flag": false
+  },
+  "scope": "Serial synthetic operator correctness and prestart refusals on eight logical dies; not a simultaneous eight-rank model test",
+  "validation": {
+    "output_bitwise_equal": true,
+    "outputs_finite": true,
+    "source_full_owner_canary_unchanged": true,
+    "repeated_output_has_independent_storage": true,
+    "unsupported_route_layout_shape_empty_grad_stream_refuse_before_dispatch": true
+  },
+  "remaining_gaps": [
+    "Actual model Q/K/V across eight ranks, forty layers, four probes and six self-history states",
+    "Paired 80-chunk BSND-reference versus combined latent/RGB equivalence",
+    "Actual kernel/backend trace and host scheduling/critical-path attribution",
+    "Complete historical optimization combination and independent performance reproduction",
+    "Invalid-owner metadata and poststart device failure injection/lifecycle validation",
+    "Historical exact provider/options identity and applicable numerical/video quality gates"
+  ],
+  "historical_exact_options_proven": false,
+  "real_model_inputs": false,
+  "model_validated": false,
+  "performance_validated": false,
+  "final_acceptance_proven": false,
+  "records": [
+    {
+      "logical_device": 0,
+      "driver_die_from_launch_mapping": 8,
+      "physical_package_from_launch_mapping": 4,
+      "package_die_from_launch_mapping": 0,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die0.json",
+        "bytes": 976,
+        "sha256": "2f135e2ff1b9e535672936f5d346b19c6465b51605435c3fcbe75c398435e10a"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/180636cdb042f1ea38ce44ca3d6bc49e/launch.json",
+        "bytes": 626,
+        "sha256": "8794203612c4508b296dde8a0f8cd39d1a9286ac747d0e2720705b02a787fa2c"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/180636cdb042f1ea38ce44ca3d6bc49e/result.json",
+        "bytes": 679,
+        "sha256": "b2b3367102966828df8f715935b0aaf5b8b5ab4ab9c6a6442025be16a1a136ce"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/180636cdb042f1ea38ce44ca3d6bc49e/service.log",
+        "bytes": 1078,
+        "sha256": "c6fff795472f6cd66a8f56d4faad85b5fe70751a666591d33fcdddd514031321"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "0",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die0.json"
+      ]
+    },
+    {
+      "logical_device": 1,
+      "driver_die_from_launch_mapping": 9,
+      "physical_package_from_launch_mapping": 4,
+      "package_die_from_launch_mapping": 1,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die1.json",
+        "bytes": 976,
+        "sha256": "9c35786c5964f1265cefc1c98826b834df3290e8f3dc080803daa886eb01ab37"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/8203e6f02977a47f2fcae13e801372ec/launch.json",
+        "bytes": 626,
+        "sha256": "3212cdf3191c767a5d8c05c29f466393244c00a41953df45d1bb5ff7b19ee40c"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/8203e6f02977a47f2fcae13e801372ec/result.json",
+        "bytes": 679,
+        "sha256": "9f10d46e003aeee27e4451951401d451c021e263b77c2586095ae5dd05353c94"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/8203e6f02977a47f2fcae13e801372ec/service.log",
+        "bytes": 1078,
+        "sha256": "fb3012e1af41da269561d1a3ead70556e9831d1f24f4e7811d235f232a8cddf7"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "1",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die1.json"
+      ]
+    },
+    {
+      "logical_device": 2,
+      "driver_die_from_launch_mapping": 10,
+      "physical_package_from_launch_mapping": 5,
+      "package_die_from_launch_mapping": 0,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die2.json",
+        "bytes": 976,
+        "sha256": "54ef2479158ef2c7147a597fa6c6c4707f96315317bd1e3fdd94171163d0e90f"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/360238ca22c21f01e50531d5df41b327/launch.json",
+        "bytes": 626,
+        "sha256": "148cc5652b315f219b1cf7a28b7f16977929e9d534db562f659f91c7d6ba7538"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/360238ca22c21f01e50531d5df41b327/result.json",
+        "bytes": 679,
+        "sha256": "d8ec9f184761972747679fbf4ede5e886d82219156b638e19c56d33cbf8510e7"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/360238ca22c21f01e50531d5df41b327/service.log",
+        "bytes": 1078,
+        "sha256": "3b79bb7ab457871ed2ed61da19d7ae6fccf78dd201f1d4d186086f4c792c7176"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "2",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die2.json"
+      ]
+    },
+    {
+      "logical_device": 3,
+      "driver_die_from_launch_mapping": 11,
+      "physical_package_from_launch_mapping": 5,
+      "package_die_from_launch_mapping": 1,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die3.json",
+        "bytes": 976,
+        "sha256": "38f6e5a036fb5105102440291f47a0b9ba57476e9e66da95b5a9095c7f03ff8e"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/f7c03d59b36a45ead58a0d32dcd7aa9c/launch.json",
+        "bytes": 626,
+        "sha256": "d0cf959be5482d9f88e3e770b98f73908237018531a6865dcd5f0cdb2fef7260"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/f7c03d59b36a45ead58a0d32dcd7aa9c/result.json",
+        "bytes": 679,
+        "sha256": "2642ec61a1a4ad73568ea7460f71a54f6537560d8b83565983324a4486cb2952"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/f7c03d59b36a45ead58a0d32dcd7aa9c/service.log",
+        "bytes": 1078,
+        "sha256": "3f9ed39ec02a9f1c2fdfac6b1ac944357ffc5c4c16a33a664254ee9bd09764f0"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "3",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die3.json"
+      ]
+    },
+    {
+      "logical_device": 4,
+      "driver_die_from_launch_mapping": 12,
+      "physical_package_from_launch_mapping": 6,
+      "package_die_from_launch_mapping": 0,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die4.json",
+        "bytes": 976,
+        "sha256": "744beb10fc0b9f18c84f4f71836a99c8fe9e8fa06f1a52cd458ffadaf18a7157"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/c57a25f99285cade840b407ec9637380/launch.json",
+        "bytes": 626,
+        "sha256": "ae7d58bfaa9ad1de71ceb0083c3a0eb306545e87c0281305a21555d722cdb347"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/c57a25f99285cade840b407ec9637380/result.json",
+        "bytes": 679,
+        "sha256": "3a8c191cc3af2ca423adbf73f3dfdd6baf9c8478595c52eace8fea1bcda0f7c3"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/c57a25f99285cade840b407ec9637380/service.log",
+        "bytes": 1078,
+        "sha256": "410360ce124c92aabb66d467f436c2b877187905b2389131e4e8ddc78ad642e0"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "4",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die4.json"
+      ]
+    },
+    {
+      "logical_device": 5,
+      "driver_die_from_launch_mapping": 13,
+      "physical_package_from_launch_mapping": 6,
+      "package_die_from_launch_mapping": 1,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die5.json",
+        "bytes": 976,
+        "sha256": "d418553f4166c9ac2d84bb43ea6c9ac27c591139ba4e8b7fbf7757865349fa18"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/ebd8b3094f68db3725a1fe85a8ee6a13/launch.json",
+        "bytes": 626,
+        "sha256": "81e08aa51d197ce371ab68eb0dfc11eb0193092f3de7691add07c7d39fa949e5"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/ebd8b3094f68db3725a1fe85a8ee6a13/result.json",
+        "bytes": 679,
+        "sha256": "85d43e4bc506fbd68f78313f2bd10fd96c78c0bf3c3e771007348e68ca01669c"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/ebd8b3094f68db3725a1fe85a8ee6a13/service.log",
+        "bytes": 1078,
+        "sha256": "58f4aa401fec1155b53af8c41b280ac593616ed9dddfcef45a321a58b5b73430"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "5",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die5.json"
+      ]
+    },
+    {
+      "logical_device": 6,
+      "driver_die_from_launch_mapping": 14,
+      "physical_package_from_launch_mapping": 7,
+      "package_die_from_launch_mapping": 0,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die6.json",
+        "bytes": 976,
+        "sha256": "badd853314f0f162f2d102abf11f0b2daf85f5f8e877173407ef3e3dfa63c4d4"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/880b3f676017bc23b18fda71daeea4fc/launch.json",
+        "bytes": 626,
+        "sha256": "9b7e4a5700a557cad875211e3db084cea8be7de8b19788e8d448ee7728225b35"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/880b3f676017bc23b18fda71daeea4fc/result.json",
+        "bytes": 679,
+        "sha256": "69574448b8ca387ba6df4724b88db4c44f9e5bd465a7b30674980f3a015b1387"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/880b3f676017bc23b18fda71daeea4fc/service.log",
+        "bytes": 1078,
+        "sha256": "0085289b7bef6ca66cb179aaca51b9f00becb79d69abef4f8723b1899ddff51c"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "6",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die6.json"
+      ]
+    },
+    {
+      "logical_device": 7,
+      "driver_die_from_launch_mapping": 15,
+      "physical_package_from_launch_mapping": 7,
+      "package_die_from_launch_mapping": 1,
+      "check_count": 12,
+      "checks": [
+        "combined_vs_public_bsnd",
+        "combined_vs_existing_cpp_bsnd",
+        "repeat_fresh_output",
+        "incompatible_route_prestart_refusal",
+        "noncontiguous_input_prestart_refusal",
+        "nonhistorical_shape_prestart_refusal",
+        "empty_input_prestart_refusal",
+        "grad_mode_prestart_refusal",
+        "nondefault_stream_prestart_refusal",
+        "source_full_owner_and_canary_0",
+        "source_full_owner_and_canary_1",
+        "source_full_owner_and_canary_2"
+      ],
+      "checker_receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die7.json",
+        "bytes": 976,
+        "sha256": "fa158894fe7594870c5d043f4f327843716e7086a59edec235d751fda71e964c"
+      },
+      "supervisor_launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/9fccc7c0293103f550461ac53b3b8d70/launch.json",
+        "bytes": 626,
+        "sha256": "20be17bd3bd05428668d65b63f40a849d5a18cc439e15755fb4f19b67c5280df"
+      },
+      "supervisor_result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/9fccc7c0293103f550461ac53b3b8d70/result.json",
+        "bytes": 679,
+        "sha256": "71b3623acdaa8f6e2e3e060f3c6ef60c97a5893396d11e296cd4ed6119dc803c"
+      },
+      "service_log": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/runs/9fccc7c0293103f550461ac53b3b8d70/service.log",
+        "bytes": 1078,
+        "sha256": "7bdb6eda677908d598547b605ec206460019caa0250885ac4844ca1b2a6d989a"
+      },
+      "exit_code": 0,
+      "fatal": null,
+      "remaining_owned_processes": [],
+      "command": [
+        "python",
+        "recovery/check_cross_combined.py",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "--device",
+        "7",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-combined-checks/die7.json"
+      ]
+    }
+  ]
+}

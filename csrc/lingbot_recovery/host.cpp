@@ -3,11 +3,14 @@
 // and allocator semantics. No historical binary/numerical admission is implied.
 #include <ATen/ATen.h>
 #include <ATen/MemoryOverlap.h>
+#include <c10/core/GradMode.h>
+#include <c10/core/InferenceMode.h>
 #include <torch/library.h>
 #include "torch_npu/csrc/core/NPUStorageImpl.h"
 #include "torch_npu/csrc/core/NPUBridge.h"
 #include "torch_npu/csrc/aten/CustomFunctions.h"
 #include "torch_npu/csrc/core/npu/NPUStream.h"
+#include "torch_npu/csrc/core/npu/NPUGraphsUtils.h"
 #include "torch_npu/csrc/core/npu/NPUCachingAllocator.h"
 #include "torch_npu/csrc/framework/OpCommand.h"
 #include "copy_spec.h"
@@ -218,6 +221,70 @@ Tensor cross(const Tensor& q, const Tensor& k, const Tensor& v, double scale) {
       {},{},std::nullopt,std::nullopt,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
       std::nullopt,{},{},{},40,scale,2147483647,2147483647,"BSND",40));
 }
+
+bool cross_dense_admitted(const Tensor& t) {
+  const auto& d=descriptor(t);
+  // Different valid physical formats are ordinary prestart refusals. Never
+  // reinterpret blocked storage or change a shared storage's format tag.
+  if (!(d.npu_format_==ACL_FORMAT_ND || d.npu_format_==ACL_FORMAT_NCHW
+        || d.npu_format_==ACL_FORMAT_NCDHW)) return false;
+  TORCH_CHECK(d.origin_format_==d.npu_format_ && d.storage_sizes_==d.base_sizes_
+      && d.base_sizes_.size()==d.base_strides_.size(), "Invalid cross physical metadata");
+  int64_t base_extent=1;
+  for(int64_t i=int64_t(d.base_sizes_.size())-1;i>=0;--i) {
+    TORCH_CHECK(d.base_sizes_[i]>0 && d.base_strides_[i]==base_extent
+        && base_extent<=INT64_MAX/d.base_sizes_[i], "Invalid cross base strides/extent");
+    base_extent*=d.base_sizes_[i];
+  }
+  const auto capacity=t.storage().nbytes()/t.element_size();
+  TORCH_CHECK(uint64_t(base_extent)<=capacity, "Cross physical base exceeds owner");
+  int64_t high=t.storage_offset();
+  TORCH_CHECK(high>=0, "Negative cross storage offset");
+  for(int64_t i=0;i<t.dim();++i) {
+    TORCH_CHECK(t.size(i)>=0 && t.stride(i)>=0, "Invalid cross view metadata");
+    if(t.size(i)==0) return false;
+    TORCH_CHECK(t.size(i)-1<=INT64_MAX/std::max<int64_t>(1,t.stride(i)), "Cross extent overflow");
+    const auto delta=(t.size(i)-1)*t.stride(i);
+    TORCH_CHECK(high<=INT64_MAX-delta, "Cross extent overflow");
+    high+=delta;
+  }
+  TORCH_CHECK(uint64_t(high)<capacity, "Cross view exceeds owner");
+  return t.is_contiguous();
+}
+
+std::optional<Tensor> try_cross_combined(const Tensor& q, const Tensor& k,
+    const Tensor& v, double scale, bool compatible_route) {
+  // Runtime/owner admission is one host call. Every None return precedes
+  // allocation and dispatch; invalid metadata raises through fatal quarantine.
+  if(!compatible_route || c10::GradMode::is_enabled()
+      || !c10::InferenceMode::is_enabled()) return std::nullopt;
+  TORCH_CHECK(std::isfinite(scale) && scale>0, "Invalid attention scale");
+  for(const auto& t:{q,k,v}) {
+    TORCH_CHECK(t.defined(), "Undefined cross tensor");
+    if(t.device().type()!=c10::DeviceType::PrivateUse1 || t.scalar_type()!=at::kBFloat16 || t.numel()==0)
+      return std::nullopt;
+  }
+  TORCH_CHECK(q.device()==k.device() && q.device()==v.device(), "Mixed cross devices");
+  TORCH_CHECK(c10_npu::current_device()==q.device().index(), "Cross current device differs from owner");
+  const auto stream=c10_npu::getCurrentNPUStream(q.device().index());
+  if(stream!=c10_npu::getDefaultNPUStream(q.device().index())) return std::nullopt;
+  // The provider requires an initialized runtime and the inputs already own
+  // NPU allocations. Use the exported API for that case: the no-init inline
+  // wrapper references IsContextInitialized, absent from this wheel's exports.
+  const auto capture=c10_npu::currentStreamCaptureStatusMayInitCtx();
+  TORCH_CHECK(capture!=c10_npu::CaptureStatus::Invalidated, "Cross stream capture invalidated");
+  if(capture!=c10_npu::CaptureStatus::None) return std::nullopt;
+  for(const auto& t:{q,k,v}) if(!cross_dense_admitted(t)) return std::nullopt;
+  if(q.sizes()!=at::IntArrayRef({1,585,40,128})
+      || k.sizes()!=at::IntArrayRef({1,512,40,128}) || v.sizes()!=k.sizes()
+      || scale!=std::pow(128.0,-0.5)) return std::nullopt;
+  // Keep the same public FIA mathematics and framework-owned queue/lifetimes
+  // as cross(). Do not wrap native dispatch in an unverified outer OpCommand.
+  return std::get<0>(npu::npu_fused_infer_attention_score(q,k,v,
+      {},{},std::nullopt,std::nullopt,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
+      std::nullopt,{},{},{},40,scale,2147483647,2147483647,"BSND",40,
+      0,0,0,0,0,0,false));
+}
 } // namespace
 
 TORCH_LIBRARY(lingbot_recovery_v1, m) {
@@ -225,6 +292,7 @@ TORCH_LIBRARY(lingbot_recovery_v1, m) {
   m.def("describe(Tensor t) -> (int, int, int[], int[], int[], int[], int[], int, int, int, int)", &describe);
   m.def("qk_send(Tensor raw, Tensor qw, Tensor kw, Tensor cosine, Tensor sine) -> Tensor", &qk_send);
   m.def("cross(Tensor q, Tensor k, Tensor v, float scale) -> Tensor", &cross);
+  m.def("try_cross_combined(Tensor q, Tensor k, Tensor v, float scale, bool compatible_route) -> Tensor?", &try_cross_combined);
   m.def("copy_pair(Tensor(a!) base, Tensor(a!) da, Tensor sa, Tensor(a!) db, Tensor sb) -> ()", &copy_pair);
   m.def("ingress(Tensor q, Tensor k, Tensor v, Tensor(a!) kp, Tensor(b!) vp, Tensor(c!) ks, Tensor(d!) vs, Tensor slots, int first) -> Tensor", &ingress);
 }

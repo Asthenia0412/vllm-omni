@@ -1,0 +1,2686 @@
+{
+  "trace_variant": "initial row-wise VAE staged-no-cross, not clean batched-copy timing",
+  "scope": "complete rank0 RGB-completion windows11\u201314; eight-rank matching communication names; per-rank device start/end inside global window",
+  "matched_collectives": 1280,
+  "per_rank_counts": {
+    "0": 1280,
+    "1": 1280,
+    "2": 1280,
+    "3": 1280,
+    "4": 1280,
+    "5": 1280,
+    "6": 1280,
+    "7": 1280
+  },
+  "per_chunk": [
+    {
+      "chunk": 11,
+      "matched_alltoall_count": 320,
+      "mean_start_spread_ms": 0.740381184375,
+      "max_start_spread_ms": 5.045655,
+      "last_rank_histogram": {
+        "0": 258,
+        "4": 62
+      }
+    },
+    {
+      "chunk": 12,
+      "matched_alltoall_count": 320,
+      "mean_start_spread_ms": 0.657332,
+      "max_start_spread_ms": 3.85086,
+      "last_rank_histogram": {
+        "0": 120,
+        "1": 29,
+        "7": 4,
+        "6": 18,
+        "4": 149
+      }
+    },
+    {
+      "chunk": 13,
+      "matched_alltoall_count": 320,
+      "mean_start_spread_ms": 0.66417478125,
+      "max_start_spread_ms": 4.254715,
+      "last_rank_histogram": {
+        "0": 99,
+        "7": 74,
+        "5": 6,
+        "4": 141
+      }
+    },
+    {
+      "chunk": 14,
+      "matched_alltoall_count": 320,
+      "mean_start_spread_ms": 0.72871939375,
+      "max_start_spread_ms": 3.779495,
+      "last_rank_histogram": {
+        "0": 109,
+        "1": 89,
+        "7": 30,
+        "4": 92
+      }
+    }
+  ],
+  "top_device_start_spreads": [
+    {
+      "name": "hcom_alltoall__327_3600_1",
+      "chunk": 11,
+      "device_start_spread_ms": 5.045655,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.3196,
+        4.77068,
+        5.04204,
+        5.05298,
+        5.147603,
+        5.24498,
+        5.27568,
+        5.09212
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_4320_1",
+      "chunk": 13,
+      "device_start_spread_ms": 4.254715,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.32962,
+        4.38128,
+        4.19098,
+        4.37982,
+        4.437569,
+        4.44314,
+        4.35602,
+        3.97604
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_3920_1",
+      "chunk": 12,
+      "device_start_spread_ms": 3.85086,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.31658,
+        3.91756,
+        3.92964,
+        2.09472,
+        4.267305,
+        3.97126,
+        4.10608,
+        3.648
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_4720_1",
+      "chunk": 14,
+      "device_start_spread_ms": 3.779495,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.33094,
+        1.14838,
+        3.0404,
+        3.84824,
+        3.937838,
+        3.95892,
+        3.87486,
+        3.321
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_4000_1",
+      "chunk": 12,
+      "device_start_spread_ms": 3.722995,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.31986,
+        3.50616,
+        3.75968,
+        3.4335,
+        3.865418,
+        3.9093,
+        3.73708,
+        3.7395
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_4640_1",
+      "chunk": 14,
+      "device_start_spread_ms": 3.6818,
+      "last_device_start_rank": 1,
+      "durations_ms": [
+        3.6015,
+        0.33766,
+        3.6181,
+        3.7994,
+        3.811137,
+        3.74978,
+        3.94988,
+        3.86946
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_3760_1",
+      "chunk": 11,
+      "device_start_spread_ms": 3.67148,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.33268,
+        3.03416,
+        3.76354,
+        3.82292,
+        3.764615,
+        3.71694,
+        3.9479,
+        3.7289
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_4480_1",
+      "chunk": 14,
+      "device_start_spread_ms": 3.37497,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.4266,
+        1.64786,
+        3.4313,
+        3.73316,
+        3.368568,
+        3.10146,
+        3.53654,
+        2.06672
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_3520_1",
+      "chunk": 11,
+      "device_start_spread_ms": 3.309095,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.42074,
+        1.68578,
+        2.87354,
+        2.81656,
+        2.872517,
+        3.60892,
+        3.66288,
+        3.02154
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_4450_1",
+      "chunk": 13,
+      "device_start_spread_ms": 3.299695,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.33844,
+        3.5068,
+        3.49608,
+        3.51696,
+        3.538691,
+        3.49192,
+        3.5276,
+        3.52564
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_3680_1",
+      "chunk": 11,
+      "device_start_spread_ms": 3.23978,
+      "last_device_start_rank": 0,
+      "durations_ms": [
+        0.29246,
+        2.87868,
+        3.1507,
+        3.3815,
+        3.235204,
+        3.26994,
+        3.47596,
+        2.7968
+      ]
+    },
+    {
+      "name": "hcom_alltoall__327_4560_1",
+      "chunk": 14,
+      "device_start_spread_ms": 2.703445,
+      "last_device_start_rank": 7,
+      "durations_ms": [
+        2.82132,
+        2.52558,
+        2.98726,
+        2.81778,
+        2.921299,
+        2.96772,
+        2.7263,
+        0.3452
+      ]
+    }
+  ],
+  "target": [
+    {
+      "rank": 0,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank0/liteserver-for-vllm-ascend-00002_559007_20261013102344688_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_0.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243131417010,
+        "end_ns": 1791858243131736610,
+        "duration_ms": 0.3196,
+        "connection": 1643975
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243131174260,
+        "end_ns": 1791858243131190150,
+        "thread": 559007,
+        "pytorch_connection": 634184
+      },
+      "host_launch": {
+        "start_ns": 1791858243131203360,
+        "end_ns": 1791858243131374930,
+        "thread": 562376,
+        "connection": 1643975
+      },
+      "probe": {
+        "start_ns": 1791858243123186760,
+        "end_ns": 1791858243375577490,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243130383170,
+        "end_ns": 1791858243130912590,
+        "duration_ms": 0.52942,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 7.9875,
+      "submit_to_launch_ms": 0.0291,
+      "launch_to_device_ms": 0.21365,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243124458050,
+          "end_ns": 1791858243124565780,
+          "duration_ms": 0.10773,
+          "thread": 559007,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243124462420,
+          "end_ns": 1791858243124565520,
+          "duration_ms": 0.1031,
+          "thread": 559007,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::chunk",
+          "start_ns": 1791858243128644000,
+          "end_ns": 1791858243128748460,
+          "duration_ms": 0.10446,
+          "thread": 559007,
+          "input_shapes": "1,4680,5120;\r\n;\r\n"
+        },
+        {
+          "name": "aten::split",
+          "start_ns": 1791858243128647570,
+          "end_ns": 1791858243128748360,
+          "duration_ms": 0.10079,
+          "thread": 559007,
+          "input_shapes": "1,4680,5120;\r\n;\r\n"
+        },
+        {
+          "name": "aten::linear",
+          "start_ns": 1791858243129892320,
+          "end_ns": 1791858243130013810,
+          "duration_ms": 0.12149,
+          "thread": 559007,
+          "input_shapes": "1,585,5120;\r\n15360,5120;\r\n15360"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243130383170,
+          "end_ns": 1791858243130912590,
+          "duration_ms": 0.52942,
+          "thread": 559007,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        },
+        {
+          "name": "npu::npu_rms_norm",
+          "start_ns": 1791858243130494080,
+          "end_ns": 1791858243130630960,
+          "duration_ms": 0.13688,
+          "thread": 559007,
+          "input_shapes": "1,585,5120;\r\n5120;\r\n"
+        },
+        {
+          "name": "Dequeue@aclnnRmsNorm",
+          "start_ns": 1791858243130631550,
+          "end_ns": 1791858243130753250,
+          "duration_ms": 0.1217,
+          "thread": 562376,
+          "input_shapes": null
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243124490990,
+          "end_ns": 1791858243124505620,
+          "connection": 1643814
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243124671520,
+          "end_ns": 1791858243124674640,
+          "connection": 1643816
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243124758550,
+          "end_ns": 1791858243124760630,
+          "connection": 1643818
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243124831620,
+          "end_ns": 1791858243124833470,
+          "connection": 1643820
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243131049770,
+        "end_ns": 1791858243131136390,
+        "duration_ms": 0.08662,
+        "stream": 47,
+        "task": 19166
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243132202250,
+        "end_ns": 1791858243132333950,
+        "duration_ms": 0.1317,
+        "stream": 47,
+        "task": 19171,
+        "connection": 1644007
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243131542850,
+          "end_ns": 1791858243131737770,
+          "duration_ms": 0.19492,
+          "stream": 47,
+          "task": 19170,
+          "connection": 1644002,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243131410760,
+            "end_ns": 1791858243131417120
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131736630,
+          "end_ns": 1791858243131736650,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1644000
+        },
+        {
+          "start_ns": 1791858243131736750,
+          "end_ns": 1791858243131736770,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1644001
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243129872850,
+          "end_ns": 1791858243129875350,
+          "duration_ms": 0.0025,
+          "stream": 47,
+          "task": 19155
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243129902490,
+          "end_ns": 1791858243129943430,
+          "duration_ms": 0.04094,
+          "stream": 47,
+          "task": 19156
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243129963070,
+          "end_ns": 1791858243129973110,
+          "duration_ms": 0.01004,
+          "stream": 47,
+          "task": 19157
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243130135810,
+          "end_ns": 1791858243130138030,
+          "duration_ms": 0.00222,
+          "stream": 47,
+          "task": 19158
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243130138050,
+          "end_ns": 1791858243130597290,
+          "duration_ms": 0.45924,
+          "stream": 47,
+          "task": 19159
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243130835370,
+          "end_ns": 1791858243130845910,
+          "duration_ms": 0.01054,
+          "stream": 47,
+          "task": 19160
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243130878350,
+          "end_ns": 1791858243130899250,
+          "duration_ms": 0.0209,
+          "stream": 47,
+          "task": 19161
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243130899270,
+          "end_ns": 1791858243130905030,
+          "duration_ms": 0.00576,
+          "stream": 47,
+          "task": 19162
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243130915770,
+          "end_ns": 1791858243130931010,
+          "duration_ms": 0.01524,
+          "stream": 47,
+          "task": 19163
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243130950090,
+          "end_ns": 1791858243130991750,
+          "duration_ms": 0.04166,
+          "stream": 47,
+          "task": 19164
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243131004790,
+          "end_ns": 1791858243131041110,
+          "duration_ms": 0.03632,
+          "stream": 47,
+          "task": 19165
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243131049770,
+          "end_ns": 1791858243131136390,
+          "duration_ms": 0.08662,
+          "stream": 47,
+          "task": 19166
+        }
+      ],
+      "previous_probe_end_ns": 1791858243121580860,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243121631450,
+          "end_ns": 1791858243122025550
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243132081900,
+        "end_ns": 1791858243132092770,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243132048890,
+          "end_ns": 1791858243132062110
+        }
+      ],
+      "python_callchain_ids_present": false
+    },
+    {
+      "rank": 1,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank1/liteserver-for-vllm-ascend-00002_559008_20261013102344689_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_1.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243126967270,
+        "end_ns": 1791858243131737950,
+        "duration_ms": 4.77068,
+        "connection": 1701989
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243126645990,
+        "end_ns": 1791858243126649910,
+        "thread": 559008,
+        "pytorch_connection": 665625
+      },
+      "host_launch": {
+        "start_ns": 1791858243126737880,
+        "end_ns": 1791858243126953620,
+        "thread": 562163,
+        "connection": 1701989
+      },
+      "probe": {
+        "start_ns": 1791858243065527890,
+        "end_ns": 1791858243327713340,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243126221590,
+        "end_ns": 1791858243126496130,
+        "duration_ms": 0.27454,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 61.1181,
+      "submit_to_launch_ms": 0.09189,
+      "launch_to_device_ms": 0.22939,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243066759480,
+          "end_ns": 1791858243121800410,
+          "duration_ms": 55.04093,
+          "thread": 559008,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243066761910,
+          "end_ns": 1791858243121799870,
+          "duration_ms": 55.03796,
+          "thread": 559008,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::copy_",
+          "start_ns": 1791858243066821720,
+          "end_ns": 1791858243121798620,
+          "duration_ms": 54.9769,
+          "thread": 559008,
+          "input_shapes": "4680;\r\n4680;\r\n"
+        },
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243121889940,
+          "end_ns": 1791858243122110910,
+          "duration_ms": 0.22097,
+          "thread": 559008,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243121892000,
+          "end_ns": 1791858243122110590,
+          "duration_ms": 0.21859,
+          "thread": 559008,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::empty_strided",
+          "start_ns": 1791858243121897680,
+          "end_ns": 1791858243122067390,
+          "duration_ms": 0.16971,
+          "thread": 559008,
+          "input_shapes": ";\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243126221590,
+          "end_ns": 1791858243126496130,
+          "duration_ms": 0.27454,
+          "thread": 559008,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        },
+        {
+          "name": "npu::npu_rms_norm",
+          "start_ns": 1791858243126256430,
+          "end_ns": 1791858243126363110,
+          "duration_ms": 0.10668,
+          "thread": 559008,
+          "input_shapes": "1,585,5120;\r\n5120;\r\n"
+        },
+        {
+          "name": "Dequeue@aclnnRmsNorm",
+          "start_ns": 1791858243126365660,
+          "end_ns": 1791858243126553280,
+          "duration_ms": 0.18762,
+          "thread": 562163,
+          "input_shapes": null
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243066826720,
+          "end_ns": 1791858243121752770,
+          "connection": 1701799
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122074090,
+          "end_ns": 1791858243122076740,
+          "connection": 1701849
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122177510,
+          "end_ns": 1791858243122180000,
+          "connection": 1701851
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122287130,
+          "end_ns": 1791858243122289070,
+          "connection": 1701853
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243126834890,
+        "end_ns": 1791858243126925990,
+        "duration_ms": 0.0911,
+        "stream": 47,
+        "task": 28041
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243131739310,
+        "end_ns": 1791858243131872670,
+        "duration_ms": 0.13336,
+        "stream": 47,
+        "task": 28046,
+        "connection": 1702028
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243127106510,
+          "end_ns": 1791858243131739190,
+          "duration_ms": 4.63268,
+          "stream": 47,
+          "task": 28043,
+          "connection": 1702021,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243126990130,
+            "end_ns": 1791858243126996220
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131737970,
+          "end_ns": 1791858243131737990,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1702019
+        },
+        {
+          "start_ns": 1791858243131738150,
+          "end_ns": 1791858243131738170,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1702020
+        },
+        {
+          "start_ns": 1791858243131739210,
+          "end_ns": 1791858243131739230,
+          "stream": 47,
+          "task": 28044,
+          "connection": 1702023
+        },
+        {
+          "start_ns": 1791858243131739270,
+          "end_ns": 1791858243131739290,
+          "stream": 47,
+          "task": 28045,
+          "connection": 1702024
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243125822750,
+          "end_ns": 1791858243125824810,
+          "duration_ms": 0.00206,
+          "stream": 47,
+          "task": 28030
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243125848390,
+          "end_ns": 1791858243125886550,
+          "duration_ms": 0.03816,
+          "stream": 47,
+          "task": 28031
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243125906830,
+          "end_ns": 1791858243125919230,
+          "duration_ms": 0.0124,
+          "stream": 47,
+          "task": 28032
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243126019110,
+          "end_ns": 1791858243126020970,
+          "duration_ms": 0.00186,
+          "stream": 47,
+          "task": 28033
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243126021010,
+          "end_ns": 1791858243126497530,
+          "duration_ms": 0.47652,
+          "stream": 47,
+          "task": 28034
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126626850,
+          "end_ns": 1791858243126638850,
+          "duration_ms": 0.012,
+          "stream": 47,
+          "task": 28035
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126657930,
+          "end_ns": 1791858243126679030,
+          "duration_ms": 0.0211,
+          "stream": 47,
+          "task": 28036
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126701270,
+          "end_ns": 1791858243126707810,
+          "duration_ms": 0.00654,
+          "stream": 47,
+          "task": 28037
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126717170,
+          "end_ns": 1791858243126732710,
+          "duration_ms": 0.01554,
+          "stream": 47,
+          "task": 28038
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126752510,
+          "end_ns": 1791858243126794650,
+          "duration_ms": 0.04214,
+          "stream": 47,
+          "task": 28039
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126797670,
+          "end_ns": 1791858243126833990,
+          "duration_ms": 0.03632,
+          "stream": 47,
+          "task": 28040
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243126834890,
+          "end_ns": 1791858243126925990,
+          "duration_ms": 0.0911,
+          "stream": 47,
+          "task": 28041
+        }
+      ],
+      "previous_probe_end_ns": 1791858243064299070,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243064337190,
+          "end_ns": 1791858243064748320
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243128641330,
+        "end_ns": 1791858243128653910,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243128613370,
+          "end_ns": 1791858243128628320
+        }
+      ],
+      "python_callchain_ids_present": false
+    },
+    {
+      "rank": 2,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank2/liteserver-for-vllm-ascend-00002_559009_20261013102344690_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_2.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243126642910,
+        "end_ns": 1791858243131684950,
+        "duration_ms": 5.04204,
+        "connection": 1722502
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243126456510,
+        "end_ns": 1791858243126459360,
+        "thread": 559009,
+        "pytorch_connection": 665623
+      },
+      "host_launch": {
+        "start_ns": 1791858243126479490,
+        "end_ns": 1791858243126676400,
+        "thread": 562167,
+        "connection": 1722502
+      },
+      "probe": {
+        "start_ns": 1791858243060131910,
+        "end_ns": 1791858243312673800,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243125895070,
+        "end_ns": 1791858243126248260,
+        "duration_ms": 0.35319,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 66.3246,
+      "submit_to_launch_ms": 0.02298,
+      "launch_to_device_ms": 0.16342,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243061314800,
+          "end_ns": 1791858243121789400,
+          "duration_ms": 60.4746,
+          "thread": 559009,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243061317570,
+          "end_ns": 1791858243121788840,
+          "duration_ms": 60.47127,
+          "thread": 559009,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::copy_",
+          "start_ns": 1791858243061361980,
+          "end_ns": 1791858243121787180,
+          "duration_ms": 60.4252,
+          "thread": 559009,
+          "input_shapes": "4680;\r\n4680;\r\n"
+        },
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243121891730,
+          "end_ns": 1791858243122084390,
+          "duration_ms": 0.19266,
+          "thread": 559009,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243121893890,
+          "end_ns": 1791858243122084150,
+          "duration_ms": 0.19026,
+          "thread": 559009,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::empty_strided",
+          "start_ns": 1791858243121899520,
+          "end_ns": 1791858243122039710,
+          "duration_ms": 0.14019,
+          "thread": 559009,
+          "input_shapes": ";\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243125895070,
+          "end_ns": 1791858243126248260,
+          "duration_ms": 0.35319,
+          "thread": 559009,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        },
+        {
+          "name": "npu::npu_rms_norm",
+          "start_ns": 1791858243125936470,
+          "end_ns": 1791858243126062230,
+          "duration_ms": 0.12576,
+          "thread": 559009,
+          "input_shapes": "1,585,5120;\r\n5120;\r\n"
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243061368050,
+          "end_ns": 1791858243121741800,
+          "connection": 1722294
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122046500,
+          "end_ns": 1791858243122049280,
+          "connection": 1722350
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122143080,
+          "end_ns": 1791858243122145370,
+          "connection": 1722352
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122233190,
+          "end_ns": 1791858243122235500,
+          "connection": 1722354
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243126356930,
+        "end_ns": 1791858243126441830,
+        "duration_ms": 0.0849,
+        "stream": 47,
+        "task": 28041
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243131686130,
+        "end_ns": 1791858243131820810,
+        "duration_ms": 0.13468,
+        "stream": 47,
+        "task": 28046,
+        "connection": 1722535
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243126765310,
+          "end_ns": 1791858243131686110,
+          "duration_ms": 4.9208,
+          "stream": 47,
+          "task": 28045,
+          "connection": 1722529,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243126701980,
+            "end_ns": 1791858243126707030
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131684970,
+          "end_ns": 1791858243131684990,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1722527
+        },
+        {
+          "start_ns": 1791858243131685090,
+          "end_ns": 1791858243131685110,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1722528
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243125518710,
+          "end_ns": 1791858243125520970,
+          "duration_ms": 0.00226,
+          "stream": 47,
+          "task": 28030
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243125560970,
+          "end_ns": 1791858243125599150,
+          "duration_ms": 0.03818,
+          "stream": 47,
+          "task": 28031
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243125599170,
+          "end_ns": 1791858243125610430,
+          "duration_ms": 0.01126,
+          "stream": 47,
+          "task": 28032
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243125676610,
+          "end_ns": 1791858243125678550,
+          "duration_ms": 0.00194,
+          "stream": 47,
+          "task": 28033
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243125678950,
+          "end_ns": 1791858243126156370,
+          "duration_ms": 0.47742,
+          "stream": 47,
+          "task": 28034
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126176110,
+          "end_ns": 1791858243126187190,
+          "duration_ms": 0.01108,
+          "stream": 47,
+          "task": 28035
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126204890,
+          "end_ns": 1791858243126224790,
+          "duration_ms": 0.0199,
+          "stream": 47,
+          "task": 28036
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126228010,
+          "end_ns": 1791858243126234430,
+          "duration_ms": 0.00642,
+          "stream": 47,
+          "task": 28037
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126234450,
+          "end_ns": 1791858243126250210,
+          "duration_ms": 0.01576,
+          "stream": 47,
+          "task": 28038
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126273110,
+          "end_ns": 1791858243126315990,
+          "duration_ms": 0.04288,
+          "stream": 47,
+          "task": 28039
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126318710,
+          "end_ns": 1791858243126355970,
+          "duration_ms": 0.03726,
+          "stream": 47,
+          "task": 28040
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243126356930,
+          "end_ns": 1791858243126441830,
+          "duration_ms": 0.0849,
+          "stream": 47,
+          "task": 28041
+        }
+      ],
+      "previous_probe_end_ns": 1791858243059165020,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243059197480,
+          "end_ns": 1791858243059574640
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243127113180,
+        "end_ns": 1791858243127121890,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243127090880,
+          "end_ns": 1791858243127100630
+        }
+      ],
+      "python_callchain_ids_present": false
+    },
+    {
+      "rank": 3,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank3/liteserver-for-vllm-ascend-00002_559010_20261013102344689_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_3.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243126626940,
+        "end_ns": 1791858243131679920,
+        "duration_ms": 5.05298,
+        "connection": 1725028
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243126478640,
+        "end_ns": 1791858243126480170,
+        "thread": 559010,
+        "pytorch_connection": 665626
+      },
+      "host_launch": {
+        "start_ns": 1791858243126497490,
+        "end_ns": 1791858243126664200,
+        "thread": 562157,
+        "connection": 1725028
+      },
+      "probe": {
+        "start_ns": 1791858243052646780,
+        "end_ns": 1791858243311408340,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243125956400,
+        "end_ns": 1791858243126271460,
+        "duration_ms": 0.31506,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 73.83186,
+      "submit_to_launch_ms": 0.01885,
+      "launch_to_device_ms": 0.12945,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243053741550,
+          "end_ns": 1791858243121812100,
+          "duration_ms": 68.07055,
+          "thread": 559010,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243053744170,
+          "end_ns": 1791858243121811290,
+          "duration_ms": 68.06712,
+          "thread": 559010,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::copy_",
+          "start_ns": 1791858243053785950,
+          "end_ns": 1791858243121809410,
+          "duration_ms": 68.02346,
+          "thread": 559010,
+          "input_shapes": "4680;\r\n4680;\r\n"
+        },
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243121911130,
+          "end_ns": 1791858243122115170,
+          "duration_ms": 0.20404,
+          "thread": 559010,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243121913990,
+          "end_ns": 1791858243122114830,
+          "duration_ms": 0.20084,
+          "thread": 559010,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::empty_strided",
+          "start_ns": 1791858243121918770,
+          "end_ns": 1791858243122069180,
+          "duration_ms": 0.15041,
+          "thread": 559010,
+          "input_shapes": ";\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243125956400,
+          "end_ns": 1791858243126271460,
+          "duration_ms": 0.31506,
+          "thread": 559010,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243053791740,
+          "end_ns": 1791858243121756210,
+          "connection": 1724817
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122076380,
+          "end_ns": 1791858243122079680,
+          "connection": 1724879
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122173800,
+          "end_ns": 1791858243122176040,
+          "connection": 1724881
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122280870,
+          "end_ns": 1791858243122282930,
+          "connection": 1724883
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243126397560,
+        "end_ns": 1791858243126485020,
+        "duration_ms": 0.08746,
+        "stream": 47,
+        "task": 28041
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243131681180,
+        "end_ns": 1791858243131813520,
+        "duration_ms": 0.13234,
+        "stream": 47,
+        "task": 28046,
+        "connection": 1725060
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243126749140,
+          "end_ns": 1791858243131681140,
+          "duration_ms": 4.932,
+          "stream": 47,
+          "task": 28045,
+          "connection": 1725054,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243126691710,
+            "end_ns": 1791858243126697730
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131679940,
+          "end_ns": 1791858243131679960,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1725052
+        },
+        {
+          "start_ns": 1791858243131680120,
+          "end_ns": 1791858243131680140,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1725053
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243125537800,
+          "end_ns": 1791858243125539780,
+          "duration_ms": 0.00198,
+          "stream": 47,
+          "task": 28030
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243125570180,
+          "end_ns": 1791858243125607260,
+          "duration_ms": 0.03708,
+          "stream": 47,
+          "task": 28031
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243125607280,
+          "end_ns": 1791858243125619020,
+          "duration_ms": 0.01174,
+          "stream": 47,
+          "task": 28032
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243125723400,
+          "end_ns": 1791858243125725820,
+          "duration_ms": 0.00242,
+          "stream": 47,
+          "task": 28033
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243125726280,
+          "end_ns": 1791858243126205140,
+          "duration_ms": 0.47886,
+          "stream": 47,
+          "task": 28034
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126237200,
+          "end_ns": 1791858243126247360,
+          "duration_ms": 0.01016,
+          "stream": 47,
+          "task": 28035
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126249080,
+          "end_ns": 1791858243126270300,
+          "duration_ms": 0.02122,
+          "stream": 47,
+          "task": 28036
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126278560,
+          "end_ns": 1791858243126284820,
+          "duration_ms": 0.00626,
+          "stream": 47,
+          "task": 28037
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126296340,
+          "end_ns": 1791858243126312560,
+          "duration_ms": 0.01622,
+          "stream": 47,
+          "task": 28038
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126315660,
+          "end_ns": 1791858243126356320,
+          "duration_ms": 0.04066,
+          "stream": 47,
+          "task": 28039
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126359360,
+          "end_ns": 1791858243126396340,
+          "duration_ms": 0.03698,
+          "stream": 47,
+          "task": 28040
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243126397560,
+          "end_ns": 1791858243126485020,
+          "duration_ms": 0.08746,
+          "stream": 47,
+          "task": 28041
+        }
+      ],
+      "previous_probe_end_ns": 1791858243051712780,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243051740360,
+          "end_ns": 1791858243052125920
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243127032800,
+        "end_ns": 1791858243127041820,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243127011790,
+          "end_ns": 1791858243127020630
+        }
+      ],
+      "python_callchain_ids_present": false
+    },
+    {
+      "rank": 4,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank4/liteserver-for-vllm-ascend-00002_559011_20261013102344689_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_4.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243126834366,
+        "end_ns": 1791858243131981969,
+        "duration_ms": 5.147603,
+        "connection": 1693309
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243126369190,
+        "end_ns": 1791858243126370640,
+        "thread": 559011,
+        "pytorch_connection": 665628
+      },
+      "host_launch": {
+        "start_ns": 1791858243126386040,
+        "end_ns": 1791858243126560280,
+        "thread": 562161,
+        "connection": 1693309
+      },
+      "probe": {
+        "start_ns": 1791858243056924660,
+        "end_ns": 1791858243311715140,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243125834490,
+        "end_ns": 1791858243126127980,
+        "duration_ms": 0.29349,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 69.44453,
+      "submit_to_launch_ms": 0.01685,
+      "launch_to_device_ms": 0.448326,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243058083420,
+          "end_ns": 1791858243121781750,
+          "duration_ms": 63.69833,
+          "thread": 559011,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243058086290,
+          "end_ns": 1791858243121781370,
+          "duration_ms": 63.69508,
+          "thread": 559011,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::copy_",
+          "start_ns": 1791858243058118890,
+          "end_ns": 1791858243121779990,
+          "duration_ms": 63.6611,
+          "thread": 559011,
+          "input_shapes": "4680;\r\n4680;\r\n"
+        },
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243121867910,
+          "end_ns": 1791858243122056670,
+          "duration_ms": 0.18876,
+          "thread": 559011,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243121870990,
+          "end_ns": 1791858243122056510,
+          "duration_ms": 0.18552,
+          "thread": 559011,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::empty_strided",
+          "start_ns": 1791858243121875910,
+          "end_ns": 1791858243122012700,
+          "duration_ms": 0.13679,
+          "thread": 559011,
+          "input_shapes": ";\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243125834490,
+          "end_ns": 1791858243126127980,
+          "duration_ms": 0.29349,
+          "thread": 559011,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        },
+        {
+          "name": "npu::npu_rms_norm",
+          "start_ns": 1791858243125874770,
+          "end_ns": 1791858243125995970,
+          "duration_ms": 0.1212,
+          "thread": 559011,
+          "input_shapes": "1,585,5120;\r\n5120;\r\n"
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243058125380,
+          "end_ns": 1791858243121732760,
+          "connection": 1693097
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122019530,
+          "end_ns": 1791858243122022380,
+          "connection": 1693157
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122112540,
+          "end_ns": 1791858243122114840,
+          "connection": 1693159
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122183580,
+          "end_ns": 1791858243122185440,
+          "connection": 1693161
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243126602781,
+        "end_ns": 1791858243126689463,
+        "duration_ms": 0.086682,
+        "stream": 47,
+        "task": 28041
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243131983129,
+        "end_ns": 1791858243132113591,
+        "duration_ms": 0.130462,
+        "stream": 47,
+        "task": 28046,
+        "connection": 1693342
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243126955348,
+          "end_ns": 1791858243131983109,
+          "duration_ms": 5.027761,
+          "stream": 47,
+          "task": 28045,
+          "connection": 1693336,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243126587360,
+            "end_ns": 1791858243126592900
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131981989,
+          "end_ns": 1791858243131982009,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1693334
+        },
+        {
+          "start_ns": 1791858243131982129,
+          "end_ns": 1791858243131982149,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1693335
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243125742924,
+          "end_ns": 1791858243125744924,
+          "duration_ms": 0.002,
+          "stream": 47,
+          "task": 28030
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243125759024,
+          "end_ns": 1791858243125797385,
+          "duration_ms": 0.038361,
+          "stream": 47,
+          "task": 28031
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243125805925,
+          "end_ns": 1791858243125817906,
+          "duration_ms": 0.011981,
+          "stream": 47,
+          "task": 28032
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243125911467,
+          "end_ns": 1791858243125913247,
+          "duration_ms": 0.00178,
+          "stream": 47,
+          "task": 28033
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243125913807,
+          "end_ns": 1791858243126388417,
+          "duration_ms": 0.47461,
+          "stream": 47,
+          "task": 28034
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126418378,
+          "end_ns": 1791858243126431558,
+          "duration_ms": 0.01318,
+          "stream": 47,
+          "task": 28035
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126440038,
+          "end_ns": 1791858243126460958,
+          "duration_ms": 0.02092,
+          "stream": 47,
+          "task": 28036
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126475219,
+          "end_ns": 1791858243126481339,
+          "duration_ms": 0.00612,
+          "stream": 47,
+          "task": 28037
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126481359,
+          "end_ns": 1791858243126497839,
+          "duration_ms": 0.01648,
+          "stream": 47,
+          "task": 28038
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126520620,
+          "end_ns": 1791858243126561920,
+          "duration_ms": 0.0413,
+          "stream": 47,
+          "task": 28039
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126565060,
+          "end_ns": 1791858243126602001,
+          "duration_ms": 0.036941,
+          "stream": 47,
+          "task": 28040
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243126602781,
+          "end_ns": 1791858243126689463,
+          "duration_ms": 0.086682,
+          "stream": 47,
+          "task": 28041
+        }
+      ],
+      "previous_probe_end_ns": 1791858243055931190,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243055960560,
+          "end_ns": 1791858243056357930
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243126992320,
+        "end_ns": 1791858243127001500,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243126969730,
+          "end_ns": 1791858243126978420
+        }
+      ],
+      "python_callchain_ids_present": false
+    },
+    {
+      "rank": 5,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank5/liteserver-for-vllm-ascend-00002_559012_20261013102344689_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_5.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243126371355,
+        "end_ns": 1791858243131616335,
+        "duration_ms": 5.24498,
+        "connection": 1724996
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243126282980,
+        "end_ns": 1791858243126286480,
+        "thread": 559012,
+        "pytorch_connection": 665629
+      },
+      "host_launch": {
+        "start_ns": 1791858243126303480,
+        "end_ns": 1791858243126456340,
+        "thread": 562378,
+        "connection": 1724996
+      },
+      "probe": {
+        "start_ns": 1791858243049531530,
+        "end_ns": 1791858243297174040,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243125832870,
+        "end_ns": 1791858243126109360,
+        "duration_ms": 0.27649,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 76.75145,
+      "submit_to_launch_ms": 0.0205,
+      "launch_to_device_ms": 0.067875,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243050594640,
+          "end_ns": 1791858243121812430,
+          "duration_ms": 71.21779,
+          "thread": 559012,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243050597920,
+          "end_ns": 1791858243121811750,
+          "duration_ms": 71.21383,
+          "thread": 559012,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::copy_",
+          "start_ns": 1791858243050626500,
+          "end_ns": 1791858243121809840,
+          "duration_ms": 71.18334,
+          "thread": 559012,
+          "input_shapes": "4680;\r\n4680;\r\n"
+        },
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243121914170,
+          "end_ns": 1791858243122118320,
+          "duration_ms": 0.20415,
+          "thread": 559012,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243121916290,
+          "end_ns": 1791858243122118050,
+          "duration_ms": 0.20176,
+          "thread": 559012,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::empty_strided",
+          "start_ns": 1791858243121922510,
+          "end_ns": 1791858243122071600,
+          "duration_ms": 0.14909,
+          "thread": 559012,
+          "input_shapes": ";\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243125832870,
+          "end_ns": 1791858243126109360,
+          "duration_ms": 0.27649,
+          "thread": 559012,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        },
+        {
+          "name": "npu::npu_rms_norm",
+          "start_ns": 1791858243125869260,
+          "end_ns": 1791858243125980700,
+          "duration_ms": 0.11144,
+          "thread": 559012,
+          "input_shapes": "1,585,5120;\r\n5120;\r\n"
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243050631870,
+          "end_ns": 1791858243121750260,
+          "connection": 1724780
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122078840,
+          "end_ns": 1791858243122082130,
+          "connection": 1724846
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122173810,
+          "end_ns": 1791858243122175830,
+          "connection": 1724848
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122271960,
+          "end_ns": 1791858243122273890,
+          "connection": 1724850
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243126176915,
+        "end_ns": 1791858243126265915,
+        "duration_ms": 0.089,
+        "stream": 47,
+        "task": 28041
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243131617495,
+        "end_ns": 1791858243131746875,
+        "duration_ms": 0.12938,
+        "stream": 47,
+        "task": 28046,
+        "connection": 1725029
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243126471895,
+          "end_ns": 1791858243131617475,
+          "duration_ms": 5.14558,
+          "stream": 47,
+          "task": 28045,
+          "connection": 1725023,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243126484750,
+            "end_ns": 1791858243126490200
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131616355,
+          "end_ns": 1791858243131616375,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1725021
+        },
+        {
+          "start_ns": 1791858243131616475,
+          "end_ns": 1791858243131616475,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1725022
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243125396855,
+          "end_ns": 1791858243125399015,
+          "duration_ms": 0.00216,
+          "stream": 47,
+          "task": 28030
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243125412455,
+          "end_ns": 1791858243125451555,
+          "duration_ms": 0.0391,
+          "stream": 47,
+          "task": 28031
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243125465135,
+          "end_ns": 1791858243125476435,
+          "duration_ms": 0.0113,
+          "stream": 47,
+          "task": 28032
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243125554995,
+          "end_ns": 1791858243125557355,
+          "duration_ms": 0.00236,
+          "stream": 47,
+          "task": 28033
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243125557375,
+          "end_ns": 1791858243126026975,
+          "duration_ms": 0.4696,
+          "stream": 47,
+          "task": 28034
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126027015,
+          "end_ns": 1791858243126037595,
+          "duration_ms": 0.01058,
+          "stream": 47,
+          "task": 28035
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126037615,
+          "end_ns": 1791858243126058415,
+          "duration_ms": 0.0208,
+          "stream": 47,
+          "task": 28036
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126058435,
+          "end_ns": 1791858243126064615,
+          "duration_ms": 0.00618,
+          "stream": 47,
+          "task": 28037
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126076095,
+          "end_ns": 1791858243126092495,
+          "duration_ms": 0.0164,
+          "stream": 47,
+          "task": 28038
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126093615,
+          "end_ns": 1791858243126136035,
+          "duration_ms": 0.04242,
+          "stream": 47,
+          "task": 28039
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126138655,
+          "end_ns": 1791858243126176215,
+          "duration_ms": 0.03756,
+          "stream": 47,
+          "task": 28040
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243126176915,
+          "end_ns": 1791858243126265915,
+          "duration_ms": 0.089,
+          "stream": 47,
+          "task": 28041
+        }
+      ],
+      "previous_probe_end_ns": 1791858243048653040,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243048677980,
+          "end_ns": 1791858243049024250
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243126861850,
+        "end_ns": 1791858243126870830,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243126841050,
+          "end_ns": 1791858243126849910
+        }
+      ],
+      "python_callchain_ids_present": false
+    },
+    {
+      "rank": 6,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank6/liteserver-for-vllm-ascend-00002_559013_20261013102344690_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_6.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243126405770,
+        "end_ns": 1791858243131681450,
+        "duration_ms": 5.27568,
+        "connection": 1724750
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243126260210,
+        "end_ns": 1791858243126261180,
+        "thread": 559013,
+        "pytorch_connection": 665628
+      },
+      "host_launch": {
+        "start_ns": 1791858243126278090,
+        "end_ns": 1791858243126429710,
+        "thread": 562374,
+        "connection": 1724750
+      },
+      "probe": {
+        "start_ns": 1791858243047793290,
+        "end_ns": 1791858243300173660,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243125751060,
+        "end_ns": 1791858243126046280,
+        "duration_ms": 0.29522,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 78.46692,
+      "submit_to_launch_ms": 0.01788,
+      "launch_to_device_ms": 0.12768,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243048809470,
+          "end_ns": 1791858243121780000,
+          "duration_ms": 72.97053,
+          "thread": 559013,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243048811520,
+          "end_ns": 1791858243121779540,
+          "duration_ms": 72.96802,
+          "thread": 559013,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::copy_",
+          "start_ns": 1791858243048842770,
+          "end_ns": 1791858243121778760,
+          "duration_ms": 72.93599,
+          "thread": 559013,
+          "input_shapes": "4680;\r\n4680;\r\n"
+        },
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243121856830,
+          "end_ns": 1791858243122050790,
+          "duration_ms": 0.19396,
+          "thread": 559013,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243121858830,
+          "end_ns": 1791858243122050490,
+          "duration_ms": 0.19166,
+          "thread": 559013,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::empty_strided",
+          "start_ns": 1791858243121863790,
+          "end_ns": 1791858243122011320,
+          "duration_ms": 0.14753,
+          "thread": 559013,
+          "input_shapes": ";\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243125751060,
+          "end_ns": 1791858243126046280,
+          "duration_ms": 0.29522,
+          "thread": 559013,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        },
+        {
+          "name": "npu::npu_rms_norm",
+          "start_ns": 1791858243125798950,
+          "end_ns": 1791858243125915070,
+          "duration_ms": 0.11612,
+          "thread": 559013,
+          "input_shapes": "1,585,5120;\r\n5120;\r\n"
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243048848040,
+          "end_ns": 1791858243121743790,
+          "connection": 1724534
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122017340,
+          "end_ns": 1791858243122019930,
+          "connection": 1724602
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122103690,
+          "end_ns": 1791858243122105780,
+          "connection": 1724604
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122172010,
+          "end_ns": 1791858243122173670,
+          "connection": 1724606
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243126206450,
+        "end_ns": 1791858243126294450,
+        "duration_ms": 0.088,
+        "stream": 47,
+        "task": 28041
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243131682670,
+        "end_ns": 1791858243131817170,
+        "duration_ms": 0.1345,
+        "stream": 47,
+        "task": 28046,
+        "connection": 1724783
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243126516750,
+          "end_ns": 1791858243131682650,
+          "duration_ms": 5.1659,
+          "stream": 47,
+          "task": 28045,
+          "connection": 1724777,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243126454580,
+            "end_ns": 1791858243126460400
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131681470,
+          "end_ns": 1791858243131681490,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1724775
+        },
+        {
+          "start_ns": 1791858243131681630,
+          "end_ns": 1791858243131681650,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1724776
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243125363450,
+          "end_ns": 1791858243125365570,
+          "duration_ms": 0.00212,
+          "stream": 47,
+          "task": 28030
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243125382130,
+          "end_ns": 1791858243125419090,
+          "duration_ms": 0.03696,
+          "stream": 47,
+          "task": 28031
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243125429030,
+          "end_ns": 1791858243125439870,
+          "duration_ms": 0.01084,
+          "stream": 47,
+          "task": 28032
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243125538770,
+          "end_ns": 1791858243125540590,
+          "duration_ms": 0.00182,
+          "stream": 47,
+          "task": 28033
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243125540670,
+          "end_ns": 1791858243126016610,
+          "duration_ms": 0.47594,
+          "stream": 47,
+          "task": 28034
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126035050,
+          "end_ns": 1791858243126047110,
+          "duration_ms": 0.01206,
+          "stream": 47,
+          "task": 28035
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126047130,
+          "end_ns": 1791858243126067070,
+          "duration_ms": 0.01994,
+          "stream": 47,
+          "task": 28036
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126070010,
+          "end_ns": 1791858243126076390,
+          "duration_ms": 0.00638,
+          "stream": 47,
+          "task": 28037
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126105310,
+          "end_ns": 1791858243126122830,
+          "duration_ms": 0.01752,
+          "stream": 47,
+          "task": 28038
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126123730,
+          "end_ns": 1791858243126166350,
+          "duration_ms": 0.04262,
+          "stream": 47,
+          "task": 28039
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126169370,
+          "end_ns": 1791858243126205450,
+          "duration_ms": 0.03608,
+          "stream": 47,
+          "task": 28040
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243126206450,
+          "end_ns": 1791858243126294450,
+          "duration_ms": 0.088,
+          "stream": 47,
+          "task": 28041
+        }
+      ],
+      "previous_probe_end_ns": 1791858243046951750,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243046975460,
+          "end_ns": 1791858243047320270
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243126831440,
+        "end_ns": 1791858243126840280,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243126809570,
+          "end_ns": 1791858243126819190
+        }
+      ],
+      "python_callchain_ids_present": false
+    },
+    {
+      "rank": 7,
+      "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank7/liteserver-for-vllm-ascend-00002_559014_20261013102344688_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_7.db",
+      "collective": {
+        "name": "hcom_alltoall__327_3600_1",
+        "group": "group_name_61",
+        "count": 1123200,
+        "start_ns": 1791858243126589100,
+        "end_ns": 1791858243131681220,
+        "duration_ms": 5.09212,
+        "connection": 1702463
+      },
+      "host_submit": {
+        "name": "HcclAlltoAll",
+        "start_ns": 1791858243126439280,
+        "end_ns": 1791858243126441250,
+        "thread": 559014,
+        "pytorch_connection": 630690
+      },
+      "host_launch": {
+        "start_ns": 1791858243126452830,
+        "end_ns": 1791858243126617590,
+        "thread": 562159,
+        "connection": 1702463
+      },
+      "probe": {
+        "start_ns": 1791858243048018500,
+        "end_ns": 1791858243304201470,
+        "ordinal_in_request": 45,
+        "chunk": 11,
+        "probe_in_chunk": 1
+      },
+      "qk_host": {
+        "start_ns": 1791858243125935870,
+        "end_ns": 1791858243126229960,
+        "duration_ms": 0.29409,
+        "index_in_probe": 0
+      },
+      "probe_start_to_submit_ms": 78.42078,
+      "submit_to_launch_ms": 0.01355,
+      "launch_to_device_ms": 0.13627,
+      "long_host_before_submit": [
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243049154220,
+          "end_ns": 1791858243121800430,
+          "duration_ms": 72.64621,
+          "thread": 559014,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243049157020,
+          "end_ns": 1791858243121799960,
+          "duration_ms": 72.64294,
+          "thread": 559014,
+          "input_shapes": "4680;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::copy_",
+          "start_ns": 1791858243049187380,
+          "end_ns": 1791858243121798330,
+          "duration_ms": 72.61095,
+          "thread": 559014,
+          "input_shapes": "4680;\r\n4680;\r\n"
+        },
+        {
+          "name": "aten::to",
+          "start_ns": 1791858243121907200,
+          "end_ns": 1791858243122111650,
+          "duration_ms": 0.20445,
+          "thread": 559014,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::_to_copy",
+          "start_ns": 1791858243121910140,
+          "end_ns": 1791858243122111360,
+          "duration_ms": 0.20122,
+          "thread": 559014,
+          "input_shapes": "1,19;\r\n;\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "aten::empty_strided",
+          "start_ns": 1791858243121914970,
+          "end_ns": 1791858243122067830,
+          "duration_ms": 0.15286,
+          "thread": 559014,
+          "input_shapes": ";\r\n;\r\n;\r\n;\r\n;\r\n"
+        },
+        {
+          "name": "lingbot_recovery_v1::qk_send",
+          "start_ns": 1791858243125935870,
+          "end_ns": 1791858243126229960,
+          "duration_ms": 0.29409,
+          "thread": 559014,
+          "input_shapes": "1,585,15360;\r\n5120;\r\n5120;\r\n1,585,1,128;\r\n1,585,1,128"
+        },
+        {
+          "name": "Dequeue@aclnnRmsNorm",
+          "start_ns": 1791858243126096760,
+          "end_ns": 1791858243126208060,
+          "duration_ms": 0.1113,
+          "thread": 562159,
+          "input_shapes": null
+        }
+      ],
+      "host_syncs_nearby": [
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243049192480,
+          "end_ns": 1791858243121743350,
+          "connection": 1702244
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122073360,
+          "end_ns": 1791858243122076110,
+          "connection": 1702312
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122173170,
+          "end_ns": 1791858243122175300,
+          "connection": 1702314
+        },
+        {
+          "name": "aclrtSynchronizeStream",
+          "start_ns": 1791858243122270230,
+          "end_ns": 1791858243122272370,
+          "connection": 1702316
+        }
+      ],
+      "send_kernel": {
+        "name": "lingbot_recovery_send",
+        "start_ns": 1791858243126420800,
+        "end_ns": 1791858243126508800,
+        "duration_ms": 0.088,
+        "stream": 47,
+        "task": 17943
+      },
+      "recv_kernel": {
+        "name": "lingbot_recovery_recv",
+        "start_ns": 1791858243131682440,
+        "end_ns": 1791858243131811200,
+        "duration_ms": 0.12876,
+        "stream": 47,
+        "task": 17948,
+        "connection": 1702496
+      },
+      "compute_stream_waits": [
+        {
+          "start_ns": 1791858243126698280,
+          "end_ns": 1791858243131682320,
+          "duration_ms": 4.98404,
+          "stream": 47,
+          "task": 17947,
+          "connection": 1702490,
+          "host_api": {
+            "name": "aclrtStreamWaitEvent",
+            "start_ns": 1791858243126644120,
+            "end_ns": 1791858243126649660
+          }
+        }
+      ],
+      "completion_event_records": [
+        {
+          "start_ns": 1791858243131681240,
+          "end_ns": 1791858243131681260,
+          "stream": 45,
+          "task": 16469,
+          "connection": 1702488
+        },
+        {
+          "start_ns": 1791858243131681420,
+          "end_ns": 1791858243131681420,
+          "stream": 45,
+          "task": 16470,
+          "connection": 1702489
+        }
+      ],
+      "preceding_compute_kernels": [
+        {
+          "name": "aclnnAdds_AddAiCore_Add",
+          "start_ns": 1791858243125548120,
+          "end_ns": 1791858243125550240,
+          "duration_ms": 0.00212,
+          "stream": 47,
+          "task": 17932
+        },
+        {
+          "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+          "start_ns": 1791858243125563060,
+          "end_ns": 1791858243125605000,
+          "duration_ms": 0.04194,
+          "stream": 47,
+          "task": 17933
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "start_ns": 1791858243125610520,
+          "end_ns": 1791858243125621680,
+          "duration_ms": 0.01116,
+          "stream": 47,
+          "task": 17934
+        },
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "start_ns": 1791858243125719880,
+          "end_ns": 1791858243125721960,
+          "duration_ms": 0.00208,
+          "stream": 47,
+          "task": 17935
+        },
+        {
+          "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+          "start_ns": 1791858243125722000,
+          "end_ns": 1791858243126192820,
+          "duration_ms": 0.47082,
+          "stream": 47,
+          "task": 17936
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126237340,
+          "end_ns": 1791858243126248720,
+          "duration_ms": 0.01138,
+          "stream": 47,
+          "task": 17937
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126248740,
+          "end_ns": 1791858243126270040,
+          "duration_ms": 0.0213,
+          "stream": 47,
+          "task": 17938
+        },
+        {
+          "name": "aclnnContiguous_SliceAiCore_Slice",
+          "start_ns": 1791858243126295880,
+          "end_ns": 1791858243126302480,
+          "duration_ms": 0.0066,
+          "stream": 47,
+          "task": 17939
+        },
+        {
+          "name": "RmsNorm",
+          "start_ns": 1791858243126302500,
+          "end_ns": 1791858243126318480,
+          "duration_ms": 0.01598,
+          "stream": 47,
+          "task": 17940
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126339300,
+          "end_ns": 1791858243126380380,
+          "duration_ms": 0.04108,
+          "stream": 47,
+          "task": 17941
+        },
+        {
+          "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+          "start_ns": 1791858243126383100,
+          "end_ns": 1791858243126419780,
+          "duration_ms": 0.03668,
+          "stream": 47,
+          "task": 17942
+        },
+        {
+          "name": "lingbot_recovery_send",
+          "start_ns": 1791858243126420800,
+          "end_ns": 1791858243126508800,
+          "duration_ms": 0.088,
+          "stream": 47,
+          "task": 17943
+        }
+      ],
+      "previous_probe_end_ns": 1791858243047028750,
+      "scheduler_before_probe": [
+        {
+          "start_ns": 1791858243047061070,
+          "end_ns": 1791858243047422380
+        }
+      ],
+      "recv_launch": {
+        "start_ns": 1791858243127005920,
+        "end_ns": 1791858243127015020,
+        "name": "launch"
+      },
+      "recv_host_ops": [
+        {
+          "name": "lingbot_recovery_recv",
+          "start_ns": 1791858243126983400,
+          "end_ns": 1791858243126993260
+        }
+      ],
+      "python_callchain_ids_present": false
+    }
+  ],
+  "limitations": [
+    "Device communication start includes waits and is not packet-transfer start.",
+    "Per-rank clocks are exporter-aligned host/device timestamps; device clock calibration uncertainty is not quantified.",
+    "Stream event IDs are not exposed in this DB. Event record and wait links use stream order, CANN connectionId, and coincident communication completion, so explicit record-to-wait event identity remains unverified.",
+    "Nested CPU ranges, communication/task waits and kernel workloads cannot be summed as independent latency.",
+    "The target layer/probe label must be derived from surrounding send/receive order, not solely collective counter arithmetic."
+  ],
+  "archival_scope": "Prior initial-row-copy, cross-disabled SP8 trace. Not the batched-copy timing variant, not restored combined BSND, and not the historical winner.",
+  "source_audit_artifact": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/trace-dependencies/eight-rank-dependencies.json",
+    "sha256": "51a0451071afd339ba2dd485bce3112ad650c82195872237b2e4f1e6a8c6cb72"
+  }
+}

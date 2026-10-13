@@ -54,7 +54,12 @@ def main():
                "distributed/autoencoders/wan_npu_exact_pack.py"]
     manifest["runtime_sources"] = [pin(root / "vllm_omni/diffusion" / p) for p in modules]
     manifest["abi_headers"] = [pin(npu / "include/torch_npu/csrc/core/NPUStorageImpl.h"),
-                               pin(npu / "include/torch_npu/csrc/aten/CustomFunctions.h")]
+                               pin(npu / "include/torch_npu/csrc/aten/CustomFunctions.h"),
+                               pin(npu / "include/torch_npu/csrc/core/npu/NPUStream.h"),
+                               pin(npu / "include/torch_npu/csrc/core/npu/NPUGraphsUtils.h"),
+                               pin(npu / "include/torch_npu/csrc/core/npu/NPUFunctions.h"),
+                               pin(Path(torch.__file__).resolve().parent / "include/c10/core/GradMode.h"),
+                               pin(Path(torch.__file__).resolve().parent / "include/c10/core/InferenceMode.h")]
     (output / "host_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(json.dumps(manifest))
 

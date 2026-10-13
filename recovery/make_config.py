@@ -18,9 +18,10 @@ def main():
     config.pop("lingbot_npu_vae_exact_pack_manifest", None)
     for feature in ("qk", "cross", "vae_pack", "descriptor"):
         config["lingbot_npu_recovery_" + feature] = args.candidate
-    # Reconstructed FIA cross differs from this restored SDPA baseline in-model.
-    # Keep it available only as a separately screened arithmetic experiment.
+    # Restoring BSND requires separate actual-input checks against public FIA;
+    # the native rollback here remains SDPA. Neither cross route opts in silently.
     config["lingbot_npu_recovery_cross"] = False
+    config["lingbot_npu_recovery_cross_combined"] = False
     config["lingbot_npu_fixed_timestep_bank"] = args.candidate
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(yaml.safe_dump(value, sort_keys=False))

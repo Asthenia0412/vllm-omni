@@ -1,0 +1,106 @@
+{
+  "question": "Was async NPU metadata enabled in historical StageA winner F1/F2/F3?",
+  "conclusion": "unproven; no recommendation to toggle during reproduction",
+  "source_default": "0",
+  "source_condition": "npu destination + cpu source + env ==1 selects BoundedNPUMetadataTransfer; otherwise synchronous t.to(device)",
+  "historical_source": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1/vllm_omni/experimental/ar_diffusion/kv_cache/paged_attention.py",
+    "sha256": "028b90605cfc85c8e2da4149ce14ad8fa045d6acea00e7e3a3cb11400e1a546c",
+    "bytes": 44740
+  },
+  "current_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/kv_cache/paged_attention.py",
+    "sha256": "028b90605cfc85c8e2da4149ce14ad8fa045d6acea00e7e3a3cb11400e1a546c",
+    "bytes": 44740
+  },
+  "sources_identical": true,
+  "prepared_environment": {
+    "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/environment_fixed_timestep_stageA_clean_v89.json",
+    "sha256": "7056e7200b8ec37142ac06d9d7707c67cf952aab3aa1c6747fb4918fa1318cff",
+    "bytes": 2128
+  },
+  "flag_in_prepared_overrides": false,
+  "parent_override_pin": {
+    "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/QK_native_rms_rope_send_v1/model_screen_single_host_v8/actual_final600_batch_v8/B_environment_v8.json",
+    "bytes": 2212,
+    "sha256": "6295204b36c2525b773f600f46da3c7139d6f0513f59303bc3eeb8b31662b343"
+  },
+  "parent_override_present": false,
+  "final_launches": [
+    {
+      "closure": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_closure_CPU.json",
+        "sha256": "99d9e830c51c8b8092cc63298c74ef731907f7f86800e81deeaae63e5ac3e9f4",
+        "bytes": 15284
+      },
+      "selected_override_verified": true,
+      "metadata_flag_in_verified_keys": false,
+      "service_manifest": {
+        "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F1/manifest.json",
+        "bytes": 222145,
+        "sha256": "b460a83c708c8d4e93a14a2d1c141ad9900fa75c90d74d7232043b2eee64d255"
+      },
+      "manifest_present": false,
+      "controller": {
+        "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/run_lingbot_sp8_experiment_device_map_v3.py",
+        "bytes": 22692,
+        "sha256": "ee77c9b92c8ea27f8ad648a99d47cb5432b92bb068298cb6aee910eeb091e75a"
+      },
+      "controller_present": false
+    },
+    {
+      "closure": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_closure_CPU.json",
+        "sha256": "370a62196414b62fe5b5006bc796750b88800a475ea030230b8aa889678c1bed",
+        "bytes": 15284
+      },
+      "selected_override_verified": true,
+      "metadata_flag_in_verified_keys": false,
+      "service_manifest": {
+        "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v91/F2/manifest.json",
+        "bytes": 222145,
+        "sha256": "346ec21d7f36dec1829a8d8bd6fee8995a553cb8918a0713570b7ebc6897b73c"
+      },
+      "manifest_present": false,
+      "controller": {
+        "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/run_lingbot_sp8_experiment_device_map_v3.py",
+        "bytes": 22692,
+        "sha256": "ee77c9b92c8ea27f8ad648a99d47cb5432b92bb068298cb6aee910eeb091e75a"
+      },
+      "controller_present": false
+    },
+    {
+      "closure": {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_closure_CPU.json",
+        "sha256": "dd801d39dbb22b2a29158c06255e2f88797bda7fc6953f16a5eddf5208a86817",
+        "bytes": 15284
+      },
+      "selected_override_verified": true,
+      "metadata_flag_in_verified_keys": false,
+      "service_manifest": {
+        "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/fixed_timestep_bank_v1/actual_final600_v93/F3/manifest.json",
+        "bytes": 222145,
+        "sha256": "429bf7c29f6a29b762422ba47192245eb918409872c16b717027ccc5b445d960"
+      },
+      "manifest_present": false,
+      "controller": {
+        "path": "/mnt/data/zhoutaichang/project/lingbot-world/profiling/runs/20261008-h200-gap-optimization/p0/run_lingbot_sp8_experiment_device_map_v3.py",
+        "bytes": 22692,
+        "sha256": "ee77c9b92c8ea27f8ad648a99d47cb5432b92bb068298cb6aee910eeb091e75a"
+      },
+      "controller_present": false
+    }
+  ],
+  "retained_stable_env_contains_flag": false,
+  "stable_env_sha256": "33101f06405b4ecf80894db92946627cd4136890768a46c775e610c3be9e22b1",
+  "limitations": [
+    "Absence from prepared override JSON and verified override keys does not prove absence from inherited environment.",
+    "Full historical service manifests and controller source are missing at recorded paths; no authoritative full effective worker environment was recovered.",
+    "Current trace shape4680 H2D sync is consistent with slot-mapping transfer, but no Python callstack was captured."
+  ],
+  "archival_scope": "Prior initial-row-copy, cross-disabled SP8 trace. Not the batched-copy timing variant, not restored combined BSND, and not the historical winner.",
+  "source_audit_artifact": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/trace-dependencies/historical-async-metadata-audit.json",
+    "sha256": "87b59ad49aa0495307f53bcbddece8150d0c8e5c7bee2ef1c904b05d98977f2e"
+  }
+}

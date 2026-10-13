@@ -40,3 +40,13 @@ all80 chunks. All8*80 latent chunks and957 primary RGB frames are bit-identical
 to the prior staged no-cross reconstruction. All owned workers retired.
 See validation/paired80-batched-copy-20261013.json. Not a timing admission;
 concurrent offline export and tensor capture were deliberately active.
+
+Independent timing completed after all exporters and heavy analysis stopped:
+run c4b9ff217a4d2973614806e8256ad3d6, warm40 then161, window11–159:
+mean944.15885ms, P99963.03828ms, max965.09891ms, zero>1000ms,
+TTFC3891.09602ms,1929frames. Profiler and tensor capture disabled.
+Earlier row-copy diagnostic with same config/workload:1184.18178/1192.64870ms.
+Observed one-run difference:240.02ms mean and229.61ms P99. This is not the
+six-launch paired screening protocol or a proof that all historical regression
+was VAE. QK/cross host paths still differ. Full combination is not reproduced;
+current run fails900/950 target and no final600 acceptance is claimed.

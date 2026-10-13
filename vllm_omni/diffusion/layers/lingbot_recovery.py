@@ -107,6 +107,11 @@ def configured(feature):
     from vllm_omni.diffusion.config import get_current_diffusion_config_or_none
     config = get_current_diffusion_config_or_none()
     values = getattr(config, "model_config", None) or {}
+    if feature in ("cross", "cross_combined"):
+        cross_modes = [values.get("lingbot_npu_recovery_" + name, False)
+                       for name in ("cross", "cross_combined")]
+        _check(all(type(value) is bool for value in cross_modes), "cross recovery modes must be bool")
+        _check(not all(cross_modes), "cross recovery modes are mutually exclusive")
     key = "lingbot_npu_recovery_" + feature
     enabled = values.get(key, False)
     _check(type(enabled) is bool, key + " must be bool")
@@ -170,6 +175,38 @@ class Cross:
                 or not provider.unblocked((q,k,v))):
             return None
         return provider.call("cross", q, k, v, scale)
+
+
+class CrossCombined:
+    """One bound provider and one C++ runtime/owner admission per cross call."""
+
+    def __init__(self):
+        self._provider = None
+
+    def try_forward(self, q, k, v, *, role, scale, attn_mask, dropout_p, is_causal, enable_gqa):
+        provider = self._provider
+        if provider is None:
+            # First forward has an initialized worker NPU runtime. SHA, ABI,
+            # JIT, SoC and fatal protocol validation retain their old meaning.
+            provider = load()
+            self._provider = provider
+        _check(not provider.poisoned, "cross provider poisoned; restart eight workers")
+        try:
+            policy = (os.environ.get("LINGBOT_RECOVERY_MANIFEST"),
+                      os.environ.get("LINGBOT_RECOVERY_MANIFEST_SHA256"))
+            _check(provider.policy == policy, "cross provider manifest changed; restart eight workers")
+            compatible = (role == "cross" and attn_mask is None and dropout_p == 0
+                          and not is_causal and not enable_gqa)
+            # Runtime stream/inference/format/extent checks run together in
+            # C++; None alone permits the original SDPA fallback.
+            return provider.call("try_cross_combined", q, k, v, scale, compatible)
+        except BaseException as error:
+            if not provider.poisoned:
+                provider.poisoned = True
+                owners = (self, provider, q, k, v, error)
+                _QUARANTINE.append(owners)
+                provider.fatal.report_failure("recovery_cross_combined", repr(error), owners)
+            raise
 
 
 class ExactPacking:

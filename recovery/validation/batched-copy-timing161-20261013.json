@@ -1,0 +1,20 @@
+{
+  "window_inclusive": [
+    11,
+    159
+  ],
+  "sample_count": 149,
+  "mean_ms": 944.1588499933722,
+  "p99_ms": 963.0382811976597,
+  "max_ms": 965.0989070069045,
+  "over_1000ms": 0,
+  "longest_over_1000ms": 0,
+  "ttfc_ms": 3891.096021980047,
+  "last_media_arrival_s": 154.42741619699518,
+  "total_frames": 1929,
+  "single_run_threshold_pass": false,
+  "final_acceptance": false,
+  "metric": "client media inter-arrival; linear-interpolated P99",
+  "limits": "Requires separate launch/warmup/profiler-off evidence; no browser playback or multi-run claim",
+  "input_sha256": "9dab59c71a1595e669a0f598f15c4ff813ba975fb19c2ae35ad403ae6dca00e1"
+}

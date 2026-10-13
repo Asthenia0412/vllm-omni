@@ -1,0 +1,875 @@
+{
+  "scope": "rank0 long sync calls fully contained in complete chunk11\u201314 rank0 RGB completion windows",
+  "db": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank0/liteserver-for-vllm-ascend-00002_559007_20261013102344688_ascend_pt/ASCEND_PROFILER_OUTPUT/ascend_pytorch_profiler_0.db",
+  "sync_count": 104,
+  "sync_workload_ms": 850.05193,
+  "records": [
+    {
+      "start_ns": 1791858243999553740,
+      "end_ns": 1791858244210372910,
+      "duration_ms": 210.81917,
+      "thread": 2400916783794079,
+      "connection": 1710412,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          212.14548,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          212.1793,
+          null
+        ],
+        [
+          "aten::to",
+          212.18838,
+          null
+        ],
+        [
+          "lingbot.rgb_copy",
+          212.79061,
+          null
+        ],
+        [
+          "lingbot.post_decode",
+          364.69332,
+          null
+        ],
+        [
+          "diffusion_step",
+          1379.55604,
+          null
+        ]
+      ],
+      "compute_union_ms": 201.416448,
+      "communication_union_ms": 9.1136,
+      "kernel_union_ms": 210.530048,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "lingbot_recovery_copy_pair",
+          161.60512000000003
+        ],
+        [
+          "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+          12.397311999999998
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCore_ViewCopy",
+          3.767296
+        ],
+        [
+          "aclnnConvolution_TransData_TransData",
+          3.554047999999999
+        ],
+        [
+          "aclnnInplaceCopy_StridedSliceAiCore_StridedSlice",
+          3.0297599999999996
+        ],
+        [
+          "aclnnContiguous_TransposeAiCore_Transpose",
+          2.451967999999999
+        ],
+        [
+          "RmsNorm",
+          2.234368000000001
+        ],
+        [
+          "aclnnSilu_TransposeAiCore_Transpose",
+          2.2151680000000002
+        ],
+        [
+          "aclnnSilu_SiluAiCore_Swish",
+          1.1878399999999996
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCpu_ViewCopy",
+          1.142272
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "30560",
+          "return_minus_end_us": 502.784
+        },
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "30557",
+          "return_minus_end_us": 534.784
+        },
+        {
+          "name": "hcom_batchSendRecv__121_1307_1",
+          "stream": "N/A",
+          "task": "N/A",
+          "return_minus_end_us": 603.648
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "30548",
+          "return_minus_end_us": 702.72
+        }
+      ]
+    },
+    {
+      "start_ns": 1791858248101690770,
+      "end_ns": 1791858248294631750,
+      "duration_ms": 192.94098,
+      "thread": 2400916783794079,
+      "connection": 1979719,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          193.66957,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          193.68911,
+          null
+        ],
+        [
+          "aten::to",
+          193.69531,
+          null
+        ],
+        [
+          "lingbot.rgb_copy",
+          194.31962,
+          null
+        ],
+        [
+          "lingbot.post_decode",
+          368.43596,
+          null
+        ],
+        [
+          "diffusion_step",
+          1368.2297,
+          null
+        ]
+      ],
+      "compute_union_ms": 184.022272,
+      "communication_union_ms": 8.652544,
+      "kernel_union_ms": 192.674816,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "lingbot_recovery_copy_pair",
+          147.760384
+        ],
+        [
+          "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+          11.342848
+        ],
+        [
+          "aclnnConvolution_TransData_TransData",
+          3.2732159999999992
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCore_ViewCopy",
+          3.182336
+        ],
+        [
+          "aclnnInplaceCopy_StridedSliceAiCore_StridedSlice",
+          2.719232
+        ],
+        [
+          "aclnnContiguous_TransposeAiCore_Transpose",
+          2.35776
+        ],
+        [
+          "RmsNorm",
+          2.085376
+        ],
+        [
+          "aclnnSilu_TransposeAiCore_Transpose",
+          2.038784
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCpu_ViewCopy",
+          1.183744
+        ],
+        [
+          "aclnnSilu_SiluAiCore_Swish",
+          1.1225599999999998
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "10279",
+          "return_minus_end_us": 485.376
+        },
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "10276",
+          "return_minus_end_us": 515.84
+        },
+        {
+          "name": "hcom_batchSendRecv__121_1634_1",
+          "stream": "N/A",
+          "task": "N/A",
+          "return_minus_end_us": 583.68
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "10267",
+          "return_minus_end_us": 689.92
+        }
+      ]
+    },
+    {
+      "start_ns": 1791858246721674650,
+      "end_ns": 1791858246913088300,
+      "duration_ms": 191.41365,
+      "thread": 2400916783794079,
+      "connection": 1889900,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          192.62558,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          192.65941,
+          null
+        ],
+        [
+          "aten::to",
+          192.66487,
+          null
+        ],
+        [
+          "lingbot.rgb_copy",
+          193.12812,
+          null
+        ],
+        [
+          "lingbot.post_decode",
+          365.649,
+          null
+        ],
+        [
+          "diffusion_step",
+          1341.82022,
+          null
+        ]
+      ],
+      "compute_union_ms": 182.916096,
+      "communication_union_ms": 8.229376,
+      "kernel_union_ms": 191.145472,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "lingbot_recovery_copy_pair",
+          146.704128
+        ],
+        [
+          "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+          11.346688
+        ],
+        [
+          "aclnnConvolution_TransData_TransData",
+          3.202047999999999
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCore_ViewCopy",
+          3.194112
+        ],
+        [
+          "aclnnInplaceCopy_StridedSliceAiCore_StridedSlice",
+          2.70464
+        ],
+        [
+          "aclnnContiguous_TransposeAiCore_Transpose",
+          2.309376
+        ],
+        [
+          "RmsNorm",
+          2.11584
+        ],
+        [
+          "aclnnSilu_TransposeAiCore_Transpose",
+          2.059264
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCpu_ViewCopy",
+          1.148672
+        ],
+        [
+          "aclnnSilu_SiluAiCore_Swish",
+          1.122048
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "60721",
+          "return_minus_end_us": 492.8
+        },
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "60718",
+          "return_minus_end_us": 526.336
+        },
+        {
+          "name": "hcom_batchSendRecv__121_1525_1",
+          "stream": "N/A",
+          "task": "N/A",
+          "return_minus_end_us": 594.688
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "60709",
+          "return_minus_end_us": 639.744
+        }
+      ]
+    },
+    {
+      "start_ns": 1791858245369142450,
+      "end_ns": 1791858245557610810,
+      "duration_ms": 188.46836,
+      "thread": 2400916783794079,
+      "connection": 1799770,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          189.12788,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          189.14586,
+          null
+        ],
+        [
+          "aten::to",
+          189.1493,
+          null
+        ],
+        [
+          "lingbot.rgb_copy",
+          189.53763,
+          null
+        ],
+        [
+          "lingbot.post_decode",
+          365.22029,
+          null
+        ],
+        [
+          "diffusion_step",
+          1334.11442,
+          null
+        ]
+      ],
+      "compute_union_ms": 179.684352,
+      "communication_union_ms": 8.52992,
+      "kernel_union_ms": 188.214272,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "lingbot_recovery_copy_pair",
+          144.099584
+        ],
+        [
+          "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+          10.974719999999998
+        ],
+        [
+          "aclnnConvolution_TransData_TransData",
+          3.2455679999999982
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCore_ViewCopy",
+          3.2010240000000003
+        ],
+        [
+          "aclnnInplaceCopy_StridedSliceAiCore_StridedSlice",
+          2.6347519999999998
+        ],
+        [
+          "aclnnContiguous_TransposeAiCore_Transpose",
+          2.2906880000000003
+        ],
+        [
+          "RmsNorm",
+          2.0446720000000003
+        ],
+        [
+          "aclnnSilu_TransposeAiCore_Transpose",
+          1.9799040000000006
+        ],
+        [
+          "aclnnInplaceCopy_ViewCopyAiCpu_ViewCopy",
+          1.170176
+        ],
+        [
+          "aclnnSilu_SiluAiCore_Swish",
+          1.0974719999999998
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "45641",
+          "return_minus_end_us": 490.752
+        },
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "45638",
+          "return_minus_end_us": 523.264
+        },
+        {
+          "name": "hcom_batchSendRecv__121_1416_1",
+          "stream": "N/A",
+          "task": "N/A",
+          "return_minus_end_us": 590.08
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "45629",
+          "return_minus_end_us": 687.616
+        }
+      ]
+    },
+    {
+      "start_ns": 1791858245817359100,
+      "end_ns": 1791858245837885290,
+      "duration_ms": 20.52619,
+      "thread": 2400916783794079,
+      "connection": 1821249,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          20.58084,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          20.62448,
+          null
+        ],
+        [
+          "aten::to",
+          20.63302,
+          null
+        ],
+        [
+          "lingbot.denoise_step",
+          258.96254,
+          null
+        ],
+        [
+          "diffusion_step",
+          1341.82022,
+          null
+        ]
+      ],
+      "compute_union_ms": 19.185664,
+      "communication_union_ms": 1.251328,
+      "kernel_union_ms": 20.436992,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "FusedInferAttentionScore",
+          8.168192
+        ],
+        [
+          "aclnnAddmm_MatMulCommon_MatMulV2",
+          4.354816
+        ],
+        [
+          "aclnnQuantMatmulWeightNz_QuantBatchMatmulV3_QuantBatchMatmulV3",
+          1.561856
+        ],
+        [
+          "lingbot_recovery_recv",
+          0.5247999999999999
+        ],
+        [
+          "aclnnInplaceCopy_TransposeAiCore_Transpose",
+          0.42624
+        ],
+        [
+          "aclnnLayerNormWithImplMode_LayerNormV3WithImplMode_LayerNormV3",
+          0.42060800000000004
+        ],
+        [
+          "aclnnInplaceCopy_CastAiCore_Cast",
+          0.409088
+        ],
+        [
+          "aclnnAdd_AddAiCore_Add",
+          0.3612160000000001
+        ],
+        [
+          "aclnnIndexSelect_GatherV3AiCore_GatherV3",
+          0.351488
+        ],
+        [
+          "aclnnFlashAttentionScore_TransposeAiCore_Transpose",
+          0.30105600000000005
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "stream": "47",
+          "task": "49298",
+          "return_minus_end_us": 1.792
+        },
+        {
+          "name": "aclnnInplaceCopy_TransposeAiCore_Transpose",
+          "stream": "47",
+          "task": "49297",
+          "return_minus_end_us": 3.84
+        },
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "49296",
+          "return_minus_end_us": 93.44
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "49295",
+          "return_minus_end_us": 109.824
+        }
+      ]
+    },
+    {
+      "start_ns": 1791858247417513770,
+      "end_ns": 1791858247436298490,
+      "duration_ms": 18.78472,
+      "thread": 2400916783794079,
+      "connection": 1929818,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          18.85064,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          18.8811,
+          null
+        ],
+        [
+          "aten::to",
+          18.88427,
+          null
+        ],
+        [
+          "lingbot.denoise_step",
+          259.34398,
+          null
+        ],
+        [
+          "diffusion_step",
+          1368.2297,
+          null
+        ]
+      ],
+      "compute_union_ms": 13.906944,
+      "communication_union_ms": 4.798976,
+      "kernel_union_ms": 18.70592,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "FusedInferAttentionScore",
+          6.093824
+        ],
+        [
+          "aclnnAddmm_MatMulCommon_MatMulV2",
+          2.4217600000000004
+        ],
+        [
+          "aclnnQuantMatmulWeightNz_QuantBatchMatmulV3_QuantBatchMatmulV3",
+          1.4315520000000002
+        ],
+        [
+          "hcom_alltoall__327_4638_1",
+          1.052928
+        ],
+        [
+          "hcom_alltoall__327_4634_1",
+          0.934912
+        ],
+        [
+          "hcom_alltoall__327_4636_1",
+          0.7744
+        ],
+        [
+          "hcom_allGather__121_1527_1",
+          0.7104
+        ],
+        [
+          "hcom_alltoall__327_4637_1",
+          0.479488
+        ],
+        [
+          "hcom_alltoall__327_4635_1",
+          0.478464
+        ],
+        [
+          "lingbot_recovery_recv",
+          0.387328
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "1893",
+          "return_minus_end_us": 78.848
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "1892",
+          "return_minus_end_us": 96.0
+        },
+        {
+          "name": "aclnnInplaceFillScalar_FillAiCore_Fill",
+          "stream": "47",
+          "task": "1891",
+          "return_minus_end_us": 103.68
+        },
+        {
+          "name": "aclnnInplaceCopy_TensorMoveAiCore_TensorMove",
+          "stream": "47",
+          "task": "1889",
+          "return_minus_end_us": 106.24
+        }
+      ]
+    },
+    {
+      "start_ns": 1791858247179424000,
+      "end_ns": 1791858247195893150,
+      "duration_ms": 16.46915,
+      "thread": 2400916783794079,
+      "connection": 1910354,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          16.52249,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          16.56603,
+          null
+        ],
+        [
+          "aten::to",
+          16.56838,
+          null
+        ],
+        [
+          "lingbot.denoise_step",
+          236.45346,
+          null
+        ],
+        [
+          "diffusion_step",
+          1368.2297,
+          null
+        ]
+      ],
+      "compute_union_ms": 14.15552,
+      "communication_union_ms": 2.24512,
+      "kernel_union_ms": 16.40064,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "FusedInferAttentionScore",
+          6.08896
+        ],
+        [
+          "aclnnAddmm_MatMulCommon_MatMulV2",
+          3.066112000000001
+        ],
+        [
+          "aclnnQuantMatmulWeightNz_QuantBatchMatmulV3_QuantBatchMatmulV3",
+          1.191936
+        ],
+        [
+          "hcom_alltoall__327_4557_1",
+          0.800256
+        ],
+        [
+          "hcom_alltoall__327_4559_1",
+          0.491008
+        ],
+        [
+          "hcom_alltoall__327_4555_1",
+          0.472064
+        ],
+        [
+          "lingbot_recovery_recv",
+          0.395776
+        ],
+        [
+          "aclnnInplaceCopy_TransposeAiCore_Transpose",
+          0.33382399999999995
+        ],
+        [
+          "aclnnInplaceCopy_CastAiCore_Cast",
+          0.31283199999999994
+        ],
+        [
+          "aclnnLayerNormWithImplMode_LayerNormV3WithImplMode_LayerNormV3",
+          0.30668799999999996
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "64378",
+          "return_minus_end_us": 74.752
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "64377",
+          "return_minus_end_us": 91.136
+        },
+        {
+          "name": "aclnnInplaceFillScalar_FillAiCore_Fill",
+          "stream": "47",
+          "task": "64376",
+          "return_minus_end_us": 98.56
+        },
+        {
+          "name": "aclnnInplaceCopy_TensorMoveAiCore_TensorMove",
+          "stream": "47",
+          "task": "64374",
+          "return_minus_end_us": 101.12
+        }
+      ]
+    },
+    {
+      "start_ns": 1791858246312951930,
+      "end_ns": 1791858246316674360,
+      "duration_ms": 3.72243,
+      "thread": 2400916783794079,
+      "connection": 1856567,
+      "enclosing_cpu": [
+        [
+          "aten::copy_",
+          3.7726,
+          null
+        ],
+        [
+          "aten::_to_copy",
+          3.80486,
+          null
+        ],
+        [
+          "aten::to",
+          3.80755,
+          null
+        ],
+        [
+          "lingbot.denoise_step",
+          237.01194,
+          null
+        ],
+        [
+          "diffusion_step",
+          1341.82022,
+          null
+        ]
+      ],
+      "compute_union_ms": 2.596096,
+      "communication_union_ms": 1.104128,
+      "kernel_union_ms": 3.700224,
+      "top_kernel_workload_in_sync_ms": [
+        [
+          "hcom_allGather__121_1419_1",
+          0.695552
+        ],
+        [
+          "FusedInferAttentionScore",
+          0.639232
+        ],
+        [
+          "aclnnAddmm_MatMulCommon_MatMulV2",
+          0.43648
+        ],
+        [
+          "hcom_alltoall__327_4399_1",
+          0.408576
+        ],
+        [
+          "aclnnQuantMatmulWeightNz_QuantBatchMatmulV3_QuantBatchMatmulV3",
+          0.395776
+        ],
+        [
+          "aclnnInplaceCopy_TransposeAiCore_Transpose",
+          0.210176
+        ],
+        [
+          "aclnnInplaceCopy_CastAiCore_Cast",
+          0.11545599999999999
+        ],
+        [
+          "aclnnAdd_AddAiCore_Add",
+          0.104192
+        ],
+        [
+          "aclnnLayerNormWithImplMode_LayerNormV3WithImplMode_LayerNormV3",
+          0.10240000000000002
+        ],
+        [
+          "aclnnFlashAttentionScore_TransposeAiCore_Transpose",
+          0.077568
+        ]
+      ],
+      "kernel_ending_before_sync_return": [
+        {
+          "name": "aclnnAddmm_CastAiCore_Cast",
+          "stream": "47",
+          "task": "55398",
+          "return_minus_end_us": 5.888
+        },
+        {
+          "name": "aclnnInplaceCopy_TransposeAiCore_Transpose",
+          "stream": "47",
+          "task": "55397",
+          "return_minus_end_us": 8.192
+        },
+        {
+          "name": "aclnnCat_ConcatD_ConcatD",
+          "stream": "47",
+          "task": "55396",
+          "return_minus_end_us": 97.536
+        },
+        {
+          "name": "aclnnInplaceCopy_CastAiCore_Cast",
+          "stream": "47",
+          "task": "55395",
+          "return_minus_end_us": 114.176
+        }
+      ]
+    }
+  ],
+  "caveat": "Parent CPU ranges prove host call context. Clipped kernel unions show temporal overlap only; specific synchronized stream is not identified. Communication classification by kernel names includes wait. Do not add host sync, kernel workload, communication, or overlap. Fine-grained TASK records are excluded because they include multiple communication subtasks and runtime waits.",
+  "kernel_source": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank0/liteserver-for-vllm-ascend-00002_559007_20261013102344688_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+  "archival_scope": "Prior initial-row-copy, cross-disabled SP8 trace. Not the batched-copy timing variant, not restored combined BSND, and not the historical winner.",
+  "source_audit_artifact": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/trace-dependencies/rank0-linked-sync.json",
+    "sha256": "2d55639423f5cf3cb53f6bfa29613a602beb2ad8fc0fd90efa7e13881bf223bb"
+  }
+}

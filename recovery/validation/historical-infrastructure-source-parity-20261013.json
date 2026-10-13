@@ -1,0 +1,1404 @@
+{
+  "schema": "lingbot_historical_infrastructure_python_parity_v1",
+  "observed_date": "2026-10-13",
+  "historical_root": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/lingbot-generated-fixed-timestep-stageA-clean-v1",
+  "current_root": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree",
+  "current_head": "4701243ab359b895256d3f0bb9a6b7b43dc2285f",
+  "scope": "Only the four enumerated top-level Python directory trees. Diffusion-specific providers, C++ libraries, environment and runtime execution are outside this comparison. This proves source parity at observation, not performance parity.",
+  "groups": {
+    "vllm_omni/engine": {
+      "historical_count": 58,
+      "current_count": 58,
+      "expected_count": 58
+    },
+    "vllm_omni/distributed": {
+      "historical_count": 38,
+      "current_count": 38,
+      "expected_count": 38
+    },
+    "vllm_omni/entrypoints": {
+      "historical_count": 114,
+      "current_count": 114,
+      "expected_count": 114
+    },
+    "vllm_omni/worker": {
+      "historical_count": 18,
+      "current_count": 18,
+      "expected_count": 18
+    }
+  },
+  "checked_files": 228,
+  "missing_files": [],
+  "added_files": [],
+  "passed": true,
+  "files": [
+    {
+      "relative_path": "vllm_omni/engine/__init__.py",
+      "historical_sha256": "9a6c0144d135db9beca4efac31f7942473b29264bee82e1cdcc2680ff0a85c21",
+      "current_sha256": "9a6c0144d135db9beca4efac31f7942473b29264bee82e1cdcc2680ff0a85c21",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/arg_utils.py",
+      "historical_sha256": "28f04bdaa2b79eacabe446fcde86ce851c5919d4551e7a5fdb9c8658b8a31a13",
+      "current_sha256": "28f04bdaa2b79eacabe446fcde86ce851c5919d4551e7a5fdb9c8658b8a31a13",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/async_engine_utils.py",
+      "historical_sha256": "23108b258a25d4b7506a0cc4392b7840b05568952f19c48d001296c4cb213dab",
+      "current_sha256": "23108b258a25d4b7506a0cc4392b7840b05568952f19c48d001296c4cb213dab",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/async_omni_engine.py",
+      "historical_sha256": "3a53d86b40a35b1b88f027a14aba57c291cabc51eed9481767c65fd2202dae0b",
+      "current_sha256": "3a53d86b40a35b1b88f027a14aba57c291cabc51eed9481767c65fd2202dae0b",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/cfg_companion_tracker.py",
+      "historical_sha256": "f2a93a8496143b497b924aa895ea6e82d6779975cb31bbb01b59b223bb30785c",
+      "current_sha256": "f2a93a8496143b497b924aa895ea6e82d6779975cb31bbb01b59b223bb30785c",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/cuda_mps.py",
+      "historical_sha256": "4cdfe5ca865b13f5865e0d1fefb61ba05fccfc569a4955bec5a09815f1f48f68",
+      "current_sha256": "4cdfe5ca865b13f5865e0d1fefb61ba05fccfc569a4955bec5a09815f1f48f68",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/__init__.py",
+      "historical_sha256": "ee4205c6ad2ea357fb5d721e6c20a14f6d359e4319528069c84b0bb7971c99af",
+      "current_sha256": "ee4205c6ad2ea357fb5d721e6c20a14f6d359e4319528069c84b0bb7971c99af",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/audio.py",
+      "historical_sha256": "d2120196144fa0685dc6130c1b85f7ea91ef13a92c986e0c0de958599426f8f5",
+      "current_sha256": "d2120196144fa0685dc6130c1b85f7ea91ef13a92c986e0c0de958599426f8f5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/commands.py",
+      "historical_sha256": "90601860622f8d4f16b0bd01d6bb5e10670c5c8284b252d6e6df1c481e1a13e8",
+      "current_sha256": "90601860622f8d4f16b0bd01d6bb5e10670c5c8284b252d6e6df1c481e1a13e8",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/config.py",
+      "historical_sha256": "1c4c92f967b0adf5cc1ea62df88ecde38d1e616a16c3854b4f57a4e0a4991a33",
+      "current_sha256": "1c4c92f967b0adf5cc1ea62df88ecde38d1e616a16c3854b4f57a4e0a4991a33",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/contracts.py",
+      "historical_sha256": "78c10e0df975a485b02edfcaf4b60b62b4fb87c02e1d6f410c35f72daa882849",
+      "current_sha256": "78c10e0df975a485b02edfcaf4b60b62b4fb87c02e1d6f410c35f72daa882849",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/events.py",
+      "historical_sha256": "770aadce4e357e21b0495f466f3e63b4ca271e8d38fd10ec962edc851b2b22a4",
+      "current_sha256": "770aadce4e357e21b0495f466f3e63b4ca271e8d38fd10ec962edc851b2b22a4",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/intermediate.py",
+      "historical_sha256": "6e8eb6cdc3ca72cd4a0009f78857d75483698d9fc0fc7b1fd52345e8d1c3ed03",
+      "current_sha256": "6e8eb6cdc3ca72cd4a0009f78857d75483698d9fc0fc7b1fd52345e8d1c3ed03",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/messages.py",
+      "historical_sha256": "356c6c3259ebd74f6d4abc3786e9f846094fe2b1c566b835578c95b6b7913f7b",
+      "current_sha256": "356c6c3259ebd74f6d4abc3786e9f846094fe2b1c566b835578c95b6b7913f7b",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/pcm_reservation.py",
+      "historical_sha256": "6ea9dffb880badfa6ca4ccbaeaa3e2666abd28f7c9083ad294263c5c890bc1c2",
+      "current_sha256": "6ea9dffb880badfa6ca4ccbaeaa3e2666abd28f7c9083ad294263c5c890bc1c2",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/plugin.py",
+      "historical_sha256": "f725bf8500a38eee9cc1d2ca2dbe58cce4f390e743db21f0bc19db0b19a13308",
+      "current_sha256": "f725bf8500a38eee9cc1d2ca2dbe58cce4f390e743db21f0bc19db0b19a13308",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/realtime_commands.py",
+      "historical_sha256": "3780c7e224a82d81373ae6f95b5a3be0ff8a5ccdac3b91378aad966eaa766765",
+      "current_sha256": "3780c7e224a82d81373ae6f95b5a3be0ff8a5ccdac3b91378aad966eaa766765",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/realtime_events.py",
+      "historical_sha256": "8acbcd33d4d41cd7ecef576c4988b9238d6af87adbe37a4b75809712dfcae3dc",
+      "current_sha256": "8acbcd33d4d41cd7ecef576c4988b9238d6af87adbe37a4b75809712dfcae3dc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/__init__.py",
+      "historical_sha256": "92fc8880fcdab94db0480f95f20a05af6cd745cde6022ddacaae15b012dff3ba",
+      "current_sha256": "92fc8880fcdab94db0480f95f20a05af6cd745cde6022ddacaae15b012dff3ba",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/append_task.py",
+      "historical_sha256": "7fdc36ecb0988b7cf647396b1b89df45243ee27ddd86bbc75a8ec93808564981",
+      "current_sha256": "7fdc36ecb0988b7cf647396b1b89df45243ee27ddd86bbc75a8ec93808564981",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/commit_policy.py",
+      "historical_sha256": "6b0994554f6889c2a6e1a70cc04158f18a1081a9a2a3a87c17970f021374cdc3",
+      "current_sha256": "6b0994554f6889c2a6e1a70cc04158f18a1081a9a2a3a87c17970f021374cdc3",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/context.py",
+      "historical_sha256": "8aea9703403fe5e345967995df09d773acec6f9b7a650412f337ac47e1b0ad39",
+      "current_sha256": "8aea9703403fe5e345967995df09d773acec6f9b7a650412f337ac47e1b0ad39",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/control.py",
+      "historical_sha256": "8ae0f8b6c7e84d1c17bc80ee802673908926890b7415f0d9ff4aef6253d7feda",
+      "current_sha256": "8ae0f8b6c7e84d1c17bc80ee802673908926890b7415f0d9ff4aef6253d7feda",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/emitter.py",
+      "historical_sha256": "4a489202ba18882e624b8f5b6ff2626fbd543900ed1c9f69bdad2defcc5cbadf",
+      "current_sha256": "4a489202ba18882e624b8f5b6ff2626fbd543900ed1c9f69bdad2defcc5cbadf",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/engine_session.py",
+      "historical_sha256": "d36509c528090f743755cf0604e7ad37972541f9f81a58d2ed01e6e5cab43ea7",
+      "current_sha256": "d36509c528090f743755cf0604e7ad37972541f9f81a58d2ed01e6e5cab43ea7",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/helpers.py",
+      "historical_sha256": "ccb90f5609640282a4206733da252b0a472b7cece46f3f197da2625fe1380d36",
+      "current_sha256": "ccb90f5609640282a4206733da252b0a472b7cece46f3f197da2625fe1380d36",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/lease.py",
+      "historical_sha256": "70ed81d885f34e10f864d61b7a96fc3c819f0f1ee21b0f1a13092d9d1848de36",
+      "current_sha256": "70ed81d885f34e10f864d61b7a96fc3c819f0f1ee21b0f1a13092d9d1848de36",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/manager.py",
+      "historical_sha256": "cffcf2b2f0a7291cdb4f56c2e0cf871f534c4cf1bae998cd1316d85ed08b84f7",
+      "current_sha256": "cffcf2b2f0a7291cdb4f56c2e0cf871f534c4cf1bae998cd1316d85ed08b84f7",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/model_channel.py",
+      "historical_sha256": "9eb911992b89160a7f28abccf99197135f6f8e1819e84d87d48c80a973ac7dd9",
+      "current_sha256": "9eb911992b89160a7f28abccf99197135f6f8e1819e84d87d48c80a973ac7dd9",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/overlap_policy.py",
+      "historical_sha256": "054a136c3ec3b8f3fffe12ff504fb4e777abb438278409d0cca25e867ef798c4",
+      "current_sha256": "054a136c3ec3b8f3fffe12ff504fb4e777abb438278409d0cca25e867ef798c4",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/playback_ledger.py",
+      "historical_sha256": "8bee5647c77518b3f9fc4297bef199d3bb2b4fb8738e828fce47aa303b77000e",
+      "current_sha256": "8bee5647c77518b3f9fc4297bef199d3bb2b4fb8738e828fce47aa303b77000e",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/session/runner.py",
+      "historical_sha256": "b318b32fb65870688e603985c43c2178a78f6e64ec45d0c2cc4f2cc4868c4358",
+      "current_sha256": "b318b32fb65870688e603985c43c2178a78f6e64ec45d0c2cc4f2cc4868c4358",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/turn_detection.py",
+      "historical_sha256": "19edce70b2014243d92850405ce416b2d8b22b377c6961755137edac2b456564",
+      "current_sha256": "19edce70b2014243d92850405ce416b2d8b22b377c6961755137edac2b456564",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex/vad.py",
+      "historical_sha256": "4f966dbb153a077b6422050ff9af04398b393918ab7383acadcd5609ba292f10",
+      "current_sha256": "4f966dbb153a077b6422050ff9af04398b393918ab7383acadcd5609ba292f10",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex_omni_engine.py",
+      "historical_sha256": "04715daf39b506e578c1d71e8638a9b8b23a0c7a126536e8e9ca2218f3264a16",
+      "current_sha256": "04715daf39b506e578c1d71e8638a9b8b23a0c7a126536e8e9ca2218f3264a16",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/duplex_orchestrator.py",
+      "historical_sha256": "3d2607c42d95ae217e27117723609e8edccd22062bb7efaaca5cb13b1cd71708",
+      "current_sha256": "3d2607c42d95ae217e27117723609e8edccd22062bb7efaaca5cb13b1cd71708",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/errors.py",
+      "historical_sha256": "3d78d63662f315048601ad9ec54ee94acbfc619e0a9190f7ef5b9d20d3365c27",
+      "current_sha256": "3d78d63662f315048601ad9ec54ee94acbfc619e0a9190f7ef5b9d20d3365c27",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/membership_controller.py",
+      "historical_sha256": "de5a0a782f0beb63441935dadbce2587eb43bb14b9c7432056aac5b4b8292ea1",
+      "current_sha256": "de5a0a782f0beb63441935dadbce2587eb43bb14b9c7432056aac5b4b8292ea1",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/messages.py",
+      "historical_sha256": "3d0f294e0e4a467ea2dc1790c926e9e9b16fbb799ff235708d5564a797d59727",
+      "current_sha256": "3d0f294e0e4a467ea2dc1790c926e9e9b16fbb799ff235708d5564a797d59727",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/mm_outputs.py",
+      "historical_sha256": "99f0d23b1241ab294efed21f365aae5be49b2d99a6dde4b91c78e6f0f63db89f",
+      "current_sha256": "99f0d23b1241ab294efed21f365aae5be49b2d99a6dde4b91c78e6f0f63db89f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/omni_engine_base.py",
+      "historical_sha256": "d560003a13fb7a4590699f6d1ebe9c0fe2d1fef7caf2af9b4ba96be4a2ea5efc",
+      "current_sha256": "d560003a13fb7a4590699f6d1ebe9c0fe2d1fef7caf2af9b4ba96be4a2ea5efc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/orchestrator.py",
+      "historical_sha256": "d5b3156e68be4cba17b4d71b5947687e7480eb3cf27f73c000101c1059f4edf5",
+      "current_sha256": "d5b3156e68be4cba17b4d71b5947687e7480eb3cf27f73c000101c1059f4edf5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/orchestrator_monitor.py",
+      "historical_sha256": "608ca1bdfee2f677b781b08ca1897e0e37f5e57c28ecf102c3fc6fc31e9d8511",
+      "current_sha256": "608ca1bdfee2f677b781b08ca1897e0e37f5e57c28ecf102c3fc6fc31e9d8511",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/output_modality.py",
+      "historical_sha256": "4aa4d250b0c9b90b234bbfccd10e90c1ec08b4959f480bc8ca18cc66eb0d04f0",
+      "current_sha256": "4aa4d250b0c9b90b234bbfccd10e90c1ec08b4959f480bc8ca18cc66eb0d04f0",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/output_processor.py",
+      "historical_sha256": "6b76ca8c63fdd769616390b1e2acd318a2583d13bbb1d2cdf745548280b5ad31",
+      "current_sha256": "6b76ca8c63fdd769616390b1e2acd318a2583d13bbb1d2cdf745548280b5ad31",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/request_snapshot.py",
+      "historical_sha256": "73676ec32b5bf6d0b0d0817c340875e44c6285fa5e7764140621e9e56b02edd7",
+      "current_sha256": "73676ec32b5bf6d0b0d0817c340875e44c6285fa5e7764140621e9e56b02edd7",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/rpc_result_router.py",
+      "historical_sha256": "2c47b154faf42db28537bf26eb1ad32dadabe2218198b440f85b4c58b4da0e0c",
+      "current_sha256": "2c47b154faf42db28537bf26eb1ad32dadabe2218198b440f85b4c58b4da0e0c",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/serialization.py",
+      "historical_sha256": "b592d1e9ea699c398f635cacadb6f251b3b7c6ecc251459884eac7842c56fc4d",
+      "current_sha256": "b592d1e9ea699c398f635cacadb6f251b3b7c6ecc251459884eac7842c56fc4d",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_admission.py",
+      "historical_sha256": "fdc8f5d756b7123c646c8652730952e2e56256aa284e97c192bf88706d76e5e5",
+      "current_sha256": "fdc8f5d756b7123c646c8652730952e2e56256aa284e97c192bf88706d76e5e5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_client.py",
+      "historical_sha256": "3e637d76f7701e47985bf18a4c4016e79623b28fd0666ee56fab0cfa87d7042f",
+      "current_sha256": "3e637d76f7701e47985bf18a4c4016e79623b28fd0666ee56fab0cfa87d7042f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_engine_core_client.py",
+      "historical_sha256": "afb987979329817d7fd9427b22fe5c0617f9e8feec46bd5f63af1d5bade86596",
+      "current_sha256": "afb987979329817d7fd9427b22fe5c0617f9e8feec46bd5f63af1d5bade86596",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_engine_core_proc.py",
+      "historical_sha256": "da4f5c15de0dc2b5e0e49c4622a909621d16d95a30cf6847388c6ed3e969d714",
+      "current_sha256": "da4f5c15de0dc2b5e0e49c4622a909621d16d95a30cf6847388c6ed3e969d714",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_engine_core_proc_manager.py",
+      "historical_sha256": "0d11002e35af82a8b228484f678d458b123a98fcc85dcf4e078cbbc8d309552a",
+      "current_sha256": "0d11002e35af82a8b228484f678d458b123a98fcc85dcf4e078cbbc8d309552a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_engine_startup.py",
+      "historical_sha256": "3aa06adbdf4e6f9460202c9edfff36c9c6541fe2a2237e8738864db6a6792100",
+      "current_sha256": "3aa06adbdf4e6f9460202c9edfff36c9c6541fe2a2237e8738864db6a6792100",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_init_utils.py",
+      "historical_sha256": "c3d89690f58c2f932ae5b7796811e2a60e4f1d68f0dbda340d5eaa03be62dde4",
+      "current_sha256": "c3d89690f58c2f932ae5b7796811e2a60e4f1d68f0dbda340d5eaa03be62dde4",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_phase_lock.py",
+      "historical_sha256": "397fa55f9069ec8f19e2bf1c8016a7e69b884848d42a55f606b6fc2d44ac6423",
+      "current_sha256": "397fa55f9069ec8f19e2bf1c8016a7e69b884848d42a55f606b6fc2d44ac6423",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_pool.py",
+      "historical_sha256": "570bd093136bad5036148aed59add8066f4578125052c5533024255141973a0a",
+      "current_sha256": "570bd093136bad5036148aed59add8066f4578125052c5533024255141973a0a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/engine/stage_runtime.py",
+      "historical_sha256": "af59af0c5509cccc785640833d7c035f261147fb7bb151325a52c1cc7b73ff38",
+      "current_sha256": "af59af0c5509cccc785640833d7c035f261147fb7bb151325a52c1cc7b73ff38",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/__init__.py",
+      "historical_sha256": "d0fca916f550c68b87ef7605295da9a4e3c6f2c74cfe1087ffd409a3d22dc4cb",
+      "current_sha256": "d0fca916f550c68b87ef7605295da9a4e3c6f2c74cfe1087ffd409a3d22dc4cb",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/__init__.py",
+      "historical_sha256": "1058febc36a42c60c2dba6e07d9cae6c22792da94458b836a6428ae5e5ad79cc",
+      "current_sha256": "1058febc36a42c60c2dba6e07d9cae6c22792da94458b836a6428ae5e5ad79cc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/adapter.py",
+      "historical_sha256": "ebd10eee308566f3b4b11798215f76a5f48cd5199b9089ef3ba7868798d90918",
+      "current_sha256": "ebd10eee308566f3b4b11798215f76a5f48cd5199b9089ef3ba7868798d90918",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/__init__.py",
+      "historical_sha256": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "current_sha256": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/base.py",
+      "historical_sha256": "ea4f9489ae7db583149506ca8927d2d5bcc54149a98017bb94d972b4535aa25a",
+      "current_sha256": "ea4f9489ae7db583149506ca8927d2d5bcc54149a98017bb94d972b4535aa25a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/mooncake_store_connector.py",
+      "historical_sha256": "8e99de4d3ce78c1c736dc1868bc35959521ad0c3f1b419eb2c73de962ca05129",
+      "current_sha256": "8e99de4d3ce78c1c736dc1868bc35959521ad0c3f1b419eb2c73de962ca05129",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/mooncake_transfer_engine_connector.py",
+      "historical_sha256": "e774ef78b4e801545c0924f29be0e169e6c999a18c94d67baf2be08950890273",
+      "current_sha256": "e774ef78b4e801545c0924f29be0e169e6c999a18c94d67baf2be08950890273",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/mori_transfer_engine_connector.py",
+      "historical_sha256": "f4589eae1058ed5fd4967077b82eef46d30e40152f93ef7175d76df61ce56c5e",
+      "current_sha256": "f4589eae1058ed5fd4967077b82eef46d30e40152f93ef7175d76df61ce56c5e",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/nixl_connector.py",
+      "historical_sha256": "33aec1c6d2b44bc20b69d99595b140fa09b62146a78521738cfb2714b3d6cf2b",
+      "current_sha256": "33aec1c6d2b44bc20b69d99595b140fa09b62146a78521738cfb2714b3d6cf2b",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/shm_connector.py",
+      "historical_sha256": "c08ffd69c9c59ee400f4f1c734be438107f9099dce7d7b3453e59fe23e985e99",
+      "current_sha256": "c08ffd69c9c59ee400f4f1c734be438107f9099dce7d7b3453e59fe23e985e99",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/yuanrong_connector.py",
+      "historical_sha256": "cc7aa795644c25a8b6fff3c5f6c606ffedff3d9d05f80bc91c467880f9e61e46",
+      "current_sha256": "cc7aa795644c25a8b6fff3c5f6c606ffedff3d9d05f80bc91c467880f9e61e46",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/connectors/yuanrong_transfer_engine_connector.py",
+      "historical_sha256": "b0a647be52a762f6bbdb9b2520f487faf924e820951fc707d97a0ea7a8d02835",
+      "current_sha256": "b0a647be52a762f6bbdb9b2520f487faf924e820951fc707d97a0ea7a8d02835",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/factory.py",
+      "historical_sha256": "77a6e86fd55a1afe3f49866626b72445512ad7bbe412262d1c5c2aa1d083f4e5",
+      "current_sha256": "77a6e86fd55a1afe3f49866626b72445512ad7bbe412262d1c5c2aa1d083f4e5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/kv_transfer_manager.py",
+      "historical_sha256": "c0a448257b5593e1858a047f1bbbc6e1a7118b005bd3611390f446baf3034999",
+      "current_sha256": "c0a448257b5593e1858a047f1bbbc6e1a7118b005bd3611390f446baf3034999",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/model_runner/__init__.py",
+      "historical_sha256": "0b5d5f09df131deaab1b19abc95c7da1a0b99e439c2e932e7784e0551e16437e",
+      "current_sha256": "0b5d5f09df131deaab1b19abc95c7da1a0b99e439c2e932e7784e0551e16437e",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/model_runner/omni_connector_payload_transport.py",
+      "historical_sha256": "e3bd0dceafdfc5cefa1dd85a600c7e18cd85464818b54b9b33cba10ff3f124a5",
+      "current_sha256": "e3bd0dceafdfc5cefa1dd85a600c7e18cd85464818b54b9b33cba10ff3f124a5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/model_runner/omni_connector_runtime.py",
+      "historical_sha256": "fd5d7345fa7da63d604f53813d4a47818124decd432bc9fcbe747321cfdc8a22",
+      "current_sha256": "fd5d7345fa7da63d604f53813d4a47818124decd432bc9fcbe747321cfdc8a22",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/transfer_adapter/__init__.py",
+      "historical_sha256": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "current_sha256": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/transfer_adapter/base.py",
+      "historical_sha256": "0cd25f5395b16034b5203feb2c11866092bcf2759c2ecdfe3c9c6d7aa7f45ea5",
+      "current_sha256": "0cd25f5395b16034b5203feb2c11866092bcf2759c2ecdfe3c9c6d7aa7f45ea5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/transfer_adapter/chunk_transfer_adapter.py",
+      "historical_sha256": "5db373e6f351ade7ed7473fc43dda32d4b234946fef8cdae6d74157beeaf1939",
+      "current_sha256": "5db373e6f351ade7ed7473fc43dda32d4b234946fef8cdae6d74157beeaf1939",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/__init__.py",
+      "historical_sha256": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "current_sha256": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/config.py",
+      "historical_sha256": "6a5fa9c9ddd20c4ac0e67bc0327c5e7911c92229714d146e7991bcddb98beaf4",
+      "current_sha256": "6a5fa9c9ddd20c4ac0e67bc0327c5e7911c92229714d146e7991bcddb98beaf4",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/env.py",
+      "historical_sha256": "01a8e7e468e7702e352065974eb084e6a205bce0c6095d272701c973455c2acc",
+      "current_sha256": "01a8e7e468e7702e352065974eb084e6a205bce0c6095d272701c973455c2acc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/initialization.py",
+      "historical_sha256": "1d1b53ca8f91f902064a2b25f594749fb53467b5c9c00cded2004148e7dc8e20",
+      "current_sha256": "1d1b53ca8f91f902064a2b25f594749fb53467b5c9c00cded2004148e7dc8e20",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/kv_utils.py",
+      "historical_sha256": "b3d182dc825203869e93e037695c9d7ed81561047de03d7cbda4170feb3c79b3",
+      "current_sha256": "b3d182dc825203869e93e037695c9d7ed81561047de03d7cbda4170feb3c79b3",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/local_rank.py",
+      "historical_sha256": "9f73e8c528c70b5909b0d07e65fbd89e6fa4a2daea41e95a76bd19039ddbd24c",
+      "current_sha256": "9f73e8c528c70b5909b0d07e65fbd89e6fa4a2daea41e95a76bd19039ddbd24c",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/logging.py",
+      "historical_sha256": "950ae8d50ddc43365886da1c7e9f33f68a38ad25903c2e40a414026270d9fcda",
+      "current_sha256": "950ae8d50ddc43365886da1c7e9f33f68a38ad25903c2e40a414026270d9fcda",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/memory_pool.py",
+      "historical_sha256": "03d40dd3340e0db17585e5cd0385b146be88c5ce8aa391351622ef1898ab6948",
+      "current_sha256": "03d40dd3340e0db17585e5cd0385b146be88c5ce8aa391351622ef1898ab6948",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_connectors/utils/serialization.py",
+      "historical_sha256": "fb4e5c110b5138d213f541559c021dd5595283c3cd68441b55cffa2b6dd500e8",
+      "current_sha256": "fb4e5c110b5138d213f541559c021dd5595283c3cd68441b55cffa2b6dd500e8",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_coordinator/__init__.py",
+      "historical_sha256": "d3484dcb801f018abf2ef6455b9a7c71c58a9c3e47409e206bd8884318540a68",
+      "current_sha256": "d3484dcb801f018abf2ef6455b9a7c71c58a9c3e47409e206bd8884318540a68",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_coordinator/load_balancer.py",
+      "historical_sha256": "b6eefd28e6afddb7b72d29645ffe6859c134d96c88a32e0e910a8d49835f89f1",
+      "current_sha256": "b6eefd28e6afddb7b72d29645ffe6859c134d96c88a32e0e910a8d49835f89f1",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_coordinator/messages.py",
+      "historical_sha256": "c471394ba87342b3ffabded3f4336377b72897efd728aeefe9af8396336c70c2",
+      "current_sha256": "c471394ba87342b3ffabded3f4336377b72897efd728aeefe9af8396336c70c2",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_coordinator/omni_coord_client_for_hub.py",
+      "historical_sha256": "713cc4ffc23659bf8d2e0d05aefc87ca0c85cf98e583f877722e3797c9d65aa8",
+      "current_sha256": "713cc4ffc23659bf8d2e0d05aefc87ca0c85cf98e583f877722e3797c9d65aa8",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_coordinator/omni_coord_client_for_stage.py",
+      "historical_sha256": "028b046f6c1e2b11c18a8d06c13fd0b21463f34f52ae0c8f2c3bd74a83dbff24",
+      "current_sha256": "028b046f6c1e2b11c18a8d06c13fd0b21463f34f52ae0c8f2c3bd74a83dbff24",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_coordinator/omni_coordinator.py",
+      "historical_sha256": "fc5049f9b3ffe2e28cf0f8895b381ce5c841f9254c7f0b1c5e2338afb8df8890",
+      "current_sha256": "fc5049f9b3ffe2e28cf0f8895b381ce5c841f9254c7f0b1c5e2338afb8df8890",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/omni_coordinator/runtime.py",
+      "historical_sha256": "15fd6ec763ccda18678fa351948eb1413e605a8ef6c069d0d520778cbc97ac6c",
+      "current_sha256": "15fd6ec763ccda18678fa351948eb1413e605a8ef6c069d0d520778cbc97ac6c",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/ray_utils/__init__.py",
+      "historical_sha256": "c9bc6ddcbd29fefb2cfd0c527c9c776b9bd907dc4e82eb40881225c4a9e609a6",
+      "current_sha256": "c9bc6ddcbd29fefb2cfd0c527c9c776b9bd907dc4e82eb40881225c4a9e609a6",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/distributed/ray_utils/utils.py",
+      "historical_sha256": "df4edbbb662287a8f569e2be930192d58ae48f22ede7999bbde8726b4f0154df",
+      "current_sha256": "df4edbbb662287a8f569e2be930192d58ae48f22ede7999bbde8726b4f0154df",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/__init__.py",
+      "historical_sha256": "7cb6ce511277fb82b0ea9afdb85b96cdc9ff6f3e27817f5ca9834adfd1b1b94a",
+      "current_sha256": "7cb6ce511277fb82b0ea9afdb85b96cdc9ff6f3e27817f5ca9834adfd1b1b94a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/async_omni.py",
+      "historical_sha256": "486cef37f31ee1211b25e3fcea9ecf680c2c8ff94a4e492e9e8ee52a1af66753",
+      "current_sha256": "486cef37f31ee1211b25e3fcea9ecf680c2c8ff94a4e492e9e8ee52a1af66753",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/async_omni_base.py",
+      "historical_sha256": "f171f7a67fcd37ccd6d5875f1ab9c05aacf2ddfad511ef227b71850249c92f66",
+      "current_sha256": "f171f7a67fcd37ccd6d5875f1ab9c05aacf2ddfad511ef227b71850249c92f66",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/__init__.py",
+      "historical_sha256": "bbc2335ff657f26175dfce64c3ba81172a9b9040c7e1dfddfd98120885a879a0",
+      "current_sha256": "bbc2335ff657f26175dfce64c3ba81172a9b9040c7e1dfddfd98120885a879a0",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/benchmark/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/benchmark/base.py",
+      "historical_sha256": "20e08c1dbe4125c084087ce2fb4710aaf199f0692cdc3948026d9520664b8275",
+      "current_sha256": "20e08c1dbe4125c084087ce2fb4710aaf199f0692cdc3948026d9520664b8275",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/benchmark/cli_args.py",
+      "historical_sha256": "557228d779a224d5e303c44e1a8116afe12ab299bf37f3313d1804d7d4c4c05f",
+      "current_sha256": "557228d779a224d5e303c44e1a8116afe12ab299bf37f3313d1804d7d4c4c05f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/benchmark/main.py",
+      "historical_sha256": "2fe30102778bc239609d94724622736a385412811058318cec0f5c1880e1b8da",
+      "current_sha256": "2fe30102778bc239609d94724622736a385412811058318cec0f5c1880e1b8da",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/benchmark/omni_duplex_eval.py",
+      "historical_sha256": "e92b1cb0ce771eb26a8e6a31739512325561706b0871902fc33204a1c75e1cfc",
+      "current_sha256": "e92b1cb0ce771eb26a8e6a31739512325561706b0871902fc33204a1c75e1cfc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/benchmark/serve.py",
+      "historical_sha256": "0811666b49a966d8fb563ac22d7dcd09d5beab7e8a42e0bbefff6971e067d771",
+      "current_sha256": "0811666b49a966d8fb563ac22d7dcd09d5beab7e8a42e0bbefff6971e067d771",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/logo.py",
+      "historical_sha256": "5a78c2896c867af83f84d0b28d55d0ccf1291b10d3723b76d29706aa3f0cfe7f",
+      "current_sha256": "5a78c2896c867af83f84d0b28d55d0ccf1291b10d3723b76d29706aa3f0cfe7f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/main.py",
+      "historical_sha256": "dda042e1e670c832143e753510588ad9269e26f50d7a353ff980e78d1633644c",
+      "current_sha256": "dda042e1e670c832143e753510588ad9269e26f50d7a353ff980e78d1633644c",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/cli/serve.py",
+      "historical_sha256": "9b9f343467a612b636ec98f821282f3a2152007aa613baf1a6f25b8477f10f34",
+      "current_sha256": "9b9f343467a612b636ec98f821282f3a2152007aa613baf1a6f25b8477f10f34",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/client_request_state.py",
+      "historical_sha256": "765a2e890ba67faff9572eced1312418a463e369433f76a7034d353a4efdee36",
+      "current_sha256": "765a2e890ba67faff9572eced1312418a463e369433f76a7034d353a4efdee36",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/__init__.py",
+      "historical_sha256": "afa0d8a4b2d3fb52861875be61aded6cde65dddbccfe7c0493c7a0328a2f4835",
+      "current_sha256": "afa0d8a4b2d3fb52861875be61aded6cde65dddbccfe7c0493c7a0328a2f4835",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/audio_encoding.py",
+      "historical_sha256": "cb6b63ddb05f7d6654d906efd2f452d1698da8ac8a96bb0daf2f5c605e4b9d39",
+      "current_sha256": "cb6b63ddb05f7d6654d906efd2f452d1698da8ac8a96bb0daf2f5c605e4b9d39",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/openai.py",
+      "historical_sha256": "aa43f8ded11b6e7ffee5c8565bd6ad6f8f7732329f6a67ada9ba11bac2dc9832",
+      "current_sha256": "aa43f8ded11b6e7ffee5c8565bd6ad6f8f7732329f6a67ada9ba11bac2dc9832",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/realtime_input.py",
+      "historical_sha256": "1990774be6767d9ede7c0ba0cc27cdb6af4a24f50f5a905288edc9eb2eaf809a",
+      "current_sha256": "1990774be6767d9ede7c0ba0cc27cdb6af4a24f50f5a905288edc9eb2eaf809a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/serving.py",
+      "historical_sha256": "1a435e76f42364f075a5f63c52480c97d3fd45b6dcd3092addd50de9d18de16a",
+      "current_sha256": "1a435e76f42364f075a5f63c52480c97d3fd45b6dcd3092addd50de9d18de16a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/session_attachment.py",
+      "historical_sha256": "0c6deeee6079e96af184e784956d7b71e8e6c3d53359dfe7fa7653b27980471e",
+      "current_sha256": "0c6deeee6079e96af184e784956d7b71e8e6c3d53359dfe7fa7653b27980471e",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/warmup.py",
+      "historical_sha256": "c4beffec5cc926f58f943f144a4d8625a9b54ec2606e3ce62321b5eb74085db0",
+      "current_sha256": "c4beffec5cc926f58f943f144a4d8625a9b54ec2606e3ce62321b5eb74085db0",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex/websocket.py",
+      "historical_sha256": "2e29efc04df9f7b46bf7d8a5609e8ef3b2c6bf52f1d4d6f9f950a10a46dfc9cd",
+      "current_sha256": "2e29efc04df9f7b46bf7d8a5609e8ef3b2c6bf52f1d4d6f9f950a10a46dfc9cd",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/duplex_omni.py",
+      "historical_sha256": "95cb6bb57141869904fe44573f08a260c3ff013ee944b4df370a0ed1e4c6406a",
+      "current_sha256": "95cb6bb57141869904fe44573f08a260c3ff013ee944b4df370a0ed1e4c6406a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/omni.py",
+      "historical_sha256": "fdf161c86bc8a9d50dfb3c3bb79d5dfdb451f8bcd92adb8a9bc023a386a8801d",
+      "current_sha256": "fdf161c86bc8a9d50dfb3c3bb79d5dfdb451f8bcd92adb8a9bc023a386a8801d",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/omni_base.py",
+      "historical_sha256": "f7fd45e180e215635062ca75b0a4b1efdeca2b40bae2c967668f350b58d220ee",
+      "current_sha256": "f7fd45e180e215635062ca75b0a4b1efdeca2b40bae2c967668f350b58d220ee",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/__init__.py",
+      "historical_sha256": "ed6fa2c29f9ec9a0f2e5640664eef1dd00f07028e6a1bdb7b13ecfd250452e2a",
+      "current_sha256": "ed6fa2c29f9ec9a0f2e5640664eef1dd00f07028e6a1bdb7b13ecfd250452e2a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/api_server.py",
+      "historical_sha256": "e2b3ec73a083a406188f748446bd8002dab9f24ab514d241f125bac599f60edc",
+      "current_sha256": "e2b3ec73a083a406188f748446bd8002dab9f24ab514d241f125bac599f60edc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/app_state.py",
+      "historical_sha256": "5cb43667949eb008497b5913b8c4f1a4b32f87cb1ae11941cc5b712e4389fc89",
+      "current_sha256": "5cb43667949eb008497b5913b8c4f1a4b32f87cb1ae11941cc5b712e4389fc89",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/audio_utils_mixin.py",
+      "historical_sha256": "c9c60d1a2001711f4bd4b4a3eed3dbef19fb791999512186bafa27934f86be97",
+      "current_sha256": "c9c60d1a2001711f4bd4b4a3eed3dbef19fb791999512186bafa27934f86be97",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/batch_serving.py",
+      "historical_sha256": "8c5a49dfa3f8699fa745d5754a90c416700e2af7ffe5ea2a38974b5abe8ead7d",
+      "current_sha256": "8c5a49dfa3f8699fa745d5754a90c416700e2af7ffe5ea2a38974b5abe8ead7d",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/chat_template.py",
+      "historical_sha256": "e4aa6a0924ed07381832cb88e1fe6d73220e72c2efba5ff81c9a05dbd2fc941b",
+      "current_sha256": "e4aa6a0924ed07381832cb88e1fe6d73220e72c2efba5ff81c9a05dbd2fc941b",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/diffusion.py",
+      "historical_sha256": "c33a5ea9cfe6eb5e88b60ff2230c35e61a959139bfdcead8a776dab1ea6378cc",
+      "current_sha256": "c33a5ea9cfe6eb5e88b60ff2230c35e61a959139bfdcead8a776dab1ea6378cc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/diffusion_request_utils.py",
+      "historical_sha256": "da3ca3f26f5fada324108b913d26d37b8ba1415d07b8f58c0e79a593d346993f",
+      "current_sha256": "da3ca3f26f5fada324108b913d26d37b8ba1415d07b8f58c0e79a593d346993f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/errors.py",
+      "historical_sha256": "ec91023dbee0c4bb06b8bc79b1c010601594b26835c6bed25f947c832e905190",
+      "current_sha256": "ec91023dbee0c4bb06b8bc79b1c010601594b26835c6bed25f947c832e905190",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/image_api_utils.py",
+      "historical_sha256": "b0e0873cd591d292f1517cdb7183ac9797f9bded585f374872f2c05cfb2a08e6",
+      "current_sha256": "b0e0873cd591d292f1517cdb7183ac9797f9bded585f374872f2c05cfb2a08e6",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/images/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/images/helpers.py",
+      "historical_sha256": "7c8ed64aaedf2abeab44f400e70777709c9119379bcf531d4bd8461157ca0a11",
+      "current_sha256": "7c8ed64aaedf2abeab44f400e70777709c9119379bcf531d4bd8461157ca0a11",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/lingbot_media_profile.py",
+      "historical_sha256": "66764958130d0b69533f17578bef5087ef14b279d357eb1ee61dd013a811f0dd",
+      "current_sha256": "66764958130d0b69533f17578bef5087ef14b279d357eb1ee61dd013a811f0dd",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/lora.py",
+      "historical_sha256": "390c5b78a06794bb893c7cf1de63f9a81332f595fa77ceb56d75f09794c5cbee",
+      "current_sha256": "390c5b78a06794bb893c7cf1de63f9a81332f595fa77ceb56d75f09794c5cbee",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/models/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/models/serving.py",
+      "historical_sha256": "51c0868aabe28ce2534370de91d44bb3affaaa36ca29866a923db5361e5ca578",
+      "current_sha256": "51c0868aabe28ce2534370de91d44bb3affaaa36ca29866a923db5361e5ca578",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/protocol/__init__.py",
+      "historical_sha256": "f8ae90ed3f228cd595133826e39824fdbaf3c9e2cddb6a388da2a62f56245ee9",
+      "current_sha256": "f8ae90ed3f228cd595133826e39824fdbaf3c9e2cddb6a388da2a62f56245ee9",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/protocol/audio.py",
+      "historical_sha256": "d71e86e4632fed6d20f04596739a0aa8e190d9866c871f27cb0a5aef1045bd3b",
+      "current_sha256": "d71e86e4632fed6d20f04596739a0aa8e190d9866c871f27cb0a5aef1045bd3b",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/protocol/chat_completion.py",
+      "historical_sha256": "8b1f72642cc0d4a84f354123e9e2b89f66885e36ce67b5d3b10d65050a0dcc34",
+      "current_sha256": "8b1f72642cc0d4a84f354123e9e2b89f66885e36ce67b5d3b10d65050a0dcc34",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/protocol/images.py",
+      "historical_sha256": "6ef00f0b14210e9b9cf32c5f1390d6aa0168d116a8f2a441bfc77634c751f7fe",
+      "current_sha256": "6ef00f0b14210e9b9cf32c5f1390d6aa0168d116a8f2a441bfc77634c751f7fe",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/protocol/rollout.py",
+      "historical_sha256": "b2533f7a4ee910ead40e9cda9d0714cd8498fc91ae0fc3a33f7b0b0d0d0241fc",
+      "current_sha256": "b2533f7a4ee910ead40e9cda9d0714cd8498fc91ae0fc3a33f7b0b0d0d0241fc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/protocol/videos.py",
+      "historical_sha256": "a66c54ea33640f2e864e9b8160902717d3cf5254860eae38304e7a17e4ef6fb0",
+      "current_sha256": "a66c54ea33640f2e864e9b8160902717d3cf5254860eae38304e7a17e4ef6fb0",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/realtime/__init__.py",
+      "historical_sha256": "7ea8f06010083af61d8d711a55626d0f7b616bf0d7e7c6ff2e466195837d47b1",
+      "current_sha256": "7ea8f06010083af61d8d711a55626d0f7b616bf0d7e7c6ff2e466195837d47b1",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/realtime/connection.py",
+      "historical_sha256": "6343953f7eee4b00c6d23670be086eb934820557d279f0f86fd20aa2c7ce8c1a",
+      "current_sha256": "6343953f7eee4b00c6d23670be086eb934820557d279f0f86fd20aa2c7ce8c1a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/realtime/session.py",
+      "historical_sha256": "d849660a4bc4aafc4f59b2660c2a175d3244719f7439672884721d5b5a92be19",
+      "current_sha256": "d849660a4bc4aafc4f59b2660c2a175d3244719f7439672884721d5b5a92be19",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/realtime_connection.py",
+      "historical_sha256": "2d1c2463a9eb0ae61305be037a57d2b85f64ade9c3118b35578a076a4d8c1a03",
+      "current_sha256": "2d1c2463a9eb0ae61305be037a57d2b85f64ade9c3118b35578a076a4d8c1a03",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/rollout_session.py",
+      "historical_sha256": "5988487162f149d8b097eebc251a3711ea855d1bc88213931adcfa4137a528d2",
+      "current_sha256": "5988487162f149d8b097eebc251a3711ea855d1bc88213931adcfa4137a528d2",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_audio_generate.py",
+      "historical_sha256": "5d04b214483cf72b1e080445074090baf330de2049a7978f6e5fbc9a3f881e8d",
+      "current_sha256": "5d04b214483cf72b1e080445074090baf330de2049a7978f6e5fbc9a3f881e8d",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_chat.py",
+      "historical_sha256": "ada2adde1e4e45f822109578e9c7a7db7d073bcdbf1beb2f885d6f51ef02da98",
+      "current_sha256": "ada2adde1e4e45f822109578e9c7a7db7d073bcdbf1beb2f885d6f51ef02da98",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_rl_rollout.py",
+      "historical_sha256": "6858e6d9cde87b6b2035b5efad55b950e5898259b69513d149ec885d7aeb7655",
+      "current_sha256": "6858e6d9cde87b6b2035b5efad55b950e5898259b69513d149ec885d7aeb7655",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_speech.py",
+      "historical_sha256": "61d4fa58b21ec22322923c98dd8069ce8c5fb3840537000ffa2463971543b8ae",
+      "current_sha256": "61d4fa58b21ec22322923c98dd8069ce8c5fb3840537000ffa2463971543b8ae",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_speech_stream.py",
+      "historical_sha256": "e7547ac1618b943b0d2e2cead1135768942f44d50b07a5384aaed2c01a0a41a3",
+      "current_sha256": "e7547ac1618b943b0d2e2cead1135768942f44d50b07a5384aaed2c01a0a41a3",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_video.py",
+      "historical_sha256": "62cf398d04380f05a03097eee8a1ebfbbb0d3a4654615445447209bcfd4735ac",
+      "current_sha256": "62cf398d04380f05a03097eee8a1ebfbbb0d3a4654615445447209bcfd4735ac",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_video_output_stream.py",
+      "historical_sha256": "ef3048292b489a72477a43e4e91014463f5beb40c64dd2d243fb4f7a69e85d8a",
+      "current_sha256": "ef3048292b489a72477a43e4e91014463f5beb40c64dd2d243fb4f7a69e85d8a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/serving_video_stream.py",
+      "historical_sha256": "00223878bd94d7b412accc04336baa9bfa103fdc43d4ec90e8000825117af312",
+      "current_sha256": "00223878bd94d7b412accc04336baa9bfa103fdc43d4ec90e8000825117af312",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/speech_text_splitter.py",
+      "historical_sha256": "45093d2d124ce0d4639697a19d215342c68933ed3c45d771700087af43b48ab7",
+      "current_sha256": "45093d2d124ce0d4639697a19d215342c68933ed3c45d771700087af43b48ab7",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/speech_usage.py",
+      "historical_sha256": "dd4379cb651bfc24e0deb59fd5a114eee8439caa4c09eeb0857aa22fd9910653",
+      "current_sha256": "dd4379cb651bfc24e0deb59fd5a114eee8439caa4c09eeb0857aa22fd9910653",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/stage_params.py",
+      "historical_sha256": "a104d1fd1d1bea070696daa67ff01cf7d63b359e7e6ac5b1ec39cec46bc5e771",
+      "current_sha256": "a104d1fd1d1bea070696daa67ff01cf7d63b359e7e6ac5b1ec39cec46bc5e771",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/storage.py",
+      "historical_sha256": "cd6309916d383f0f91faa8e3cd2ea81a335cf1f2be6b13fb228baea6d40ea334",
+      "current_sha256": "cd6309916d383f0f91faa8e3cd2ea81a335cf1f2be6b13fb228baea6d40ea334",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/stores.py",
+      "historical_sha256": "d4e100c78f35d028c784ea50f67d5c155d0c02916f5077b8a24f8c1ccdb5d1a3",
+      "current_sha256": "d4e100c78f35d028c784ea50f67d5c155d0c02916f5077b8a24f8c1ccdb5d1a3",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/__init__.py",
+      "historical_sha256": "7a56ecd109c19bcd68a11e1ee480ea9420c8817a1fd0a394e00af6ac70affff1",
+      "current_sha256": "7a56ecd109c19bcd68a11e1ee480ea9420c8817a1fd0a394e00af6ac70affff1",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/audex.py",
+      "historical_sha256": "050da3f27516c0499aee54470e2eceda842b156e53cb2e030ac1d6ee9fdc5caf",
+      "current_sha256": "050da3f27516c0499aee54470e2eceda842b156e53cb2e030ac1d6ee9fdc5caf",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/audex_tta.py",
+      "historical_sha256": "9722a2967863ea6ef6fd08498b1f70b2930912dc1c762e78ee5d4f6475dc51a5",
+      "current_sha256": "9722a2967863ea6ef6fd08498b1f70b2930912dc1c762e78ee5d4f6475dc51a5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/audio8_tts.py",
+      "historical_sha256": "df640b6ec0f959dbf677e68098576703a3f24e183b2e73d29417b095e1402104",
+      "current_sha256": "df640b6ec0f959dbf677e68098576703a3f24e183b2e73d29417b095e1402104",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/base.py",
+      "historical_sha256": "b97bf27bbfcd6084f6025bff83d6620c442cb4e3cfe66e5a77d4d17c4a8a17cd",
+      "current_sha256": "b97bf27bbfcd6084f6025bff83d6620c442cb4e3cfe66e5a77d4d17c4a8a17cd",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/breeze_tts_2.py",
+      "historical_sha256": "e8bf4d71196999972c073868fb00497cea64a1d5e9fa5ab0d4cb15bfd644b138",
+      "current_sha256": "e8bf4d71196999972c073868fb00497cea64a1d5e9fa5ab0d4cb15bfd644b138",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/capabilities.py",
+      "historical_sha256": "f4d5838e76306d1382d2eb64c18bd8d6f92f6986eb813e0ce62eb4be947f5d73",
+      "current_sha256": "f4d5838e76306d1382d2eb64c18bd8d6f92f6986eb813e0ce62eb4be947f5d73",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/cosyvoice3.py",
+      "historical_sha256": "2c189423013f6e3f412de7341b37279382ffad98daf9f540b49795210e0cb148",
+      "current_sha256": "2c189423013f6e3f412de7341b37279382ffad98daf9f540b49795210e0cb148",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/covo_audio.py",
+      "historical_sha256": "cf9f5f0da5aadecf353f026ce75ad515fc5ebff338fdf27716c721c7d639d85f",
+      "current_sha256": "cf9f5f0da5aadecf353f026ce75ad515fc5ebff338fdf27716c721c7d639d85f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/fish_speech.py",
+      "historical_sha256": "aa416b802ec8ba3b04e8df9f07a4099c3e2e4eb5d96f788779366d2ff9ce7f8d",
+      "current_sha256": "aa416b802ec8ba3b04e8df9f07a4099c3e2e4eb5d96f788779366d2ff9ce7f8d",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/gepard.py",
+      "historical_sha256": "bb9d5d76a650e4b01d88fae4bda13befe0db4a506ca907bec4360c2e9929b615",
+      "current_sha256": "bb9d5d76a650e4b01d88fae4bda13befe0db4a506ca907bec4360c2e9929b615",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/glm_tts.py",
+      "historical_sha256": "58e6cbfa2968660b5950e564a406ef956e02446c69e79ec512b4701de72a7d2a",
+      "current_sha256": "58e6cbfa2968660b5950e564a406ef956e02446c69e79ec512b4701de72a7d2a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/higgs_audio_v2.py",
+      "historical_sha256": "916cc57e5f9229a671d705873794e8292d4513fc291ada14f834c5b2d36ddf0b",
+      "current_sha256": "916cc57e5f9229a671d705873794e8292d4513fc291ada14f834c5b2d36ddf0b",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/higgs_audio_v3.py",
+      "historical_sha256": "8dd2a2821344a651f244f276311ada1194554716d1b7f898b9c32cc96799a5d3",
+      "current_sha256": "8dd2a2821344a651f244f276311ada1194554716d1b7f898b9c32cc96799a5d3",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/indextts2.py",
+      "historical_sha256": "0b8ac5741925187992cf037bf9dcc1a2969affb587df89b72edb6eed2c094081",
+      "current_sha256": "0b8ac5741925187992cf037bf9dcc1a2969affb587df89b72edb6eed2c094081",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/ming_flash_omni_tts.py",
+      "historical_sha256": "cb116304f0797ac2f178e45a0dd92667439bb3eb79ae97d1d01870abcd39aec3",
+      "current_sha256": "cb116304f0797ac2f178e45a0dd92667439bb3eb79ae97d1d01870abcd39aec3",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/ming_tts.py",
+      "historical_sha256": "e2d4e7e80dfb88b75529fb2995ebf04317940c15c6e0b89124c481c9b0500d1f",
+      "current_sha256": "e2d4e7e80dfb88b75529fb2995ebf04317940c15c6e0b89124c481c9b0500d1f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/minimax_music3.py",
+      "historical_sha256": "b37dc8c8a9bd3da385187900d8b8dbde0f62598d0a878a9ed2fdc4eb2417e5de",
+      "current_sha256": "b37dc8c8a9bd3da385187900d8b8dbde0f62598d0a878a9ed2fdc4eb2417e5de",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/moss_tts.py",
+      "historical_sha256": "a94be94159f5ba6fe7646c9833d1ef7114986c5200cc2bffe26fe0983b5554fa",
+      "current_sha256": "a94be94159f5ba6fe7646c9833d1ef7114986c5200cc2bffe26fe0983b5554fa",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/omnivoice.py",
+      "historical_sha256": "af408f83a0d21649bdbb4b0971abaf1650f9eaa771fe7047eedf06a040c463bb",
+      "current_sha256": "af408f83a0d21649bdbb4b0971abaf1650f9eaa771fe7047eedf06a040c463bb",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/qwen3_tts.py",
+      "historical_sha256": "8ec7a9d766ad266486407ac90e72ad6688a34ff0711e9bc6508007b484c898dc",
+      "current_sha256": "8ec7a9d766ad266486407ac90e72ad6688a34ff0711e9bc6508007b484c898dc",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/step_audio2.py",
+      "historical_sha256": "299daeb87af9fe130fa0b38b0ca4b1d2a1894aad57021faeda390adbf28efc5e",
+      "current_sha256": "299daeb87af9fe130fa0b38b0ca4b1d2a1894aad57021faeda390adbf28efc5e",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/voxcpm2.py",
+      "historical_sha256": "08296597164db14eeb245d189ac79cc6b9b0ad5671d4bd42c8e18f668a5faf7d",
+      "current_sha256": "08296597164db14eeb245d189ac79cc6b9b0ad5671d4bd42c8e18f668a5faf7d",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/tts_adapters/voxtral.py",
+      "historical_sha256": "8e2d0ab14e8b2cd205c67f119736d15e983ea828198134413f7feb192934f55e",
+      "current_sha256": "8e2d0ab14e8b2cd205c67f119736d15e983ea828198134413f7feb192934f55e",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/utils.py",
+      "historical_sha256": "e7861521525e52fd2f7a5024c540bde39db2b918c863dc389cd4f308bea7f297",
+      "current_sha256": "e7861521525e52fd2f7a5024c540bde39db2b918c863dc389cd4f308bea7f297",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video/generation/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video/generation/helpers.py",
+      "historical_sha256": "d8a16ed63e424d01ae1ed61f5f648588325e5278d0fd1be86bda1281dfc43ba5",
+      "current_sha256": "d8a16ed63e424d01ae1ed61f5f648588325e5278d0fd1be86bda1281dfc43ba5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video_api_utils.py",
+      "historical_sha256": "c7b8fe33ba186c4d0c93407c840a43ff99c046a16f3f2d970b29ff891a747a32",
+      "current_sha256": "c7b8fe33ba186c4d0c93407c840a43ff99c046a16f3f2d970b29ff891a747a32",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video_frame_filter.py",
+      "historical_sha256": "ca6e68a0a0e63b44083a2b6e851ef2cfa3219321b3ce4b9a9dedc9b1e25acaee",
+      "current_sha256": "ca6e68a0a0e63b44083a2b6e851ef2cfa3219321b3ce4b9a9dedc9b1e25acaee",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video_stream_base.py",
+      "historical_sha256": "e8c1d1a31d0c31dad3b0321fe10cfc9d17de45fdcf0afb18abedc1e9a19afc88",
+      "current_sha256": "e8c1d1a31d0c31dad3b0321fe10cfc9d17de45fdcf0afb18abedc1e9a19afc88",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video_stream_context.py",
+      "historical_sha256": "f46e0a480f9cce8ebcfed3974c5a5ed536fa6b6a9600ac133177b3196bf2cb80",
+      "current_sha256": "f46e0a480f9cce8ebcfed3974c5a5ed536fa6b6a9600ac133177b3196bf2cb80",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video_stream_envs.py",
+      "historical_sha256": "27fec09e9872eed76cb23c2a207fd01e8a320c6f53e673936ff4621a3e38a405",
+      "current_sha256": "27fec09e9872eed76cb23c2a207fd01e8a320c6f53e673936ff4621a3e38a405",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openai/video_stream_session.py",
+      "historical_sha256": "448439654209da8d78392e76ccc68645fb252af3605a987586ead2ae410b8df6",
+      "current_sha256": "448439654209da8d78392e76ccc68645fb252af3605a987586ead2ae410b8df6",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openpi/__init__.py",
+      "historical_sha256": "6c6ec57de9f82ef42d82760f144a4571cb16b3cd6de33aaa7aa9fd65e8ab1fa1",
+      "current_sha256": "6c6ec57de9f82ef42d82760f144a4571cb16b3cd6de33aaa7aa9fd65e8ab1fa1",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openpi/connection.py",
+      "historical_sha256": "66d815096276f4de620e08967235850eed3968b710a42de1f4d78e24029df9b0",
+      "current_sha256": "66d815096276f4de620e08967235850eed3968b710a42de1f4d78e24029df9b0",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/openpi/serving.py",
+      "historical_sha256": "0ca53339b15fa5bd1010e2a90f2178f1309563edb96d6502535946b4922dc5fe",
+      "current_sha256": "0ca53339b15fa5bd1010e2a90f2178f1309563edb96d6502535946b4922dc5fe",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/pd_utils.py",
+      "historical_sha256": "7a1bb2357627377204de6662ea6e6e710c2d79ea0ca6e63dd45279d808df796b",
+      "current_sha256": "7a1bb2357627377204de6662ea6e6e710c2d79ea0ca6e63dd45279d808df796b",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/omni_control/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/omni_control/protocol.py",
+      "historical_sha256": "def219c4f44a773da345fffed9856839dfb65461c8b6dcc239e18b782994e126",
+      "current_sha256": "def219c4f44a773da345fffed9856839dfb65461c8b6dcc239e18b782994e126",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/profile/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/profile/protocol.py",
+      "historical_sha256": "68823cda5249a8f931106a4bae955b893ca624eadc38a3ee6633e871a0ca1ed5",
+      "current_sha256": "68823cda5249a8f931106a4bae955b893ca624eadc38a3ee6633e871a0ca1ed5",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/profile/utils.py",
+      "historical_sha256": "b0ac342de5ecf2447cc1f641d711123d3c4ff4ecd9d0aa7b9dd8f55d3b37b0b4",
+      "current_sha256": "b0ac342de5ecf2447cc1f641d711123d3c4ff4ecd9d0aa7b9dd8f55d3b37b0b4",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/utils/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/utils/errors.py",
+      "historical_sha256": "22d7ec68f4784b6c6993c76274c7c4a44a2f4f05b434044e55aeb7e692b5a04c",
+      "current_sha256": "22d7ec68f4784b6c6993c76274c7c4a44a2f4f05b434044e55aeb7e692b5a04c",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/serve/utils/routes.py",
+      "historical_sha256": "94efb71d1eb2e81ac631701b9cf6608bc28084cf201d03b287a1c3378098577a",
+      "current_sha256": "94efb71d1eb2e81ac631701b9cf6608bc28084cf201d03b287a1c3378098577a",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/stage_utils.py",
+      "historical_sha256": "f376360bd06eb9a51cef9a0dfcbf72b4438b19f523598994577b68023cb40fdf",
+      "current_sha256": "f376360bd06eb9a51cef9a0dfcbf72b4438b19f523598994577b68023cb40fdf",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/entrypoints/utils.py",
+      "historical_sha256": "669e5bcdfcded668d0517c6e2e3f214888e9ecd0ccec38d6c6e09f615b6ae340",
+      "current_sha256": "669e5bcdfcded668d0517c6e2e3f214888e9ecd0ccec38d6c6e09f615b6ae340",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/__init__.py",
+      "historical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/base.py",
+      "historical_sha256": "58dc42c9e43219ab6cd9eb7f395d61b5490d770e77127b3bcc9b1c377666d040",
+      "current_sha256": "58dc42c9e43219ab6cd9eb7f395d61b5490d770e77127b3bcc9b1c377666d040",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/gpu_ar_model_runner.py",
+      "historical_sha256": "8e8f9c7b51c26d9c65402114129a216e3f9908f5d64992593fd48061518310c0",
+      "current_sha256": "8e8f9c7b51c26d9c65402114129a216e3f9908f5d64992593fd48061518310c0",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/gpu_ar_worker.py",
+      "historical_sha256": "3b92591377aa32a8efd8942d1a976acf58039f530e6d76737b96360a4eb1977f",
+      "current_sha256": "3b92591377aa32a8efd8942d1a976acf58039f530e6d76737b96360a4eb1977f",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/gpu_generation_model_runner.py",
+      "historical_sha256": "f42558da87c3561d09645107e119b782bb246df0fbad1a00e18bcfe6fc2ea5d1",
+      "current_sha256": "f42558da87c3561d09645107e119b782bb246df0fbad1a00e18bcfe6fc2ea5d1",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/gpu_generation_worker.py",
+      "historical_sha256": "8b51a09deee7c5cce852d3259fda0fae271ea0e4bb70b4c27368a7c8c23441cb",
+      "current_sha256": "8b51a09deee7c5cce852d3259fda0fae271ea0e4bb70b4c27368a7c8c23441cb",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/gpu_memory_utils.py",
+      "historical_sha256": "ad244277399e357bcd6443c0ee740ec527c7374f877b051d0adccac98837f871",
+      "current_sha256": "ad244277399e357bcd6443c0ee740ec527c7374f877b051d0adccac98837f871",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/gpu_model_runner.py",
+      "historical_sha256": "6760a6101f8b76f6de47c9bc3a2f18834f400d571b99df59c8fc340cd9009558",
+      "current_sha256": "6760a6101f8b76f6de47c9bc3a2f18834f400d571b99df59c8fc340cd9009558",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/memory_utils.py",
+      "historical_sha256": "99e38fd70c11640f2a8b26148b35c5bd1251276ffbe3fe696e56148b7316feef",
+      "current_sha256": "99e38fd70c11640f2a8b26148b35c5bd1251276ffbe3fe696e56148b7316feef",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/mixins.py",
+      "historical_sha256": "2befd3ed6116a9d6fb67934575654cd79bb0264389005d919edf62f0ee89cbc7",
+      "current_sha256": "2befd3ed6116a9d6fb67934575654cd79bb0264389005d919edf62f0ee89cbc7",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/omni_connector_model_runner_mixin.py",
+      "historical_sha256": "f4b14cbd00d4bd88c3890c502acaa9681d34922860cba813563c7a48d0571df8",
+      "current_sha256": "f4b14cbd00d4bd88c3890c502acaa9681d34922860cba813563c7a48d0571df8",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/omni_connector_validation.py",
+      "historical_sha256": "36617296f737e531caebb4190a05d2ea0c838688909420bfb54cc4b238574ded",
+      "current_sha256": "36617296f737e531caebb4190a05d2ea0c838688909420bfb54cc4b238574ded",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/output/__init__.py",
+      "historical_sha256": "65b9161999f55b3fa91f066535428434da0f321a514a6b90da221c3c16070e84",
+      "current_sha256": "65b9161999f55b3fa91f066535428434da0f321a514a6b90da221c3c16070e84",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/output/payload_build.py",
+      "historical_sha256": "258caf7c377a859d5df52d62227106ef7d0fc0baecbcb9c852e2c9a57b6d54ec",
+      "current_sha256": "258caf7c377a859d5df52d62227106ef7d0fc0baecbcb9c852e2c9a57b6d54ec",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/payload_span.py",
+      "historical_sha256": "716bc94862ce223faad2e20b38ebb72ac92f24118c6d1fbcc2abd571f4eeda36",
+      "current_sha256": "716bc94862ce223faad2e20b38ebb72ac92f24118c6d1fbcc2abd571f4eeda36",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/runner_assisted_metadata.py",
+      "historical_sha256": "9d5796093d59b7574fb65573728b3e8494449ba352e23ecb5b679929a3392e37",
+      "current_sha256": "9d5796093d59b7574fb65573728b3e8494449ba352e23ecb5b679929a3392e37",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/sampling_utils.py",
+      "historical_sha256": "38fe95cd37c723c7b176ceed7bddca630878304332cfa9adf47eb7fa3debef0e",
+      "current_sha256": "38fe95cd37c723c7b176ceed7bddca630878304332cfa9adf47eb7fa3debef0e",
+      "identical": true
+    },
+    {
+      "relative_path": "vllm_omni/worker/sparse_audio.py",
+      "historical_sha256": "7bf216dad4e040639f2b85cf2f5c81fb5ec2880a1f3d15bd8ec289bfb1374dcd",
+      "current_sha256": "7bf216dad4e040639f2b85cf2f5c81fb5ec2880a1f3d15bd8ec289bfb1374dcd",
+      "identical": true
+    }
+  ]
+}

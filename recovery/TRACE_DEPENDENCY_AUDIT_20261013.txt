@@ -1,0 +1,58 @@
+Eight-rank dependency audit — 2026-10-13
+
+Scope: staged-no-cross profile collected before the batched VAE fix. This is the initial row-wise copy trace, not a trace of the newly measured 944.159/963.038 ms candidate and not the historical 895–899 ms winner. All analysis was CPU-only and read-only against exported traces.
+
+Evidence files: validation/eight-rank-dependencies-old-row-no-cross-20261013.json, validation/rank0-linked-sync-old-row-no-cross-20261013.json, validation/historical-async-metadata-audit-20261013.json. Methodology: read-only joins of COMMUNICATION_OP → CANN_API → CONNECTION_IDS → PYTORCH_API link collective device intervals to host submissions; TASK stream/task IDs and kernel_details.csv identify consumer waits and kernels. Complete chunk boundaries come from rank0 RGB completion markers. The original small analysis helpers remain in /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/trace-dependencies; giant traces and parser outputs are deliberately not vendored here.
+
+1. Complete steady-window collective matching
+
+Exactly 1280 matching All-to-All operations across all eight ranks, 320 in each complete chunk 11–14. Boundaries are rank0 blocking RGB completions. Device start spread per chunk:
+  chunk 11: mean 0.740 ms; maximum 5.046 ms; last-start rank counts {'0': 258, '4': 62}
+  chunk 12: mean 0.657 ms; maximum 3.851 ms; last-start rank counts {'0': 120, '1': 29, '7': 4, '6': 18, '4': 149}
+  chunk 13: mean 0.664 ms; maximum 4.255 ms; last-start rank counts {'0': 99, '7': 74, '5': 6, '4': 141}
+  chunk 14: mean 0.729 ms; maximum 3.779 ms; last-start rank counts {'0': 109, '1': 89, '7': 30, '4': 92}
+These spreads are descriptive arrival skew, not additive end-to-end latency and not transfer-time estimates. Clock alignment uses exporter timestamps; calibration uncertainty was not quantified.
+
+2. Concrete critical dependency: hcom_alltoall__327_3600_1
+
+Host marker ordinal and QK-call ordering independently identify chunk11, probe1 (zero-based), first layer. The host-submit spread is4.914ms; device-start spread is5.046ms. Times below are relative to the earliest host HcclAlltoAll submission (rank6); queue delay is host submit start to CANN launch start.
+
+rank | HCCL submit offset ms | submit→launch ms | collective duration ms | stream47 EVENT_WAIT ms | collective end→recv start ms
+   0 |                 4.914 |            0.029 |                  0.320 |                  0.195 |                        0.466
+   1 |                 0.386 |            0.092 |                  4.771 |                  4.633 |                        0.001
+   2 |                 0.196 |            0.023 |                  5.042 |                  4.921 |                        0.001
+   3 |                 0.218 |            0.019 |                  5.053 |                  4.932 |                        0.001
+   4 |                 0.109 |            0.017 |                  5.148 |                  5.028 |                        0.001
+   5 |                 0.023 |            0.021 |                  5.245 |                  5.146 |                        0.001
+   6 |                 0.000 |            0.018 |                  5.276 |                  5.166 |                        0.001
+   7 |                 0.179 |            0.014 |                  5.092 |                  4.984 |                        0.001
+
+Rank0 enters the collective last and executes it in0.320ms, while other ranks show4.771–5.276ms. Their consumer-stream waits last4.633–5.166ms; recv starts1.16–1.36 microseconds after communication completion. Rank0 consumer wait is0.195ms, but its recv starts0.466ms after completion because its recv launch also arrives later. This demonstrates wait propagation from upstream submission to collective to consumer; the intervals overlap and must not be summed.
+
+For rank0, CANN connection1644002 is aclrtStreamWaitEvent. Its TASK(stream47,19170) spans1791858243131542850–1791858243131737770 ns. The collective ends1791858243131736610 ns, with EVENT_RECORD tasks(stream45,16469/16470) immediately after. Then recv TASK(stream47,19171) starts1791858243132202250 ns. Explicit event-handle identity is absent from the DB, so record→wait pairing uses stream order and coincident completion rather than a recorded event ID. CANN/PyTorch connections directly map host submissions and kernel launches.
+
+3. What makes rank0 late, and what remains unresolved
+
+This is not simply a5ms delayed start of the second probe. Rank1–7 enter their probe host markers57.7–75.4ms before rank0, then block in aten::to/_to_copy/copy_ for a4680-element tensor. Their stream-synchronize durations are54.93–72.94ms and finish within23.5microseconds of one another. Rank0 reaches the same point later and waits only14.6microseconds. Thus CPU marker timing reflects different queued work, not equivalent device-progress boundaries.
+
+After this common completion frontier, rank0 still takes longer to reach QK/HCCL. Its QK host call lasts0.529ms versus0.275–0.353ms on peers. Rank0 enqueue→launch is only0.029ms; the long communication is not explained by a long HCCL host launch queue in this sample. Remaining rank0 delay lies before enqueue, across previous-probe host completion, scheduler/engine transition, metadata preparation and pre-attention/QK host work. This capture has no Python callchains; exact attribution to owner checks, GC, CPU scheduling, engine work or one source line remains unproven. It is not valid to claim an engine-source regression from this trace.
+
+The4680-element copy is consistent with ensure_video_slots→compute_slot_mapping→_to_device_async in paged_attention.py. This is a source/shape inference, not a captured callstack. On NPU the unchanged historical source defaults to synchronous t.to(device); the optional bounded pinned-pool route requires VLLM_LINGBOT_NPU_ASYNC_METADATA=1.
+
+4. Long RGB stream synchronizations
+
+See validation/rank0-linked-sync-old-row-no-cross-20261013.json:104 sync calls total850.052ms across chunk11–14. The longest four188.47–210.82ms are nested in RGB aten::to/_to_copy/copy_. Their intervals overlap179.68–201.42ms compute union,8.23–9.11ms communication union, and144.10–161.61ms copy_pair kernel workload. This is consistent with RGB materialization draining pending VAE work. These host waits are not independent CPU loss. Specific synchronized stream handles remain unidentified.
+
+5. Historical async-metadata flag audit
+
+The retained historical/current paged_attention.py files are byte-identical (SHA256028b90605cfc85c8e2da4149ce14ad8fa045d6acea00e7e3a3cb11400e1a546c), default0. F1/F2/F3 command chains select environment_fixed_timestep_stageA_clean_v89.json; its27 overrides omit ASYNC_METADATA. Closures verify those selected overrides only. The stable environment script also omits the flag. The parent B_environment_v8.json, controller source and original complete F1/F2/F3 service manifests are missing at recorded paths. Therefore inherited effective setting is UNPROVEN; absence from overrides does not establish disabled. Do not toggle it as a claimed restoration of the winner without stronger evidence.
+
+6. Guard/runtime boundaries
+
+Cross BSND/combined was disabled in this traced variant, so this trace cannot attribute any cost to that historical combined guard. QK and recv host custom-op ranges include their actual C++ admission and dispatch work; Python provider/runtime checks may also lie in caller intervals outside those ranges. Inspected descriptor checks read host-side tensor/storage metadata and runtime stream/capture state; no explicit device synchronization appears in those checks. They cannot be declared free, and the trace does not separate their exclusive CPU cost. Existing metadata-copy synchronization waits include pending device work; owner/descriptor checking time must not be inferred by subtracting kernel duration from a host range or by summing waits.
+
+The actionable restoration order remains original QK single-host scheduling, actual cross BSND plus combined guard, and original-equivalent recv/VAE work. Re-profile the restored combination for remaining dependency delays. This audit establishes concrete dependencies and a missing historical environment proof; it does not establish new-feature performance gains or justify weakening correctness/lifetime checks.
+
+7. Infrastructure source parity
+
+Rechecked all historical/current Python filenames and SHA256 contents in vllm_omni/engine (58), distributed (38), entrypoints (114), worker (18): all 228 files match, with no missing or additional Python files. Evidence: validation/historical-infrastructure-source-parity-20261013.json. This comparison excludes diffusion-specific providers, compiled libraries, runtime and inherited environment; it does not prove equivalent dispatch or performance.
