@@ -1,0 +1,58 @@
+Isolated public-ACLNN repeatable event pool, version 1.
+Written 2026-10-13. NOT compiled, device tested, performance screened or model
+admitted. No production module imports or config options select this code.
+
+Read ../../QK_REPEATABLE_EVENT_POOL_DESIGN_20261013.txt before any experiment.
+This is an independent new namespace, not the rejected single-queue provider
+and not a reconstruction of an unavailable historical binary.
+
+Future explicit CPU build (not executed while preparing these files):
+  python recovery/experiments/qk_repeatable_pool/build.py \
+    --provider-manifest /absolute/source-pinned/host_manifest.json \
+    --output /absolute/new-build-directory
+The builder accepts the recovery manifest's exact kernels pin. It imports
+torch only within main, loads only for CPU operator registration and queries
+symbol paths/stat-field names; create/run/close are never called by the build.
+
+Operator API, for a future independently supervised correctness controller:
+  ops = torch.ops.lingbot_qk_repeatable_pool_v1
+  handle = ops.create(raw, qw, kw, cosine, sine, fixed_capacity)
+  init = ops.initialization_status(handle)
+  send, owner = ops.run(handle, raw, qw, kw, cosine, sine)
+  send, owner = ops.run_with_test_arena(handle, raw, qw, kw, cosine, sine, arena)
+  report = dict(zip(ops.stat_names(), ops.stats(handle)))
+Input tensors must already have actual captured physical owners. This module
+does not provide a fixture loader, Python lease, consumer guard, or model
+integration. An external controller must preserve returned send/owner through
+the original communication consumer and inspect all eight worker results.
+Each injected test arena must be independent of every still-retained call.
+
+create cold-prepares a FIXED pool on the producer thread. Stage1 statuses are
+flat groups [plan,stage,stage1_status,repeatable_status,workspace_bytes], with
+-999 meaning not reached. ops.handles() allows inspecting retained failed
+initialization handles after a caught host exception; it is not a retry path.
+The callback performs no new plan/framework allocation, no polling loop and
+no synchronization. Only COMPLETE recorded generations are reusable. A NEW
+slot is admitted by explicit NEW state, never an initial event query.
+
+Successful teardown (outside timing) requires: stop generating calls; caller
+drains the queued stream/device; call ops.close(handle); caller drains again
+so the cleanup callback has returned; require stats.closed==1, poisoned==0
+and workspace_resident_bytes==0. close is asynchronous and never waits itself.
+Close before completion is terminal. Neither a failed call nor failed close
+may be retried. Retain the DSO and let the owned supervisor retire all workers.
+
+Pool registry has process lifetime to quarantine failure owners, including a
+stage1-created executor whose SetRepeatable failed. No static destructor uses
+the repeatable-only destruction API on such an executor. Healthy close cleans
+native resources on the same consumer thread; closed scalar receipts remain.
+used_plan_peak and retained_call_slots describe retained slots, not an exact
+device-active count. NOT_READY queries count observed busy decisions. Workspace
+initial/resident bytes and capacity must be reported alongside timings.
+
+Differences from old qk_single_queue: reusable four-executor plans, fresh
+address refresh, progress-event completion before reuse, fixed bounded pool,
+explicit state/generation/thread/context binding and explicit close. The old
+four-native numerical definitions and padded-owner ABI are preserved. Native
+OPP support, multiple fresh-address calls and lifetime safety still require
+actual correctness tests; source presence alone is not a PASS.

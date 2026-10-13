@@ -1,0 +1,317 @@
+{
+  "schema": "lingbot_qk_repeatable_pool_support_archive_v1",
+  "scope": "two distinct real probes; test-arena run_impl; completed-event reuse; explicit successful close",
+  "passed": true,
+  "api_support_only": true,
+  "method": "rank0_two_distinct_real_probes_completed_event_reuse_v1",
+  "source_pins_rechecked": true,
+  "pins": {
+    "build_receipt": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-repeatable-pool.20261013v1/build-receipt.json",
+      "bytes": 9492,
+      "sha256": "8b02b9457eff671dba58e1da3729172280487c3af533197e0f6565b4b4987d18"
+    },
+    "candidate_source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/experiments/qk_repeatable_pool/host.cpp",
+      "bytes": 23191,
+      "sha256": "205114b1e5645abea7923e577f667b3f003d546a4ba3391821e01c232128dd24"
+    },
+    "builder": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/experiments/qk_repeatable_pool/build.py",
+      "bytes": 4981,
+      "sha256": "7f5aac165fd85ddb84659d956a4535229cfdbea226bdd05f3747c16d978b19ae"
+    },
+    "design": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_REPEATABLE_EVENT_POOL_DESIGN_20261013.txt",
+      "bytes": 9760,
+      "sha256": "f33678e0a48efd9670b2a132594e83d5b89fcbb78904f9f767d5f58e61d37927"
+    },
+    "library": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-repeatable-pool.20261013v1/liblingbot_qk_repeatable_pool_v1.so",
+      "bytes": 258752,
+      "sha256": "95ee01b3b3e77d9dd4b8444b52bc361f2f6530eda1bfabd9ca3aafd4cea781a8"
+    },
+    "provider_manifest": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qk-record-once.20261013v1/host_manifest.json",
+      "bytes": 8496,
+      "sha256": "9c04e585968fba131aa3c18b7805117caf0b7b7d12af0be4568a03753c413e97"
+    },
+    "kernel": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+      "bytes": 402128,
+      "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+    },
+    "support": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-checks/support-v1/receipt.json",
+      "bytes": 11117,
+      "sha256": "8227323f987cc120f837c93c928650c6e74d08c38e676a70dfbc9bc7c3a5bb15"
+    },
+    "supervisor_launch": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-runs/e693996edcd6eb620fccd73e739ff051/launch.json",
+      "bytes": 1362,
+      "sha256": "be98a8baec5da4c0e539c0b48241e569e68cccf0c63d82e11a0a62240729cd66"
+    },
+    "supervisor_result": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-runs/e693996edcd6eb620fccd73e739ff051/result.json",
+      "bytes": 1415,
+      "sha256": "3b344a5f8abe69758cb4dfffe339f6afe9e999fc7c9e20204de645134cf56209"
+    },
+    "supervisor_log": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-runs/e693996edcd6eb620fccd73e739ff051/service.log",
+      "bytes": 2492,
+      "sha256": "f717328b6bca519638d334354fd2f9c9387b7be59070bfc1d2054f7c08c00e71"
+    },
+    "cpu_tests": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_repeatable_pool_support.py",
+      "bytes": 3573,
+      "sha256": "c03a8bc16bac841c1fcc02076ae5602e90ffcb2b9992255fcea2d2a9dc256f1c"
+    }
+  },
+  "harness_sources": {
+    "check_qk_repeatable_pool_support.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_repeatable_pool_support.py",
+      "bytes": 19415,
+      "sha256": "64c9fd81bc5c63714c1faafc3295c477a9a3400869b1485693c55b8b358ea7a0"
+    },
+    "load_real_fixtures.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    "check_qk_real_matrix.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_real_matrix.py",
+      "bytes": 24351,
+      "sha256": "2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519"
+    },
+    "qk_replay_fixture.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/qk_replay_fixture.py",
+      "bytes": 6026,
+      "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+    }
+  },
+  "capture_contract": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+    "bytes": 22079,
+    "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+  },
+  "fixture_metadata": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p0_l00.json",
+      "bytes": 11043,
+      "sha256": "582e0b7b99e43f42eb31fb5f42e13daae0579a997faba15b26aec5acf47e6f50"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p1_l00.json",
+      "bytes": 11042,
+      "sha256": "8409c0d33e7bb69c24d1fc9e50a9d0ce194c1843b6e169915c7c53bfd8e7681c"
+    }
+  ],
+  "cases": [
+    {
+      "identity": {
+        "rank": 0,
+        "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+        "chunk": 0,
+        "kv_len": 4680,
+        "probe": 0,
+        "layer": 0,
+        "coefficient_generation": 161
+      },
+      "passed": true,
+      "full_owner_sha256_verified": true
+    },
+    {
+      "identity": {
+        "rank": 0,
+        "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+        "chunk": 0,
+        "kv_len": 4680,
+        "probe": 1,
+        "layer": 0,
+        "coefficient_generation": 162
+      },
+      "passed": true,
+      "full_owner_sha256_verified": true
+    }
+  ],
+  "checks": [
+    "two_real_probes_raw_and_send_values_differ",
+    "all_five_input_addresses_are_fresh",
+    "public_native_equals_captured",
+    "full_sources_and_descriptors_before",
+    "all_four_repeatable_stages_supported",
+    "two_fresh_full_arena_canary_passes",
+    "native_bitwise_both_probes",
+    "completed_event_plan_reuse",
+    "retained_first_output_unchanged",
+    "all_full_sources_and_descriptors_after",
+    "successful_same_consumer_close_outputs_and_sources_retained"
+  ],
+  "initialization": [
+    {
+      "plan": 0,
+      "stage": 0,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 22768384
+    },
+    {
+      "plan": 0,
+      "stage": 1,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 22768384
+    },
+    {
+      "plan": 0,
+      "stage": 2,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 16777728
+    },
+    {
+      "plan": 0,
+      "stage": 3,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 16777728
+    }
+  ],
+  "statistics_by_stage": {
+    "create": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 0,
+      "callbacks_done": 0,
+      "pending": 0,
+      "pending_peak": 0,
+      "event_queries": 0,
+      "event_not_ready": 0,
+      "plan_reuses": 0,
+      "used_plan_peak": 0,
+      "generations": 0,
+      "pool_exhaustions": 0,
+      "producer_tid": 3296172,
+      "consumer_tid": 0,
+      "accepting": 1,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 0
+    },
+    "run0": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 1,
+      "callbacks_done": 1,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 0,
+      "event_not_ready": 0,
+      "plan_reuses": 0,
+      "used_plan_peak": 1,
+      "generations": 1,
+      "pool_exhaustions": 0,
+      "producer_tid": 3296172,
+      "consumer_tid": 3298014,
+      "accepting": 1,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 1
+    },
+    "run1": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 2,
+      "callbacks_done": 2,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 1,
+      "event_not_ready": 0,
+      "plan_reuses": 1,
+      "used_plan_peak": 1,
+      "generations": 2,
+      "pool_exhaustions": 0,
+      "producer_tid": 3296172,
+      "consumer_tid": 3298014,
+      "accepting": 1,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 1
+    },
+    "close": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 0,
+      "submitted": 2,
+      "callbacks_done": 2,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 2,
+      "event_not_ready": 0,
+      "plan_reuses": 1,
+      "used_plan_peak": 1,
+      "generations": 2,
+      "pool_exhaustions": 0,
+      "producer_tid": 3296172,
+      "consumer_tid": 3298014,
+      "accepting": 0,
+      "closed": 1,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 0
+    }
+  },
+  "workspace_bytes": 79092224,
+  "workspace_MiB": 75.42822265625,
+  "cpu_tests": {
+    "command": "python recovery/test_qk_repeatable_pool_support.py",
+    "passed": 5,
+    "torch_imported": false,
+    "device_calls": false,
+    "evidence": "observed stdout during implementation; independently repeated by root; no separate test-log artifact"
+  },
+  "supervisor": {
+    "nonce": "e693996edcd6eb620fccd73e739ff051",
+    "leader": {
+      "pid": 3296172,
+      "uid": 1003,
+      "pgid": 3296172,
+      "start": 18417822
+    },
+    "mode": "correctness",
+    "exit_code": 0,
+    "fatal": null,
+    "remaining_owned_processes": []
+  },
+  "not_tested": [
+    "HCCL",
+    "eight-rank192 matrix",
+    "inflight reuse",
+    "pool exhaustion",
+    "production run allocator",
+    "last-reference lifecycle stress",
+    "performance",
+    "full model"
+  ],
+  "actual192_global_proven": false,
+  "model_admitted": false,
+  "performance_admitted": false,
+  "historical_identity_proven": false,
+  "lifecycle_admitted": false,
+  "v1_cleanup_risk": "Consumer callback resets Call/Tensor owners and closes Tensor workspaces. A last release of recordStream-managed storage may enter allocator free/event insertion and enqueue onto the same framework consumer; under queue saturation this could wait on its own queue. This is a source-review risk, not an observed failure or proven cause of latency. Two drained calls and externally retained inputs/outputs do not exercise it. Preserve v1 and fix ownership separately before inflight/performance admission.",
+  "next_boundary": "New v2 ownership implementation with separately pinned build/correctness. Do not edit or promote this archived v1."
+}

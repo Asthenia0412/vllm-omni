@@ -1,0 +1,147 @@
+QK repeatable executor pool: isolated design, 2026-10-13
+
+Status and scope
+This is a new operator-only candidate. No production provider, runtime flag,
+model import, performance admission or historical single-host identity follows
+from this design. Source has not been compiled or run on a device. It changes
+the rejected direct-ACLNN prototype's per-call executor construction into a
+fixed pool of independently prepared reusable executors. Native full-width
+5120 RMSNorm, BF16 norm/RoPE boundaries, interleave mode 1 and the existing
+SP8 exact send pack remain unchanged. Actual support and numerical equivalence
+must be demonstrated; successful source inspection is not device admission.
+
+The previous prototype prepared four fresh executors/workspaces per call and
+was 27.4% slower on only eight retained cases. That result is not inherited as
+a measurement of this pool. The current real192 complete-call gate includes
+the original HCCL consumer and remains unchanged. Historical leaf timing's
+HCCL scope cannot be established from the missing collector.
+
+Safety argument
+The design does not assume that a stage2 host return snapshots every executor
+address. A plan is reusable only after its generation's event, recorded after
+all four stage2 launches and exact pack on the same ACL stream, is COMPLETE.
+Thus no previous device work can read that plan's executor/workspace when its
+addresses change. Every plan has independent executors, ACL descriptors,
+workspace allocations and event. The event is a completion fence for this
+plan, not permission to overwrite the fresh send tensor still consumed by
+HCCL. Send/owner and the original HCCL lease retain their original lifetime.
+
+Cold initialization
+An explicit create operator runs on the submitting host thread before timing.
+It checks inference/default-stream/no-capture/device/context and the original
+physical owner contract, records that producer thread, and allocates template
+intermediates and a fixed user-selected number of plans (1..64). For each plan
+and each of the four steps it calls GetWorkspaceSize, immediately calls
+aclSetAclOpExecutorRepeatable, and stores both return codes. It then allocates
+that step's workspace using the framework allocator on this host thread, and
+creates one progress event per plan. No native stage2 or pack is executed by
+create. Every metadata descriptor and all template owners stay alive in the
+pool. No framework allocation occurs recursively inside a queue callback.
+The source does not build plans lazily in hot callbacks.
+
+The pool key contains the complete non-address input descriptor (view shape,
+stride, offset, physical/origin format, physical/base sizes and strides,
+allocation bytes), plus dtype/device, epsilon and mode. Runtime inputs with a
+different key are rejected before outputs or native work. Addresses are never
+used to infer immutable payloads. Each call allocates fresh norm/rstd/RoPE and
+padded send owners on the producer thread and retains all owners.
+
+Hot submission and state
+Exactly one RunOpApiV2 callback contains select/query, all address refreshes,
+the four native stage2 calls, exact pack and final event record. It does not
+call public torch-npu operators or a framework allocator recursively. Its
+first invocation binds the pool's consumer TID; later invocations must match
+that TID, context and ACL stream. A mutex serializes pool metadata and closes;
+the producer never holds it while enqueuing, to avoid queue-full deadlock.
+
+Plan states are NEW, RESERVED, RECORDED and FAILED, with generation and
+recorded_generation. NEW means no prior execution and is usable without an
+event query. RECORDED is queried only when generation==recorded_generation
+and generation>0. NOT_READY is skipped. COMPLETE authorizes reuse. The previous
+call owners remain retained until this completion check. A successful record
+is published only after the new native/pack work has been submitted. Query
+and record occur on the same consumer thread. This avoids the documented
+cross-thread order hazard and the Ex-event initial-COMPLETE trap.
+
+Each RMS step updates input x/gamma and output y/rstd. Each RotaryV2 step
+updates x/cos/sin/out; rotate remains nullptr as in the native call. Addresses
+are storage bases, not data_ptr plus an already encoded storage offset. Both
+bases and effective views must be 32-byte aligned. Shape/stride/offset/format
+and dtype are fixed; no format tag mutation is permitted.
+
+All pool slots occupied and not ready means terminal POOL_EXHAUSTED. There is
+no busy polling, blocking event wait, device synchronization, unbounded pool
+growth or fallback. The independent supervisor must terminate all workers.
+The pool cap and exhaustion count are results, not hidden tuning parameters.
+
+Ownership and explicit shutdown
+A process-lifetime registry retains pools and quarantined calls. It has no
+static destructor that could free in-flight storage during Python shutdown.
+Normal cleanup is explicit: the submitting thread stops submissions, performs
+the harness's out-of-measurement stream/device drain, and calls close. Close
+sets accepting=false and enqueues a cleanup callback after earlier callbacks.
+That callback must run on the bound consumer thread; it verifies pending=0
+and every previously used plan's event COMPLETE before destroying anything.
+Only then does it destroy the reusable executors, ACL descriptors and events,
+and release workspace/template/call owners. A final caller drain establishes
+that the cleanup callback returned; stats.closed must be true. Close itself
+never synchronizes. A premature close is terminal, not a retryable wait.
+
+If create, refresh, execution, event handling or close fails, the registry
+retains the pool and affected owners. Partial non-repeatable executor creation
+is not destroyed using a repeatable-only destructor. No cleanup path guesses
+whether opaque work is still live. The owned supervisor must retire workers.
+The caller must not unload the DSO before confirmed successful close; on a
+failure it must retain the DSO until process termination.
+
+Counters and timing
+Stats report capacity, initialized plans, initial and still-resident workspace
+bytes, submitted/completed callbacks, pending callbacks/high-water mark,
+event queries/not-ready/reuses, used-plan high-water mark, generation count,
+pool exhaustion, producer/consumer TID, accepting/closed/poisoned and last
+failure code/step. Workspace and pool management are included in complete-call
+timing, except explicitly reported cold construction before warmup. Fresh
+output allocation, owner retention/release, event query and record, address
+refresh and the original Python/HCCL consumer remain in measured calls.
+Per-call synchronization in the existing operator harness is unchanged; it
+does not replace the pool's explicit generation/event checks. This screening
+does not prove that a fixed cap survives unsynchronized model queue depth.
+
+Admission and stopping rules
+First run separate correctness: four native stages must accept SetRepeatable
+and real address changes. Any unsupported/failing API ends the candidate,
+without production changes or weakened guards. Initialization success alone
+is insufficient: compare actual outputs against the public-native reference,
+with distinct fresh owner addresses, full arena/source/canary checks and
+retained old outputs. Exercise two in-flight calls using independent slots,
+prove that a recorded/not-ready plan is never refreshed, and exercise bounded
+pool exhaustion in an independently supervised expected-failure process.
+Cover all real192 cases and original nonzero-offset HCCL; do not claim all40
+payloads from retained layer0. Then use the unchanged three-round screen and
+only later consider model lifecycle/queue-depth testing. No NPU jobs or compile
+are authorized by this document itself.
+
+Official CANN 9.1 references, inspected 2026-10-13
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00041.html
+  Repeatable must be enabled immediately after stage1. Non-address metadata
+  is fixed; lifetime is caller-managed. CopyToNpu/CopyNpuToNpu and same-address
+  L0 ViewCopy are excluded. Actual native-plan support is tested explicitly.
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00045.html
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00046.html
+  Public lower-case input/output address APIs; 32-byte alignment required.
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00021.html
+  Reusable executor destruction is explicit. Non-repeatable stage2 consumes
+  its executor; the two lifetime contracts must not be mixed.
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/runtimeapi/aclcppdevg_03_0081.html
+  Ex progress event; no reset/deprecated query/wait-status API. No timing flag.
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/runtimeapi/aclcppdevg_03_0083.html
+  Record captures already submitted stream work. Before its first record an
+  Ex event can query COMPLETE, requiring the independent state/generation.
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/runtimeapi/aclcppdevg_03_0086.html
+  COMPLETE covers all captured tasks; cross-thread record/query can reorder.
+
+Installed public declarations: /usr/local/Ascend/ascend-toolkit/latest/include/
+aclnn/acl_meta.h and acl/acl_rt.h. Framework queue source previously pinned:
+torch-npu 5dd8ef3f9b375b5ae4a83538d5785754148c3302, OpCommand.cpp RunOpApiV2.
+This design changes lifecycle semantics, not arithmetic, but numerical,
+ownership, public API support and speed still require independent validation.

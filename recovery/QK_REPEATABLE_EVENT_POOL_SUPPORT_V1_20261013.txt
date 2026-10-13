@@ -1,0 +1,71 @@
+QK repeatable event pool v1: isolated API-support result (2026-10-13)
+
+Outcome
+PASS for one rank, one layer, one history length, two distinct real probes.
+This is API/address-refresh support evidence, not operator performance admission
+or restoration of historical single-host model performance.
+
+Run and authoritative evidence
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+NEW=ROOT/qk-record-once-worktree
+Run: ROOT/qk-repeatable-pool-runs/e693996edcd6eb620fccd73e739ff051
+Support: ROOT/qk-repeatable-pool-checks/support-v1/receipt.json
+Build: ROOT/build/qk-repeatable-pool.20261013v1/build-receipt.json
+Compact versioned receipt:
+  recovery/validation/qk-repeatable-pool-support-v1-20261013.json
+The compact receipt binds exact build, source, library, helper, fixture metadata,
+support, supervisor launch/result/log and CPU-test pins. Candidate source/library,
+helper and fixture metadata pins were rechecked when this archive was written.
+No giant fixture payloads or device binaries are copied into source control.
+
+Exact scope and checks
+Captured rank0/layer0/chunk0, KV4680, probes0 and1 from the same real request.
+The complete non-address input descriptors match. All five materialized native
+inputs have fresh storage addresses; raw QKV and native_send values differ between
+probes, so identical values cannot conceal an ignored address update.
+The frozen Runtime.native public reference preserves full5120 RMS epsilon1e-6,
+interleave rotary and the original packing order. It matches each independently
+captured native_send bitwise. The candidate matches those references bitwise.
+Both calls use independent exact padded ND2 arenas: 8,986,112 BF16 elements,
+17,972,224 bytes, payload offset256 elements and256-element outer canaries.
+Full source/reference owners, source descriptors and complete destination arenas
+pass. The first output remains unchanged after the second call and explicit close.
+No repeated payload is presented as another rank, probe, history or layer.
+
+Native support and pool state
+All four native stage1 calls and all four SetRepeatable calls return0.
+Capacity1, initialized1. Calls submitted/completed2, generation2, plan reuse1,
+not-ready0, exhaustion0, pending0, poisoned0. The second call reuses only the plan
+whose post-pack event is complete. Correctness synchronization explicitly drains
+each call; no claim about overlapping calls follows from these counters.
+Initial/resident workspace after create: 79,092,224 bytes = 75.42822265625 MiB.
+Per RMS stage: 22,768,384 bytes; per rotary stage: 16,777,728 bytes.
+Close executes on the same recorded consumer thread after an external drain.
+Final closed1, accepting0, resident workspace0 and retained call slots0.
+Supervisor exit0, fatal=null, remaining owned processes=[]; launch/result identities
+and exact command agree. The test includes no retries.
+
+Unresolved v1 ownership boundary
+The consumer callback performs plan.active.reset(), and close destroys Tensor
+owners/workspaces. If this releases the last reference to recordStream-managed
+storage, allocator free/event insertion can enqueue work onto the same consumer
+queue. A full queue could therefore cause the consumer to wait on itself.
+This is a source-review risk; this run did not reproduce such a failure or establish
+it as a latency cause. External ownership plus two drained calls does not prove
+safe last-reference release or queue-saturated execution. Preserve these v1 files
+and evidence; resolve ownership in a separately named/pinned v2 before expanding.
+
+Not tested/admitted
+HCCL, the eight-rank192 matrix, inflight reuse, pool exhaustion, production run()
+output allocation, last-reference lifecycle stress, performance and full model.
+The test-arena API shares the candidate run_impl, but it does not validate the
+ordinary production run() allocator. No historical binary identity, model gain,
+12 FPS result or completed historical-combination recovery is claimed.
+
+CPU checks
+python recovery/test_qk_repeatable_pool_support.py: five tests passed, with no
+torch import or device calls. Cases cover actual-pair metadata, changed descriptor
+and history rejection, partial SetRepeatable failure status preservation, exact
+SHA refusal receipt and refusal to overwrite a prior receipt. Root independently
+repeated the tests. This note records observed test output; it is not a saved CPU
+execution log. Frozen host/build/design/harness remain unchanged by this archive.
