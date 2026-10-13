@@ -31,7 +31,8 @@ def configure(pipeline, model_config):
     pipeline.transformer._lingbot_stageB_operator_screen = None
     if not directory:
         return
-    need(model_config.get("lingbot_npu_fixed_modulation_stageB") is True,
+    need(model_config.get("lingbot_npu_fixed_modulation_stageB") is True
+         or model_config.get("lingbot_npu_fixed_modulation_cpp_v2") is True,
          "explicit StageB flag is required")
     need(os.environ.get("ROOT_LINGBOT_SP8_EXPERIMENT_MODE") == "profile",
          "screening is permitted only in an owned diagnostic service")
@@ -72,7 +73,8 @@ class Screen:
             return forward
         need(not self.failed, "failed screen requires worker restart")
         from . import lingbot_fixed_timestep_bank_stageA_v1 as stageA
-        from . import lingbot_fixed_modulation_stageB as stageB
+        from .lingbot_fixed_modulation_dispatch import for_transformer
+        stageB = for_transformer(transformer)
         need(type(token) is stageA._CallToken and length in LENGTHS and uniform,
              "actual fixed-step context and one of six actual histories required")
         session = token.probe.session

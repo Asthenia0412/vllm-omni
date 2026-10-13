@@ -1,0 +1,105 @@
+Stage B per-layer C++ guard v2 — STOP after round 2, 2026-10-13
+
+Decision: default OFF; no model admission. The first operator round passed,
+but the second improved only 5.28%, below the predeclared 10% per-round gate.
+Round 3 was not executed. These two rounds are not a completed three-round
+screen, a paired model improvement, or final 600-chunk acceptance.
+
+Independent mechanism
+The rejected Python Stage B cache queried retained metadata separately from
+Python. This v2 keeps each original per-layer check point and combines nine
+snapshots into one typed C++ call: parameter, original FP32 result, six original
+views, and the current forward's BF16 projection. All original arithmetic,
+BF16/FP32 boundaries, source/probe/session authorization, publication and drain
+boundaries remain. Snapshot holds both Tensor and independent Storage owners.
+The current Frame is recreated for each forward; no once-forward replacement
+of the per-layer checks is used. Wrapped-forward module identity is checked.
+
+No NPU kernel, installed OPP, communication order, KV commit, VAE cache, control
+protocol or media output policy is changed. New configuration is independent:
+  lingbot_npu_fixed_modulation_cpp_v2: false
+Python v1 and C++ v2 are mutually exclusive. Invalid metadata/provider failures
+retain owners, poison the request and use the launch-owned eight-worker fatal
+protocol; execution never falls back to native after candidate admission.
+
+CPU build and source checks
+The independently namespaced host library actually compiled and registered.
+Build-time NPU initialization was false; Frame and Entry rejected CPU tensors
+before an NPU StorageImpl cast. Build/ABI receipts are revalidated before device
+startup and after the request. This is not inherited v1 qualification.
+38 C++-core contract tests use explicit Tensor/StageA/C++ doubles; 13 tests are
+source contracts; 12 controller regressions include refusal before any device
+command when the library drifts. These, the unchanged v1's 32 tests and the
+screen's 6 tests passed normally and with python -O (101 tests per mode).
+CPU doubles/source tests alone establish no NPU correctness or acceleration.
+Original Stage A bytes and all 228 historical infrastructure files are intact.
+
+Actual independent operator runs
+Same four physical packages 4-7 / driver dies 8-15, SP8/TP1/ring1, 832x480,
+four DMD steps, full history, BF16 attention, FFN W8A8 NZ, actual 12 FPS.
+QK-combined, cross-combined and asynchronous metadata remain OFF.
+Each fresh service completed an 8-chunk request: 93 ordered frames. The operator
+screen retains actual six-history x four-probe contexts on each of eight ranks,
+including their genuine timestep/source capabilities and staging snapshots.
+It replays 40-layer preparation only, in the same active session. There is no
+KV/camera/VAE state advance during replay; staging bytes and forward identity
+are restored before returning to the original consumers.
+
+Complete measured region: staging copy + either 40 native original expressions
+or candidate prepare_forward + 40 guarded lookups. Each arm/case has 20 warmups,
+30 wall samples and a separate 30 event samples. No per-layer synchronization,
+trimming, pooling, outlier exclusion or gate change. The case statistic is the
+maximum across eight rank means of 30 wall samples; 24 cases have equal weight.
+Gate: mean candidate/native <=0.90 and every case ratio <=1.05, each round.
+Device event spans include host enqueue gaps; they are not kernel-only timing.
+
+Round  Native region(ms)  Candidate(ms)  Mean ratio       Worst case ratio
+1      1.9362622236       1.7377056236   0.8974536622     0.9659063032
+2      1.8070340139       1.7116789875   0.9472311945     0.9994138783
+
+Round 1 passes both gates; round 2 fails the mean gate. Both rounds pass every
+worst-case gate. Independent review recomputed all samples and checked 417
+file pins per round, request/nonce binding, configurations and owned retirement.
+All 192 actual contexts x 40 layers passed logical FP32 output bits, view stride
+and offset checks; readonly parameters/timestep/source/snapshots also passed.
+These checks do not establish allocation padding/canaries, paired 80-chunk
+latent/RGB parity, final video quality, browser playback or lifecycle acceptance.
+
+Both requests completed before intentional owned retirement. Each cleanup ended
+service -9 / supervisor 247, fatal=null, remaining_owned_processes=[]. This is
+owned-process cleanup evidence, not healthy graceful shutdown acceptance.
+
+Current model performance is unchanged
+Qualified plain-BSND full-stack screening (warm40+161, client media inter-arrival
+window11-159; 149 samples, linear P99):
+  A1 mean928.263 / P99942.128 ms
+  A2 mean927.064 / P99944.021 ms
+  A3 mean924.638 / P99939.464 ms
+No new chunk saving is inferred from this operator diagnostic. The mean900 target,
+three final warm40+600 runs and playback/lifecycle requirements remain unmet.
+
+Next action
+Independently diagnose host stages before selecting another mechanism. The
+two total-region timings do not prove which checks dominate. Preserve all
+check points and owners; do not delete guards to make the benchmark pass.
+Any new path needs fresh screening; the rejected version remains reproducible.
+
+Reproduction
+  recovery/experiments/stageB_metadata_guard_v2/{host.cpp,build.py,PROVENANCE.txt}
+  recovery/prepare_stageB_cpp_operator.py
+  recovery/run_stageB_cpp_operator.py
+  recovery/validation/stageB-cpp-two-round-screen-20261013.json
+  recovery/validation/stageB-cpp-round1-independent-20261013.json
+  recovery/validation/stageB-cpp-round2-independent-20261013.json
+
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+  ROOT/build/stageB-metadata-guard.20261013v2/build-receipt.json
+  ROOT/audits/stageB-modulation-v2/execution-v1/plan.json
+  ROOT/audits/stageB-modulation-v2/execution-v1/operator{1,2}/checks/rank{0..7}.json
+  ROOT/audits/stageB-modulation-v2/ROUND{1,2}_INDEPENDENT_REVIEW.json
+  ROOT/audits/stageB-modulation-v2/cpu-contract-tests-v1.json
+
+Build only after sourcing recovery/env.sh; use --execute and a new build directory.
+Prepare requires --parent-plan, --output and --cpp-build. Execute the frozen plan
+one round at a time with --round N --execute. Do not restart a launch whose
+launch-intent exists. Record each observed process handle until its terminal state.

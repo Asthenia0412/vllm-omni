@@ -1,0 +1,97 @@
+{
+  "schema": "lingbot_stageB_cpp_s2_two_round_summary_v2",
+  "plan": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v2/execution-v1/plan.json",
+    "bytes": 68527,
+    "sha256": "76d63b73c234ad2cb489e5f3140478596d852961e679b1c9e0c5d6fe00e93e11"
+  },
+  "independent_review_passed": true,
+  "rounds": [
+    {
+      "number": 1,
+      "review": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v2/ROUND1_INDEPENDENT_REVIEW.json",
+        "bytes": 40660,
+        "sha256": "6b2e4298d25bb27e6fba973aa51458d594db6d31129a21d597adeab7c1c4bd23"
+      },
+      "nonce": "b2365198416f562d9516704ce22151c4",
+      "metrics": {
+        "native_ms": 1.936262223611111,
+        "stageB_ms": 1.737705623611111,
+        "ratio": 0.8974536622267547,
+        "aggregate_gate_pass": true,
+        "worst_case_ratio": 0.9659063032330056,
+        "worst_case": [
+          28080,
+          3
+        ],
+        "worst_case_gate_pass": true,
+        "failed_case_count": 0
+      },
+      "operator_round_gate_pass": true
+    },
+    {
+      "number": 2,
+      "review": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/stageB-modulation-v2/ROUND2_INDEPENDENT_REVIEW.json",
+        "bytes": 40659,
+        "sha256": "1d3a2709f800b6091ea3a3a7c75749661f47e5d3ea2d11d85c4bd4e339c21cb3"
+      },
+      "nonce": "f5877d05f71d3a95739a15a0cd6c0d8c",
+      "metrics": {
+        "native_ms": 1.807034013888889,
+        "stageB_ms": 1.7116789875,
+        "ratio": 0.9472311945121183,
+        "aggregate_gate_pass": false,
+        "worst_case_ratio": 0.9994138783354857,
+        "worst_case": [
+          18720,
+          3
+        ],
+        "worst_case_gate_pass": true,
+        "failed_case_count": 0
+      },
+      "operator_round_gate_pass": false
+    }
+  ],
+  "decision": {
+    "completed_rounds": 2,
+    "planned_rounds": 3,
+    "strict_gate_pass": false,
+    "third_round": "not executed after round2 aggregate10percent gate failure",
+    "proceed_to_model": false,
+    "model_admitted": false,
+    "final_acceptance": false
+  },
+  "third_round_evidence": {
+    "launch_intent_present": false,
+    "launches": [],
+    "controller_result_present": false,
+    "planned_launch_script_present": true
+  },
+  "fresh_services_sequential": true,
+  "gate": {
+    "case": "max over8 ranks of mean of all30 wall samples",
+    "aggregate": "equal-weight24 cases; candidate/native<=0.90 in every round",
+    "worst_case": "every24 case ratio<=1.05",
+    "outliers": "all retained",
+    "pool_rounds": false,
+    "wall_event": "independent batches, diagnostic event only; no addition",
+    "ranks": "not240 independent samples"
+  },
+  "scope": {
+    "correctness": "8 ranks x24 actual history/probe contexts x40 layers x6 logical views per round",
+    "source_and_abi": "417 file identities independently verified in each terminal review",
+    "protected228_unchanged": true,
+    "stageA_unchanged": true,
+    "request": "8 ordered chunks,93 frames,actual12FPS per round",
+    "metadata_async": false
+  },
+  "limitations": [
+    "second round failed despite all24 worst-case ratios passing; first-round success cannot replace all3-round gate",
+    "not model timing, not a full historical recovery or PR causal performance result",
+    "intentional service-9/supervisor247 closes ownership; not a healthy shutdown/lifecycle proof",
+    "logical view/source checks do not prove full allocation arena/canary integrity",
+    "v1 qualification not inherited"
+  ]
+}

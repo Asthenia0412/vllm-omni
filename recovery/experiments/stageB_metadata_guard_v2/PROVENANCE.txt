@@ -1,0 +1,68 @@
+Stage B per-layer C++ metadata guard v2, SOURCE only at authoring
+
+New namespace: lingbot_stageB_guard_v2.
+Python API: torch.classes.lingbot_stageB_guard_v2.Frame(projection).validate() -> bool;
+Entry(parameter, result, six_original_views).validate(actual_parameter, Frame) -> bool.
+Builder schema: lingbot_stageB_guard_cpu_build_v2.
+
+This replaces repeated Python metadata access with one C++ call at EACH original
+layer consumption boundary. It does not lift validation to the beginning of the
+whole forward, change modulation arithmetic, or submit any NPU work. It does not
+inherit Stage B v1 operator, model, performance, or historical qualification.
+
+Frame is created for each actual Forward AFTER original staging. Normal staging
+copy_ can change projection version between forwards, so Entry never freezes a
+projection version across forwards. Frame snapshots and strongly owns the actual
+Tensor and its independent original Storage. Entry separately owns parameter,
+complete result and six original views, with independent strong Storage owners.
+All original eleven physical descriptor fields, TensorImpl/StorageImpl identities,
+dtype/device, complete allocation pointers/extent and version(enabled,value) are
+checked at each validate call. Disabled inference versions remain unavailable;
+there is no claim to detect arbitrary inference-mode payload mutation.
+
+Entry.validate validates actual_parameter, result, all6views and Frame projection
+in a single registered host method, at the same per-layer point as v1. Geometry is
+fixed BF16 parameter[1,6,5120], BF16 projection[1,1,6,5120], FP32 result[1,1,6,5120],
+and six FP32 views[1,1,1,5120] sharing result storage in original chunk order.
+Formats are the native unblocked ND/NCHW/NCDHW (2/0/30); no storage label is changed.
+Defined CPU owners are rejected before casting any storage to NPUStorageImpl.
+Undefined tensors are also refused. Constructors and validate are inference-only,
+no_grad and bound to their original consumer C++ thread ID. No stream switch,
+stream query, event, queue callback, allocator recordStream or device sync is added.
+
+The Python integration MUST retain actual StageA tokens/session generations,
+probe/source provenance, strict layer order, provider function/code and parameter
+object identity checks, cold registration/allocation budgets, and publication only
+after all160 entries plus4 successful complete model forwards. This DSO does not
+supply session/probe authentication or permission to reuse a stale Frame. It must
+not be used as a replacement for those guards.
+
+Python bank/Forward retains these classes; all Entry owners remain retained until
+the original StageA used-session default-stream fence succeeds and the actual
+session is removed. An error anywhere after selection must quarantine the Frame,
+Entry/bank and traceback via the existing eight-worker fatal path, never retry or
+fall back. The classes themselves have no implicit sync/destructor callback. The
+Python caller owns safe retirement; dropping the last reference early is not safe
+by construction. Failed ctor snapshots contain existing Python-owned tensors and
+make no device allocation or write; caller still retains/quarantines the operands.
+
+Existing source references:
+- csrc/lingbot_recovery/host.cpp descriptor/describe establishes current pinned
+  NPUStorageImpl ABI and public npu::get_npu_format cross-check. The installed wheel
+  lacks NPUStorageImpl RTTI exports; check PrivateUse1 before the same static cast.
+- Frozen lingbot_fixed_timestep_bank_stageA_v1.py _light/_physical/_OwnedTensor and
+  retire_session define owner metadata and A's unchanged drain boundary.
+- Frozen Stage B v1 _Entry.check/Forward.get define the original per-layer check
+  timing; no v1 code is edited by this isolated experiment.
+- Installed torch/include/c10/core/TensorImpl.h VariableVersion::enabled and
+  current_version distinguish disabled inference counters; c10/core/Storage.h
+  and ATen/core/TensorBase.h provide intrusive strong owners and impl identities.
+- torch/custom_class.h and ATen/core/ivalue.h provide typed registered host classes.
+
+build.py is opt-in (--execute --output NEW_DIRECTORY), refuses replacing a prior
+output, pins actual source/header/loaded-library ABI, fsyncs compiler terminal
+status BEFORE load_library, and only marks registration true after real class
+registration plus two CPU-owner refusal checks. It checks NPU remains uninitialized.
+Registration is not NPU descriptor, lifetime, correctness, or speed qualification.
+The CPU source-contract tests validate source boundaries only, not C++ execution.
+No authoring-time build/device execution has been performed.
