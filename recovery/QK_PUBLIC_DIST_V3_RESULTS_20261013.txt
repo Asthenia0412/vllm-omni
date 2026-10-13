@@ -1,0 +1,74 @@
+QK public dist v3：长尾位于 alltoall_base 的 host 包围区间
+
+本轮是独立诊断，不是性能门槛或模型验收。v3 新正确性与 profile 均由 root
+在同八个 die 8–15 上串行启动；本分析只读取 CPU 数据，没有发起设备任务。
+
+证据与范围
+- Correctness: 2f52528f8f18c654d0de791af85107bf；八 rank ×24 真实 layer0
+  输入，每 case 原13项正确性检查和四条 instrumented 路径，实际768个观察调用。
+- Profile: b5757376d27d60388374562ee5971faf；八 rank ×5760 =46080行。
+  六种历史长度、四 probes、两scope、两arm；每phase20 warm +60诊断调用。
+- 两个 supervisor 均 exit_code=0、fatal=null、remaining_owned_processes=[]。
+- 聚合器逐项绑定新v3正确性、八rank原始记录、source/manifest/public API/code/CALL
+  指纹及两次supervisor；旧v2或broad PASS不能准入。真实pybind事件已由新正确性验证。
+- 主体仍为原all_to_all_5D/HCCL顺序和当前stream；group是隔离torchrun8 WORLD，
+  不是运行中模型的Ulysses实例。layer1–39没有重复伪造成真实payload。
+
+实际结果（每行是一次rank调用；时间包含诊断扰动）
+区间                               mean (us)       max (ms)   >2ms
+python_before_alltoall                40.263       0.844727      0
+alltoall_binding                      68.198       7.915553     45
+python_between_bindings                5.509       2.973594      1
+wait_binding                           9.456       0.125061      0
+python_after_wait                      3.359       0.100351      0
+
+五段分割同一个public函数体，其总时间与外层collective/post-sync重叠，不能相加
+声称可节省的模型时间。public函数体共有46次>2ms；其中45次长段在alltoall_base
+绑定，另一次在两个绑定之间的Python区间。wait绑定没有>2ms样本。
+
+长 alltoall_base 同时出现在两条执行路径
+- cached_snapshot_and_original_consumer, baseline: 14次>2ms。
+- cached_snapshot_and_original_consumer, combined: 10次>2ms。
+- producer_plus_layer0_and_original_consumer, baseline: 12次>2ms。
+- producer_plus_layer0_and_original_consumer, combined: 9次>2ms。
+合计 baseline26次、combined19次；长段分布全部八rank。一次诊断的数量差异不能
+证明candidate变快，也不能归因于仅combined才有的逻辑。
+45个长alltoall段中，43个记录了voluntary context switch，
+involuntary为0；thread CPU中位0.08302ms，
+范围0.06109–2.51697ms。
+这缩小了观察边界，但不能区分GIL重新获得、框架内部等待、队列/事件/allocator路径，
+也不能据此命名具体锁或网络原因。wall/CPU/上下文计数顺序读取而非原子快照；短段
+存在负wall-minus-CPU样本，该差值不是可靠的空闲时间估计。
+
+跨rank传播例子（完整八rank绝对时间在summary.examples中）
+- KV9360 / probe1 / cached baseline / sample3 / 全局row1323：rank5的
+  alltoall绑定耗时5.720025ms。使用同次最早alltoall_c_call作为共同t=0：
+  七个peer的同次post-sync已在0.680655–0.698525ms完成，
+  rank5直到5.835526ms才离开该绑定。
+- 下一次rank5到7.250157ms才进入绑定；
+  七个peer的下一次post-sync耗时变为6.157979–6.310620ms。
+  这是相同collective序号及下一序号的host依赖时间关联，不能将前次迟返与下次peer
+  等待重复计为两份独立损失，也不能代替设备kernel/HCCL时间线。
+- 最大alltoall段是rank1、row1679、cached combined、sample59：7.915553ms。
+  由于sample59已在phase末尾，聚合器不跨phase拼接“下一次”案例。
+
+GC与生命周期
+- 八rank GC记录完整，无drop/error/unmatched。观察到的16个public body GC交集
+  都在alltoall前的Python区间；alltoall/wait长段没有同线程GC交集。
+- old-held替换后，lease和receive Python wrapper的存活计数均为0。它仅是Python
+  wrapper生命周期证据，不是底层device storage已释放的证明。
+
+解释边界与本轮停止点
+- C事件的起止包围pybind转换、GIL释放/重新获得及callback；不是纯C++内部执行
+  或传输时间。profile打开期间该线程全部Python/C事件都会触发回调，通常每调用
+  39个事件，rank0有一次55个；不能将本轮均值、次数或其差异迁移到干净模型。
+- 不读取f_locals、不保留Work/frame/tensor；Work来自原函数work=result;work.wait()
+  数据流对齐，不声称直接记录了Work实例ID。
+- 原逐调用前后sync仍保留；无新设备sync。当前结果足以将调查范围缩到alltoall
+  binding包围区间，本轮不扩展侵入式PG/allocator诊断，不改变失败QK候选的禁用状态。
+- 没有新的端到端速度收益、P99改善或模型准入结论。
+
+文件
+完整摘要: /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-public-dist-v3/summary-v3.json
+紧凑证据: recovery/validation/qk-public-dist-v3-completed-20261013.json
+运行与源码说明: recovery/QK_PUBLIC_DIST_PROFILE_V3_20261013.txt

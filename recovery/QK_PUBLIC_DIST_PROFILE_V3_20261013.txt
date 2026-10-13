@@ -1,0 +1,112 @@
+QK public All-to-All host diagnostic v3 (actual192 correctness/profile completed)
+
+Completed root-owned runs
+Correctness supervisor 2f52528f8f18c654d0de791af85107bf: all8 ranks x96 observed
+calls passed. Profile supervisor b5757376d27d60388374562ee5971faf: all8 x5760
+rows completed. Both supervisors exit0/fatalnull/remaining_owned_processes[].
+The actual pybind event support is now proved by fresh v3 correctness, not by
+relabeling v2 data. See QK_PUBLIC_DIST_V3_RESULTS_20261013.txt and the compact
+validation/qk-public-dist-v3-completed-20261013.json for evidence and limits.
+
+Purpose
+Split the previously observed public all_to_all_single host span into the
+alltoall_base binding, the Work.wait binding, and their surrounding Python work.
+This is a diagnostic only, never the performance gate or model admission.
+The v2 observations did not establish a lock, allocator, network, or hardware
+cause. These new host intervals do not establish those causes either.
+
+Source evidence
+Installed Python is CPython 3.12.14; torch 2.10.0+cpu commit
+449b1768410104d3ed79d3bcfe4ba1d65c7f22c0; torch_npu 2.10.0.post4 commit
+5dd8ef3f9b375b5ae4a83538d5785754148c3302.
+torch/distributed/distributed_c10d.py lines4768..4781 calls the group method,
+then waits on non-None Work for the existing async_op=False behavior.
+ProcessGroup.hpp lines608..639 dispatch c10d::alltoall_base_. Pinned Ops.cpp
+lines448..471 forwards PrivateUse1 to that group's backend. HCCL equal-split
+alltoall_base calls collective(... opts.asyncOp); collective returns Work at
+ProcessGroupHCCL.cpp:4292. Its Work.wait calls synchronizeInternal at1143..1155.
+That function installs a current-stream dependency, handles allocator state,
+and conditionally blocks if blockingWait_ is enabled. A wait binding span is
+not necessarily a host wait for transfer completion.
+
+Both exact PyTorch pybind methods use gil_scoped_release (init.cpp:2436..2444
+and3737..3740). CPython legacy_tracing.c:78..114 sends C profile events for
+PyCFunction and PyMethod wrapping it. The installed pybind header constructs a
+PyCFunction at641 and PyInstanceMethod at738. Work.wait exposed on the class is
+an unbound instancemethod with builtin __func__; a group's bound method is a
+MethodType with builtin __func__. The observer requires the actual builtin
+function identity, not a matching method/type name.
+
+Primary source links and exact local source SHA are in the standalone audit:
+ROOT/audits/qk-restore/public-dist-profile-v1/source-pins.json.
+https://github.com/pytorch/pytorch/blob/449b1768410104d3ed79d3bcfe4ba1d65c7f22c0/torch/csrc/distributed/c10d/init.cpp
+https://github.com/pytorch/pytorch/blob/449b1768410104d3ed79d3bcfe4ba1d65c7f22c0/torch/csrc/distributed/c10d/Ops.cpp
+https://github.com/Ascend/pytorch/blob/5dd8ef3f9b375b5ae4a83538d5785754148c3302/torch_npu/csrc/distributed/ProcessGroupHCCL.cpp
+https://github.com/python/cpython/blob/v3.12.14/Python/legacy_tracing.c
+
+Scope and lifecycle
+Only new files: observe_qk_public_dist.py, diagnose_qk_public_dist.py, and its
+CPU test. Frozen v2 and runtime files remain unchanged. Reuse the frozen outer
+run_arm and InstrumentedCall bytecode with a private constructor replacement.
+Keep the original collective, HCCL group, stream, async flag, owner references,
+input arithmetic, 20 warm calls and 60 diagnostic calls. Keep existing before/
+after-call NPU sync; add no device operation or intermediate synchronization.
+
+sys.setprofile is enabled only while calling the original public Python API,
+in the current Python thread. Reject an existing profiler before that call.
+Restore None on normal and exceptional exit. A foreign replacement is preserved
+and produces terminal diagnostic failure, never accepted as a complete row.
+CPython can remove a callback that raised; this is recorded as a failed row even
+though the original None state is restored. All errors follow the existing
+owner quarantine and worker retirement policy. No retry or native fallback.
+
+The callback uses fixed integer arrays. It retains no frame, tensor, Work,
+exception, or traceback and never reads f_locals. Group ID is checked against
+the original collective arguments. The actual body frame ID, exact source/code,
+CALL offsets, and C function object identities align both events with the pinned
+work=result; work.wait() dataflow. It does NOT directly observe a Work instance
+ID, because CPython provides the underlying C function, not the bound Work.
+
+Six marks per row: body_call, alltoall_c_call, alltoall_c_return, wait_c_call,
+wait_c_return, body_return. Five disjoint intervals partition this body span.
+The body span lies inside v2's public_dist_call and has the same native TID.
+Never add these intervals to the enclosing collective/public-call durations.
+C-call intervals include conversion, profile callback overhead, GIL release and
+reacquisition, scheduling, and the binding itself. They are not pure backend or
+network time. sys.setprofile observes every Python/C event in this thread while
+enabled, even though only six marks are retained. It has nonzero perturbation.
+
+CPU evidence
+The standalone stdlib proof extracted the installed public function AST, removed
+only the logging decorator, and used bound builtins to emulate pybind calls.
+It observed two C-event pairs, the async path without wait, C-exception behavior,
+thread locality, existing-hook refusal, and no retained Work. This is mock proof,
+not actual HCCL event proof.
+Twelve targeted tests passed normally and under python -O. CPU-only imports of
+torch/torch_npu additionally confirmed both loaded public code fingerprints,
+the actual Work.wait descriptor and group method canonical identities, and that
+the canonical group function does not retain the group. NPU initialized=False;
+no collective was called during that CPU inspection. The subsequent root-owned
+device correctness run separately proved installed pybind support; no old v2
+PASS was reused.
+
+Run under the existing root-owned eight-rank supervisor, dies8..15 only:
+  torchrun --standalone --nnodes=1 --nproc-per-node=8 \
+    recovery/diagnose_qk_public_dist.py --execute --mode correctness \
+    --fixtures ROOT/audits/capture-fixtures/launch-v1/full/fixtures \
+    --manifest ROOT/build/qk-record-once.20261013v1/qk_combined_manifest.json \
+    --correctness-dir ROOT/qk-record-once-checks/correctness \
+    --output ROOT/audits/qk-public-dist-v3/correctness
+Use the supervisor's original pinned environment, manifest, source path and
+fatal ownership variables. ROOT is a placeholder for the actual recovery root.
+Only after all8 new correctness receipts pass, use --mode profile and add
+  --diagnostic-correctness-dir ROOT/audits/qk-public-dist-v3/correctness
+with a fresh output directory. Correctness has96 rows/rank, profile5760 rows/rank;
+all24 actual layer0 cases/rank (six histories and four probes). These are not
+40-layer payloads or model timing. New schema/method/source pins reject old v2.
+
+If real pybind events cannot be admitted, stop this observer. A separate short
+CPU-only torch_npu profiler capture can expose existing framework ranges such
+as c10d::alltoall_base_ and HcclAlltoAll, with record_shapes/profile_memory/
+with_stack disabled. It cannot promise an uninstrumented WorkHCCL::wait split
+and must not be combined with sys.setprofile without separate validation.

@@ -1,0 +1,86 @@
+{
+  "schema": "qk_public_dist_v3_cpu_preparation_v1",
+  "files": {
+    "observe_qk_public_dist.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/observe_qk_public_dist.py",
+      "bytes": 13464,
+      "sha256": "1e7b9101a76bcbb0f5fb9e5bbc507dded030c1f486f3855ed9af01f28274718b"
+    },
+    "diagnose_qk_public_dist.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/diagnose_qk_public_dist.py",
+      "bytes": 20936,
+      "sha256": "9f461217740f9a8114f88e939188b7d28bf2f3d8a20f0da881f7eb1f45c2c161"
+    },
+    "test_qk_public_dist_cpu.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_public_dist_cpu.py",
+      "bytes": 9869,
+      "sha256": "acc4ed8534ed555889eb8d116355b73bf5130e6d968109e91e87083219e01297"
+    }
+  },
+  "source_evidence": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/public-dist-profile-v1/source-pins.json",
+    "bytes": 1485,
+    "sha256": "164dd20b0a2fa5206a7c9f7660db0b87cd2ee857d1598050f145229039b28f79"
+  },
+  "public_api": {
+    "method": "thread_local_exact_body_c_call_boundaries_v1",
+    "python": "3.12.14 (main, Sep 24 2026, 17:56:52) [Clang 22.1.3 ]",
+    "cache_tag": "cpython-312",
+    "optimize": 0,
+    "source": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py",
+      "bytes": 247572,
+      "sha256": "31155344233ae77360a630bbeacf1b43cfa18f1923cf2103cd5b3142db39ec5c"
+    },
+    "logger": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/distributed/c10d_logger.py",
+      "bytes": 3185,
+      "sha256": "b7b5866e4d3c3847e24f3fe488f187cbd90ac94955a24a98dc10f0d96c99b649"
+    },
+    "torch_version": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/version.py",
+      "bytes": 313,
+      "sha256": "7859361e4fdec5c69ccf14c8e2b2a1c5ec604b2e7c8e2820d402ccf782bd04bb"
+    },
+    "torch_npu_version": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/version.py",
+      "bytes": 86,
+      "sha256": "f11e02e3acade31a81657136784872a1d70e2f232cab0ef19d3a605aec47424d"
+    },
+    "body_code_sha256": "532f8d769ce5322d0ef219fdf1a85a9b6a922e9d872224df092f0193b1f242f1",
+    "wrapper_code_sha256": "8b5494f0f01c719eb6b4459074aae34e2a8386b4ebd87e2e3db0709000ca9ce5",
+    "callsites": {
+      "alltoall_base": 460,
+      "wait": 504
+    },
+    "code_fingerprint_method": "python_typed_code_fields_v1"
+  },
+  "stdlib_mock": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/public-dist-profile-v1/stdlib-proof.json",
+    "bytes": 2204,
+    "sha256": "f3fcf755beb1135486c46fbaae69e80d3ef236b6537f260aee53291b795f3d48"
+  },
+  "tests": {
+    "normal": {
+      "passed": 12,
+      "exit_code": 0
+    },
+    "python_O": {
+      "passed": 12,
+      "exit_code": 0
+    }
+  },
+  "cpu_framework_inspection": {
+    "torch_imported": true,
+    "torch_npu_imported": true,
+    "npu_initialized": false,
+    "collective_called": false,
+    "pinned_body_wrapper_match": true,
+    "actual_wait_unbound_instancemethod_func_builtin": true,
+    "actual_group_method_func_builtin": true,
+    "canonical_builtin_retains_group": false
+  },
+  "device_correctness_passed": false,
+  "performance_gate_passed": false,
+  "model_admitted": false
+}

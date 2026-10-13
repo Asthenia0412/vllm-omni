@@ -1,0 +1,1651 @@
+{
+  "schema": "qk_public_dist_v3_completed_diagnostic_v1",
+  "diagnostic_only": true,
+  "performance_gate_passed": false,
+  "model_admitted": false,
+  "summary": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-public-dist-v3/summary-v3.json",
+    "bytes": 986172,
+    "sha256": "47e2096c3d99e39297c1784958c7127f2ff5570d99b503a0ad0dc5c27d4f299c"
+  },
+  "files": {
+    "observe_qk_public_dist.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/observe_qk_public_dist.py",
+      "bytes": 13464,
+      "sha256": "1e7b9101a76bcbb0f5fb9e5bbc507dded030c1f486f3855ed9af01f28274718b"
+    },
+    "diagnose_qk_public_dist.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/diagnose_qk_public_dist.py",
+      "bytes": 20936,
+      "sha256": "9f461217740f9a8114f88e939188b7d28bf2f3d8a20f0da881f7eb1f45c2c161"
+    },
+    "test_qk_public_dist_cpu.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_public_dist_cpu.py",
+      "bytes": 9869,
+      "sha256": "acc4ed8534ed555889eb8d116355b73bf5130e6d968109e91e87083219e01297"
+    },
+    "summarize_qk_public_dist.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/summarize_qk_public_dist.py",
+      "bytes": 27227,
+      "sha256": "6a09499b725daa03766f01aac9f4e6c2651b526d746410a1df7b87ec669b3679"
+    },
+    "test_qk_public_dist_summary_cpu.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_public_dist_summary_cpu.py",
+      "bytes": 5571,
+      "sha256": "bd1385fcd987ac8f86bb6b0e38b22075eea046793697da86aec2354c25c439f6"
+    },
+    "QK_PUBLIC_DIST_PROFILE_V3_20261013.txt": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_PUBLIC_DIST_PROFILE_V3_20261013.txt",
+      "bytes": 7311,
+      "sha256": "a3bc80ebeb2454c24aeee9f96aeb88e71989d6be4e644739471ffb02eed33558"
+    },
+    "QK_PUBLIC_DIST_V3_RESULTS_20261013.txt": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_PUBLIC_DIST_V3_RESULTS_20261013.txt",
+      "bytes": 5051,
+      "sha256": "c353ec708e59f7abf9daca0683c1bed1d667faead61ee4a7e2dc6acc5c38831f"
+    }
+  },
+  "primary_source_evidence": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/public-dist-profile-v1/pytorch_Ops.cpp",
+      "bytes": 32955,
+      "sha256": "5eccf5a7da1a3bc8964b3d69d9caac04c87836d0cfc8338bc2597d7849618fba",
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/449b1768410104d3ed79d3bcfe4ba1d65c7f22c0/torch/csrc/distributed/c10d/Ops.cpp"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/public-dist-profile-v1/pytorch_init.cpp",
+      "bytes": 176156,
+      "sha256": "6b72ea6065a33164f79bd5a97d50a40aa2fc9084bb10c317c26ab2a4eb8eab6a",
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/449b1768410104d3ed79d3bcfe4ba1d65c7f22c0/torch/csrc/distributed/c10d/init.cpp"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/public-dist-profile-v1/cpython_legacy_tracing.c",
+      "bytes": 17708,
+      "sha256": "01c2dafe8b84f352e4ba9fd5fc64d36368f163b681c8e141c39082636ceb9cd4",
+      "url": "https://raw.githubusercontent.com/python/cpython/v3.12.14/Python/legacy_tracing.c"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/host-cost-v1/ProcessGroupHCCL.cpp",
+      "bytes": 340274,
+      "sha256": "ba393be1672c7ce84dbbe9e9705ad9164a70af52a1883d487931ab1e212278ab",
+      "url": "https://raw.githubusercontent.com/Ascend/pytorch/5dd8ef3f9b375b5ae4a83538d5785754148c3302/torch_npu/csrc/distributed/ProcessGroupHCCL.cpp"
+    }
+  ],
+  "cpu_receipt": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/validation/qk-public-dist-v3-cpu-20261013.json",
+    "bytes": 3496,
+    "sha256": "9929fa232f32599dde3f082f73a7544f14a7e6175f04ec37628a05356b17189a"
+  },
+  "correctness_rank_calls": 96,
+  "correctness_total_calls": 768,
+  "profile_rank_rows": 5760,
+  "profile_total_rows": 46080,
+  "actual_input_cases": 192,
+  "real_payload_layers": [
+    0
+  ],
+  "all40_payloads": false,
+  "tests": {
+    "observer_wrapper_normal": 12,
+    "observer_wrapper_O": 12,
+    "summary_normal": 7,
+    "summary_O": 7
+  },
+  "profiles": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank0.json",
+      "bytes": 11371955,
+      "sha256": "ffeef06f228b2f145e6dd7fff563417d9156a4ca38c6b4cc577304f6b9456e75"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank1.json",
+      "bytes": 11371955,
+      "sha256": "0b370bd41585b8c97adb98b016a6109ba2a100745c6ea35eb6c670ab11b840c6"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank2.json",
+      "bytes": 11371955,
+      "sha256": "eb1b0af963f27436c56859bbbc05c41a7e7fcd6209c6f4c35ac067bc8e52f146"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank3.json",
+      "bytes": 11371955,
+      "sha256": "3b878954dd72ae009cba44f68458fa192d13c479d2af25b53e29045bfb3ce684"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank4.json",
+      "bytes": 11371955,
+      "sha256": "52b02e14d542070edecd81405bae563b26c51e53f2b755160a937d3607daed9b"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank5.json",
+      "bytes": 11371955,
+      "sha256": "b3255a441a086a7c996f9c4b4220fa1ff88e6768f92574b0d383ea9405dbf36d"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank6.json",
+      "bytes": 11371955,
+      "sha256": "a15e2a6bd54a3d8bea50e54ef5fb85b794cd8db015361ba2684ef6ec48ad7c4a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3/rank7.json",
+      "bytes": 11371955,
+      "sha256": "9bc5e9fb3d946268f661d0773f4654e549d0e01693162fb45907e68717dd517d"
+    }
+  ],
+  "supervisors": {
+    "profile": {
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-runs/b5757376d27d60388374562ee5971faf/launch.json",
+        "bytes": 1130,
+        "sha256": "e3e60133febe661c00cc81332caca4360f13fd95ed9ce5e36ae712b4932980d6"
+      },
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-runs/b5757376d27d60388374562ee5971faf/result.json",
+        "bytes": 1183,
+        "sha256": "2c0b63732d4864b4ce51fb10c978ef4cb1b62240db750462ac3a4769d05d7d14"
+      },
+      "nonce": "b5757376d27d60388374562ee5971faf",
+      "options": {
+        "--mode": "profile",
+        "--fixtures": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures",
+        "--manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+        "--correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness",
+        "--diagnostic-correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3",
+        "--output": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/profile-v3"
+      }
+    },
+    "correctness": {
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-runs/2f52528f8f18c654d0de791af85107bf/launch.json",
+        "bytes": 1008,
+        "sha256": "729417b955f4e291945b230f971627d2258456673d68231297e93756d44cc4c7"
+      },
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-runs/2f52528f8f18c654d0de791af85107bf/result.json",
+        "bytes": 1061,
+        "sha256": "0908dc2d7839c93cacc64381770f6c43b0626978934d276ea67be17ee77d0587"
+      },
+      "nonce": "2f52528f8f18c654d0de791af85107bf",
+      "options": {
+        "--mode": "correctness",
+        "--fixtures": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures",
+        "--manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+        "--correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness",
+        "--output": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3"
+      }
+    }
+  },
+  "correctness_receipts": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank0.json",
+      "bytes": 50103,
+      "sha256": "65af33e2cc83ca48227dee59a4355380feb5106288d901a17a01283531010795"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank1.json",
+      "bytes": 50103,
+      "sha256": "f8166a93f076aa7db0e8896fe724268ad2e38fd8cd156f8602649b9931f2704a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank2.json",
+      "bytes": 50103,
+      "sha256": "bfd365af6570c69cf6ae2019dc8c9858a275991c063ad8817af34ed34ed020c8"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank3.json",
+      "bytes": 50103,
+      "sha256": "1a0f10ddeaf5e5c46a5a0c44763ea8489cb7e05e9a730c70fae1cdf25dec1c82"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank4.json",
+      "bytes": 50103,
+      "sha256": "62f1499e0808c740e45dbf20aeeb13052904bed59a10b99685bef81b1e7aad5e"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank5.json",
+      "bytes": 50103,
+      "sha256": "17bad4bfe591085d03730f810716e6272f4087eeb7a31fd7b8419d81af8cd0da"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank6.json",
+      "bytes": 50103,
+      "sha256": "2aec12d99f03591cd1b746c285ca4fcc44abec9722753d3c5326c6f56a6260bf"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank7.json",
+      "bytes": 50103,
+      "sha256": "0ca94d59eee96f27e2f32074d2a56b9524bd238c06928c4f627d5e8f521e679e"
+    }
+  ],
+  "diagnostic_correctness_receipts": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank0.json",
+      "bytes": 171878,
+      "sha256": "a3137f3a5633f6f7333a2ccbe8882c04ec3582c49efb1946a1e797a619b508d3"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank1.json",
+      "bytes": 171878,
+      "sha256": "407583ff79ab4de4e8d09a2bb0db04381e9946c367a42d08953b0a04b0477577"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank2.json",
+      "bytes": 171878,
+      "sha256": "7803a368649344888169d6fe07b9b28d847e0ded1f7dada018e2c7bd50dd0def"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank3.json",
+      "bytes": 171878,
+      "sha256": "5fd65d4c7437fe4646d3c093f082fe49f60e0d49d3f626f39d9198671ba89ed7"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank4.json",
+      "bytes": 171878,
+      "sha256": "bc8ccdd866018c316a0ac49aa7df990b7a54310ccb382322c31b7b427a82e73b"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank5.json",
+      "bytes": 171878,
+      "sha256": "21f4a87248fb0730e32731b2d7ee856541fbd5ae50c92db272a3b474fc801783"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank6.json",
+      "bytes": 171878,
+      "sha256": "1543f88643af741274fc3f3629974b185d98ee3713d99d1babc57f65196374f6"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-public-dist-checks/correctness-v3/rank7.json",
+      "bytes": 171878,
+      "sha256": "44ae118d4f6eef7dcaf12938e34aaf6e328eb761dee835e94c54803ed86e02d4"
+    }
+  ],
+  "manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+    "bytes": 8320,
+    "sha256": "19d282194022d7c6544a2c06ac738e9fa1ce1f1c23e952b0698e5e8e757b0bbd"
+  },
+  "sources": {
+    "harness": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_real_matrix.py",
+      "bytes": 24351,
+      "sha256": "2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519"
+    },
+    "loader": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    "capture_contract": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+      "bytes": 22079,
+      "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+    },
+    "original_collective": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/distributed/comm.py",
+      "bytes": 15443,
+      "sha256": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f"
+    },
+    "coefficient_producer": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_native_bf16_qk.py",
+      "bytes": 7946,
+      "sha256": "42a5c7c45bd750f1b489f2fa89a4cb66a3946867b90b231097f3533946264014"
+    },
+    "baseline_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 11282,
+      "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+    },
+    "combined_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_qk_combined.py",
+      "bytes": 10282,
+      "sha256": "d9c83b3d394cb7fd4cfc777b6c52374d384260446ffa5ffbec77dd161c53d756"
+    },
+    "padded_consumer_hook": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 32237,
+      "sha256": "3a189a2bdeb60ca001007424bb329efb863693e97b338ac997cd6dcb3543ada6"
+    }
+  },
+  "diagnostic_sources": {
+    "wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/diagnose_qk_public_dist.py",
+      "bytes": 20936,
+      "sha256": "9f461217740f9a8114f88e939188b7d28bf2f3d8a20f0da881f7eb1f45c2c161"
+    },
+    "observer": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/observe_qk_public_dist.py",
+      "bytes": 13464,
+      "sha256": "1e7b9101a76bcbb0f5fb9e5bbc507dded030c1f486f3855ed9af01f28274718b"
+    },
+    "frozen_diagnostic": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/diagnose_qk_host_dependencies.py",
+      "bytes": 20775,
+      "sha256": "a3757158dde34cc1b6ce7772c12d30cc09c90a6bb306c633ed62559d0c369cae"
+    },
+    "frozen_observer": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/observe_qk_collective_host.py",
+      "bytes": 14663,
+      "sha256": "412e96c61b2a64b26e8cc183bafd728d08ad8442413701b851bdee45989b22ab"
+    }
+  },
+  "matrix_sha256": "135caf06dcdd680c3ac8f4138e7c78ed136d5577b5a2361c88242822ea86f7da",
+  "public_api_sources": {
+    "method": "thread_local_exact_body_c_call_boundaries_v1",
+    "python": "3.12.14 (main, Sep 24 2026, 17:56:52) [Clang 22.1.3 ]",
+    "cache_tag": "cpython-312",
+    "optimize": 0,
+    "source": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py",
+      "bytes": 247572,
+      "sha256": "31155344233ae77360a630bbeacf1b43cfa18f1923cf2103cd5b3142db39ec5c"
+    },
+    "logger": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/distributed/c10d_logger.py",
+      "bytes": 3185,
+      "sha256": "b7b5866e4d3c3847e24f3fe488f187cbd90ac94955a24a98dc10f0d96c99b649"
+    },
+    "torch_version": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/version.py",
+      "bytes": 313,
+      "sha256": "7859361e4fdec5c69ccf14c8e2b2a1c5ec604b2e7c8e2820d402ccf782bd04bb"
+    },
+    "torch_npu_version": {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/version.py",
+      "bytes": 86,
+      "sha256": "f11e02e3acade31a81657136784872a1d70e2f232cab0ef19d3a605aec47424d"
+    },
+    "body_code_sha256": "532f8d769ce5322d0ef219fdf1a85a9b6a922e9d872224df092f0193b1f242f1",
+    "wrapper_code_sha256": "8b5494f0f01c719eb6b4459074aae34e2a8386b4ebd87e2e3db0709000ca9ce5",
+    "callsites": {
+      "alltoall_base": 460,
+      "wait": 504
+    },
+    "code_fingerprint_method": "python_typed_code_fields_v1"
+  },
+  "stage_summary": {
+    "python_before_alltoall": {
+      "count": 46080,
+      "mean_wall_ms": 0.040263252408854165,
+      "mean_thread_cpu_ms": 0.03959967686631945,
+      "max_wall_ms": 0.844727,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 84,
+      "involuntary_switches": 27,
+      "same_thread_gc_overlap_ns": 2526909,
+      "samples_with_same_thread_gc": 16,
+      "negative_wall_minus_cpu_samples": 14772
+    },
+    "alltoall_binding": {
+      "count": 46080,
+      "mean_wall_ms": 0.06819766280381945,
+      "mean_thread_cpu_ms": 0.062920830078125,
+      "max_wall_ms": 7.915553,
+      "gt2ms": 45,
+      "gt5ms": 6,
+      "voluntary_switches": 2910,
+      "involuntary_switches": 40,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 40612
+    },
+    "python_between_bindings": {
+      "count": 46080,
+      "mean_wall_ms": 0.005508753103298611,
+      "mean_thread_cpu_ms": 0.004960793619791667,
+      "max_wall_ms": 2.973594,
+      "gt2ms": 1,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 2,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 39
+    },
+    "wait_binding": {
+      "count": 46080,
+      "mean_wall_ms": 0.009455795572916667,
+      "mean_thread_cpu_ms": 0.009349089409722223,
+      "max_wall_ms": 0.125061,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 6,
+      "involuntary_switches": 12,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 39899
+    },
+    "python_after_wait": {
+      "count": 46080,
+      "mean_wall_ms": 0.003358855381944445,
+      "mean_thread_cpu_ms": 0.003197936414930556,
+      "max_wall_ms": 0.100351,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 1,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 1087
+    },
+    "public_body_total_overlaps_five_stages": {
+      "count": 46080,
+      "mean_wall_ms": 0.12678431927083333,
+      "mean_thread_cpu_ms": 0.12002832638888888,
+      "max_wall_ms": 7.988453,
+      "gt2ms": 46,
+      "gt5ms": 7,
+      "voluntary_switches": 3000,
+      "involuntary_switches": 82,
+      "same_thread_gc_overlap_ns": 2526909,
+      "samples_with_same_thread_gc": 16,
+      "negative_wall_minus_cpu_samples": 661
+    }
+  },
+  "profile_event_counts": [
+    {
+      "rank": 0,
+      "total": 224656,
+      "minimum": 39,
+      "maximum": 55
+    },
+    {
+      "rank": 1,
+      "total": 224640,
+      "minimum": 39,
+      "maximum": 39
+    },
+    {
+      "rank": 2,
+      "total": 224640,
+      "minimum": 39,
+      "maximum": 39
+    },
+    {
+      "rank": 3,
+      "total": 224640,
+      "minimum": 39,
+      "maximum": 39
+    },
+    {
+      "rank": 4,
+      "total": 224640,
+      "minimum": 39,
+      "maximum": 39
+    },
+    {
+      "rank": 5,
+      "total": 224640,
+      "minimum": 39,
+      "maximum": 39
+    },
+    {
+      "rank": 6,
+      "total": 224640,
+      "minimum": 39,
+      "maximum": 39
+    },
+    {
+      "rank": 7,
+      "total": 224640,
+      "minimum": 39,
+      "maximum": 39
+    }
+  ],
+  "binding_stalls_by_arm_scope": [
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "count": 14
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "count": 10
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "count": 12
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "count": 9
+    }
+  ],
+  "binding_stall_context": {
+    "count": 45,
+    "voluntary_nonzero": 43,
+    "involuntary_nonzero": 0,
+    "thread_cpu_median_ns": 83020,
+    "thread_cpu_min_ns": 61090,
+    "thread_cpu_max_ns": 2516970
+  },
+  "gc_observation_complete": true,
+  "gc_by_rank": [
+    {
+      "rank": 0,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 1,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 2,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 3,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 4,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 5,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 6,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 7,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    }
+  ],
+  "old_python_wrapper_alive": {
+    "lease_alive": 0,
+    "receive_wrapper_alive": 0
+  },
+  "selected_same_next_example": {
+    "rank": 5,
+    "row": 1323,
+    "kv_len": 9360,
+    "probe": 1,
+    "scope": "cached_snapshot_and_original_consumer",
+    "arm": "baseline",
+    "sample": 3,
+    "start_ns": 182918244629368,
+    "end_ns": 182918250414303,
+    "wall_ns": 5784935,
+    "thread_cpu_ns": 187790,
+    "wall_minus_thread_cpu_ns": 5597145,
+    "voluntary_switches": 1,
+    "involuntary_switches": 0,
+    "same_thread_gc_overlap_ns": 0,
+    "inner_stages": {
+      "python_before_alltoall": {
+        "start_ns": 182918244629368,
+        "end_ns": 182918244664968,
+        "wall_ns": 35600,
+        "thread_cpu_ns": 35840,
+        "wall_minus_thread_cpu_ns": -240,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "alltoall_binding": {
+        "start_ns": 182918244664968,
+        "end_ns": 182918250384993,
+        "wall_ns": 5720025,
+        "thread_cpu_ns": 123430,
+        "wall_minus_thread_cpu_ns": 5596595,
+        "voluntary_switches": 1,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "python_between_bindings": {
+        "start_ns": 182918250384993,
+        "end_ns": 182918250391323,
+        "wall_ns": 6330,
+        "thread_cpu_ns": 5580,
+        "wall_minus_thread_cpu_ns": 750,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "wait_binding": {
+        "start_ns": 182918250391323,
+        "end_ns": 182918250410923,
+        "wall_ns": 19600,
+        "thread_cpu_ns": 19660,
+        "wall_minus_thread_cpu_ns": -60,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "python_after_wait": {
+        "start_ns": 182918250410923,
+        "end_ns": 182918250414303,
+        "wall_ns": 3380,
+        "thread_cpu_ns": 3280,
+        "wall_minus_thread_cpu_ns": 100,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      }
+    },
+    "same_call": {
+      "alltoall_binding_host_start_skew_ns": 115501,
+      "latest_host_start_rank": 5,
+      "alltoall_binding_host_return_skew_ns": 5781486,
+      "latest_host_return_rank": 5,
+      "peers": [
+        {
+          "rank": 0,
+          "inner_timestamps": {
+            "body_call": 182918244528387,
+            "alltoall_c_call": 182918244576277,
+            "alltoall_c_return": 182918244678198,
+            "wait_c_call": 182918244684828,
+            "wait_c_return": 182918244695808,
+            "body_return": 182918244699838
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243981462,
+            "pre_sync_end": 182918244013143,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918244016433,
+            "prepare_end": 182918244412586,
+            "exchange_begin": 182918244418816,
+            "collective_begin": 182918244434376,
+            "collective_end": 182918244766629,
+            "exchange_end": 182918244776339,
+            "call_return_before_replace": 182918244778349,
+            "old_held_replace_end": 182918244796079,
+            "post_sync_begin": 182918244798909,
+            "post_sync_end": 182918245236812
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 47890,
+              "thread_cpu_ns": 47620,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 101921,
+              "thread_cpu_ns": 84290,
+              "voluntary_switches": 1,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 6630,
+              "thread_cpu_ns": 5760,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 10980,
+              "thread_cpu_ns": 11030,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 4030,
+              "thread_cpu_ns": 3950,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 1,
+          "inner_timestamps": {
+            "body_call": 182918244532867,
+            "alltoall_c_call": 182918244575277,
+            "alltoall_c_return": 182918244631718,
+            "wait_c_call": 182918244636878,
+            "wait_c_return": 182918244646008,
+            "body_return": 182918244649238
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243993022,
+            "pre_sync_end": 182918244028453,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918244031803,
+            "prepare_end": 182918244414036,
+            "exchange_begin": 182918244421016,
+            "collective_begin": 182918244436896,
+            "collective_end": 182918244716888,
+            "exchange_end": 182918244726358,
+            "call_return_before_replace": 182918244728788,
+            "old_held_replace_end": 182918244742558,
+            "post_sync_begin": 182918244745818,
+            "post_sync_end": 182918245247992
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 42410,
+              "thread_cpu_ns": 42070,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 56441,
+              "thread_cpu_ns": 56780,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5160,
+              "thread_cpu_ns": 4750,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 9130,
+              "thread_cpu_ns": 9190,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3230,
+              "thread_cpu_ns": 3150,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "inner_timestamps": {
+            "body_call": 182918244527507,
+            "alltoall_c_call": 182918244567597,
+            "alltoall_c_return": 182918244625007,
+            "wait_c_call": 182918244630028,
+            "wait_c_return": 182918244638748,
+            "body_return": 182918244641978
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243976942,
+            "pre_sync_end": 182918243998143,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918244009953,
+            "prepare_end": 182918244392236,
+            "exchange_begin": 182918244398376,
+            "collective_begin": 182918244414936,
+            "collective_end": 182918244708468,
+            "exchange_end": 182918244717878,
+            "call_return_before_replace": 182918244720498,
+            "old_held_replace_end": 182918244736588,
+            "post_sync_begin": 182918244739828,
+            "post_sync_end": 182918245230122
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 40090,
+              "thread_cpu_ns": 39830,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 57410,
+              "thread_cpu_ns": 57570,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5021,
+              "thread_cpu_ns": 4710,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 8720,
+              "thread_cpu_ns": 8780,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3230,
+              "thread_cpu_ns": 3190,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "inner_timestamps": {
+            "body_call": 182918244514267,
+            "alltoall_c_call": 182918244549467,
+            "alltoall_c_return": 182918244603507,
+            "wait_c_call": 182918244608457,
+            "wait_c_return": 182918244617317,
+            "body_return": 182918244620647
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243976282,
+            "pre_sync_end": 182918243996142,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918243998683,
+            "prepare_end": 182918244380066,
+            "exchange_begin": 182918244386686,
+            "collective_begin": 182918244402196,
+            "collective_end": 182918244687148,
+            "exchange_end": 182918244696448,
+            "call_return_before_replace": 182918244698618,
+            "old_held_replace_end": 182918244714958,
+            "post_sync_begin": 182918244718488,
+            "post_sync_end": 182918245230442
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 35200,
+              "thread_cpu_ns": 35110,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 54040,
+              "thread_cpu_ns": 54090,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 4950,
+              "thread_cpu_ns": 4650,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 8860,
+              "thread_cpu_ns": 8890,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3330,
+              "thread_cpu_ns": 3270,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "inner_timestamps": {
+            "body_call": 182918244599007,
+            "alltoall_c_call": 182918244648418,
+            "alltoall_c_return": 182918244717438,
+            "wait_c_call": 182918244723358,
+            "wait_c_return": 182918244733108,
+            "body_return": 182918244736208
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243991372,
+            "pre_sync_end": 182918244024573,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918244028183,
+            "prepare_end": 182918244457046,
+            "exchange_begin": 182918244464246,
+            "collective_begin": 182918244480926,
+            "collective_end": 182918244809879,
+            "exchange_end": 182918244820329,
+            "call_return_before_replace": 182918244822449,
+            "old_held_replace_end": 182918244838999,
+            "post_sync_begin": 182918244842519,
+            "post_sync_end": 182918245242112
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 49411,
+              "thread_cpu_ns": 49200,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 69020,
+              "thread_cpu_ns": 69710,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5920,
+              "thread_cpu_ns": 5340,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 9750,
+              "thread_cpu_ns": 9640,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3100,
+              "thread_cpu_ns": 2990,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "inner_timestamps": {
+            "body_call": 182918244629368,
+            "alltoall_c_call": 182918244664968,
+            "alltoall_c_return": 182918250384993,
+            "wait_c_call": 182918250391323,
+            "wait_c_return": 182918250410923,
+            "body_return": 182918250414303
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243994542,
+            "pre_sync_end": 182918244038923,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918244042883,
+            "prepare_end": 182918244509027,
+            "exchange_begin": 182918244515617,
+            "collective_begin": 182918244532007,
+            "collective_end": 182918251056959,
+            "exchange_end": 182918251068549,
+            "call_return_before_replace": 182918251070559,
+            "old_held_replace_end": 182918251097839,
+            "post_sync_begin": 182918251101599,
+            "post_sync_end": 182918251171149
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 35600,
+              "thread_cpu_ns": 35840,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 5720025,
+              "thread_cpu_ns": 123430,
+              "voluntary_switches": 1,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 6330,
+              "thread_cpu_ns": 5580,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 19600,
+              "thread_cpu_ns": 19660,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3380,
+              "thread_cpu_ns": 3280,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 6,
+          "inner_timestamps": {
+            "body_call": 182918244520177,
+            "alltoall_c_call": 182918244562527,
+            "alltoall_c_return": 182918244622117,
+            "wait_c_call": 182918244627058,
+            "wait_c_return": 182918244636048,
+            "body_return": 182918244639088
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243979272,
+            "pre_sync_end": 182918243996992,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918243999423,
+            "prepare_end": 182918244390556,
+            "exchange_begin": 182918244397356,
+            "collective_begin": 182918244414056,
+            "collective_end": 182918244704258,
+            "exchange_end": 182918244713778,
+            "call_return_before_replace": 182918244716458,
+            "old_held_replace_end": 182918244735018,
+            "post_sync_begin": 182918244738738,
+            "post_sync_end": 182918245235852
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 42350,
+              "thread_cpu_ns": 42060,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 59590,
+              "thread_cpu_ns": 59860,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 4941,
+              "thread_cpu_ns": 4590,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 8990,
+              "thread_cpu_ns": 9060,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3040,
+              "thread_cpu_ns": 2960,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 7,
+          "inner_timestamps": {
+            "body_call": 182918244591647,
+            "alltoall_c_call": 182918244649318,
+            "alltoall_c_return": 182918244723578,
+            "wait_c_call": 182918244729148,
+            "wait_c_return": 182918244748548,
+            "body_return": 182918244751828
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918243976672,
+            "pre_sync_end": 182918243997853,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918244009173,
+            "prepare_end": 182918244458846,
+            "exchange_begin": 182918244464986,
+            "collective_begin": 182918244481136,
+            "collective_end": 182918244848709,
+            "exchange_end": 182918244858279,
+            "call_return_before_replace": 182918244860359,
+            "old_held_replace_end": 182918244875399,
+            "post_sync_begin": 182918244879640,
+            "post_sync_end": 182918245231552
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 57671,
+              "thread_cpu_ns": 42560,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 74260,
+              "thread_cpu_ns": 64180,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5570,
+              "thread_cpu_ns": 4910,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 19400,
+              "thread_cpu_ns": 10070,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3280,
+              "thread_cpu_ns": 3150,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        }
+      ]
+    },
+    "next_call": {
+      "alltoall_binding_host_start_skew_ns": 5996467,
+      "latest_host_start_rank": 5,
+      "alltoall_binding_host_return_skew_ns": 6022658,
+      "latest_host_return_rank": 5,
+      "peers": [
+        {
+          "rank": 0,
+          "inner_timestamps": {
+            "body_call": 182918245784277,
+            "alltoall_c_call": 182918245830147,
+            "alltoall_c_return": 182918245906478,
+            "wait_c_call": 182918245912518,
+            "wait_c_return": 182918245923558,
+            "body_return": 182918245926708
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918245240802,
+            "pre_sync_end": 182918245262663,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918245265593,
+            "prepare_end": 182918245659536,
+            "exchange_begin": 182918245665556,
+            "collective_begin": 182918245681506,
+            "collective_end": 182918245991238,
+            "exchange_end": 182918246000478,
+            "call_return_before_replace": 182918246002418,
+            "old_held_replace_end": 182918246017209,
+            "post_sync_begin": 182918246021019,
+            "post_sync_end": 182918252293168
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 45870,
+              "thread_cpu_ns": 45850,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 76331,
+              "thread_cpu_ns": 76700,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 6040,
+              "thread_cpu_ns": 5810,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 11040,
+              "thread_cpu_ns": 10820,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3150,
+              "thread_cpu_ns": 3060,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 1,
+          "inner_timestamps": {
+            "body_call": 182918245802017,
+            "alltoall_c_call": 182918245837797,
+            "alltoall_c_return": 182918245894088,
+            "wait_c_call": 182918245899748,
+            "wait_c_return": 182918245908798,
+            "body_return": 182918245912628
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918245251602,
+            "pre_sync_end": 182918245283413,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918245285923,
+            "prepare_end": 182918245667786,
+            "exchange_begin": 182918245674576,
+            "collective_begin": 182918245690936,
+            "collective_end": 182918245979118,
+            "exchange_end": 182918245988598,
+            "call_return_before_replace": 182918245990598,
+            "old_held_replace_end": 182918246004348,
+            "post_sync_begin": 182918246007638,
+            "post_sync_end": 182918252301528
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 35780,
+              "thread_cpu_ns": 35410,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 56291,
+              "thread_cpu_ns": 56790,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5660,
+              "thread_cpu_ns": 5110,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 9050,
+              "thread_cpu_ns": 9290,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3830,
+              "thread_cpu_ns": 3550,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "inner_timestamps": {
+            "body_call": 182918245778317,
+            "alltoall_c_call": 182918245813827,
+            "alltoall_c_return": 182918245870117,
+            "wait_c_call": 182918245875227,
+            "wait_c_return": 182918245884547,
+            "body_return": 182918245888298
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918245233422,
+            "pre_sync_end": 182918245255842,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918245259253,
+            "prepare_end": 182918245637676,
+            "exchange_begin": 182918245643856,
+            "collective_begin": 182918245660036,
+            "collective_end": 182918245954398,
+            "exchange_end": 182918245963848,
+            "call_return_before_replace": 182918245965888,
+            "old_held_replace_end": 182918245982668,
+            "post_sync_begin": 182918245986058,
+            "post_sync_end": 182918252279188
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 35510,
+              "thread_cpu_ns": 35320,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 56290,
+              "thread_cpu_ns": 56570,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5110,
+              "thread_cpu_ns": 4740,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 9320,
+              "thread_cpu_ns": 9590,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3751,
+              "thread_cpu_ns": 3460,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "inner_timestamps": {
+            "body_call": 182918245768397,
+            "alltoall_c_call": 182918245803157,
+            "alltoall_c_return": 182918245858537,
+            "wait_c_call": 182918245863767,
+            "wait_c_return": 182918245872707,
+            "body_return": 182918245876027
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918245233762,
+            "pre_sync_end": 182918245254032,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918245256623,
+            "prepare_end": 182918245627425,
+            "exchange_begin": 182918245633275,
+            "collective_begin": 182918245648666,
+            "collective_end": 182918245942038,
+            "exchange_end": 182918245951238,
+            "call_return_before_replace": 182918245953228,
+            "old_held_replace_end": 182918245969668,
+            "post_sync_begin": 182918245972868,
+            "post_sync_end": 182918252283488
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 34760,
+              "thread_cpu_ns": 34860,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 55380,
+              "thread_cpu_ns": 55510,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5230,
+              "thread_cpu_ns": 4850,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 8940,
+              "thread_cpu_ns": 9030,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3320,
+              "thread_cpu_ns": 3220,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "inner_timestamps": {
+            "body_call": 182918245846287,
+            "alltoall_c_call": 182918245892198,
+            "alltoall_c_return": 182918245961798,
+            "wait_c_call": 182918245967368,
+            "wait_c_return": 182918245976538,
+            "body_return": 182918245979728
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918245246162,
+            "pre_sync_end": 182918245268363,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918245271173,
+            "prepare_end": 182918245701146,
+            "exchange_begin": 182918245707956,
+            "collective_begin": 182918245725366,
+            "collective_end": 182918246052709,
+            "exchange_end": 182918246063109,
+            "call_return_before_replace": 182918246065269,
+            "old_held_replace_end": 182918246082239,
+            "post_sync_begin": 182918246085639,
+            "post_sync_end": 182918252313699
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 45911,
+              "thread_cpu_ns": 46160,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 69600,
+              "thread_cpu_ns": 69730,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5570,
+              "thread_cpu_ns": 4980,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 9170,
+              "thread_cpu_ns": 9230,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3190,
+              "thread_cpu_ns": 3120,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "inner_timestamps": {
+            "body_call": 182918251757404,
+            "alltoall_c_call": 182918251799624,
+            "alltoall_c_return": 182918251881195,
+            "wait_c_call": 182918251887285,
+            "wait_c_return": 182918251897955,
+            "body_return": 182918251901405
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918251175950,
+            "pre_sync_end": 182918251203870,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918251207300,
+            "prepare_end": 182918251639493,
+            "exchange_begin": 182918251645803,
+            "collective_begin": 182918251661503,
+            "collective_end": 182918251967286,
+            "exchange_end": 182918251977116,
+            "call_return_before_replace": 182918251978996,
+            "old_held_replace_end": 182918251997066,
+            "post_sync_begin": 182918252008756,
+            "post_sync_end": 182918252302198
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 42220,
+              "thread_cpu_ns": 42080,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 81571,
+              "thread_cpu_ns": 82100,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 6090,
+              "thread_cpu_ns": 5500,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 10670,
+              "thread_cpu_ns": 10680,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3450,
+              "thread_cpu_ns": 3400,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 6,
+          "inner_timestamps": {
+            "body_call": 182918245777077,
+            "alltoall_c_call": 182918245815267,
+            "alltoall_c_return": 182918245871637,
+            "wait_c_call": 182918245876757,
+            "wait_c_return": 182918245885808,
+            "body_return": 182918245889498
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918245239142,
+            "pre_sync_end": 182918245257203,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918245259993,
+            "prepare_end": 182918245638226,
+            "exchange_begin": 182918245644286,
+            "collective_begin": 182918245660686,
+            "collective_end": 182918245955558,
+            "exchange_end": 182918245965378,
+            "call_return_before_replace": 182918245967448,
+            "old_held_replace_end": 182918245983998,
+            "post_sync_begin": 182918245987168,
+            "post_sync_end": 182918252288358
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 38190,
+              "thread_cpu_ns": 38050,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 56370,
+              "thread_cpu_ns": 56650,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5120,
+              "thread_cpu_ns": 4790,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 9051,
+              "thread_cpu_ns": 9340,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3690,
+              "thread_cpu_ns": 3360,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        },
+        {
+          "rank": 7,
+          "inner_timestamps": {
+            "body_call": 182918245834517,
+            "alltoall_c_call": 182918245895988,
+            "alltoall_c_return": 182918245979948,
+            "wait_c_call": 182918245985728,
+            "wait_c_return": 182918246001348,
+            "body_return": 182918246004818
+          },
+          "outer_timestamps": {
+            "pre_sync_begin": 182918245235102,
+            "pre_sync_end": 182918245256013,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 182918245258753,
+            "prepare_end": 182918245686336,
+            "exchange_begin": 182918245693306,
+            "collective_begin": 182918245710816,
+            "collective_end": 182918246098019,
+            "exchange_end": 182918246107679,
+            "call_return_before_replace": 182918246109999,
+            "old_held_replace_end": 182918246124709,
+            "post_sync_begin": 182918246128309,
+            "post_sync_end": 182918252286288
+          },
+          "inner_deltas": {
+            "python_before_alltoall": {
+              "wall_ns": 61471,
+              "thread_cpu_ns": 46630,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "alltoall_binding": {
+              "wall_ns": 83960,
+              "thread_cpu_ns": 64830,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_between_bindings": {
+              "wall_ns": 5780,
+              "thread_cpu_ns": 5180,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "wait_binding": {
+              "wall_ns": 15620,
+              "thread_cpu_ns": 10330,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            },
+            "python_after_wait": {
+              "wall_ns": 3470,
+              "thread_cpu_ns": 3350,
+              "voluntary_switches": 0,
+              "involuntary_switches": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  "caveats": [
+    "New wrapper and observer overhead change dispatch/GC timing; diagnostic data never admit the failed QK candidate.",
+    "Only five inner host stages are disjoint. Their total, enclosing outer call and outer sync overlap and cannot be added as savings.",
+    "C-call spans include argument/return conversion, callback overhead, GIL release/reacquisition, and scheduling; not pure C++ backend time.",
+    "Group, exact body frame/CALL offsets and builtin identities align with pinned Work dataflow; no direct Work instance ID is observed.",
+    "sys.setprofile processes all Python/C events in the current thread while active; its nonzero overhead changes the path.",
+    "Public dist host entry/return is not device entry/completion, transport time, or an identified lock wait.",
+    "Same/next-call eight-rank timestamps show host ordering association, not a standalone causal device timeline.",
+    "GC is matched only on the same native thread and clipped to each interval. Missing/dropped pairs remain partial.",
+    "Wall/CPU/context observations are sequential, not atomic; signed wall-minus-CPU is not an idle estimate.",
+    "Scalar helpers are reused with explicit source pins; old broad schema, raw-marshal-v1 or old PASS is never relabelled as v3 correctness."
+  ],
+  "report": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_PUBLIC_DIST_V3_RESULTS_20261013.txt",
+    "bytes": 5051,
+    "sha256": "c353ec708e59f7abf9daca0683c1bed1d667faead61ee4a7e2dc6acc5c38831f"
+  }
+}
