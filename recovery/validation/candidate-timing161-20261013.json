@@ -1,0 +1,21 @@
+{
+  "window_inclusive": [
+    11,
+    159
+  ],
+  "sample_count": 149,
+  "mean_ms": 1184.1817779262196,
+  "p99_ms": 1192.648701404687,
+  "max_ms": 1197.7073829912115,
+  "over_1000ms": 149,
+  "longest_over_1000ms": 149,
+  "ttfc_ms": 4017.327699024463,
+  "last_media_arrival_s": 192.97081108400016,
+  "total_frames": 1929,
+  "single_run_threshold_pass": false,
+  "final_acceptance": false,
+  "metric": "client media inter-arrival; linear-interpolated P99",
+  "limits": "Requires separate launch/warmup/profiler-off evidence; no browser playback or multi-run claim",
+  "input": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/model-runs/104adb676bce4cb01de80ac62ef9dcec/rollout161.json",
+  "input_sha256": "151418fc3a3b88ecde2dd51181098056c70bb3c7cc8c9363a4e859ec2db7d728"
+}

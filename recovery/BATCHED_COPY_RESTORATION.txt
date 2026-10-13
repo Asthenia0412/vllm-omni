@@ -1,0 +1,42 @@
+Batched VAE copy reconstruction — 2026-10-13
+==========================================
+Purpose: remove a regression introduced while reconstructing the missing
+historical exact-pack library. This is not a claim to recover its exact lost
+source, schedule, or binary identity.
+
+Evidence: complete rank0 chunks11–14 each contain four denoise probes and
+160 send/recv calls; rebuilt copy_pair kernel workload is270.43–270.54ms.
+Chunk boundaries are the preceding/current blocking primary RGB D2H completion.
+The analyzer rejects kernels crossing a boundary. Counts and timestamps come
+from matching CANN9.1 export. Kernel sums are separate from interval unions;
+communication classification is a name heuristic. No clean timing inferred.
+
+Change: group contiguous row indices within dimension3 into a 2D DataCopyPad.
+For each batch, source/destination GM strides use byte gaps, while UB rows
+use the intrinsic's32-byte padded pitch with zero extra block stride.
+Both transfers carry only width*2 valid bytes per row. Padding is never
+written to GM. Each task owns unique rows and may not cross an outer-stride
+boundary. Existing MTE2->MTE3 and MTE3->MTE2 waits protect the shared buffer.
+
+Budget: one32768-byte UB allocation, pitch=ceil(width*2/32)*32,
+rows_per_batch=floor(32768/pitch), maximum1024 rows. No new Cube, L1, L0,
+queue, double-buffer or inter-core synchronization resource. GM gaps must
+fit uint32 bytes; widths above16384 elements use the retained original
+wide-row loop. ABI, owners, default stream, error handling and commit order
+are unchanged. Old immutable libraries remain available for rollback.
+
+Build: host.6sHA96w9 / kernels.cRuBgmME under persistent recovery build root.
+Previous build: host.Y0gl1K3v / kernels.ca3dGt7v.
+check_operators adds heights1025/1031 and wide split rows16386 to cover
+multiple batches, partial final batches, padding and original-path fallback.
+Independent correctness receipts must pass all eight selected dies8–15.
+No timing from correctness or concurrent export is eligible for admission.
+Next: real model80-chunk latent/RGB equivalence, isolated warm40+161
+comparison against original row copy and native VAE, then original final
+warm40+600 protocol after restoring the winning full combination.
+
+Model correctness completed: run01b0f84261fa959be18ad0791340e78c generated
+all80 chunks. All8*80 latent chunks and957 primary RGB frames are bit-identical
+to the prior staged no-cross reconstruction. All owned workers retired.
+See validation/paired80-batched-copy-20261013.json. Not a timing admission;
+concurrent offline export and tensor capture were deliberately active.

@@ -1,0 +1,45 @@
+{
+  "scope": "first chunk latent isolation only; single-chunk benchmark metric failure recorded separately",
+  "rows": [
+    {
+      "rank": 0,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    },
+    {
+      "rank": 1,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    },
+    {
+      "rank": 2,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    },
+    {
+      "rank": 3,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    },
+    {
+      "rank": 4,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    },
+    {
+      "rank": 5,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    },
+    {
+      "rank": 6,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    },
+    {
+      "rank": 7,
+      "bit_equal": true,
+      "relative_l2": 0.0
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "scope": "paired model latent/RGB bit parity only; not arena/canary, quality or timing acceptance",
+  "reference": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-staging80",
+  "candidate": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/batched-copy80",
+  "ranks": [
+    {
+      "rank": 0,
+      "latent_chunks": 80,
+      "rgb_frames": 957
+    },
+    {
+      "rank": 1,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 2,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 3,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 4,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 5,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 6,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 7,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    }
+  ]
+}

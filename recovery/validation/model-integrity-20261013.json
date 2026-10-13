@@ -1,0 +1,189 @@
+{
+  "revision": "59cccf49f2d2dd27418ae7a04b82b10868d455c2",
+  "complete": true,
+  "passed": true,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "a5aa48b58034ca5384b5f05e184d7c3983c39219",
+      "actual": "a5aa48b58034ca5384b5f05e184d7c3983c39219"
+    },
+    {
+      "path": "README.md",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "d8ca3aef51030c9e122d6d2232546174bece2ec3",
+      "actual": "d8ca3aef51030c9e122d6d2232546174bece2ec3"
+    },
+    {
+      "path": "assets/teaser.png",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "8d0ec018a9996580ff0264c58fa036a5ed97c9369ce824566636d06e9020009a",
+      "actual": "8d0ec018a9996580ff0264c58fa036a5ed97c9369ce824566636d06e9020009a"
+    },
+    {
+      "path": "model_index.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "eb65c48846195c9c1a07051094afd35b7c2c7dcb",
+      "actual": "eb65c48846195c9c1a07051094afd35b7c2c7dcb"
+    },
+    {
+      "path": "scheduler/scheduler_config.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "950d26faea717c8902ee197982026cb9c1b6463e",
+      "actual": "950d26faea717c8902ee197982026cb9c1b6463e"
+    },
+    {
+      "path": "text_encoder/config.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "ab4a73bce055c6e32e66133032dcb3adfb26ee8d",
+      "actual": "ab4a73bce055c6e32e66133032dcb3adfb26ee8d"
+    },
+    {
+      "path": "text_encoder/model-00001-of-00003.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58",
+      "actual": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58"
+    },
+    {
+      "path": "text_encoder/model-00002-of-00003.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7",
+      "actual": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7"
+    },
+    {
+      "path": "text_encoder/model-00003-of-00003.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f",
+      "actual": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f"
+    },
+    {
+      "path": "text_encoder/model.safetensors.index.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "f3d3d4da90eb33e14c92d88ea346370fa3c0b5b2",
+      "actual": "f3d3d4da90eb33e14c92d88ea346370fa3c0b5b2"
+    },
+    {
+      "path": "tokenizer/special_tokens_map.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "2ed25bf989a28d20b5d4b5822fbc24666d12a6f7",
+      "actual": "2ed25bf989a28d20b5d4b5822fbc24666d12a6f7"
+    },
+    {
+      "path": "tokenizer/spiece.model",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458",
+      "actual": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458"
+    },
+    {
+      "path": "tokenizer/tokenizer.json",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "20a46ac256746594ed7e1e3ef733b83fbc5a6f0922aa7480eda961743de080ef",
+      "actual": "20a46ac256746594ed7e1e3ef733b83fbc5a6f0922aa7480eda961743de080ef"
+    },
+    {
+      "path": "tokenizer/tokenizer_config.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "09d434f9457238f697f4c208aab47f58caa15bfe",
+      "actual": "09d434f9457238f697f4c208aab47f58caa15bfe"
+    },
+    {
+      "path": "transformer/config.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "9dfe0b4133a2bd556800ebabd71785750a243f20",
+      "actual": "9dfe0b4133a2bd556800ebabd71785750a243f20"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00001-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "a4927c8b5514a4d1fd525076bcaed38e24da8739e462d7e3fc2c9667174ffa3b",
+      "actual": "a4927c8b5514a4d1fd525076bcaed38e24da8739e462d7e3fc2c9667174ffa3b"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00002-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "52f72063dbd8b664206b9a7eb9635fba864e428805acf3f7f1bc0ebff0dc7f37",
+      "actual": "52f72063dbd8b664206b9a7eb9635fba864e428805acf3f7f1bc0ebff0dc7f37"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00003-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "4543a0e867c72aecb5d50ba3e5e2b200af1c13036d41bbaaf1cad1b8990b6235",
+      "actual": "4543a0e867c72aecb5d50ba3e5e2b200af1c13036d41bbaaf1cad1b8990b6235"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00004-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "0f9a0dc28917196ff52790713527b4367a42515563302a92c41df4637eb03f0d",
+      "actual": "0f9a0dc28917196ff52790713527b4367a42515563302a92c41df4637eb03f0d"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00005-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "78e2c70c6a033c929d4079294d5fb8925a8e23bd35e6f97cf9df5203e31fd88c",
+      "actual": "78e2c70c6a033c929d4079294d5fb8925a8e23bd35e6f97cf9df5203e31fd88c"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00006-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "468a83ecac653804f73ddb8ff0336909409c4a543ad79a187a09012c670140fe",
+      "actual": "468a83ecac653804f73ddb8ff0336909409c4a543ad79a187a09012c670140fe"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00007-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "9c7106f02612df4bcb37fc1f418b70114cc6109115c7578fe56c2ef3a2403265",
+      "actual": "9c7106f02612df4bcb37fc1f418b70114cc6109115c7578fe56c2ef3a2403265"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00008-of-00008.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "a1a82c8720a12d46fbbbddccf9c841ea1ac21e13cf84bffadb4d23e9804c5fc7",
+      "actual": "a1a82c8720a12d46fbbbddccf9c841ea1ac21e13cf84bffadb4d23e9804c5fc7"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model.safetensors.index.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "38532897aa6b4adb315dab8f5367969a6816846f",
+      "actual": "38532897aa6b4adb315dab8f5367969a6816846f"
+    },
+    {
+      "path": "vae/config.json",
+      "ok": true,
+      "algorithm": "sha1",
+      "expected": "c190b2929391232ec2f6e493dfe93542927e74ea",
+      "actual": "c190b2929391232ec2f6e493dfe93542927e74ea"
+    },
+    {
+      "path": "vae/diffusion_pytorch_model.safetensors",
+      "ok": true,
+      "algorithm": "sha256",
+      "expected": "d6e524b3fffede1787a74e81b30976dce5400c4439ba64222168e607ed19e793",
+      "actual": "d6e524b3fffede1787a74e81b30976dce5400c4439ba64222168e607ed19e793"
+    }
+  ]
+}

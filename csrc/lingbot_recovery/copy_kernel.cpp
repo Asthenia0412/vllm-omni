@@ -13,6 +13,43 @@ class CopyRows {
     in.SetGlobalBuffer((__gm__ uint16_t*)src);
     out.SetGlobalBuffer((__gm__ uint16_t*)dst);
     LocalTensor<uint16_t> local = buffer.Get<uint16_t>();
+    // Restore bulk strided transfers instead of one DMA/fence per short row.
+    // Both DMA sides use exactly width*2 bytes per row. UB rows are padded to
+    // 32 bytes by DataCopyPad; GM gaps are expressed in bytes. A batch never
+    // crosses dimension 3, where outer strides may change independently.
+    // At most 32 KiB live UB, no extra buffers and no Cube/L1/L0 resources.
+    if (spec.width > 0 && spec.width <= 16384 && spec.sizes[3] > 0 &&
+        spec.src_strides[3] >= spec.width && spec.dst_strides[3] >= spec.width &&
+        spec.src_strides[3] - spec.width <= 2147483647LL &&
+        spec.dst_strides[3] - spec.width <= 2147483647LL) {
+      const int64_t pitch = ((spec.width * 2 + 31) / 32) * 32;
+      const int64_t batch = 32768 / pitch;  // <=1024, below blockCount limit
+      const int64_t batches = (spec.sizes[3] + batch - 1) / batch;
+      const int64_t outer = spec.rows / spec.sizes[3];
+      for (int64_t task = GetBlockIdx(); task < outer * batches; task += GetBlockNum()) {
+        int64_t index = task / batches;
+        const int64_t first = (task % batches) * batch;
+        int64_t si = first * spec.src_strides[3], di = first * spec.dst_strides[3];
+        for (int d = 2; d >= 0; --d) {
+          const int64_t coord = index % spec.sizes[d];
+          index /= spec.sizes[d];
+          si += coord * spec.src_strides[d]; di += coord * spec.dst_strides[d];
+        }
+        const uint16_t count = static_cast<uint16_t>(
+            spec.sizes[3] - first < batch ? spec.sizes[3] - first : batch);
+        const uint32_t bytes = static_cast<uint32_t>(spec.width * 2);
+        DataCopyExtParams read{count, bytes,
+            static_cast<uint32_t>((spec.src_strides[3] - spec.width) * 2), 0, 0};
+        DataCopyExtParams write{count, bytes, 0,
+            static_cast<uint32_t>((spec.dst_strides[3] - spec.width) * 2), 0};
+        DataCopyPad(local, in[si], read, DataCopyPadExtParams<uint16_t>{false,0,0,0});
+        SetFlag<HardEvent::MTE2_MTE3>(EVENT_ID0); WaitFlag<HardEvent::MTE2_MTE3>(EVENT_ID0);
+        DataCopyPad(out[di], local, write);
+        SetFlag<HardEvent::MTE3_MTE2>(EVENT_ID0); WaitFlag<HardEvent::MTE3_MTE2>(EVENT_ID0);
+      }
+      return;
+    }
+    // Wide rows or unrepresentable DMA gaps keep the original path.
     for (int64_t row = GetBlockIdx(); row < spec.rows; row += GetBlockNum()) {
       int64_t index = row, si = 0, di = 0;
       for (int d = 3; d >= 0; --d) {

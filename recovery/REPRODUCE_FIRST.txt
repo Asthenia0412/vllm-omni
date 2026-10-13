@@ -1,0 +1,74 @@
+Reproduction priority — 2026-10-13
+================================
+User direction: reproduce the original optimizations and performance before
+attempting additional optimization routes. The overall optimization goal stays
+active. The current reconstruction is not the historical winning baseline.
+
+Evidence
+--------
+Historical retained final600 report: root_stageA_final600_retry_three_timing_CPU_v94.json.
+Historical selected config: historical_candidate.yaml.
+Historical opt-in environment: environment_fixed_timestep_stageA_clean_v89.json.
+Historical result: mean approximately 895–899 ms, P99 approximately 911–914 ms.
+Current reconstructed no-cross candidate: warm40 + 161 measured chunks,
+window 11–159 mean 1184.1818 ms, P99 1192.6487 ms. This shorter diagnostic run
+is not the original final600 acceptance protocol.
+Model repository download and hashes pass; identity with the historical model
+checkpoint is not established. This remains a reproduction variable.
+
+Known restoration differences to resolve first
+---------------------------------------------
+1. Historical cross combined C++/H40 BSND FIA was enabled. Current timed
+   candidate disables reconstructed cross and uses recovered SDPA instead.
+   Reconstructed FIA differs from that SDPA reference at chunk0; this does
+   not establish disagreement with the historical FIA implementation.
+   Recover historical source/contract, compare actual operation parameters,
+   and establish the correct reference before performance claims.
+2. Historical QK single-host entry used a custom RMS/RoPE/send OPP. Current
+   implementation uses multiple public native arithmetic operators followed
+   by a newly written send kernel. Restored semantics are not restored
+   scheduling or performance. Locate retained contract/source/build inputs;
+   reconstruct original fusion if binaries and source remain unavailable.
+3. Historical recv and exact VAE copies had validated custom binaries.
+   Current row-copy kernels are replacements. Inspect actual trace dispatch
+   and costs, then reproduce their original batching/layout strategy.
+4. StageA fixed timestep bank, FFN W8A8, history staging/prefix reuse,
+   primary-only uint8 pixel output and device interleave are present in
+   recovered Python. Verify actual dispatch and launch environment rather
+   than inferring activity from configuration names.
+5. OMP=8, planar RGB and history staging env were restored after initial
+   launch omissions. Keep these fixed and record hardware/SDK/model hashes.
+
+Next sequence
+-------------
+A. Complete offline export of already collected eight-rank Level1 data;
+   attribute only complete steady chunks11–14 after warm40. Use it to find
+   restoration deviations, not to launch unrelated new optimization work.
+B. Create historical-vs-current operation/launch manifest, prioritize missing
+   cross and QK fusion; keep original retained artifacts immutable.
+C. Correctness for each recovered path against the corresponding historical
+   mathematical contract, then real eight-rank model paired validation.
+D. Reproduce original three independent warm40 +600 runs, window11–598,
+   each mean<=900 ms and P99<=950 ms. Keep full workload/12FPS/frame contract.
+E. Resume additional optimization only after reproduction is established.
+
+Current trace capture completed; daemon worker exporter cannot parse in-process.
+Offline exporter also exposed torch_npu's first-'tools' substring path bug when
+SDK is beneath /home/.../tools. export_profile.py fixes discovery only within
+its own process, using the same installed CANN exporter without modifying SDK.
+Raw capture and first failed-export logs are retained. Export file presence
+is only a first check; trace completeness must still be established.
+
+First actual dispatch evidence (rank0, 2026-10-13)
+------------------------------------------------
+Successful matching CANN export shows 2,755 reconstructed copy_pair calls
+with 4,258.824 ms total device duration over the full16 request, including
+startup. This is the largest single name/shape workload in that capture.
+It is not a steady-state per-chunk saving estimate. New row-copy code does
+one short-row DMA then waits MTE2->MTE3->MTE2 for every row; restoring VAE
+copy batching is now higher-priority than assuming cross is the main gap.
+QK send and recv actually dispatched 2,560 times each (=16*4*40).
+Next causal test: keep all current knobs fixed, disable only rebuilt VAE
+packing and compare independently warmed timing. This rollback diagnoses a
+restoration regression; it does not replace the original fusion objective.
+Eight-rank exporter remains sequential and active; rank0 completed.

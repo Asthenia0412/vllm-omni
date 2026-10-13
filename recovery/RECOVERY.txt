@@ -153,3 +153,48 @@ alongside it. No new GitHub push or PR is claimed for this recovery branch.
 Official API references used to reconstruct queued launches and byte copies:
 https://github.com/Ascend/op-plugin/tree/master/examples/cpp_extension
 https://www.hiascend.com/document/detail/en/CANNCommunityEdition/910/API/ascendcopapi/docs/en/api/SIMD-API/basic_api/memory_vector_compute/data_move/DataCopyPad_GMToUB.md
+
+Recovery validation update, 2026-10-13
+--------------------------------------
+All 26 model files now match the pinned repository metadata: LFS files were
+checked with SHA256 and ordinary Git blobs with Git's SHA1 blob framing.
+The receipt is validation/model-integrity-20261013.json. This does not verify
+identity with the lost historical checkpoint.
+
+The first native16 rollout completed on physical packages4-7/dies8-15.
+Its short-run intervals were about1060ms, not formal warm40/600 acceptance.
+Worker OMP had defaulted to320. env.sh now sets OMP/MKL8, independently
+configurable through LINGBOT_OMP_NUM_THREADS/LINGBOT_MKL_NUM_THREADS.
+The retained device-interleave eligibility also requires PLANAR_RGB=1 and
+PINNED_RGB=0; env.sh supplies these. A subsequent correctness launch logged
+actual=owned_clone_out on rank0. No isolated latency saving is claimed.
+
+Diagnostic capture accepts persistent SFS and LINGBOT_CAPTURE_RANK=-1 for
+separate rank0..rank7 directories. Use it only in correctness services.
+recovery/run_smoke.py waits for the owned service and verified model receipt;
+--chunks 80 collects a full comparison rollout. recovery/compare_captures.py
+requires all eight ranks, ordered chunks, finite bit-identical latents and
+primary-only exact RGB with the expected frame counts. These checks do not
+replace arena/canary, lifecycle, quality, or timing gates.
+
+Candidate screening update, 2026-10-13
+-------------------------------------
+The full rebuilt candidate failed paired80 bit parity at rank0/chunk0;
+latent relative L2=0.0163038. Its FIA cross-attention is an arithmetic change
+from the restored SDPA baseline. Disabling only rebuilt cross restored exact
+first-chunk latent parity on all8 ranks. This first-chunk isolation is not
+full-model admission; its one-chunk media benchmark also hit a null-generation-
+index client error, so no request/throughput PASS is claimed for that run.
+make_config.py now leaves rebuilt cross off even in the candidate template.
+
+Both initial paired80 runs had no allocated history staging because the
+required VLLM_LINGBOT_NPU_HISTORY_STAGING environment flag was missing.
+env.sh now enables that existing consumer. A separate staged candidate run
+must pass all8-rank latent/RGB comparison before timing or admission.
+
+The staged no-cross candidate completed80 chunks and passed exact comparison
+against native80: all8 ranks x80 latent chunks, plus957 primary RGB frames.
+See validation/paired80-staging-no-cross-20261013.json. Both runs were separate
+correctness launches. This proves observed model outputs only; it does not
+prove all optimized dispatches occurred, all arenas/canaries, lifecycle,
+15-video quality, or any performance target.

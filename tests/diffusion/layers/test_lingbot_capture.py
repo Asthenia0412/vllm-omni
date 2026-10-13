@@ -47,3 +47,27 @@ def test_bad_pixel_contract_rejected(tmp_path):
 def test_session_name_cannot_escape_destination(tmp_path):
     writer = capture.DiagnosticCapture(tmp_path, "../../bad/session")
     assert writer.directory.parent == tmp_path
+
+
+def test_all_rank_capture_uses_distinct_sfs_directories(monkeypatch):
+    from types import SimpleNamespace
+
+    destinations = []
+    monkeypatch.setenv("LINGBOT_CAPTURE_DIR", "/mnt/sfs_turbo/lingbot-test/captures")
+    monkeypatch.setenv("LINGBOT_CAPTURE_RANK", "-1")
+    monkeypatch.setattr(capture, "DiagnosticCapture", lambda path, session: (
+        destinations.append(path) or SimpleNamespace(capture_activations=False)))
+    for rank in range(8):
+        monkeypatch.setattr(capture, "_rank", lambda rank=rank: rank)
+        capture.begin_capture(SimpleNamespace(), "same-session")
+    assert destinations == [Path(f"/mnt/sfs_turbo/lingbot-test/captures/rank{rank}") for rank in range(8)]
+
+
+@pytest.mark.parametrize("destination", ["/mnt/sfs_turbo-elsewhere/x", "/tmp/capture"])
+def test_capture_rejects_nonpersistent_or_prefix_lookalike(monkeypatch, destination):
+    from types import SimpleNamespace
+
+    monkeypatch.setenv("LINGBOT_CAPTURE_DIR", destination)
+    monkeypatch.setenv("LINGBOT_CAPTURE_RANK", "-1")
+    with pytest.raises(ValueError, match="persistent"):
+        capture.begin_capture(SimpleNamespace(), "request")

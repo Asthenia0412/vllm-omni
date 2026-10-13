@@ -39,7 +39,11 @@ def main():
     with torch.inference_mode():
         # Source/arena/canaries cover strided offsets, width tails, 4D and 5D.
         for shape in ((1,384,2,120,26), (1,8,3,7,13), (1,4,2,8,52),
-                      (1,4,3,7,104), (1,8,7,26)):
+                      (1,4,3,7,104), (1,8,7,26),
+                      # Cross multiple 32KiB batches with an incomplete tail;
+                      # exercise unaligned UB rows and the wide-row fallback.
+                      (1,2,2,1025,26), (1,2,3,1031,34),
+                      (1,1,2,5,32772)):
             count = 1
             for size in shape:
                 count *= size

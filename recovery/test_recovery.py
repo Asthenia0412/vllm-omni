@@ -46,6 +46,7 @@ class RecoveryTests(unittest.TestCase):
                 self.assertNotIn("/mnt/data",path.read_text())
                 config=yaml.safe_load(path.read_text())["stages"][0]["model_config"]
                 self.assertEqual(config["lingbot_npu_recovery_qk"],candidate)
+                self.assertFalse(config["lingbot_npu_recovery_cross"])
                 self.assertEqual(config["lingbot_npu_fixed_timestep_bank"],candidate)
                 self.assertFalse(config["lingbot_npu_qk_single_host_admission_v1"])
                 self.assertFalse(config["lingbot_npu_vae_exact_pack"])

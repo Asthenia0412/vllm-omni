@@ -1,0 +1,203 @@
+{
+  "scope": "record_shapes from original reconstructed row-copy capture; strides/owners not present",
+  "variants": [
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,384,3,62,15;\r\n1,384,3,62,1;\r\n1,384,3,62,1;\r\n1,384,3,62,1;\r\n1,384,3,62,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 480
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,384,3,62,15;\r\n1,384,2,60,13;\r\n1,384,2,60,13;\r\n1,384,1,60,13;\r\n1,384,1,60,13",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 460
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,6,242,54;\r\n1,192,6,242,1;\r\n1,192,6,242,1;\r\n1,192,6,242,1;\r\n1,192,6,242,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 282
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,96,6,482,106;\r\n1,96,6,482,1;\r\n1,96,6,482,1;\r\n1,96,6,482,1;\r\n1,96,6,482,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 282
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,6,242,54;\r\n1,192,2,240,52;\r\n1,192,2,240,52;\r\n1,192,4,240,52;\r\n1,192,4,240,52",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 276
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,96,6,482,106;\r\n1,96,2,480,104;\r\n1,96,2,480,104;\r\n1,96,4,480,104;\r\n1,96,4,480,104",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 276
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,384,4,122,28;\r\n1,384,4,122,1;\r\n1,384,4,122,1;\r\n1,384,4,122,1;\r\n1,384,4,122,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 235
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,384,4,122,28;\r\n1,384,2,120,26;\r\n1,384,2,120,26;\r\n1,384,2,120,26;\r\n1,384,2,120,26",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 230
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,16,3,62,15;\r\n1,16,3,62,1;\r\n1,16,3,62,1;\r\n1,16,3,62,1;\r\n1,16,3,62,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 48
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,4,122,28;\r\n1,192,4,122,1;\r\n1,192,4,122,1;\r\n1,192,4,122,1;\r\n1,192,4,122,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 47
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,16,3,62,15;\r\n1,16,2,60,13;\r\n1,16,2,60,13;\r\n1,16,1,60,13;\r\n1,16,1,60,13",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 46
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,4,122,28;\r\n1,192,2,120,26;\r\n1,192,2,120,26;\r\n1,192,2,120,26;\r\n1,192,2,120,26",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 46
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,384,3,62,15;\r\n1,384,1,60,13;\r\n1,384,1,60,13;\r\n1,384,1,60,13;\r\n1,384,1,60,13",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 10
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,3,242,54;\r\n1,192,3,242,1;\r\n1,192,3,242,1;\r\n1,192,3,242,1;\r\n1,192,3,242,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 6
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,96,3,482,106;\r\n1,96,3,482,1;\r\n1,96,3,482,1;\r\n1,96,3,482,1;\r\n1,96,3,482,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 6
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,6,242,54;\r\n1,192,1,240,52;\r\n1,192,1,240,52;\r\n1,192,4,240,52;\r\n1,192,4,240,52",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 6
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,96,6,482,106;\r\n1,96,1,480,104;\r\n1,96,1,480,104;\r\n1,96,4,480,104;\r\n1,96,4,480,104",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 6
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,384,3,122,28;\r\n1,384,3,122,1;\r\n1,384,3,122,1;\r\n1,384,3,122,1;\r\n1,384,3,122,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 5
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,384,4,122,28;\r\n1,384,1,120,26;\r\n1,384,1,120,26;\r\n1,384,2,120,26;\r\n1,384,2,120,26",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 5
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,3,122,28;\r\n1,192,3,122,1;\r\n1,192,3,122,1;\r\n1,192,3,122,1;\r\n1,192,3,122,1",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 1
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,16,3,62,15;\r\n1,16,1,60,13;\r\n1,16,1,60,13;\r\n1,16,1,60,13;\r\n1,16,1,60,13",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 1
+    },
+    {
+      "args": {
+        "Fwd thread id": 0,
+        "Input Dims": "1,192,4,122,28;\r\n1,192,1,120,26;\r\n1,192,1,120,26;\r\n1,192,2,120,26;\r\n1,192,2,120,26",
+        "Input type": "c10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16;\r\nc10::BFloat16",
+        "Sequence number": -1
+      },
+      "calls": 1
+    }
+  ]
+}

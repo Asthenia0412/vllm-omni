@@ -1,0 +1,366 @@
+{
+  "scope": "rank0 full16 capture including startup; workload totals include overlap; not steady chunk latency or savings",
+  "source": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/profiles/staged-no-cross/diffusion_rank0/liteserver-for-vllm-ascend-00002_559007_20261013102344688_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv",
+  "top": [
+    {
+      "name": "lingbot_recovery_copy_pair",
+      "input_shapes": "N/A",
+      "calls": 2755,
+      "total_kernel_ms": 4258.824360000008
+    },
+    {
+      "name": "FusedInferAttentionScore",
+      "input_shapes": "\"1,4680,5,128;1,28080,5,128;1,28080,5,128;;;;;;;;;;;;;;;;;;;;;;;;;;;;\"",
+      "calls": 1760,
+      "total_kernel_ms": 3591.411259999999
+    },
+    {
+      "name": "alltoallAicpuKernel",
+      "input_shapes": "N/A",
+      "calls": 5120,
+      "total_kernel_ms": 1667.098120000001
+    },
+    {
+      "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+      "input_shapes": "\"585,5120;5120,5120;5120\"",
+      "calls": 10240,
+      "total_kernel_ms": 1404.8998799999993
+    },
+    {
+      "name": "aclnnAddmm_MatMulCommon_MatMulV2",
+      "input_shapes": "\"585,5120;15360,5120;15360\"",
+      "calls": 2560,
+      "total_kernel_ms": 973.8505200000009
+    },
+    {
+      "name": "aclnnQuantMatmulWeightNz_QuantBatchMatmulV3_QuantBatchMatmulV3",
+      "input_shapes": "\"585,5120;432,320,16,32;13824;13824;585\"",
+      "calls": 2560,
+      "total_kernel_ms": 545.0639199999994
+    },
+    {
+      "name": "batch_send_recvAicpuKernel",
+      "input_shapes": "N/A",
+      "calls": 1632,
+      "total_kernel_ms": 516.3883599999997
+    },
+    {
+      "name": "aclnnQuantMatmulWeightNz_QuantBatchMatmulV3_QuantBatchMatmulV3",
+      "input_shapes": "\"585,13824;160,864,16,32;5120;5120;585\"",
+      "calls": 2560,
+      "total_kernel_ms": 467.82046
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,6,6,482,834,16;162,6,16,16;96\"",
+      "calls": 128,
+      "total_kernel_ms": 445.01972
+    },
+    {
+      "name": "lingbot_recovery_recv",
+      "input_shapes": "N/A",
+      "calls": 2560,
+      "total_kernel_ms": 333.9113000000002
+    },
+    {
+      "name": "FusedInferAttentionScore",
+      "input_shapes": "\"1,4680,5,128;1,23400,5,128;1,23400,5,128;;;;;;;;;;;;;;;;;;;;;;;;;;;;\"",
+      "calls": 160,
+      "total_kernel_ms": 271.9350999999999
+    },
+    {
+      "name": "aclnnLayerNormWithImplMode_LayerNormV3WithImplMode_LayerNormV3",
+      "input_shapes": "\"1,585,5120;5120;5120\"",
+      "calls": 7744,
+      "total_kernel_ms": 265.8839000000005
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,6,12,242,418,16;324,12,16,16;192\"",
+      "calls": 96,
+      "total_kernel_ms": 259.00106000000005
+    },
+    {
+      "name": "aclnnInplaceCopy_CastAiCore_Cast",
+      "input_shapes": "\"1,585,5120\"",
+      "calls": 25728,
+      "total_kernel_ms": 226.62659999999727
+    },
+    {
+      "name": "lingbot_recovery_send",
+      "input_shapes": "N/A",
+      "calls": 2560,
+      "total_kernel_ms": 222.10977999999992
+    },
+    {
+      "name": "FusedInferAttentionScore",
+      "input_shapes": "\"1,4680,5,128;1,18720,5,128;1,18720,5,128;;;;;;;;;;;;;;;;;;;;;;;;;;;;\"",
+      "calls": 160,
+      "total_kernel_ms": 221.64586000000008
+    },
+    {
+      "name": "aclnnAddcmul_AxpyV2AiCore_AxpyV2",
+      "input_shapes": "\"1,1,1,5120;1,1,585,5120;1,1,1,5120\"",
+      "calls": 5120,
+      "total_kernel_ms": 201.84704000000045
+    },
+    {
+      "name": "aclnnRotaryPositionEmbeddingV2_RotaryPositionEmbedding_RotaryPositionEmbedding",
+      "input_shapes": "\"1,585,40,128;1,585,1,128;1,585,1,128\"",
+      "calls": 5120,
+      "total_kernel_ms": 201.21353999999977
+    },
+    {
+      "name": "aclnnFlashAttentionScore_FlashAttentionScore_FlashAttentionScore",
+      "input_shapes": "\"1,40,585,128;1,40,512,128;1,40,512,128;;;;;;;;;;;;;\"",
+      "calls": 2560,
+      "total_kernel_ms": 186.0658400000003
+    },
+    {
+      "name": "FusedInferAttentionScore",
+      "input_shapes": "\"1,4680,5,128;1,14040,5,128;1,14040,5,128;;;;;;;;;;;;;;;;;;;;;;;;;;;;\"",
+      "calls": 160,
+      "total_kernel_ms": 169.09999999999994
+    },
+    {
+      "name": "RmsNorm",
+      "input_shapes": "\"1,585,5120;5120\"",
+      "calls": 7680,
+      "total_kernel_ms": 167.9525600000001
+    },
+    {
+      "name": "aclnnConstantPadNd_PadV3AiCore_PadV3",
+      "input_shapes": "\"1,96,6,480,832;10;\"",
+      "calls": 124,
+      "total_kernel_ms": 159.78681999999995
+    },
+    {
+      "name": "aclnnContiguous_TransposeAiCore_Transpose",
+      "input_shapes": "\"96,4,480,832;4\"",
+      "calls": 128,
+      "total_kernel_ms": 137.9089000000001
+    },
+    {
+      "name": "aclnnFlashAttentionScore_TransposeAiCore_Transpose",
+      "input_shapes": "\"512,40,128;3\"",
+      "calls": 5120,
+      "total_kernel_ms": 135.28371999999953
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,4,24,122,210,16;648,24,16,16;384\"",
+      "calls": 96,
+      "total_kernel_ms": 124.28275999999998
+    },
+    {
+      "name": "aclnnInplaceCopy_TransposeAiCore_Transpose",
+      "input_shapes": "\"40,585,128;3\"",
+      "calls": 5120,
+      "total_kernel_ms": 120.88627999999991
+    },
+    {
+      "name": "aclnnSilu_TransposeAiCore_Transpose",
+      "input_shapes": "\"832,4,480,96;4\"",
+      "calls": 128,
+      "total_kernel_ms": 119.96090000000004
+    },
+    {
+      "name": "FusedInferAttentionScore",
+      "input_shapes": "\"1,4680,5,128;1,9360,5,128;1,9360,5,128;;;;;;;;;;;;;;;;;;;;;;;;;;;;\"",
+      "calls": 160,
+      "total_kernel_ms": 118.37316
+    },
+    {
+      "name": "aclnnMul_MulAiCore_Mul",
+      "input_shapes": "\"1,1,585,5120;1,1,1,5120\"",
+      "calls": 5120,
+      "total_kernel_ms": 107.89559999999967
+    },
+    {
+      "name": "aclnnConvolution_TransData_TransData",
+      "input_shapes": "\"1,96,6,482,834\"",
+      "calls": 128,
+      "total_kernel_ms": 104.02335999999995
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,6,6,482,106,16;162,6,16,16;96\"",
+      "calls": 282,
+      "total_kernel_ms": 100.96509999999999
+    },
+    {
+      "name": "aclnnAdd_AddAiCore_Add",
+      "input_shapes": "\"1,585,5120;1,585,5120\"",
+      "calls": 5760,
+      "total_kernel_ms": 99.2414800000002
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,6,12,242,54,16;324,12,16,16;192\"",
+      "calls": 282,
+      "total_kernel_ms": 96.12132000000001
+    },
+    {
+      "name": "aclnnAdd_AddAiCore_Add",
+      "input_shapes": "\"1,1,585,5120;1,1,585,5120\"",
+      "calls": 5120,
+      "total_kernel_ms": 94.88386000000047
+    },
+    {
+      "name": "aclnnCat_ConcatD_ConcatD",
+      "input_shapes": "\"1,96,2,480,832;1,96,4,480,832\"",
+      "calls": 124,
+      "total_kernel_ms": 92.50978000000003
+    },
+    {
+      "name": "aclnnGelu_Gelu_Gelu",
+      "input_shapes": "\"1,585,13824\"",
+      "calls": 2560,
+      "total_kernel_ms": 91.12223999999976
+    },
+    {
+      "name": "aclnnConvolution_TransData_TransData",
+      "input_shapes": "\"1,4,6,480,832,16\"",
+      "calls": 160,
+      "total_kernel_ms": 83.95691999999995
+    },
+    {
+      "name": "RmsNorm",
+      "input_shapes": "\"1,832,4,480,96;96\"",
+      "calls": 128,
+      "total_kernel_ms": 70.72535999999998
+    },
+    {
+      "name": "aclnnDynamicQuantV2_DynamicQuant_DynamicQuant",
+      "input_shapes": "\"585,13824\"",
+      "calls": 2560,
+      "total_kernel_ms": 68.17368000000005
+    },
+    {
+      "name": "FusedInferAttentionScore",
+      "input_shapes": "\"1,4680,5,128;1,4680,5,128;1,4680,5,128;;;;;;;;;;;;;;;;;;;;;;;;;;;;\"",
+      "calls": 160,
+      "total_kernel_ms": 67.6961
+    },
+    {
+      "name": "aclnnInplaceCopy_TransposeAiCore_Transpose",
+      "input_shapes": "\"8,585,5,128;4\"",
+      "calls": 2560,
+      "total_kernel_ms": 67.46857999999999
+    },
+    {
+      "name": "aclnnFlashAttentionScore_TransposeAiCore_Transpose",
+      "input_shapes": "\"585,40,128;3\"",
+      "calls": 2560,
+      "total_kernel_ms": 66.35485999999997
+    },
+    {
+      "name": "aclnnSilu_SiluAiCore_Swish",
+      "input_shapes": "\"1,96,4,480,832\"",
+      "calls": 128,
+      "total_kernel_ms": 64.24985999999998
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,3,24,62,106,16;648,24,16,16;384\"",
+      "calls": 264,
+      "total_kernel_ms": 62.54310000000006
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,4,24,122,28,16;648,24,16,16;384\"",
+      "calls": 235,
+      "total_kernel_ms": 60.17123999999999
+    },
+    {
+      "name": "aclnnInplaceCopy_ViewCopyAiCpu_ViewCopy",
+      "input_shapes": "\"2623488;4;4;1;2,384,120,26;4;4;1\"",
+      "calls": 47,
+      "total_kernel_ms": 57.488899999999994
+    },
+    {
+      "name": "aclnnFlashAttentionScore_FlashAttentionScore_FlashAttentionScore",
+      "input_shapes": "\"1,1,6240,384;1,1,6240,384;1,1,6240,384;;;;;;;;;;;;;\"",
+      "calls": 81,
+      "total_kernel_ms": 55.67086
+    },
+    {
+      "name": "aclnnConstantPadNd_PadV3AiCore_PadV3",
+      "input_shapes": "\"1,192,6,240,416;10;\"",
+      "calls": 93,
+      "total_kernel_ms": 54.78698000000002
+    },
+    {
+      "name": "aclnnAdd_AddAiCore_Add",
+      "input_shapes": "\"1,96,4,480,832;1,96,4,480,832\"",
+      "calls": 64,
+      "total_kernel_ms": 53.491340000000015
+    },
+    {
+      "name": "aclnnDynamicQuantV2_DynamicQuant_DynamicQuant",
+      "input_shapes": "\"585,5120\"",
+      "calls": 2560,
+      "total_kernel_ms": 53.045739999999896
+    },
+    {
+      "name": "aclnnAdds_AddAiCore_Add",
+      "input_shapes": "\"1,585,5120;\"",
+      "calls": 2624,
+      "total_kernel_ms": 47.96753999999999
+    },
+    {
+      "name": "aclnnContiguous_SliceAiCore_Slice",
+      "input_shapes": "\"585,15360;2;2\"",
+      "calls": 5120,
+      "total_kernel_ms": 46.52046000000003
+    },
+    {
+      "name": "aclnnContiguous_TransposeAiCore_Transpose",
+      "input_shapes": "\"192,4,240,416;4\"",
+      "calls": 96,
+      "total_kernel_ms": 46.133100000000006
+    },
+    {
+      "name": "aclnnMul_MulAiCore_Mul",
+      "input_shapes": "\"1,585,5120;1,585,5120\"",
+      "calls": 2560,
+      "total_kernel_ms": 44.58527999999989
+    },
+    {
+      "name": "aclnnConvolution_Conv3dv2WithFlag_Conv3DV2",
+      "input_shapes": "\"1,6,6,242,418,16;162,12,16,16;192\"",
+      "calls": 32,
+      "total_kernel_ms": 44.025299999999994
+    },
+    {
+      "name": "aclnnConvolution_TransData_TransData",
+      "input_shapes": "\"1,192,6,242,418\"",
+      "calls": 96,
+      "total_kernel_ms": 38.221700000000006
+    },
+    {
+      "name": "aclnnIndexSelect_GatherV3AiCore_GatherV3",
+      "input_shapes": "\"36,1560,5,128;15;1\"",
+      "calls": 880,
+      "total_kernel_ms": 37.95019999999999
+    },
+    {
+      "name": "aclnnSilu_TransposeAiCore_Transpose",
+      "input_shapes": "\"416,4,240,192;4\"",
+      "calls": 96,
+      "total_kernel_ms": 37.57016000000001
+    },
+    {
+      "name": "aclnnConvolution_TransData_TransData",
+      "input_shapes": "\"1,4,12,240,416,16\"",
+      "calls": 160,
+      "total_kernel_ms": 37.506240000000005
+    },
+    {
+      "name": "aclnnCat_ConcatD_ConcatD",
+      "input_shapes": "\"1,192,2,240,416;1,192,4,240,416\"",
+      "calls": 93,
+      "total_kernel_ms": 36.65426
+    }
+  ]
+}

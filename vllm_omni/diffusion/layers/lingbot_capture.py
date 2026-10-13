@@ -67,7 +67,8 @@ class DiagnosticCapture:
             "latent_contract": "original model-space dtype and shape, before VAE normalization",
             "chunks": self.records, "activations": self.activation_records,
             "payload_directory": str(self.payload_directory),
-            "payload_storage_persistent": str(self.payload_directory).startswith("/mnt/data/"),
+            "payload_storage_persistent": any(self.payload_directory.is_relative_to(root)
+                                              for root in (Path("/mnt/data"), Path("/mnt/sfs_turbo"))),
         })
 
     def begin_probe(self, chunk: int, probe: int):
@@ -135,12 +136,14 @@ def begin_capture(pipeline, session_id: str):
     """Install first-layer input hooks once; switch the writer on session start."""
     global _active_capture
     selected = int(os.environ.get("LINGBOT_CAPTURE_RANK", "0"))
-    if _rank() != selected:
+    if selected != -1 and _rank() != selected:
         _active_capture = None
         return
     destination = Path(os.environ["LINGBOT_CAPTURE_DIR"]).expanduser().resolve()
-    if not str(destination).startswith("/mnt/data/"):
-        raise ValueError("Diagnostic captures must use persistent /mnt/data storage")
+    if not any(destination.is_relative_to(root) for root in (Path("/mnt/data"), Path("/mnt/sfs_turbo"))):
+        raise ValueError("Diagnostic captures must use persistent /mnt/data or /mnt/sfs_turbo storage")
+    if selected == -1:
+        destination = destination / f"rank{_rank()}"
     _active_capture = DiagnosticCapture(destination, session_id)
     pipeline._lingbot_diagnostic_capture = _active_capture
     if _active_capture.capture_activations:

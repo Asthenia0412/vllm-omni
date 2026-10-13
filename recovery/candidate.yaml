@@ -84,7 +84,7 @@ stages:
     lingbot_npu_fixed_timestep_bank: true
     lingbot_npu_fixed_timestep_bank_diagnostics: false
     lingbot_npu_recovery_qk: true
-    lingbot_npu_recovery_cross: true
+    lingbot_npu_recovery_cross: false
     lingbot_npu_recovery_vae_pack: true
     lingbot_npu_recovery_descriptor: true
   parallel_config:
