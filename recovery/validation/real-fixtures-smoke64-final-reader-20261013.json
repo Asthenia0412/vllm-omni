@@ -1,0 +1,69 @@
+{
+  "schema": "lingbot_real_fixture_partial_audit_v1",
+  "partial_smoke_passed": true,
+  "complete_input_matrix": false,
+  "actual192_global_proven": false,
+  "qk_real_layer0_payload_cases": 64,
+  "cross_real_layer0_payload_cases": 64,
+  "all40_descriptor_cases": 5120,
+  "all40_payloads": false,
+  "payload_sha256_verified": true,
+  "actual_kv_lengths": [
+    4680,
+    9360
+  ],
+  "destination_canary_verified": false,
+  "kernel_correctness_passed": false,
+  "model_admitted": false,
+  "performance_validated": false,
+  "build_manifest_sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67",
+  "audit_kind": "fresh CPU re-audit of retained partial64case capture using frozen final readers",
+  "started_utc": "2026-10-13T04:11:40.089636+00:00",
+  "completed_utc": "2026-10-13T04:11:49.849826+00:00",
+  "fixture_root": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v2/smoke/fixtures",
+  "source_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/env.sh",
+      "bytes": 1772,
+      "sha256": "75b1f579f7a67b56064d0f16c23f50deba87ebb6cc16842c186642cc0f4f90e4"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/supervise.py",
+      "bytes": 5158,
+      "sha256": "b6afe8d8ede1e8b4e60c4b6311a9b66bfd370abfe21b39a20c8826c315137b7e"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/run_smoke.py",
+      "bytes": 2321,
+      "sha256": "fb6b159410c501a46fb7729d2c849058176a6d540f6440aa2d4378e0910a78ca"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/run_real_fixture_capture.py",
+      "bytes": 10310,
+      "sha256": "1edbcd6e13bf0a8c99dce8980fe79141285a9d5307993035e7a1c712513c9785"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_real_fixtures.py",
+      "bytes": 7663,
+      "sha256": "215a88e6617689c2f047ae016b52bd8dd230ede71b8fb6ae03599e310bd8873d"
+    }
+  ],
+  "original_scope_receipt": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v2/smoke/services/9fd5b7be875d4449845d76929a9c7fcb/fixture-matrix-audit.json",
+    "bytes": 616,
+    "sha256": "294240958032e738dd979eb84f9ced2ac4a2b9274d152f42ce501851cd0470b9"
+  },
+  "original_supervisor_result": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v2/smoke/services/9fd5b7be875d4449845d76929a9c7fcb/result.json",
+    "bytes": 742,
+    "sha256": "05389eb3082380d265c9e67148293321c4f4a5d37a26ca01b0f09b62d7e1887b"
+  },
+  "device_rerun": false,
+  "timing_eligible": false,
+  "original_run_used_these_final_reader_pins": false
+}

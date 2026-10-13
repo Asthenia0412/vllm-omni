@@ -76,3 +76,21 @@ mostly overlap pending VAE work. Neither host waits nor270ms copy workload
 can be added to device kernel time or called the whole regression. This is
 not a profile of the944ms candidate. Historical ASYNC_METADATA's effective
 inherited setting remains unproven and is not silently enabled.
+
+Latest independent reconstruction checks (2026-10-13)
+---------------------------------------------------
+Native QK combined admission is implemented default-off and backed up remotely.
+One retained case per rank passed original HCCL/receive parity, full send arena
+and input-owner checks (136 checks across eight ranks). The original binary is
+not restored; all40-layer and all4probe/6history payload tests remain pending.
+Three fresh full-call diagnostic rounds did not establish stable admission:
+cached-snapshot wall B/A ratios0.8136/1.0134/0.9079; producer-inclusive
+ratios0.8924/1.3102/0.9615. Common rank spikes affected means. Do not remove
+spikes, count correlated ranks as independent samples, or sum isolated gains
+into chunk savings. See qk-combined-retained8-fullcall-diagnostic receipt.
+Independent real-model fixture capture is in progress. Its input readbacks and
+NFS writes exclude it from performance timing. A one-chunk smoke encountered
+the existing benchmark's null generation index; all owned workers were retired.
+Retry uses two chunks per request, without changing engine or protocol code.
+ASYNC_METADATA stays explicitly0. Its event/owner CPU audit is recorded in
+METADATA_TRANSFER_AUDIT_20261013.txt; no device A/B or timing claim yet.

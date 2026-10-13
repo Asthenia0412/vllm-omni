@@ -1,0 +1,114 @@
+Real activation capture controller and independent owner loader (2026-10-13)
+
+CURRENT EVIDENCE
+A separate full service completed warm40 plus fresh16 and captured192 actual
+layer0 cases per role (QK and cross), all8 ranks/all4 probes/all6 history lengths.
+It verified15360 all40-layer descriptor cases and992 content-addressed owners
+(9,357,189,120 bytes) by SHA. All workers were retired with no provider fatal.
+Compact pinned evidence: validation/real-fixtures-full192-capture-20261013.json.
+This is input-matrix/readback proof, not candidate/kernel/model/performance
+admission; the new loader device materializer still needs a separate device check.
+
+The separate smoke service captured actual pre-RMS QKV and actual cross Q/K/V
+on all8 ranks, all4 probes, at observed KV lengths4680 and9360. Layer0 payload:
+64QK+64cross cases. All40 layers:5120 descriptor cases. It is partial, not192
+per role and not all40 layers of payload. The original native provider dispatch
+receipt and complete source-owner hashes are retained.
+
+Original scope: validation/real-fixtures-smoke64-original-scope-20261013.json.
+A later independent CPU audit of the retained bytes used frozen, hardened
+readers and verified every payload SHA:
+  validation/real-fixtures-smoke64-final-reader-20261013.json
+It explicitly does not attribute final reader pins retroactively to the original
+capture. No device rerun or speed result is implied by that CPU re-audit.
+
+The first one-chunk smoke hit the existing benchmark's int(None) conversion of
+pending generation_chunk_index before request2. No capture case was produced.
+The owned supervisor retired all workers, with no provider fatal. The second
+smoke used2+2 chunks and passed. The benchmark, REST/control protocol and228
+historical infrastructure files were not modified for this diagnostic.
+
+SIX SOURCE-PINNED CONTROLLER DEPENDENCIES
+The full correctness run uses a new immutable before-request plan with exact
+config SHA and harness pins for env.sh, supervise.py, run_smoke.py,
+run_real_fixture_capture.py, check_real_fixtures.py and load_real_fixtures.py.
+They were frozen before requests. Pinned runtime/helper/provider files were not
+edited. The old source-pinned recoveryQK and plain recoveryCross are selected;
+all old/new combined flags are false and asynchronous metadata is explicitly0.
+The effective historical async-metadata setting remains unproven; this explicit
+current baseline setting is not labeled restoration of a historical winner.
+
+PREPARATION (CPU ONLY)
+  python recovery/prepare_real_fixture_capture.py \
+    --root /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012 \
+    --output /mnt/sfs_turbo/<fresh-prepared-capture-directory> \
+    --manifest /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json \
+    --base-config /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/reference-bsnd.yaml \
+    --devices 8,9,10,11,12,13,14,15 \
+    --image /home/zhoutaichang/.cache/vllm/assets/vllm_public_assets/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg
+The root controller selects/serializes available dies. The8–15 list above is
+the current selected die set; logical model devices stay0–7. Preparation verifies
+the source manifest and creates independent smoke2+2 and full warm40+16 configs,
+plans and launch scripts. It never launches devices or sends requests.
+
+For each phase, only after the previous owned supervisor reports no remaining
+processes, root runs its launch.sh. The existing supervisor owns process identity,
+fatal nonce and all-worker retirement. It prints the service run directory.
+  python recovery/run_real_fixture_capture.py \
+    --plan <phase>/plan.json --run <printed-owned-service-directory>
+This controller requires the pinned config/harness plan, matching owned service
+port, manifest, fixture paths, baseline flags, visible dies and metadata0. It
+uses existing run_smoke for two ordered requests and preserves both rollouts.
+It verifies the resulting scope and hashes, ties audit SHA to the prepared build,
+and retires the owned service in finally. It never selects processes by name or
+stops unrelated jobs. Failed and partial artifacts are preserved as such.
+
+The full run started from launch-v1/full and uses its separate immutable
+plan.frozen-before-request.json. This file adds final pins before any request
+without reusing a capture label or changing the initialized model/config/root.
+The original plan pin and this ordering are explicitly recorded.
+
+READERS AND PROOF BOUNDARIES
+check_real_fixtures.py requires actual complete six-history/four-probe coverage
+on every rank, all40 descriptors,192 layer0 cases per role, exact operand names,
+actual backend receipts, owner-map bijection, schema/source/build agreement and
+full-owner hashes. Reused payload paths have their cached actual SHA compared
+against EVERY declaration. Empty operand maps and split owner aliases fail.
+Missing histories cannot be filled by duplicates, chunk-number inference or
+synthetic inputs. A valid matrix still does not admit a candidate kernel/model.
+
+load_real_fixtures.py imports only stdlib until a caller explicitly materializes
+CPU/device tensors. Public API:
+  case_paths(root, kind, rank, require_complete=True) ->24 actual layer0 JSONs
+  loaded = load_case(path) -> full byte-owner hash/layout/alias validation
+  replay = loaded.materialize(torch, device, describe, allocate_owner)
+For CPU use device='cpu' without callbacks. Device callers must provide the
+original11field descriptor function and an explicit-format allocator callback:
+  allocate_owner(base_sizes,dtype,device,npu_format)
+For example, a root-authorized device harness may supply torch_npu.empty_with_format
+with acl_format=npu_format. The loader never changes storage format labels.
+It validates actual device, full physical extent, base/view shape/stride/offset,
+pointer relation and distinct owner identity before copying complete owners.
+It returns inputs, outputs, owners and host_owners; callers retain them through
+consumer completion. Inputs/output reference snapshots stay independent, while
+aliases within each snapshot share their original full owner.
+
+QK inputs include pre-RMS raw QKV, both norm gammas and original plus expanded
+cosine/sine; output.native_send is the actual original packed result. Metadata
+records the real shared coefficient generation. Replaying layer0 forty times
+is not all40 real payload coverage. Benchmark reports must distinguish a single
+producer.prepare per actual forward from one producer per leaf, and cannot
+claim complete model throughput from isolated leaf replays.
+
+TESTS
+15 CPU tests passed:10 capture/matrix contracts and5 standalone-loader contracts.
+Source pins and command details:
+  validation/real-fixture-reader-cpu-tests-20261013.json
+Tests cover first real history/probe selection, missing/duplicate coverage,
+reused owner path with conflicting SHA, empty snapshots, split alias IDs,
+truncated/changed owner bytes, full prefix/suffix retention, noncontiguous CPU
+views, independent input/reference snapshots and refusal of device replay without
+explicit allocation/descriptor callbacks. Device materialization of this new
+loader has not yet been qualified; the capture itself has the partial live smoke
+above. Candidate destination canaries, arithmetic acceptance,80chunk latent/RGB
+parity, lifecycle checks and final600 performance remain separate requirements.

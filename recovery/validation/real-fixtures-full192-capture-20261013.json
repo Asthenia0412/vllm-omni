@@ -1,0 +1,1754 @@
+{
+  "schema": "lingbot_real_fixture_complete_capture_scope_v1",
+  "created_utc": "2026-10-13T04:16:05.352074+00:00",
+  "run": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b",
+  "fixture_root": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures",
+  "warmup_chunks": 40,
+  "capture_chunks": 16,
+  "fresh_request_after_warmup": true,
+  "actual_history_lengths": [
+    4680,
+    9360,
+    14040,
+    18720,
+    23400,
+    28080
+  ],
+  "actual_dmd_probes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "payload_layers": [
+    0
+  ],
+  "descriptor_layers": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "audit": {
+    "schema": "lingbot_real_fixture_matrix_audit_v1",
+    "complete_input_matrix": true,
+    "actual192_global_proven": true,
+    "qk_real_layer0_payload_cases": 192,
+    "cross_real_layer0_payload_cases": 192,
+    "all40_descriptor_cases": 15360,
+    "all40_payloads": false,
+    "owners": 992,
+    "owner_bytes": 9357189120,
+    "payload_sha256_verified": true,
+    "destination_canary_verified": false,
+    "kernel_correctness_passed": false,
+    "model_admitted": false,
+    "performance_validated": false,
+    "build_manifest_sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+  },
+  "audit_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b/fixture-matrix-audit.json",
+    "bytes": 581,
+    "sha256": "2dc93d21cd8822c05287f31c7e7082849792a04846e973b72ced391479bcb819"
+  },
+  "controller_protocol_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b/fixture-protocol.json",
+    "bytes": 2334,
+    "sha256": "a10d7ba841afdbd55807bd42f2da837d0e1cf0f726a94880e3192e9184a8ac7d"
+  },
+  "frozen_plan_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/plan.frozen-before-request.json",
+    "bytes": 3230,
+    "sha256": "e2db90b949c34a03a3ca1ae79852ba1f3c9ed75f415147b971555891e011ef4f"
+  },
+  "original_plan_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/plan.json",
+    "bytes": 1465,
+    "sha256": "859129f7b5fb85f30ddc9290a67cd0844a579041886570ca5725393bc76bbe07"
+  },
+  "config_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/config.yaml",
+    "bytes": 2401,
+    "sha256": "0936fc60eea35c23acd8be0689e20ee51ad57dca2e197cf217746e50cf49b2d5"
+  },
+  "harness_source_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/env.sh",
+      "bytes": 1772,
+      "sha256": "75b1f579f7a67b56064d0f16c23f50deba87ebb6cc16842c186642cc0f4f90e4"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/supervise.py",
+      "bytes": 5158,
+      "sha256": "b6afe8d8ede1e8b4e60c4b6311a9b66bfd370abfe21b39a20c8826c315137b7e"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/run_smoke.py",
+      "bytes": 2321,
+      "sha256": "fb6b159410c501a46fb7729d2c849058176a6d540f6440aa2d4378e0910a78ca"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/run_real_fixture_capture.py",
+      "bytes": 10310,
+      "sha256": "1edbcd6e13bf0a8c99dce8980fe79141285a9d5307993035e7a1c712513c9785"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_real_fixtures.py",
+      "bytes": 7663,
+      "sha256": "215a88e6617689c2f047ae016b52bd8dd230ede71b8fb6ae03599e310bd8873d"
+    }
+  ],
+  "rank_coverage": [
+    {
+      "rank": 0,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/coverage.json",
+        "bytes": 64916,
+        "sha256": "9cda4318ea084f728ec0f85dc959a650027f97f8fa7766d9a2185b83c9f4e4b8"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    },
+    {
+      "rank": 1,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/coverage.json",
+        "bytes": 64916,
+        "sha256": "82aedd338b866b92ab4d8d99207915e5b4f521ca74d700c346d009e22fffb15f"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    },
+    {
+      "rank": 2,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/coverage.json",
+        "bytes": 64916,
+        "sha256": "abb021083563709c6e27aa166539f7d598a6247c431e285dec4ca81ef8326d3e"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    },
+    {
+      "rank": 3,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/coverage.json",
+        "bytes": 64916,
+        "sha256": "76a7c295af254ee56a5a2254987d73b9fb8799c9dde302d3c13fa571b0734c71"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    },
+    {
+      "rank": 4,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/coverage.json",
+        "bytes": 64916,
+        "sha256": "adb421897a7584bbf9e30e6bd2594eea59cf79294109e306d8c8c04bcab3f195"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    },
+    {
+      "rank": 5,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/coverage.json",
+        "bytes": 64916,
+        "sha256": "af740d4b48ad87835705e98af4a70b3d64dc6126500dd832d2c5ca24c491cf91"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    },
+    {
+      "rank": 6,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/coverage.json",
+        "bytes": 64916,
+        "sha256": "0e45ddc1b1260cc27fc520906e3b9770b87b3615a9110b444bb1282bc7129156"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    },
+    {
+      "rank": 7,
+      "coverage_pin": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/coverage.json",
+        "bytes": 64916,
+        "sha256": "4262f01072460efb7f7d141352ede87cca16c231785925647527e00e615590e1"
+      },
+      "complete": true,
+      "failed": false,
+      "descriptor_count": 1920,
+      "payload_count": 48,
+      "expected_payload_cases_per_role": 24,
+      "request_ordinal": 2,
+      "request_ids": [
+        "video_stream-f7812255dfcc476893bae9d6a2eab7f8-b3d509eb",
+        "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e"
+      ],
+      "locations": [
+        {
+          "kv_len": 4680,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 4680,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 0
+        },
+        {
+          "kv_len": 9360,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 9360,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 1
+        },
+        {
+          "kv_len": 14040,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 14040,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 2
+        },
+        {
+          "kv_len": 18720,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 18720,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 3
+        },
+        {
+          "kv_len": 23400,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 23400,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 4
+        },
+        {
+          "kv_len": 28080,
+          "probe": 0,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 1,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 2,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        },
+        {
+          "kv_len": 28080,
+          "probe": 3,
+          "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+          "chunk": 5
+        }
+      ],
+      "source_pins": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+          "bytes": 22079,
+          "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+          "bytes": 5164,
+          "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+        }
+      ],
+      "build_manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+      }
+    }
+  ],
+  "source_build_manifest_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+    "bytes": 8229,
+    "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+  },
+  "runtime_source_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 11282,
+      "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recv_kv_sp8.py",
+      "bytes": 25035,
+      "sha256": "4ef14801a29547e298fb6b34ed667b6115a8ddc786abbafc11e82c7a362c5598"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_qk_combined.py",
+      "bytes": 10212,
+      "sha256": "80cc9509e008f9a28255cfcbb29a1f0c8601b930f4726db0e6daa29f7864634f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+      "bytes": 22079,
+      "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+      "bytes": 5164,
+      "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_sp8_fatal.py",
+      "bytes": 5357,
+      "sha256": "df806bfabff834cff31ea1f11965e24886163cf1489dce9ee933ee55dbce050a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 32237,
+      "sha256": "3a189a2bdeb60ca001007424bb329efb863693e97b338ac997cd6dcb3543ada6"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_fixed_timestep_bank_stageA_v1.py",
+      "bytes": 23392,
+      "sha256": "3ea53af8a7f4bdc3e0a78137d235c8019c20f262549f6acc0c951c4c44ad24cc"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/models/lingbot_world/transformer.py",
+      "bytes": 78172,
+      "sha256": "1253165bdcf7d46ab4dc0d854c7b38b3b92d4527de32f54df931b17fd6e4f91d"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/backends/cross_combined_integration_v1.py",
+      "bytes": 6304,
+      "sha256": "690cb787e550e5db411255e6cd234fa01b361414061b3431fce9b5d8215334cc"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/distributed/autoencoders/wan_npu_exact_pack.py",
+      "bytes": 16900,
+      "sha256": "9aa67ab133d179bb9ecf80a4b79b7375a63628667df041332d7260134811a84a"
+    }
+  ],
+  "host_source_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery/host.cpp",
+    "bytes": 16218,
+    "sha256": "856c685e36c69d8fd6b6111ce647ce4e067b9f402ae1dd536537d729ee7322ca"
+  },
+  "host_library_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/liblingbot_recovery_host.so",
+    "bytes": 253976,
+    "sha256": "f7aa61305ce465f3b387dd5130f1978660c4707e7b1a1d018d931f8f7baca5f6"
+  },
+  "copy_kernel_library_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+    "bytes": 402128,
+    "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+  },
+  "model": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+    "integrity_pin": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world-integrity.json",
+      "bytes": 7016,
+      "sha256": "0e210b20bf2cd4bda63281acb37b0b83f596c38454b257eee0711664c27b2120"
+    },
+    "download_revision": "59cccf49f2d2dd27418ae7a04b82b10868d455c2",
+    "complete": true,
+    "download_integrity_passed": true,
+    "historical_checkpoint_identity_established": false
+  },
+  "request_rollout_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b/request1-rollout40.json",
+      "bytes": 12397,
+      "sha256": "166449f5c88456357b8c5df3b85883d5d6c78c27dbd177a68ad19cf9e633561f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b/request2-rollout16.json",
+      "bytes": 7664,
+      "sha256": "d1eb5247b0bee43732e441a310adb94fba26c1dc22988210fee40efc7ef33198"
+    }
+  ],
+  "visible_devices": "8,9,10,11,12,13,14,15",
+  "logical_ranks": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "current_baseline": {
+    "recovery_qk": true,
+    "recovery_qk_combined": false,
+    "recovery_cross": true,
+    "recovery_cross_combined": false,
+    "old_qk_single_host": false,
+    "old_cross_combined": false,
+    "metadata_async_env": "0",
+    "recv_recovery": true,
+    "batched_vae": true
+  },
+  "supervisor_result": {
+    "nonce": "ee3320eae23939704ba92406aac1071b",
+    "leader": {
+      "pid": 1616289,
+      "uid": 1003,
+      "pgid": 1616289,
+      "start": 17379672
+    },
+    "command": [
+      "vllm",
+      "serve",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+      "--omni",
+      "--deploy-config",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/config.yaml",
+      "--port",
+      "7816",
+      "--init-timeout",
+      "1800",
+      "--stage-init-timeout",
+      "1800"
+    ],
+    "mode": "correctness",
+    "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+    "fatal": null,
+    "exit_code": -9,
+    "remaining_owned_processes": []
+  },
+  "supervisor_result_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b/result.json",
+    "bytes": 741,
+    "sha256": "bfd580a21213859863822ea8b64dbdf063d39136a77bc6d9db0e6e461de3da7d"
+  },
+  "interpretation": {
+    "real_inputs_cover_192_cases_per_role": true,
+    "all40_payloads": false,
+    "native_full_owner_readback_validated_on_this_capture": true,
+    "destination_canary_verified": false,
+    "new_loader_device_materializer_validated": false,
+    "candidate_kernel_correctness_passed": false,
+    "paired_model80_passed_by_this_run": false,
+    "video_quality_passed_by_this_run": false,
+    "timing_eligible": false,
+    "model_admitted": false,
+    "performance_validated": false,
+    "historical_binary_identity_proven": false
+  }
+}

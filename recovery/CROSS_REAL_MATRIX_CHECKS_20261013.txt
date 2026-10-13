@@ -1,0 +1,70 @@
+Actual cross BSND / combined-guard replay (2026-10-13)
+
+Implementation: recovery/check_cross_real_matrix.py
+Frozen SHA256: 78f34d382cb0c8778e1b9990456ae9f2aaf70ee0b264ebd87c8db7b031998dbc
+CPU tests: recovery/test_cross_real_matrix.py
+Test SHA256: 87c54891ae3a7aa2fb8354fb31ae9be142c3fc2aeb298f22b592a14fb3811e18
+
+Scope
+- Uses the real Attention constructor and Attention.forward, the normal SDPA
+  integration, and configured Cross versus CrossCombined. The startup context
+  is isolated and derived from the capture YAML; it is not full model startup.
+- Includes wrapper layout handling, admission, FIA allocation/dispatch and output
+  handling. Does not include Q/K projections, output projection, HCCL, model
+  scheduling, source materialization or first-call initialization in timing.
+- Requires all24 actual layer0 contexts per rank (six self-history lengths x
+  four probes). Cross text K/V length remains512. All40 descriptor coverage is
+  not all40-layer payload coverage.
+- The reference is the captured current public-native H40 BSND route, not SDPA
+  arithmetic, the lost historical DSO, or proof of original model identity.
+
+Correctness
+- A temporary provider spy proves one expected operation, identical Q/K/V
+  objects and the same output returned through the full caller. It is removed
+  in a finally block and is not present during timing.
+- Both arms run twice with all four outputs kept live. Verify finite outputs,
+  bitwise captured-native and paired equality, complete output owner contents,
+  distinct output allocations, all input/reference owner bytes and descriptors.
+- Uses captured full owner extents. No additional output canary is allocated by
+  the public FIA API; destination_canary_verified is explicitly false.
+- Every case checks payload SHA and preserves physical format and aliases via
+  the frozen loader. Exceptions retain the live state and poison the provider;
+  the owned supervisor must retire its experiment. No retry/fallback admission.
+
+CPU validation
+- 16 tests passed under /home/zhoutaichang/venvs/vllm-omni/bin/python, without
+  importing torch/torch_npu. Includes missing rank/case, changed fixture/source,
+  missing finite gate, incorrect dispatch and spy-restoration failures.
+- py_compile passed. System python was too old for zip(strict=True), so the
+  first system-python test invocation failed; use the experiment interpreter.
+- Actual192 metadata preflight passed against the complete, globally hashed
+  capture. The final change only expanded dependency source pins after review.
+- Peer review by qk_restore_audit found no correctness/owner-lifetime blocker.
+- This note contains no device, numerical-pass or performance result.
+
+Root-owned invocation
+  Python: /home/zhoutaichang/venvs/vllm-omni/bin/python
+  Script: recovery/check_cross_real_matrix.py
+  --capture-plan /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/plan.frozen-before-request.json
+  --matrix-audit /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b/fixture-matrix-audit.json
+  --mode correctness --rank R --device R --output <correctness-directory>/rankR.json
+
+Run R=0..7 only on the owned visible set8,9,10,11,12,13,14,15 under the existing
+fatal supervisor with experiment mode=correctness and the capture build pinned
+by LINGBOT_RECOVERY_MANIFEST and its SHA. Disable fixture/output capture and old
+observer environment variables. Do not change the source-pinned runtime.
+
+Timing additionally requires --mode timing --correctness-dir <above-directory>
+--round N, with N=1,2,3 in independently launched processes and mode=timing in
+the supervisor. All8 matching correctness receipts are checked before device
+initialization. Each actual case uses20 warmups,30 complete-call wall samples
+and a separate30-sample device-event pass per arm; round2 reverses arm order.
+Use a fresh output path for every run. Ranks have no phase barrier: serial die
+runs are permitted; never interpret timestamps as proof of simultaneous rank
+sampling. Per-call synchronization differs from steady model submission.
+
+Only a complete8-rank aggregate can establish actual192 candidate correctness.
+Full-call screening needs three independent rounds, average improvement>=10%
+and worst-case regression<=5%. Passing this isolated screen still requires the
+paired model/latent/RGB and performance acceptance tests. No isolated-call
+speedup is converted into chunk milliseconds or end-to-end gain here.

@@ -1,0 +1,44 @@
+{
+  "schema": "lingbot_real_fixture_reader_cpu_tests_v1",
+  "test_source_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/test_real_fixture_capture.py",
+      "bytes": 11110,
+      "sha256": "7e87da252ed5b99bd30c56f49359b1f687abcbe324fe256f60ded297545f22bd"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/test_load_real_fixtures.py",
+      "bytes": 4681,
+      "sha256": "56471cefd978c13db5ba0c92a0fcd1f54334ca83b2c016e56853e574287da3b4"
+    }
+  ],
+  "counts": {
+    "capture_and_matrix_contracts": 10,
+    "full_owner_loader_contracts": 5,
+    "total": 15
+  },
+  "passed": true,
+  "commands": [
+    "python -m unittest discover -s recovery -p test_real_fixture_capture.py -v",
+    "/home/zhoutaichang/venvs/vllm-omni/bin/python -m unittest discover -s recovery -p test_load_real_fixtures.py -v"
+  ],
+  "checked": [
+    "first occurrence chosen by actual history/probe, not chunk inference",
+    "exact192-per-role global matrix versus partial/all40 descriptor-only scope",
+    "full owner view offsets/strides/extents and live alias mapping",
+    "actual backend receipt and fallback refusal",
+    "metadata-only source proof limits",
+    "reused owner path with conflicting declared SHA",
+    "empty operand map cannot pass matrix validation",
+    "split alias IDs cannot become independent replay owners",
+    "truncated/changed full owner payload",
+    "CPU full-owner reconstruction retains prefix/suffix and noncontiguous aliases",
+    "device replay refuses missing explicit-format allocator/descriptor callback"
+  ],
+  "cpu_only": true,
+  "device_materializer_device_validated": false,
+  "actual_model_192_cases_tested": false,
+  "native_runtime_sources_changed": false,
+  "tests_called_device_initialization": false,
+  "device_initialization_state_observed": false
+}

@@ -1,0 +1,99 @@
+{
+  "schema": "metadata_transfer_CPU_callback_contract_audit_v1",
+  "source": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/kv_cache/npu_metadata_transfer.py",
+  "source_sha256": "e81ab1f71e1f099b7acda14058b427c2a8da03cf69f66c310bf5ab1814f4dc37",
+  "checks": [
+    "inflight_same_signature_allocates_distinct_host_and_destination",
+    "completed_slot_reused_only_after_event_preserves_old_destination",
+    "pending_destinations_receive_own_values",
+    "new_request_fills_current_values_without_old_session_content",
+    "drain_releases_only_completed_hosts",
+    "pool_pressure_waits_oldest_copy_before_mutating_host",
+    "pool_limits_preserved",
+    "copy_failure_raises",
+    "copy_failure_poison_retains_host",
+    "copy_failure_prevents_future_overwrite",
+    "record_failure_raises",
+    "record_failure_poison_retains_host",
+    "record_failure_prevents_future_overwrite",
+    "event_query_failure_poisoned",
+    "different_producer_thread_rejected",
+    "signature_limit_stays_synchronous_despite_all_prior_events_complete"
+  ],
+  "passed": true,
+  "torch_imported": false,
+  "device_calls": false,
+  "scope": "Injectable fake callbacks only; does not establish actual torch-npu H2D/event/allocator behavior.",
+  "signature_limit_limitation_reproduced": true,
+  "audit": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/metadata-transfer/AUDIT.txt",
+    "bytes": 8401,
+    "sha256": "72debc48f3768aff386a69cde8a2f1e1a048386e54927238115b4fdb38ec0066"
+  },
+  "test_script": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/metadata-transfer/cpu_contract_checks.py",
+    "bytes": 5407,
+    "sha256": "af127315ac07d16a3eaca885d29034a8eae593802173be62e613b049314ea08c"
+  },
+  "source_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/kv_cache/npu_metadata_transfer.py",
+      "bytes": 8480,
+      "sha256": "e81ab1f71e1f099b7acda14058b427c2a8da03cf69f66c310bf5ab1814f4dc37"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/kv_cache/paged_attention.py",
+      "bytes": 44740,
+      "sha256": "028b90605cfc85c8e2da4149ce14ad8fa045d6acea00e7e3a3cb11400e1a546c"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/kv_cache/state.py",
+      "bytes": 9431,
+      "sha256": "b898d5edd84511a84986d210c2930a4dbd42b3a34c8e5e9edbec22e4f94e7404"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/kv_cache/manager.py",
+      "bytes": 39652,
+      "sha256": "1b14f27eab19a20903a89d704475c6715e060285235a67a7478557bf7efb2b51"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/runner.py",
+      "bytes": 26635,
+      "sha256": "df19ab880b306835a2720df804437d4de7016f46565a75db67f3f29d3b27298a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/engine.py",
+      "bytes": 2617,
+      "sha256": "6344ef4b78b14a0ee2805a856e4489b7255d7bda59a2bb11a5452a8523a395f9"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/experimental/ar_diffusion/session.py",
+      "bytes": 23750,
+      "sha256": "9992aff9b962d1e5ada00d7c84548d799594f02fcb004b986f5ab87b015db6ba"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/models/lingbot_world/transformer.py",
+      "bytes": 78172,
+      "sha256": "1253165bdcf7d46ab4dc0d854c7b38b3b92d4527de32f54df931b17fd6e4f91d"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recv_kv_sp8.py",
+      "bytes": 25035,
+      "sha256": "4ef14801a29547e298fb6b34ed667b6115a8ddc786abbafc11e82c7a362c5598"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/worker/diffusion_worker.py",
+      "bytes": 84053,
+      "sha256": "d4eb551842e14cb7d08d7a43ae12902f34a801a4f005d367ce2618db92ae1ab7"
+    }
+  ],
+  "admission": {
+    "flags_changed": false,
+    "runtime_sources_changed": false,
+    "device_correctness": false,
+    "model_correctness": false,
+    "performance_validated": false,
+    "baseline_gate": "Do not enable AB until restored cross + QK full baseline is established"
+  },
+  "interpretation": "16 fake-callback checks prove Python pool ownership transitions only. Old stream waits are not measured savings. Signature saturation is a reproduced performance limitation, not a demonstrated stale-metadata bug."
+}

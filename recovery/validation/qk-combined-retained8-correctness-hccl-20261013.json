@@ -1,0 +1,870 @@
+{
+  "schema": "lingbot_qk_combined_retained8_correctness_hccl_review_v1",
+  "reviewed_at": "2026-10-13T03:57:47.784476+00:00",
+  "stage": "retained real8 correctness and unchanged original HCCL only",
+  "stage_passed": true,
+  "unique_input_cases": 8,
+  "fixture_scope": {
+    "request_ordinal": 2,
+    "chunk": 11,
+    "probe": 0,
+    "layer": 0,
+    "ranks": 8
+  },
+  "fixture_manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/manifest.json",
+    "bytes": 127639,
+    "sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325"
+  },
+  "leaf": {
+    "proof": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/leaf0.json",
+      "bytes": 1713,
+      "sha256": "69f03fb1383a45c8d568385ad8d66c3477899eb264c1875b6d3ce7cde3054a37"
+    },
+    "record": {
+      "rank": 0,
+      "checks": [
+        "retained_historical_query_RMS",
+        "retained_historical_key_RMS",
+        "expanded_cosine_snapshot",
+        "expanded_sine_snapshot",
+        "combined_full_target_arena_canaries",
+        "combined_sentinel_send",
+        "baseline_full_wrapper_consumer_output",
+        "combined_full_wrapper_consumer_output",
+        "source_full_owner000",
+        "source_full_owner001",
+        "source_full_owner002",
+        "source_full_owner003",
+        "source_full_owner004",
+        "source_full_owner005",
+        "source_full_owner006",
+        "source_full_owner007",
+        "source_full_owner008"
+      ],
+      "fixture_scope": {
+        "request_ordinal": 2,
+        "chunk": 11,
+        "probe": 0,
+        "layer": 0,
+        "ranks": 8
+      },
+      "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+      "actual192": false,
+      "all40": false,
+      "all_probes": false,
+      "historical_binary_restored": false,
+      "model_admitted": false,
+      "passed": true,
+      "timing_validated": false,
+      "original_hccl_included": false,
+      "manifest": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+        "bytes": 8124,
+        "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+      },
+      "harness": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+        "bytes": 9105,
+        "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+      },
+      "fixture_loader": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+        "bytes": 6026,
+        "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+      }
+    }
+  },
+  "hccl_ranks": [
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank0.json",
+        "bytes": 1712,
+        "sha256": "a6c963620a4f1b54ec33422e4032e88a53abf61bee863d536cc45abb48bae980"
+      },
+      "record": {
+        "rank": 0,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    },
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank1.json",
+        "bytes": 1712,
+        "sha256": "89b37dc244bcafb50470717d5e6ce06781117e5a78a725f46d87b7f630b0608a"
+      },
+      "record": {
+        "rank": 1,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    },
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank2.json",
+        "bytes": 1712,
+        "sha256": "bd87feab4a82ab8cdc32f148c114f5e91210c9ccc2dad22ead9320570dc03a1b"
+      },
+      "record": {
+        "rank": 2,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    },
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank3.json",
+        "bytes": 1712,
+        "sha256": "d4cece2c9425d0d484a7fcb50b72d59c01685b3cdaa94ed40c9da2d9252eef07"
+      },
+      "record": {
+        "rank": 3,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    },
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank4.json",
+        "bytes": 1712,
+        "sha256": "c19da35f95d8b6c33d5afe066b931c5503d8eae892c7f14e80e620233f8c8ea2"
+      },
+      "record": {
+        "rank": 4,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    },
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank5.json",
+        "bytes": 1712,
+        "sha256": "a8c1d3c08bfa3cd286b2c916107ed811c85e5529422c42f22a9f4c4175ec4335"
+      },
+      "record": {
+        "rank": 5,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    },
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank6.json",
+        "bytes": 1712,
+        "sha256": "c5f4ca05844b0d4d14a430cb7b51aab2f64591418c359175a222024d53d0be19"
+      },
+      "record": {
+        "rank": 6,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    },
+    {
+      "proof": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8/rank7.json",
+        "bytes": 1712,
+        "sha256": "c5ee743e79729aa852a84119c3bdb43b955b9e23239428608c34693061d5d99e"
+      },
+      "record": {
+        "rank": 7,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "combined_full_target_arena_canaries",
+          "combined_sentinel_send",
+          "baseline_full_wrapper_consumer_output",
+          "combined_full_wrapper_consumer_output",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "timing_validated": false,
+        "original_hccl_included": true,
+        "manifest": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "bytes": 8124,
+          "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+        },
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+          "bytes": 9105,
+          "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+        },
+        "fixture_loader": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+          "bytes": 6026,
+          "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+        }
+      }
+    }
+  ],
+  "hccl_checks": 136,
+  "leaf_checks": 17,
+  "build_manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+    "bytes": 8124,
+    "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+  },
+  "build_record": {
+    "schema": "lingbot_qk_combined_build_v1",
+    "source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_qk_combined/host.cpp",
+      "bytes": 11396,
+      "sha256": "c8de691287fcecfd2331466ca64d9f4a61f364b2709f2cdc8fde401bd91eff11"
+    },
+    "library": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/liblingbot_qk_combined.so",
+      "bytes": 187552,
+      "sha256": "e5bcf20f636623abd3e143352baa59c59690ab6e50cf3f39f845f1912d10fd8b"
+    },
+    "provider_manifest": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+      "bytes": 8229,
+      "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+    },
+    "dependencies": [
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+        "bytes": 402128,
+        "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+      }
+    ],
+    "runtime_sources": [
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_qk_combined.py",
+        "bytes": 10212,
+        "sha256": "80cc9509e008f9a28255cfcbb29a1f0c8601b930f4726db0e6daa29f7864634f"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+        "bytes": 11282,
+        "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+        "bytes": 32237,
+        "sha256": "3a189a2bdeb60ca001007424bb329efb863693e97b338ac997cd6dcb3543ada6"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_native_bf16_qk.py",
+        "bytes": 7946,
+        "sha256": "42a5c7c45bd750f1b489f2fa89a4cb66a3946867b90b231097f3533946264014"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_sp8_fatal.py",
+        "bytes": 5357,
+        "sha256": "df806bfabff834cff31ea1f11965e24886163cf1489dce9ee933ee55dbce050a"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+        "bytes": 22079,
+        "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_output_capture.py",
+        "bytes": 5164,
+        "sha256": "72d42859518b608d88090acef9be4ff65b137abae650e6232f7727512fb69a99"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/models/lingbot_world/transformer.py",
+        "bytes": 78172,
+        "sha256": "1253165bdcf7d46ab4dc0d854c7b38b3b92d4527de32f54df931b17fd6e4f91d"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/distributed/comm.py",
+        "bytes": 15443,
+        "sha256": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f"
+      }
+    ],
+    "abi_headers": [
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/NPUStorageImpl.h",
+        "bytes": 1719,
+        "sha256": "c4c488410e53760739c32de25dc00bcd53d0d55a55d48247d248671ccb06e9f1"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/aten/CustomFunctions.h",
+        "bytes": 157695,
+        "sha256": "eda9b02f53d526bbbb5429d38f5bf98fb3b09b2d02a3b9aef80abc855e13655c"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUStream.h",
+        "bytes": 4726,
+        "sha256": "4d0b32e2bffeda7a69713a5e679e1298015dcde35c3c07ac48823f26a649d21c"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUFunctions.h",
+        "bytes": 4957,
+        "sha256": "14bfce4bcb2e53e0094e1208d596994224ffe0b0084b46315f88912ef7795ecf"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUGraphsUtils.h",
+        "bytes": 4167,
+        "sha256": "84054ef102fffdc76092e9066b39b9ef124206329a8a02a3440148278803acd4"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUCachingAllocator.h",
+        "bytes": 19457,
+        "sha256": "d16adcbbee0d6a071632358de7e00b4c357de0bfd326c4d3e42d712f73260fc3"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/framework/OpCommand.h",
+        "bytes": 7099,
+        "sha256": "9b81f6549a627bfafcf577a1a56d78b0a256249111c76aa4c2306b4f50089427"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib/libtorch_npu.so",
+        "bytes": 82429241,
+        "sha256": "83fb9a0eb249aef6bca7f8463047fcb4d3062cc4849f17ddf31a5e050c838842"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/c10/core/GradMode.h",
+        "bytes": 1915,
+        "sha256": "cfdfec89042dc0ae11c56004d9e1d4caddb42085201a975f18ba7f2db3332a31"
+      },
+      {
+        "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/c10/core/InferenceMode.h",
+        "bytes": 4017,
+        "sha256": "5a28204782690888acbef7ca221b6ced032f241b14bc6dee92cc86401024519c"
+      }
+    ],
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "torch_npu_git": "5dd8ef3f9b375b5ae4a83538d5785754148c3302",
+    "command": [
+      "g++",
+      "-std=c++17",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-D_GLIBCXX_USE_CXX11_ABI=1",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_qk_combined/host.cpp",
+      "-o",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/liblingbot_qk_combined.so",
+      "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include",
+      "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/torch/csrc/api/include",
+      "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include",
+      "-I/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/include",
+      "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
+      "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
+      "-L/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
+      "-L/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib",
+      "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
+      "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
+      "-Wl,-rpath,/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
+      "-Wl,-rpath,/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+      "-ltorch_npu",
+      "-ltorch_cpu",
+      "-ltorch",
+      "-lc10",
+      "-lascendcl",
+      "-ldl"
+    ],
+    "build_script": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/build_qk_combined.py",
+      "bytes": 5269,
+      "sha256": "79864d2bd3530628b48f76223f65cb1e54d58367af29f189363f877d40712609"
+    },
+    "registration_passed": true,
+    "cpu_refusal_passed": true,
+    "npu_initialized": false,
+    "historical_admission_inherited": false,
+    "device_admitted": false,
+    "model_admitted": false,
+    "execution": "public native RMSQ/RMSK/RotaryV2Q/RotaryV2K + queued exact send; consolidated admission"
+  },
+  "parent_provider_manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+    "bytes": 8229,
+    "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+  },
+  "harness": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_combined.py",
+    "bytes": 9105,
+    "sha256": "f63e7a5b1c253aea9501d4a49f48183e2d5d9ea98ae1c2d25663149e5650933c"
+  },
+  "fixture_loader": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/qk_replay_fixture.py",
+    "bytes": 6026,
+    "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+  },
+  "supervisor": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/supervise.py",
+    "bytes": 5158,
+    "sha256": "b6afe8d8ede1e8b4e60c4b6311a9b66bfd370abfe21b39a20c8826c315137b7e"
+  },
+  "launches": [
+    {
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-runs/89db399fb012af07c231c56b113d910d/result.json",
+        "bytes": 872,
+        "sha256": "89988756cc96fc0d1a997b2a39668c5785dc5306cb9672fdd7b8b13ec9c02afb"
+      },
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-runs/89db399fb012af07c231c56b113d910d/launch.json",
+        "bytes": 819,
+        "sha256": "8a10b2e002220d87535f6e836f4dc6507aacf4d920211dc5d8fad9eae622e355"
+      },
+      "receipt": {
+        "nonce": "89db399fb012af07c231c56b113d910d",
+        "leader": {
+          "pid": 1469619,
+          "uid": 1003,
+          "pgid": 1469619,
+          "start": 17302409
+        },
+        "command": [
+          "python",
+          "recovery/check_qk_combined.py",
+          "--execute",
+          "--device",
+          "0",
+          "--mode",
+          "correctness",
+          "--fixtures",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/manifest.json",
+          "--manifest",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/leaf0.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      },
+      "original_leader_identity_absent_at_review": true
+    },
+    {
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-runs/3f68bb037d0a20f3a83ee3bebea324ca/result.json",
+        "bytes": 922,
+        "sha256": "1232c64fedf2b98eb0b2094e507a0d20c6a9fb507e94120a9b94acdc7ada0f3a"
+      },
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-runs/3f68bb037d0a20f3a83ee3bebea324ca/launch.json",
+        "bytes": 869,
+        "sha256": "018968dee2fb3754d9f6acd8f77fb6ae0524a5b85202c054470e654ba1de0e63"
+      },
+      "receipt": {
+        "nonce": "3f68bb037d0a20f3a83ee3bebea324ca",
+        "leader": {
+          "pid": 1473446,
+          "uid": 1003,
+          "pgid": 1473446,
+          "start": 17305210
+        },
+        "command": [
+          "torchrun",
+          "--standalone",
+          "--nnodes=1",
+          "--nproc-per-node=8",
+          "recovery/check_qk_combined.py",
+          "--execute",
+          "--hccl",
+          "--mode",
+          "correctness",
+          "--fixtures",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/manifest.json",
+          "--manifest",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-combined-checks/hccl8"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      },
+      "original_leader_identity_absent_at_review": true
+    }
+  ],
+  "all_owned_supervisors_exit0": true,
+  "owned_remaining_processes": [],
+  "actual192": false,
+  "all40_payload": false,
+  "all_probes": false,
+  "historical_binary_restored": false,
+  "performance_validated": false,
+  "model_admitted": false,
+  "model_equivalence": false,
+  "checks_scope": {
+    "native_RMS_and_coefficient_reference": true,
+    "native_send_bitwise": true,
+    "full_sentinel_target_arena_and_canary_after_pack": true,
+    "original_HCCL_and_receive_order_output_equal": true,
+    "full_source_owners_unchanged": true,
+    "fresh_production_HCCL_path": true,
+    "full_sentinel_target_arena_after_HCCL": false,
+    "new_combined_wrong_current_device_negative_test": false
+  },
+  "limitations": [
+    "Repeated rank0 smoke is not a ninth distinct input case.",
+    "Sentinel full arena is compared after pack; fresh production send traverses HCCL. No sentinel-after-HCCL claim.",
+    "No full192, full40-layer payload, model80, long-run, lifecycle or speed gate is granted.",
+    "No latency result is derived from correctness runs."
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schema": "lingbot_real_fixture_partial_capture_scope_v1",
+  "run": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v2/smoke/services/9fd5b7be875d4449845d76929a9c7fcb",
+  "original_matrix_audit": {
+    "schema": "lingbot_real_fixture_partial_audit_v1",
+    "partial_smoke_passed": true,
+    "complete_input_matrix": false,
+    "actual192_global_proven": false,
+    "qk_real_layer0_payload_cases": 64,
+    "cross_real_layer0_payload_cases": 64,
+    "all40_descriptor_cases": 5120,
+    "all40_payloads": false,
+    "payload_sha256_verified": true,
+    "actual_kv_lengths": [
+      4680,
+      9360
+    ],
+    "destination_canary_verified": false,
+    "kernel_correctness_passed": false,
+    "model_admitted": false,
+    "performance_validated": false,
+    "build_manifest_sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+  },
+  "original_matrix_audit_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v2/smoke/services/9fd5b7be875d4449845d76929a9c7fcb/fixture-matrix-audit.json",
+    "bytes": 616,
+    "sha256": "294240958032e738dd979eb84f9ced2ac4a2b9274d152f42ce501851cd0470b9"
+  },
+  "supervisor_result": {
+    "nonce": "9fd5b7be875d4449845d76929a9c7fcb",
+    "leader": {
+      "pid": 1570450,
+      "uid": 1003,
+      "pgid": 1570450,
+      "start": 17358195
+    },
+    "command": [
+      "vllm",
+      "serve",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+      "--omni",
+      "--deploy-config",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v2/smoke/config.yaml",
+      "--port",
+      "7816",
+      "--init-timeout",
+      "1800",
+      "--stage-init-timeout",
+      "1800"
+    ],
+    "mode": "correctness",
+    "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+    "fatal": null,
+    "exit_code": -9,
+    "remaining_owned_processes": []
+  },
+  "controller_protocol_pin": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v2/smoke/services/9fd5b7be875d4449845d76929a9c7fcb/fixture-protocol.json",
+    "bytes": 2357,
+    "sha256": "ad5fbb5569148ca8c9a14a1e286a97b02f4975d5043ee6e17878e32f8396c7df"
+  },
+  "warmup_chunks": 2,
+  "capture_chunks": 2,
+  "reader_revision": "original pre-hardening controller/readers; final reader pins were not recorded before these requests",
+  "final_reader_reaudit": "real-fixtures-smoke64-final-reader-20261013.json",
+  "complete_input_matrix": false,
+  "actual192_global_proven": false,
+  "all40_payloads": false,
+  "model_admitted": false,
+  "performance_validated": false,
+  "timing_eligible": false,
+  "earlier_one_chunk_attempt": {
+    "run": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/smoke/services/b383ba5d42783329175f26a541942bd5",
+    "failure": "benchmark tried int(generation_chunk_index=None) before request2; no fixtures captured",
+    "supervisor_result": {
+      "nonce": "b383ba5d42783329175f26a541942bd5",
+      "leader": {
+        "pid": 1523186,
+        "uid": 1003,
+        "pgid": 1523186,
+        "start": 17335253
+      },
+      "command": [
+        "vllm",
+        "serve",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+        "--omni",
+        "--deploy-config",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/smoke/config.yaml",
+        "--port",
+        "7816",
+        "--init-timeout",
+        "1800",
+        "--stage-init-timeout",
+        "1800"
+      ],
+      "mode": "correctness",
+      "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+      "fatal": null,
+      "exit_code": -9,
+      "remaining_owned_processes": []
+    },
+    "runtime_provider_fatal": false,
+    "benchmark_or_protocol_modified": false
+  }
+}

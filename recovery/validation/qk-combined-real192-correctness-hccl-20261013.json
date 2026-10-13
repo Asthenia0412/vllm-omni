@@ -1,0 +1,3729 @@
+{
+  "schema": "lingbot_qk_combined_real192_correctness_summary_v1",
+  "passed": true,
+  "candidate": "default-off qk_combined public native RMS/RoPE plus fresh padded pack",
+  "scope": {
+    "actual_ranks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "physical_dies": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "actual_probes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "actual_history_lengths": [
+      4680,
+      9360,
+      14040,
+      18720,
+      23400,
+      28080
+    ],
+    "payload_layers": [
+      0
+    ],
+    "actual_payload_cases": 192,
+    "all40_payloads": false,
+    "collective": "fresh isolated WORLD HCCL8 with unchanged all_to_all_5D and receive reorder; not the service Ulysses group instance"
+  },
+  "matrix_sha256": "135caf06dcdd680c3ac8f4138e7c78ed136d5577b5a2361c88242822ea86f7da",
+  "candidate_manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+    "bytes": 8124,
+    "sha256": "6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d"
+  },
+  "sources": {
+    "harness": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_qk_real_matrix.py",
+      "bytes": 24351,
+      "sha256": "2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519"
+    },
+    "loader": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    "capture_contract": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+      "bytes": 22079,
+      "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+    },
+    "original_collective": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/distributed/comm.py",
+      "bytes": 15443,
+      "sha256": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f"
+    },
+    "coefficient_producer": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_native_bf16_qk.py",
+      "bytes": 7946,
+      "sha256": "42a5c7c45bd750f1b489f2fa89a4cb66a3946867b90b231097f3533946264014"
+    },
+    "baseline_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 11282,
+      "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+    },
+    "combined_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_qk_combined.py",
+      "bytes": 10212,
+      "sha256": "80cc9509e008f9a28255cfcbb29a1f0c8601b930f4726db0e6daa29f7864634f"
+    },
+    "padded_consumer_hook": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 32237,
+      "sha256": "3a189a2bdeb60ca001007424bb329efb863693e97b338ac997cd6dcb3543ada6"
+    }
+  },
+  "per_case_checks": [
+    "expanded_coefficients",
+    "captured_reference_hccl",
+    "baseline_send_and_receive",
+    "sentinel_send",
+    "full_arena_after_pack",
+    "sentinel_receive",
+    "full_arena_after_hccl",
+    "fresh_owner_extent_offset_and_distinctness",
+    "fresh_sends_and_receives",
+    "first_owner_not_overwritten",
+    "full_source_and_reference_owners",
+    "source_descriptors_unchanged",
+    "missing_snapshot_refuses_without_producer_mutation"
+  ],
+  "total_check_groups": 2496,
+  "rank_results": [
+    {
+      "rank": 0,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank0.json",
+        "bytes": 49978,
+        "sha256": "6adc533dffe45f46a3d37e67db90c55cacda5aa9ebdd48e0414cb72c7477ae1e"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p0_l00.json",
+            "bytes": 11043,
+            "sha256": "582e0b7b99e43f42eb31fb5f42e13daae0579a997faba15b26aec5acf47e6f50"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p1_l00.json",
+            "bytes": 11042,
+            "sha256": "8409c0d33e7bb69c24d1fc9e50a9d0ce194c1843b6e169915c7c53bfd8e7681c"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p2_l00.json",
+            "bytes": 11042,
+            "sha256": "96972c700ba9ea51926f8e4f2f2dd9a521972415585bb2bcb26b090e33688a42"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p3_l00.json",
+            "bytes": 11041,
+            "sha256": "40fe45e916cee2bf47a3cc45a3d7575d25fd448d12da8c7056860454b33d5954"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv9360_p0_l00.json",
+            "bytes": 11069,
+            "sha256": "46d868ec5e291c407fb36d2202cceaac193cf375c36bd3530f0f96d26c0d202c"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv9360_p1_l00.json",
+            "bytes": 11068,
+            "sha256": "c8bc4280075829c77c71b10878db56fcfb7881763ab94861775b5d59401c12cd"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv9360_p2_l00.json",
+            "bytes": 11068,
+            "sha256": "24834bf5645280c6d7ccfeea319b01e2ab761dd9931feaf235bb60743bbc68f5"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv9360_p3_l00.json",
+            "bytes": 11067,
+            "sha256": "8300e6820f8e9a5e0eb2c5a0aac600947f75c4bc3cf4976c17697485bf2eed41"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv14040_p0_l00.json",
+            "bytes": 11094,
+            "sha256": "539dae3e45d1b6102aa6a211d6363bcf20d67a5f28ffcda506efb170362d23a0"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv14040_p1_l00.json",
+            "bytes": 11093,
+            "sha256": "e4e49b97cba9ecf7a34d58c869e5f67159d7a565d921e9d53f11b4d017a08bde"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv14040_p2_l00.json",
+            "bytes": 11093,
+            "sha256": "efe49498260d13baf18c9eec8d22530dff72da81f139cfe1770415bcca3aa9e5"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv14040_p3_l00.json",
+            "bytes": 11092,
+            "sha256": "64c113e73624ef3fa224614e1076efb900951217db7ccadecbaac57ea9b964eb"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv18720_p0_l00.json",
+            "bytes": 11118,
+            "sha256": "029175167aac55bcd289fbd963ba70c85a20e943cfd7b57d9528433343a50c9f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv18720_p1_l00.json",
+            "bytes": 11117,
+            "sha256": "802e907c972815974444d64b188a38cf6229104af6a1d0f0aecc4750a1562175"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv18720_p2_l00.json",
+            "bytes": 11117,
+            "sha256": "d8ad2ee9f3c3ec3cf22e9e74025f61d65945831dbd6dbe5b936bc619dc6965d2"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv18720_p3_l00.json",
+            "bytes": 11113,
+            "sha256": "c594f9f6b7e3835aa9c076b52ce50875a63db055060e57829cde14297f4d1d19"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv23400_p0_l00.json",
+            "bytes": 11139,
+            "sha256": "941eb9e41f6e2f07952601237178a31f66abc5158e7d60ea415510e35388895d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv23400_p1_l00.json",
+            "bytes": 11138,
+            "sha256": "6684fb8e9d58c475408834a50dedf7788615d6533be80720de450ce1a6dde3ec"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv23400_p2_l00.json",
+            "bytes": 11138,
+            "sha256": "8722add582f29fb9a484b386d46ae87fcc94de5c15d3ddc42d0b8a42de141277"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv23400_p3_l00.json",
+            "bytes": 11134,
+            "sha256": "6cbb1ecec51e8015441becafa4890f1cb281316cbbd4fa6e64279d6d7ba32854"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv28080_p0_l00.json",
+            "bytes": 11160,
+            "sha256": "d831308fa205a74170ed34d3a832d386603eaa0c22557e7cffadfbcb1f36d812"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv28080_p1_l00.json",
+            "bytes": 11159,
+            "sha256": "5bfc46046ea3524e859aa9af413c6997f79c06a09a05697c782659e2bd8efe70"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv28080_p2_l00.json",
+            "bytes": 11159,
+            "sha256": "f2082361c3ab6377c098b1fe64ebe8230000542930324a236980d72c8468f551"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 0,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv28080_p3_l00.json",
+            "bytes": 11155,
+            "sha256": "29e4924fec40111c4fa251c11dc47ebf36c12239a93809cd223733690c2dab9a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    },
+    {
+      "rank": 1,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank1.json",
+        "bytes": 49978,
+        "sha256": "7c23179eb1f4054d483770962d9c9a12bccd1989dd32ab988e69ab602d00f919"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv4680_p0_l00.json",
+            "bytes": 11051,
+            "sha256": "1d3f607767f574266f42634b15a0a4dd16b50d6e05e5c0053563dd125ed2dc38"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv4680_p1_l00.json",
+            "bytes": 11050,
+            "sha256": "2897bc3d5faa6e97395ce0eed3cba245e050a62c9aa6f4b241ae70c493e420ed"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv4680_p2_l00.json",
+            "bytes": 11050,
+            "sha256": "75dd5278c1b685e0a7c8663baa43c4aafa16cc8f766b1b35435f5db5a0b04ce3"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv4680_p3_l00.json",
+            "bytes": 11049,
+            "sha256": "a6d79fc8aacbe53f98f6b19f1308072bbc267eee633d35c0090c243579dcf633"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv9360_p0_l00.json",
+            "bytes": 11077,
+            "sha256": "cb20bc4f47b678b9adad309aabf45a73893cc130100cdef24812485873d6a828"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv9360_p1_l00.json",
+            "bytes": 11076,
+            "sha256": "12ea4f872125bf5b264e8d798075d4f47dbd12cd30cd8f9f8f6457f6b27af4a3"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv9360_p2_l00.json",
+            "bytes": 11076,
+            "sha256": "bfe9de717c4334761e0b6b4e06fec7b7978df4fbcc054cd30cd67527a1ccb5dc"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv9360_p3_l00.json",
+            "bytes": 11075,
+            "sha256": "e4dbeac77098d03787bd30a95b9e5f175bce363c636ddb7b38664e71c0d1e108"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv14040_p0_l00.json",
+            "bytes": 11102,
+            "sha256": "2d5a0fba0cf60d6a66bec5299dbca2085a9a70f09469ee11e555e04608db3af4"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv14040_p1_l00.json",
+            "bytes": 11101,
+            "sha256": "913a79b93154dcf03be2ae2e1e9be6a0cd6198c188027f12d01e1d747298190a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv14040_p2_l00.json",
+            "bytes": 11101,
+            "sha256": "d699efb368ffa4b9468cce88fe6b21aa02a385a74d089c27cf2f79134cbdb77f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv14040_p3_l00.json",
+            "bytes": 11100,
+            "sha256": "9595b34fc5505c001de9f121863e15a2bb7ff4d1b9143af3ae8169d77065ae27"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv18720_p0_l00.json",
+            "bytes": 11126,
+            "sha256": "ebbdc4b7344e421d86e8a1eb07a443ec905ec363b50f840626407ad0996cf905"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv18720_p1_l00.json",
+            "bytes": 11125,
+            "sha256": "21378863e5145108260aa38b14fcf83cdb87a73b48fea6cbb36e3d5e5ae5844d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv18720_p2_l00.json",
+            "bytes": 11125,
+            "sha256": "07f41d4ace4070db3fd3c2630504ebad490dd90b50d3355ff4c353217f7ce0ca"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv18720_p3_l00.json",
+            "bytes": 11121,
+            "sha256": "5375544453e74616cc733e9598a66cc8e547ac8fb0f3d2124c90bdccb8a559c4"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv23400_p0_l00.json",
+            "bytes": 11147,
+            "sha256": "20f843fd82ecb88a969e4f1032a0817863f65226cb9814fa5abe81e7a3ccb287"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv23400_p1_l00.json",
+            "bytes": 11146,
+            "sha256": "2f9ebbf6e22550237c112099f93a7e79d4d56e0b6cfc874fc64a9ac7f38ca2d8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv23400_p2_l00.json",
+            "bytes": 11146,
+            "sha256": "c9728ed657b8cb409c4499bcf3259917b9a38d962c108863c3a948a8599a8620"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv23400_p3_l00.json",
+            "bytes": 11142,
+            "sha256": "232a771036f0f124925967a2b1718c8d52030ac9474a920d04d67f7285dbaed1"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv28080_p0_l00.json",
+            "bytes": 11168,
+            "sha256": "469b0b540e514f289453a4523c4a61ee79f3eca7fe1f4cc6543dca0d90e22c05"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv28080_p1_l00.json",
+            "bytes": 11167,
+            "sha256": "6977f74884058a213201d7e245e63947b7fcb66d6fd2280006e33466ab0c69ab"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv28080_p2_l00.json",
+            "bytes": 11167,
+            "sha256": "e975d750957907c80d05e7e4958ea5a54b5bebe6dcf55290756c047c693fa9cd"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 1,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank1/qk_kv28080_p3_l00.json",
+            "bytes": 11163,
+            "sha256": "8845da1eb10f846e2fdc597d97c9202480e46177611984fa8ec4b8945f2803f8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank2.json",
+        "bytes": 49978,
+        "sha256": "1d491136be27e3e74f91a9203dd75d2de93beb3818066feda252784600bb9b2e"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv4680_p0_l00.json",
+            "bytes": 11051,
+            "sha256": "4c0cba57399c239b54a80b9e0078f2e59578fc0bd75f9c8f88bd9a8a20cf77e3"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv4680_p1_l00.json",
+            "bytes": 11050,
+            "sha256": "8267e295c97384e7233027c941212f8b6265b2e38bd2d7526ab0ec2ec0c22600"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv4680_p2_l00.json",
+            "bytes": 11050,
+            "sha256": "fb03f6d7d92fc4d2ba5c1298a24464eeb11aaf253fc0396c9982aa3942ecce6b"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv4680_p3_l00.json",
+            "bytes": 11049,
+            "sha256": "39a19bbb811f7d723fcc8ab657d55f6082ef135329553e52fa6103b08329cbb6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv9360_p0_l00.json",
+            "bytes": 11077,
+            "sha256": "9e887a0327e9efe025c7f87a014a7c194d8eb997f1262fc5baf59615e5f93fb8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv9360_p1_l00.json",
+            "bytes": 11076,
+            "sha256": "3448dc84283bcce0ce40aa6a4eff1cd80e9d521688d46e51142f243de04e4b99"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv9360_p2_l00.json",
+            "bytes": 11076,
+            "sha256": "4fb72f7f7c86eabed5c101576eea77d2f1d97a3c4882c40598fccc3864dcde0a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv9360_p3_l00.json",
+            "bytes": 11075,
+            "sha256": "bfbd9d123a5b96402e07eca0cd4c246f58a89e98aea64f8249c0b1569c353918"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv14040_p0_l00.json",
+            "bytes": 11102,
+            "sha256": "7bd41ae014d31d61f96e3bc16128cd0136163ef508954750716d0cfba4649c4a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv14040_p1_l00.json",
+            "bytes": 11101,
+            "sha256": "a9ed6e252c247b801880866a8c99761f50ebbf5304d0f98797bbdff12309a9a6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv14040_p2_l00.json",
+            "bytes": 11101,
+            "sha256": "5936a83c97418530709267f42b53d67e106e1ddc06a3f094bb5f8f262a3934b2"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv14040_p3_l00.json",
+            "bytes": 11100,
+            "sha256": "cdd5dcd0a9b9b3de09eb715bac0f55b378c97651cfbaf03b706cb242fc8d7b63"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv18720_p0_l00.json",
+            "bytes": 11126,
+            "sha256": "50851c3331b4486343a1e8d8a8c215a7cfd7947ca12e0250b8e4c69b5fe698a2"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv18720_p1_l00.json",
+            "bytes": 11125,
+            "sha256": "0c8667c8c9e895d62f0e138a60f267314f0b0d96e2ce18eaacf8f3c282758aca"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv18720_p2_l00.json",
+            "bytes": 11125,
+            "sha256": "16e14b2ecf01e71ad0f6e8b6787f073472154792196fac9191f48772fee72607"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv18720_p3_l00.json",
+            "bytes": 11121,
+            "sha256": "20608e1d4f1c328196053db91315ac35aac3cd125f7377adcd14ecb33d55d1eb"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv23400_p0_l00.json",
+            "bytes": 11147,
+            "sha256": "bee0013e111e7c340059552760af65849bcc2a22b4a46e0eb33cdbcf31362e47"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv23400_p1_l00.json",
+            "bytes": 11146,
+            "sha256": "29761d4368a920d0291e340a1163bbe0ffefddc1e56748c5c9c3374f4d356027"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv23400_p2_l00.json",
+            "bytes": 11146,
+            "sha256": "70a07d597d6a206925e78ad584334abb4ee76a7f8a39ca8f4bf2bf17ec657df8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv23400_p3_l00.json",
+            "bytes": 11142,
+            "sha256": "dfce9babb55acca9b8158f846ad08b47eba090f776a21943f0f8009ee5a61bd6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv28080_p0_l00.json",
+            "bytes": 11168,
+            "sha256": "86a89ed583810efdce2b79e52e55ceda03e532cb35c591bb3c268a37d36969c7"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv28080_p1_l00.json",
+            "bytes": 11167,
+            "sha256": "02132b7f1175da38c8dde55891cbc36e8b754503bf71a2ec051dbd500445e917"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv28080_p2_l00.json",
+            "bytes": 11167,
+            "sha256": "2865d289d569168fa6542af75f21bafbdaa6b680863212f238df06a64fdb4997"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 2,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank2/qk_kv28080_p3_l00.json",
+            "bytes": 11163,
+            "sha256": "b81568fd62f20b71cec3284c4b908bb61b6c8c95860f72f0cf82ee3c408925c8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank3.json",
+        "bytes": 49978,
+        "sha256": "7c0c6a80fc60def6e67bfb2acb48ff0938786c009ac9abb52191fac1d0a1ea6c"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv4680_p0_l00.json",
+            "bytes": 11053,
+            "sha256": "c29d7e038e69c199e59db26d3d2a3cd5b10aca8f091645f082f0b4a9a045f3c9"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv4680_p1_l00.json",
+            "bytes": 11052,
+            "sha256": "810b2ba9ca150457b9e90de7c25ce045cd918bb58771a92289d08cd824c6784d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv4680_p2_l00.json",
+            "bytes": 11052,
+            "sha256": "648f80b527e6d8c39cb7808fdecd981ba3ab8dec1ad8c8488a3324298e6ae727"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv4680_p3_l00.json",
+            "bytes": 11051,
+            "sha256": "648d6eec9f897e5b179af094b60fbb20bc003f5dc0a9a123ed6d2b8a9f7cd232"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv9360_p0_l00.json",
+            "bytes": 11079,
+            "sha256": "f00e3bf7e09ea8feeb654c9803fc5fbbd492ae998faf0c51014b836ad6f18a44"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv9360_p1_l00.json",
+            "bytes": 11078,
+            "sha256": "a4676fd7e77ac024dad86c7f6f370f4b5f78ded54aaafc278e5fac814dfceab8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv9360_p2_l00.json",
+            "bytes": 11078,
+            "sha256": "e6ad0adc8eb02f5b9892e4dc112d86b4ad89ccb5831c14e9da55aa6222b770d2"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv9360_p3_l00.json",
+            "bytes": 11077,
+            "sha256": "57ad1c5351eb9ff9dbd8442f058ed2b44132466253b7f9a348d8f61f8f52e7c3"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv14040_p0_l00.json",
+            "bytes": 11104,
+            "sha256": "182be8ed24505ecc28794433fe923011084f9dd7f92fe98b5053dd96eff413b2"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv14040_p1_l00.json",
+            "bytes": 11103,
+            "sha256": "7d141b4600609a0d0ed4c889a12240482b2f1d01cbb3a78e9d3eaabcd5d3a532"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv14040_p2_l00.json",
+            "bytes": 11103,
+            "sha256": "222ac844160867bae6ca8ffdb4839bd8879cf7a1237d11f1bc28004d312e7f1f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv14040_p3_l00.json",
+            "bytes": 11102,
+            "sha256": "1a04fd88bbedfabeb218fbb5a8b5d210a9e18007eb04c7b134b0862920586f1d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv18720_p0_l00.json",
+            "bytes": 11128,
+            "sha256": "e4328113370c955ee0b5fc4bfbf60b830304b26a68cf776243251d39707ca88a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv18720_p1_l00.json",
+            "bytes": 11127,
+            "sha256": "1c1d1a64357642f62eef291592883b2335aab9ab1fe2090e72d301057fcea57d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv18720_p2_l00.json",
+            "bytes": 11127,
+            "sha256": "af6aca7a90a167beb969a86b93e5eecf140b2ecebf4f8314b4906ed0417483ae"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv18720_p3_l00.json",
+            "bytes": 11123,
+            "sha256": "19f335a47b1e7bf6b30667fcef19475d8304e61511b32bddb4f8bf3b18a63e33"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv23400_p0_l00.json",
+            "bytes": 11149,
+            "sha256": "71c3505a7b0b527252b72e4fb3eb73a17f8b48924232edebb2cd7917f582c531"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv23400_p1_l00.json",
+            "bytes": 11148,
+            "sha256": "b9cb9c596ee11110803b3274366104a5d5262ad3106fe883ad15c4dbd39a8ffd"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv23400_p2_l00.json",
+            "bytes": 11148,
+            "sha256": "852da8eaeaca7957a9fada60811ecf07cd7d52e94afa4d2f23bc4aee6b7c058a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv23400_p3_l00.json",
+            "bytes": 11144,
+            "sha256": "13b3e067abcc05cc9525eb87b322767fb20c2f2808e73c78f87ae4d2fb9c7173"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv28080_p0_l00.json",
+            "bytes": 11170,
+            "sha256": "57b2c27e768f765020908d79955b94dd5940b0480e9579b9844ac67e73616960"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv28080_p1_l00.json",
+            "bytes": 11169,
+            "sha256": "9ec521cb53d755c59ccff8aad7e46679ab816d297f7702eef9b4ec89ed193202"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv28080_p2_l00.json",
+            "bytes": 11169,
+            "sha256": "2fcf3610f30a92f2b52bac99bcc91bda55fdbe9ae8365a201dc2078a8c78fb20"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 3,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank3/qk_kv28080_p3_l00.json",
+            "bytes": 11165,
+            "sha256": "bc564c070dd3744b1bae7bfdffe0a02690cee6b105403204ba35ee1fd06f7576"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank4.json",
+        "bytes": 49978,
+        "sha256": "fe5b6d097ce5e6166f66290dbbb13e5a5b2dda0711ed3e970d0ac2214dbbe091"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv4680_p0_l00.json",
+            "bytes": 11053,
+            "sha256": "2e10b56bf2867df4a7c0ad27daa3effb119483d19815efe1eb0e4bef2f7a5b4c"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv4680_p1_l00.json",
+            "bytes": 11052,
+            "sha256": "75ad2f92516cc6c9816903b8be45ca55e4d2d5c03cea46a3f0e864ae374ecb0f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv4680_p2_l00.json",
+            "bytes": 11052,
+            "sha256": "463a4390d76ae658cbfc6a6461135246a2118eabb870077981957eb24c3bf6f9"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv4680_p3_l00.json",
+            "bytes": 11051,
+            "sha256": "208d2a2483ec726cf6551f5bfa9447a79daa4122ab79efb650d654f794cd975a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv9360_p0_l00.json",
+            "bytes": 11079,
+            "sha256": "5847b5a78e21994b35aaae82c5d18dc00b080d04843aa04cdcaa6166fd11a434"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv9360_p1_l00.json",
+            "bytes": 11078,
+            "sha256": "f417ae6b59e0a77a69881cdad2078a9549aee3666dab0451965e180ccc7a74c6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv9360_p2_l00.json",
+            "bytes": 11078,
+            "sha256": "02289afc5300f695b2f36e44f7176dbaf3d206e08ac8a476944a22507ad9440f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv9360_p3_l00.json",
+            "bytes": 11077,
+            "sha256": "98a56ed153d8e7603a29fc878247269f47e17870f6b2eea0b81328121858bbf3"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv14040_p0_l00.json",
+            "bytes": 11104,
+            "sha256": "ea4795e53704148c71e3ce8b95811318be2c0f0c83dfd5c4d1b5dd365def9b01"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv14040_p1_l00.json",
+            "bytes": 11103,
+            "sha256": "d9880745928d5069dc28c98f25002c8b56e9e1e31f3e654c62668ff1ef4dba93"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv14040_p2_l00.json",
+            "bytes": 11103,
+            "sha256": "c7816f470d28c7bbbce7e5fe48af14ad03f87adcbb13b4cb1627d8cd3d08b159"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv14040_p3_l00.json",
+            "bytes": 11102,
+            "sha256": "406caf4e34c620375532b9ca37be8209a2e0d09900e22db3121d78d24b55d3be"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv18720_p0_l00.json",
+            "bytes": 11128,
+            "sha256": "9af94581ff910c391d3f5112bc31e4499c55cf6933cdfe1ccb203a47a4a5606b"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv18720_p1_l00.json",
+            "bytes": 11127,
+            "sha256": "438d67fe911e5daf050f36d74d2dd0367b2982dd76cfa525ec2743be9867b661"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv18720_p2_l00.json",
+            "bytes": 11127,
+            "sha256": "a791abbd9ba606b871ac42f57020fbdeb0a9d0f2ae8e0bf1ad41af672d77093e"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv18720_p3_l00.json",
+            "bytes": 11123,
+            "sha256": "492902e26c2e5aaaede360f7d3a093f04c763188baf5f79b88a13ed3fc6dd9fd"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv23400_p0_l00.json",
+            "bytes": 11149,
+            "sha256": "b3bb1e50f907c1c76744685576d43d9420ce4f4f24a4a612abc207ee06890439"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv23400_p1_l00.json",
+            "bytes": 11148,
+            "sha256": "7f3260c067175fcde4d691f93ebdeda7fad42de3c5139a8d56bc37e2003deada"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv23400_p2_l00.json",
+            "bytes": 11148,
+            "sha256": "f83ae88af350f0a0d0300d5f4b8b4f8402f601e7458f28d44160f560471f2ecc"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv23400_p3_l00.json",
+            "bytes": 11144,
+            "sha256": "bda9ac7b993d7e2cc6d3638f0bd8d8d5a4b2a04d445f026f5c2f3061f2b49d27"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv28080_p0_l00.json",
+            "bytes": 11170,
+            "sha256": "47e80582fa42612a64c1314e467c138d6241539cc66cc7685a501f2748c68f6d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv28080_p1_l00.json",
+            "bytes": 11169,
+            "sha256": "ac9b8bd48586dcd0e2497f4993cc9a71928f6923471eb5dd18df57ad8d5fd91a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv28080_p2_l00.json",
+            "bytes": 11169,
+            "sha256": "ac8acbb0254545b945e3829fdf358f96cf89632efeb3bcaedc03f6d0fa098e0f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 4,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank4/qk_kv28080_p3_l00.json",
+            "bytes": 11165,
+            "sha256": "99f53d048966fcbffe0aeaa087c52fb3c3450e81bc25071ac6c1e7327e56be57"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank5.json",
+        "bytes": 49978,
+        "sha256": "a8e3bfaf93dafd35e45563ed37234ab20ad262dc1eea50bf9148ec8d54e6d195"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv4680_p0_l00.json",
+            "bytes": 11053,
+            "sha256": "60e8dde53b268f46243ed28f39fcbea2e6188a6e9ff1e57487f6e3066d5ffe13"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv4680_p1_l00.json",
+            "bytes": 11052,
+            "sha256": "0bf9084af4ad1c82dc6fe6f975fe789488c153b9e10c4838fc7bb74687f7a198"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv4680_p2_l00.json",
+            "bytes": 11052,
+            "sha256": "d782972571765c5afcff92122ee641356963bd32a66f92b09b425b1d816fb642"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv4680_p3_l00.json",
+            "bytes": 11051,
+            "sha256": "65e081d3bb0e62350f4735f739ebd5a8b48feb4646f6693fc335c909a14f2e46"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv9360_p0_l00.json",
+            "bytes": 11079,
+            "sha256": "ca948488aca8da0aeb435607654a536d7955b57d7e368e19f97af188711f7005"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv9360_p1_l00.json",
+            "bytes": 11078,
+            "sha256": "320ef9a58a44252e5e609e8377321026e768cb2f675f27fc8f44afe8352b8ebe"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv9360_p2_l00.json",
+            "bytes": 11078,
+            "sha256": "5fb3d6bc7d46f58935bf00f9c3da50c5f8991b7c7288a129a2073bacc5e3942f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv9360_p3_l00.json",
+            "bytes": 11077,
+            "sha256": "eb849e0b81177ce837ca43798d31d3a5a2931a87b9b5bcad6a499dfc8ba6f405"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv14040_p0_l00.json",
+            "bytes": 11104,
+            "sha256": "2e102588c6d2ddfb91482d6e6d7d81afabd776be80e6462204e06daf45ef07ef"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv14040_p1_l00.json",
+            "bytes": 11103,
+            "sha256": "38a02a40cfb3154c8f058767d5738fb7767b39f09e5c1cfe4aa5b26168f42e8e"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv14040_p2_l00.json",
+            "bytes": 11103,
+            "sha256": "0bd032415ca2d9703d39bffa25008d205d1a914baf4950e5371aeffc095b77c3"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv14040_p3_l00.json",
+            "bytes": 11102,
+            "sha256": "49c8dbe64861a426a8d47498b06ffb422deab4a41fca9e2e92afde17f5266b8a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv18720_p0_l00.json",
+            "bytes": 11128,
+            "sha256": "6b9c2ba9717220daa56e98e7a3cd3c3af4d5ecbd1fdffdb3fe66f905e6c3bbfd"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv18720_p1_l00.json",
+            "bytes": 11127,
+            "sha256": "e57e64e12a4e10de14671568e60fd8dd5c837b0886c37a1330f1358ee70dbce6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv18720_p2_l00.json",
+            "bytes": 11127,
+            "sha256": "43e4c2de57cbee37a1055e6fb16629321259409e1da6eaedf421f8b5165dd66f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv18720_p3_l00.json",
+            "bytes": 11123,
+            "sha256": "28f00b63ad7a992187995a88f3061035c860af9c8ba84d78381a81a4718cf64c"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv23400_p0_l00.json",
+            "bytes": 11149,
+            "sha256": "9a8a651a0a9519716c15847a14c9a6d2e5927249558dcc14cdc206b1ba1cc9e2"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv23400_p1_l00.json",
+            "bytes": 11148,
+            "sha256": "20c9fa28c967244eb4bcae2bfa333e7c8f73b7678e2404417e97a322666e660f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv23400_p2_l00.json",
+            "bytes": 11148,
+            "sha256": "6480977c7b4c3f80c686eb7fb91a9b2e73bf3a2d6e22744b832cbf66c32c49cd"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv23400_p3_l00.json",
+            "bytes": 11144,
+            "sha256": "7565379b67cfdd8b78d8f3cddbaf63d6e2d606b9c2d9bf69a0716c7d8d9493cb"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv28080_p0_l00.json",
+            "bytes": 11170,
+            "sha256": "8803478daa23a34a82a8a0258dcdfde0b3a8bca2bc4a12c5fe62da1fe6dc0111"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv28080_p1_l00.json",
+            "bytes": 11169,
+            "sha256": "480015d44db03b4aa68d843b2110aa592e6925a9f95d11c30c93b5c1a7a60ab8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv28080_p2_l00.json",
+            "bytes": 11169,
+            "sha256": "4a6e26dae22d47ec3c70211258087894cc3da3df50c1fbb9dc43e281eec0afce"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 5,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank5/qk_kv28080_p3_l00.json",
+            "bytes": 11165,
+            "sha256": "e20461070e9c895121d9a1ac310e89c54ea992a58230a996fcbe3d4fbc41042e"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank6.json",
+        "bytes": 49978,
+        "sha256": "b2ab94abe0f4df70714f59b38f6624a80332ed6191283842faaab7d3f192ae4b"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv4680_p0_l00.json",
+            "bytes": 11053,
+            "sha256": "ccc270f1b2341364217f9a83ed4322bbcb2ae0c5e0596c6e3e589981c2145b6e"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv4680_p1_l00.json",
+            "bytes": 11052,
+            "sha256": "fd562be5920ad7630e211ba185b32131b0bd1e90a48ac7ec82d9f23a45630fdb"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv4680_p2_l00.json",
+            "bytes": 11052,
+            "sha256": "3e3f06bf1d9f353b6c0c4ebf999bbdd7e9e6c9ef0da6508a29e826b2dd93a42e"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv4680_p3_l00.json",
+            "bytes": 11051,
+            "sha256": "f75c23cd163ff6893f636b97d0351aacaae19cee49155c0877c2079f33b253a4"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv9360_p0_l00.json",
+            "bytes": 11079,
+            "sha256": "9122f44baa3669087d3f36f1dfa154ecc8ce7321bfc9bf579e49f55590bedca1"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv9360_p1_l00.json",
+            "bytes": 11078,
+            "sha256": "a0f82c4d3fba0fc247fd765895083a1f9db4b5084b8586a5374daa723f946e51"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv9360_p2_l00.json",
+            "bytes": 11078,
+            "sha256": "3bae75c96a0d1d9f24386cb860a2ef57fbc90620c7d049351c53e0f565f02ca8"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv9360_p3_l00.json",
+            "bytes": 11077,
+            "sha256": "059128cb66821608b1ea95faabfb49f4c4dec94d9b40c68b64c28c5adc07204d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv14040_p0_l00.json",
+            "bytes": 11104,
+            "sha256": "a7d0934aab3e93854f0131784bbbc8a34d745eea647c46870357b9547c3bb7df"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv14040_p1_l00.json",
+            "bytes": 11103,
+            "sha256": "96a8d52d023d8b30d78647eb89f9cf0f4ef3259261377a9739e1e74ac185097a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv14040_p2_l00.json",
+            "bytes": 11103,
+            "sha256": "4a93e7bf5602a885975237517485ef066fef70978271c2fb1033f423c62b31fb"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv14040_p3_l00.json",
+            "bytes": 11102,
+            "sha256": "36fe40048fa00ab80b24dadaca2a93f39b5c3d15745b97f697d22945faac8315"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv18720_p0_l00.json",
+            "bytes": 11128,
+            "sha256": "d60c9009785ab0adf6c6c867fa3ae3cc66f38b8fe4f937dee27f7c17f0545201"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv18720_p1_l00.json",
+            "bytes": 11127,
+            "sha256": "411b63dd66e200c57cc86d41745d00dc11fe7cc3c7b9b79c43b30665ea0eb528"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv18720_p2_l00.json",
+            "bytes": 11127,
+            "sha256": "220127d52cf400a7d35f6daea5e1c143ebe93100bb7d17560957fc423ba79e41"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv18720_p3_l00.json",
+            "bytes": 11123,
+            "sha256": "971fe3fe96527d3ad9c273a4dae4d9b61300a7949c6a98da66c8fa6e9f5f2c2f"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv23400_p0_l00.json",
+            "bytes": 11149,
+            "sha256": "49edf5383c5e1f65f9b39256fde4282a88ef09e6e3ed8c99c4c6bf5fcbf8520b"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv23400_p1_l00.json",
+            "bytes": 11148,
+            "sha256": "2efffe4d7735b6ae55273da6b03b159145acd987a318ca78cffde61d25ca0370"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv23400_p2_l00.json",
+            "bytes": 11148,
+            "sha256": "1c155e7f97cad1b3ec43305c6ef4e0d17cc0d119012cd57e69eb0b16d9bdeee6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv23400_p3_l00.json",
+            "bytes": 11144,
+            "sha256": "ba59ac87e0e80b2071d86d381ca7f6752b700213e68ccbeb2e955c206af54ef9"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv28080_p0_l00.json",
+            "bytes": 11170,
+            "sha256": "3d4f1a6721e246d234e119f874193f80206b5566e94acd9512ed9e4997b8bb04"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv28080_p1_l00.json",
+            "bytes": 11169,
+            "sha256": "da2e80436c4baac8fe9d88d4523143e585edacb0af2b5d48ffcd2efd3eddd5f2"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv28080_p2_l00.json",
+            "bytes": 11169,
+            "sha256": "d70bb761e3330d70754b32bd00726b8660ad903ba497a54b6098bb1ffb5d8c16"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 6,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank6/qk_kv28080_p3_l00.json",
+            "bytes": 11165,
+            "sha256": "86f29c2a8997e791cd033c5bde562bcdc1e70d2b05be222aefc20d8c88de488e"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "report": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness/rank7.json",
+        "bytes": 49978,
+        "sha256": "bab958e485ad3ed5bb0cd496150a7004441006229b8126e4ce281d326b422e4f"
+      },
+      "real_cases": 24,
+      "checks_passed": 312,
+      "cases": [
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 161
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv4680_p0_l00.json",
+            "bytes": 11053,
+            "sha256": "dab13ddc80b33bdd1109e6166c6d341e2e9477f73d40eb91c9d3305f44f9364a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 162
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv4680_p1_l00.json",
+            "bytes": 11052,
+            "sha256": "b4c44c9336dbe04d1d339b7e85f134d981ef1001f0a038e6331ee4a055a80e72"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 163
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv4680_p2_l00.json",
+            "bytes": 11052,
+            "sha256": "4ef1b51dbcd026c09d12109d7c2625d4e1d53ec4030773912c22827e49a316a6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 0,
+            "kv_len": 4680,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 164
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv4680_p3_l00.json",
+            "bytes": 11051,
+            "sha256": "96779bc75ba25d21f75b67d8cfd80d581797b59833ea0f4f02a9cb8a52d6cec6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 165
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv9360_p0_l00.json",
+            "bytes": 11079,
+            "sha256": "c119748b0801b1f6eeaac22837a335c5cf10fa6d387b06ab71e14fce99f6d347"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 166
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv9360_p1_l00.json",
+            "bytes": 11078,
+            "sha256": "3d03a129801d104f89c1068aaa2f9fe517cd036ef6033e053a3e70a6c1413e29"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 167
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv9360_p2_l00.json",
+            "bytes": 11078,
+            "sha256": "666db95a8ec2ffcc6ed326981073a73c57b4b589487ace8e7950b38f91775730"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 1,
+            "kv_len": 9360,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 168
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv9360_p3_l00.json",
+            "bytes": 11077,
+            "sha256": "2eeeee372d14ee7b07e5d47b71dbcec125c35a495f6c76746c206f9b9815c436"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 169
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv14040_p0_l00.json",
+            "bytes": 11104,
+            "sha256": "bc4d4fc19914bfd6e49461994bba1c7206d85e3124a64d40477000be47405a45"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 170
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv14040_p1_l00.json",
+            "bytes": 11103,
+            "sha256": "d1890a4cd93c19a57739f915b17662a58ab8dede0a0be707346f618b6d3e45fc"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 171
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv14040_p2_l00.json",
+            "bytes": 11103,
+            "sha256": "f17e8c7bdbf37354398d94d335c5683dca33606a82cf7c85e17aaa434f8369a7"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 2,
+            "kv_len": 14040,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 172
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv14040_p3_l00.json",
+            "bytes": 11102,
+            "sha256": "a55779c696382db6b14cd405b121c8b67b253d8ac502e0fdb4575cb18ea8b8e0"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 173
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv18720_p0_l00.json",
+            "bytes": 11128,
+            "sha256": "7ced0cce77db417d965c04490e9ec470aa875eac9ca59d7aec5dbf4102aaf3c0"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 174
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv18720_p1_l00.json",
+            "bytes": 11127,
+            "sha256": "aa3099a4905b19236bd7602110fbddebd68fc07aa90900d244942ca4a7ae83ee"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 175
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv18720_p2_l00.json",
+            "bytes": 11127,
+            "sha256": "2a33ef74ad78edb99533ad3f7735e1d3532d6baf8b496ad876b195b569f9898a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 3,
+            "kv_len": 18720,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 176
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv18720_p3_l00.json",
+            "bytes": 11123,
+            "sha256": "904c606bd1b7384b0a8c50e7a767f05f536b951f7b58b19a26b8b06d737a0f56"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 177
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv23400_p0_l00.json",
+            "bytes": 11149,
+            "sha256": "68ea120a9cdf7b52dfce566c82ef825d59eb4e37111e3b1680746c896509ac0d"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 178
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv23400_p1_l00.json",
+            "bytes": 11148,
+            "sha256": "2f5c3a3fa806cf64dc86b17641969bf2860a8322fdaea579d6093068a6b031e0"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 179
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv23400_p2_l00.json",
+            "bytes": 11148,
+            "sha256": "5ed33ae688df452133e8992dddf20f1542f62cda9ac02681fa89a58a9c07d858"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 4,
+            "kv_len": 23400,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 180
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv23400_p3_l00.json",
+            "bytes": 11144,
+            "sha256": "932e05c473468b87d64e3dc9e2163a952757c5bee59c44e516223b33c6d89e4c"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 0,
+            "layer": 0,
+            "coefficient_generation": 181
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv28080_p0_l00.json",
+            "bytes": 11170,
+            "sha256": "926e3e2d589882b3ca1a4d0f8206994cdda07b48a1e84a21ef1be2fd6b9b4e2a"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 1,
+            "layer": 0,
+            "coefficient_generation": 182
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv28080_p1_l00.json",
+            "bytes": 11169,
+            "sha256": "21a5459a970f66a6a752263aca105c296c3df13c597215d5c9072260f4c81bd6"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 2,
+            "layer": 0,
+            "coefficient_generation": 183
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv28080_p2_l00.json",
+            "bytes": 11169,
+            "sha256": "667e3d906d08671d02ab21e1d9166762887441d55f1bbcdfa1e35df9457736c3"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        },
+        {
+          "identity": {
+            "rank": 7,
+            "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+            "chunk": 5,
+            "kv_len": 28080,
+            "probe": 3,
+            "layer": 0,
+            "coefficient_generation": 184
+          },
+          "fixture": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank7/qk_kv28080_p3_l00.json",
+            "bytes": 11165,
+            "sha256": "4fce8675c62fd415f39360107e71bb4413341b83566d128b49e1804a463c5522"
+          },
+          "checks_all_passed": true,
+          "full_owner_sha256_verified": true
+        }
+      ]
+    }
+  ],
+  "supervisor": {
+    "receipt": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-runs/10079ccc733d6e748c10604382cf8a71/result.json",
+      "bytes": 924,
+      "sha256": "7db895eae3c0787f5b46d7115f41bdbeea77f5778ba4978669da53cebc7b6cdc"
+    },
+    "result": {
+      "nonce": "10079ccc733d6e748c10604382cf8a71",
+      "leader": {
+        "pid": 1716206,
+        "uid": 1003,
+        "pgid": 1716206,
+        "start": 17438047
+      },
+      "command": [
+        "torchrun",
+        "--standalone",
+        "--nnodes=1",
+        "--nproc-per-node=8",
+        "recovery/check_qk_real_matrix.py",
+        "--execute",
+        "--mode",
+        "correctness",
+        "--fixtures",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures",
+        "--manifest",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-combined.4812aaf2/qk_combined_manifest.json",
+        "--output",
+        "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-real-matrix-checks/correctness"
+      ],
+      "mode": "correctness",
+      "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+      "fatal": null,
+      "exit_code": 0,
+      "remaining_owned_processes": []
+    },
+    "owned_leader_identity_present": false
+  },
+  "finite_proof": {
+    "receipt": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/validation/qk-real192-finite-implication-20261013.json",
+      "bytes": 432236,
+      "sha256": "ac711fdc22bb82add36241438b10492d2014fbb4e8481ac8f28a833f8e14d10d"
+    },
+    "all_logical_inputs_finite": true,
+    "captured_native_send_finite": true,
+    "candidate_finite_proven_by_bitwise_implication": true,
+    "candidate_isfinite_kernel_executed": false,
+    "padding_finite_claim": false
+  },
+  "pure_arithmetic_bitwise": true,
+  "full_source_owner_bytes_verified": true,
+  "full_arena_and_canaries_after_pack_and_hccl": true,
+  "fresh_independent_owner_verified": true,
+  "model_admitted": false,
+  "performance_gate_passed": false,
+  "historical_single_host_binary_identity_proven": false,
+  "limitations": [
+    "Only actual layer0 payload; other39 layers have descriptors only",
+    "Isolated producer/admission/lease/collective path; no model or service startup coverage",
+    "No actual one-queue identity or timing gain claimed",
+    "Production fresh owners have uninitialized canaries; initialized test-only full arena shares the candidate executor/pack implementation",
+    "Finite proof is independent CPU inspection of captured logical values plus candidate bitwise equality"
+  ]
+}

@@ -27,6 +27,7 @@ def check(root, *, hash_payloads=False):
     expected = {(kind, length, probe, layer) for kind in ('qk', 'cross')
                 for length in contract.LENGTHS for probe in range(4) for layer in range(40)}
     total_owners, total_bytes = set(), 0
+    owner_hashes = {}
     manifests, helper_pins, rank_locations = set(), set(), []
     for rank in range(8):
         directory = root / f'rank{rank}'
@@ -44,6 +45,7 @@ def check(root, *, hash_payloads=False):
         keys = set()
         for name in coverage['cases']:
             case = json.loads(local_file(directory,name).read_text())
+            need(case.get('schema') == 'lingbot_real_fixture_case_v1', 'Invalid case schema')
             key = (case['kind'],case['kv_len'],case['probe'],case['layer'])
             need(key in expected and key not in keys and case['rank'] == rank, 'Duplicate/invalid case identity')
             keys.add(key)
@@ -54,6 +56,11 @@ def check(root, *, hash_payloads=False):
             need(case['full_sources_unchanged'] is (True if payload else None), 'Source byte proof is mislabeled')
             receipt = case['dispatch_receipt']
             expected_op = 'qk_send' if key[0] == 'qk' else 'cross'
+            wanted_inputs = ({'qkv','query_weight','key_weight','cosine','sine','expanded_cosine','expanded_sine'}
+                             if key[0] == 'qk' else {'query','key','value'})
+            wanted_outputs = {'native_send'} if key[0] == 'qk' else {'native_output'}
+            need(set(case['inputs']['descriptors']) == wanted_inputs
+                 and set(case['outputs']['descriptors']) == wanted_outputs, 'Missing actual operand/output')
             need(receipt['provider_operation'] == expected_op and receipt['dispatch_count'] == 1
                  and receipt['operands_identical'] and receipt['output_identical']
                  and receipt['build_manifest_sha256'] == coverage['build_manifest']['sha256'],
@@ -61,13 +68,22 @@ def check(root, *, hash_payloads=False):
             for section in ('inputs','outputs'):
                 snap = case[section]
                 need(set(snap['descriptors']) == set(snap['view_owner_ids']), 'Missing view owner association')
+                owner_ids, allocations = {}, {}
                 for tensor,desc in snap['descriptors'].items():
                     contract.view_extent(desc)
-                    owner=snap['owners'][snap['view_owner_ids'][tensor]]
+                    oid=snap['view_owner_ids'][tensor]
+                    owner=snap['owners'][oid]
+                    allocation=(desc['device'],desc['storage_data_ptr'],desc['storage_bytes'])
+                    identity=(*allocation,desc['dtype'])
+                    need(oid not in owner_ids or owner_ids[oid]==identity,'Owner ID has inconsistent allocation')
+                    need(allocation not in allocations or allocations[allocation]==oid,
+                         'One captured allocation is split across multiple owner IDs')
+                    owner_ids[oid]=identity;allocations[allocation]=oid
                     need(owner['storage_bytes'] == desc['storage_bytes']
                          and owner['base_sizes'] == desc['base_sizes']
                          and owner['base_strides'] == desc['base_strides']
                          and owner['npu_format'] == desc['npu_format'], 'Owner descriptor mismatch')
+                need(set(owner_ids)==set(snap['owners']),'Unreferenced owner in fixture')
                 for owner in snap['owners'].values():
                     if not payload:
                         need(owner['raw_sha256'] is None and owner['relative_path'] is None,
@@ -82,8 +98,10 @@ def check(root, *, hash_payloads=False):
                             state=hashlib.sha256()
                             with path.open('rb') as handle:
                                 for block in iter(lambda:handle.read(1024*1024),b''):state.update(block)
-                            need(state.hexdigest()==digest, 'Owner payload hash mismatch')
+                            owner_hashes[path] = state.hexdigest()
                         total_owners.add(path);total_bytes+=path.stat().st_size
+                    if hash_payloads:
+                        need(owner_hashes[path]==digest, 'Owner payload hash mismatch')
         need(keys == expected, 'Missing real case descriptors')
     need(len(manifests)==1 and len(helper_pins)==1, 'Ranks use different source/build pins')
     need(all(loc == rank_locations[0] for loc in rank_locations), 'Rank actual history/probe locations differ')

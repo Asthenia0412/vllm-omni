@@ -1,0 +1,72 @@
+QK combined admission: actual192 three-round screen (2026-10-13)
+
+Outcome: strict performance screen FAILED in all three independent launches.
+All six scope/round combinations fail the predefined worst-case limit. The
+candidate is not a measured winner and this screen does not admit it to the model.
+
+Frozen method (agreed before results were read): for each real history/probe
+case and arm, take the maximum of eight ranks' means over all 30 wall calls.
+The scope aggregate weights its 24 case metrics equally. Every round and both
+scopes independently require aggregate combined/baseline <= 0.90, and every
+case ratio <= 1.05. Integer nanosecond sums implement the thresholds exactly.
+Worst per-rank ratios are a separate diagnostic. No outliers were removed;
+no round/scope pooling or after-the-fact threshold change was used.
+
+Round / scope                baseline_ms combined_ms improvement worst_case_B/A
+1 / producer + layer0 + HCCL   1.015754 0.923218 9.110% 1.139966
+1 / cached + layer0 + HCCL     0.961684 0.826558 14.051% 1.175503
+2 / producer + layer0 + HCCL   1.042186 0.957850 8.092% 1.118831
+2 / cached + layer0 + HCCL     0.970491 0.921761 5.021% 1.233649
+3 / producer + layer0 + HCCL   1.040245 0.967894 6.955% 1.246202
+3 / cached + layer0 + HCCL     0.965953 0.866714 10.274% 1.191411
+
+The producer-inclusive scope improves 6.96-9.11%, below the 10% aggregate
+requirement in each round. The cached scope improves 5.02-14.05%; only rounds
+1 and 3 meet its aggregate limit. Worst-case regressions remain 11.88-24.62%
+for the producer-inclusive scope and 17.55-23.36% for the cached scope.
+These are complete-call operator results with unchanged HCCL and receive
+reorder. They cannot be multiplied by 40 or converted into a chunk benefit.
+
+Evidence and scope:
+- Eight ranks x four probes x six actual KV lengths 4680..28080 = 192 real
+  layer0 cases. All40 descriptors exist in the capture, but all40 layer
+  payloads were not replayed; layer0 was not duplicated to stand in for them.
+- Every timing rank binds the same fixture matrix, exact case identities,
+  candidate/provider build manifests, eight correctness receipt hashes and
+  frozen source pins. Four distinct supervised launches exited naturally
+  with code0, no fatal marker and no remaining owned processes.
+- Timing uses 20 warmups, a 30-call wall batch and a separate 30-call event
+  batch. Producer generations advance80 in the producer-inclusive scope and
+  remain unchanged in the cached scope, matching the frozen harness contract.
+- For each sample index, eight ranks participate in one correlated collective.
+  These are 30 collective samples, not 240 independent samples. Rank host
+  start/return/end skews, wall interval union/envelope and per-rank means are
+  reported separately. Host timestamps do not prove device collective entry.
+- Wall/event measurements are not added, and host wait is not added to kernel
+  time. Union/envelope diagnostics do not estimate communication transfer.
+- Correctness receipts establish the harness' captured-reference, full-owner,
+  arena/canary, lease, descriptor and HCCL checks. No end-to-end performance,
+  historical single-host identity, video-quality admission or statistical
+  significance claim follows from this operator screen.
+- Seven synthetic CPU tests passed: metric ordering, exact threshold/outlier
+  retention, distinct per-rank diagnostic, separate event batch, malformed
+  sample/producer contract rejection, interval union and host-clock mismatch.
+
+Compact evidence (versioned, including all24 case metrics per scope/round):
+  recovery/validation/qk-real192-three-round-screen-20261013.json
+Full derived per-sample diagnostics (19.9 MB; not copied into git):
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/actual192-aggregate-v1.json
+Pre-read aggregator freeze:
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/actual192-aggregator-frozen-before-read.json
+Aggregator SHA256: 4f06e233fb36bf849f536d625f1e971c04ecbd35084d01a9bb02d74808dfda24
+Test SHA256: e7d44f6a9012b8f66f4bc4efd67cb86bdb6366a22deb9c8c35894e5369434799
+
+Reproduce with recovery/aggregate_qk_real_matrix.py using correctness-dir
+ROOT/qk-real-matrix-checks/correctness, correctness-run
+ROOT/qk-real-matrix-runs/10079ccc733d6e748c10604382cf8a71,
+--timing-dirs ROOT/qk-real-matrix-checks/timing-round1 through timing-round3,
+and --timing-runs in this order:
+  ROOT/qk-real-matrix-runs/e3106e788c79fcfb3b9c37ef99c3bfe8
+  ROOT/qk-real-matrix-runs/7e95868bbf8f8a9d2962a3bfecc1331d
+  ROOT/qk-real-matrix-runs/cc560e82f15daccdd62a79a3a9ff54f8
+with --output pointing to a new file. ROOT is /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012.

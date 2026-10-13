@@ -1,0 +1,55 @@
+NPU async metadata: deferred experiment and CPU audit (2026-10-13)
+
+Do not enable until the restored cross + QK full baseline is established.
+First AB changes only VLLM_LINGBOT_NPU_ASYNC_METADATA=0/1, with diagnostics off.
+Keep the historical 228 engine/distributed/entrypoint/worker files unchanged.
+
+The current LingBot path performs four metadata H2D copies per DMD probe:
+video slot mapping, block table, query offsets and sequence lengths. DMD4 gives
+16 copies/chunk. Indexed hidden_states.device is passed before all40 layers.
+Fresh device destinations belong to the forward context. Process-global pinned
+host slots remain immutable until their per-copy event finishes; no destination
+pooling is used. Reset/new-request can retain bounded host allocation (2MiB,
+24 slots,6 signatures per device), but reuse fills current source values.
+Abort cleanup already synchronizes before releasing pages. Preserve serialized
+worker/tick lifecycle boundaries and eager same-stream metadata consumption.
+
+CPU result:16 injectable fake-callback checks passed without torch imports or
+NPU initialization. Checks cover inflight owner immutability, event-gated reuse,
+independent destinations/new-request values, oldest-copy backpressure, bounds,
+copy/record/query failure poisoning, and producer-thread refusal. This does not
+prove real CANN copy/event semantics or model correctness.
+
+No demonstrated same-stream stale-metadata bug was found. A concrete performance
+limitation was reproduced: once6 resident signatures fill the signature budget,
+new signatures fall back synchronously even when old events are complete, because
+signature admission precedes inactive-slot retirement. Capture fallback counters;
+do not combine a pool-policy fix into the initial env-only AB without evidence.
+The helper alone does not issue restart-eight fatal reports. Failure injection
+must confirm the existing supervisor terminates a partly failed run. Capture and
+cross-stream consumers are outside this experiment's admission; creating a source
+lifetime event does not automatically establish a different consumer's dependency.
+
+Deferred gates, owned by root:
+1. Real metadata on all8 dies: initial/steady chunks,4 probes,6 history lengths,
+   scratch vs managed slots and sliding. Exact destination/source values, actual
+   dtype/format/extent/version checks; no skipped metadata or inference changes.
+2. Isolated delayed-copy/1-2-slot pressure and post-submit event failure tests:
+   no early host mutation, no live destination reuse, terminal poison and restart8.
+3. Device proof of H2D-to-consumer ordering on the original stream, with complete
+   event/backend evidence; never infer this from async_op/non_blocking alone.
+4. Paired80-chunk all-rank latent and pre-encode RGB equality, then cancel,
+   disconnect, reset, warm-to-fresh, immediate new request and prompt-update tests.
+5. A1/B1/B2/A2/A3/B3 service screening (warm40+161,window11-159), then only a winner
+   proceeds to3x warm40+600 and mean<=900ms/P99<=950ms per run. Report full chunk
+   latency and rank arrival spread; pool counters outside the timed interval.
+
+The old four trace waits1.2/2.0/25.6/36.7ms are not savings. Determine whether
+async copies let useful work move earlier or merely move the wait to consumption,
+RGB or chunk completion. RGB waits can overlap VAE. Align rank timelines and
+avoid counting host waiting plus the kernels it waits for twice.
+
+Machine-readable evidence and source SHA pins:
+  recovery/validation/metadata-transfer-cpu-audit-20261013.json
+Detailed local report (not a deployment dependency):
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/metadata-transfer/AUDIT.txt

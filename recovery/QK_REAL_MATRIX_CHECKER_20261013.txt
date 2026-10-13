@@ -1,0 +1,67 @@
+QK real matrix checker — new standalone method, no model admission
+
+Scope
+  check_qk_real_matrix.py uses load_real_fixtures.py to replay24 actual layer0
+  inputs per rank: lengths4680/9360/14040/18720/23400/28080 × probes0..3.
+  All8 ranks submit in that exact order. No missing case synthesis or40-layer
+  payload claim. Other layers in the capture have descriptors only. The source
+  capture is a correctness run and its durations are never used for timing.
+
+Correctness
+  Each case independently verifies regenerated expanded coefficients against
+  the captured expansion, baseline and combined send against actual native_send,
+  and the original all_to_all_5D collective/receive order. The sentinel allocation
+  is filled before candidate execution; complete arena including256-element
+  prefix/suffix canaries is checked both after pack and after original HCCL.
+  Two simultaneously live production leases must have independent full padded
+  owners (offset256, extent8986112 BF16), with both sends/receives bit-identical.
+  Full captured input AND reference output owners remain unchanged, not just
+  their logical tensor slices. A missing producer snapshot refuses without
+  advancing/allocating that snapshot. Guards remain active under python -O.
+  The per-rank receipt claims24 passed; only validation of all8 matching receipts
+  establishes actual192 candidate correctness. Supervisor exit/fatal/owned-PID
+  cleanup receipts remain necessary operational evidence outside this checker.
+
+Timing method phase_barrier_then_sync_per_call_sync_v2
+  Not directly comparable with the old8 method: it adds explicit phase-boundary
+  dist.barrier then NPU synchronize, without per-sample barriers. Full call is
+  coefficient producer (separate scope), Python policy/admission, native RMS/RoPE
+  and pack, lease creation, the unchanged HCCL/receive, and consumer guards.
+  Each scope/arm gets20warm/30wall/30event calls. Every wall call retains pre/post
+  NPU synchronization; each event call waits for its end event. Event samples are
+  a separate batch, so wall/event times must not be subtracted sample-by-sample.
+  Wall/event reports include absolute local monotonic start/return/end ns; ranks
+  share one host/boot ID. This exposes arrival skew without inventing a common
+  host-call start. Eight ranks ×30 values are30 coupled collective samples,
+  not240 independent samples. Per-call sync changes normal model submission.
+  Producer scope prepares coefficients anew for each call; cached scope reuses
+  one snapshot only for repeated calls of this same captured case. The replay
+  counter is fresh and is explicitly separate from actual captured generation.
+  Rounds1/3 use A→B and round2 B→A. All3 fresh supervised processes are required
+  for screening; no automatic >=10% admission or model speed claim is emitted.
+  The streamed/grouped40-layer diagnostic is deliberately absent.
+
+Commands (root owns device scheduling; substitute current immutable manifests)
+  source recovery/env.sh
+  export ASCEND_RT_VISIBLE_DEVICES=8,9,10,11,12,13,14,15
+  export OMP_NUM_THREADS=8
+  python -O recovery/test_qk_real_matrix_cpu.py
+
+  python recovery/supervise.py --runs "$QK_MATRIX_RUNS" \
+    --manifest "$CURRENT_PROVIDER_MANIFEST" --mode correctness -- \
+    torchrun --standalone --nnodes=1 --nproc-per-node=8 \
+    recovery/check_qk_real_matrix.py --execute --mode correctness \
+    --fixtures "$REAL_MATRIX_FIXTURES" --manifest "$CURRENT_QK_MANIFEST" \
+    --output "$QK_MATRIX_CORRECTNESS"
+
+  # Repeat with separate fresh supervisor invocations and output paths for1..3.
+  python recovery/supervise.py --runs "$QK_MATRIX_RUNS" \
+    --manifest "$CURRENT_PROVIDER_MANIFEST" --mode timing -- \
+    torchrun --standalone --nnodes=1 --nproc-per-node=8 \
+    recovery/check_qk_real_matrix.py --execute --mode timing --round 1 \
+    --fixtures "$REAL_MATRIX_FIXTURES" --manifest "$CURRENT_QK_MANIFEST" \
+    --correctness-dir "$QK_MATRIX_CORRECTNESS" --output "$QK_MATRIX_ROUND1"
+
+  Timing refuses unless all8 correctness receipts pin the same192 metadata files,
+  full-owner validation, candidate manifest, harness/loader and runtime sources.
+  No device work, correctness success, or speed gain is implied by CPU tests.

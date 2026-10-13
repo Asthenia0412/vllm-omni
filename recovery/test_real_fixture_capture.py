@@ -132,6 +132,9 @@ class MatrixAuditContract(unittest.TestCase):
         names=[f'{kind}_{length}_{probe}_{layer}.json' for kind in ('qk','cross')
                for length in module.LENGTHS for probe in range(4) for layer in range(40)]
         corrupted=[False]
+        reused_path_wrong_hash=[False]
+        empty_operands=[False]
+        split_alias=[False]
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             for rank in range(8):
@@ -148,13 +151,25 @@ class MatrixAuditContract(unittest.TestCase):
                 payload=layer==0
                 desc=dict(npu_format=2,origin_format=2,base_sizes=[1],base_strides=[1],physical_sizes=[1],
                           shape=[1],stride=[1],storage_offset=0,element_bytes=2,storage_bytes=2,
-                          storage_data_ptr=4096,data_ptr=4096)
+                          storage_data_ptr=4096,data_ptr=4096,device=f'npu:{rank}',dtype='torch.bfloat16')
                 owner=dict(storage_bytes=2,base_sizes=[1],base_strides=[1],npu_format=2,
                            raw_sha256=digest if payload else None,relative_path='owner.u8' if payload else None)
-                snap=dict(descriptors=dict(x=desc),owners=dict(owner000=owner),view_owner_ids=dict(x='owner000'))
-                return json.dumps(dict(kind=kind,kv_len=length,probe=probe,layer=layer,rank=rank,request_id='r2',
+                if reused_path_wrong_hash[0] and payload and probe==1:
+                    owner['raw_sha256']='0'*64
+                input_names=(['qkv','query_weight','key_weight','cosine','sine','expanded_cosine','expanded_sine']
+                             if kind=='qk' else ['query','key','value'])
+                output_names=['native_send'] if kind=='qk' else ['native_output']
+                def snap(names):
+                    if empty_operands[0]:return dict(descriptors={},owners={},view_owner_ids={})
+                    value=dict(descriptors={name:desc for name in names},owners=dict(owner000=owner),
+                               view_owner_ids={name:'owner000' for name in names})
+                    if split_alias[0] and len(names)>1:
+                        value['owners']['owner001']=owner
+                        value['view_owner_ids'][names[-1]]='owner001'
+                    return value
+                return json.dumps(dict(schema='lingbot_real_fixture_case_v1',kind=kind,kv_len=length,probe=probe,layer=layer,rank=rank,request_id='r2',
                     chunk=length//4680,payload_present=payload and not corrupted[0],source_descriptors_unchanged=True,
-                    full_sources_unchanged=True if payload else None,inputs=snap,outputs=snap,
+                    full_sources_unchanged=True if payload else None,inputs=snap(input_names),outputs=snap(output_names),
                     dispatch_receipt=dict(provider_operation='qk_send' if kind=='qk' else 'cross',dispatch_count=1,
                                           operands_identical=True,output_identical=True,build_manifest_sha256='build')))
             with patch.object(Path,'read_text',read),patch.object(self.checker,'local_file',lambda d,n:d/n):
@@ -165,6 +180,16 @@ class MatrixAuditContract(unittest.TestCase):
                 self.assertFalse(result['model_admitted'])
                 corrupted[0]=True
                 with self.assertRaisesRegex(ValueError,'mislabeled'):self.checker.check(root)
+                corrupted[0]=False
+                reused_path_wrong_hash[0]=True
+                with self.assertRaisesRegex(ValueError,'hash mismatch'):
+                    self.checker.check(root,hash_payloads=True)
+                reused_path_wrong_hash[0]=False
+                empty_operands[0]=True
+                with self.assertRaisesRegex(ValueError,'Missing actual operand'):self.checker.check(root)
+                empty_operands[0]=False
+                split_alias[0]=True
+                with self.assertRaisesRegex(ValueError,'split across'):self.checker.check(root)
 
 
 if __name__=='__main__':unittest.main()
