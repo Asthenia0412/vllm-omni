@@ -1,0 +1,116 @@
+QK repeatable pool, fixed 24 plans: correctness passed; performance rejected
+2026-10-13
+
+The fresh 192-input correctness run passed, and all three timing launches
+completed without pool exhaustion. Neither complete-call scope passed the
+agreed performance gate in any round. This route remains default-off and is
+not admitted to model testing. These are operator/consumer timings, not chunk
+latency, end-to-end FPS or a reproduction of the historical single-host result.
+
+Versioned evidence:
+  recovery/validation/qk-repeatable-cap24-screen-20261013.json
+Full frozen aggregation:
+  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-repeatable-cap24-v1/three-round-summary.json
+  SHA256 910aa4d74d88112b0dc8ce01ed75f699622c37b6d1d43be64aa6a0b80970fbae
+
+Complete-call screen
+
+Each case metric is max over eight ranks of that rank's mean of all 30 wall
+samples. Each round/scope metric is the equal-weight mean of its 24 case metrics.
+The gate requires pool/baseline <=0.90 and every case ratio <=1.05, separately
+for both scopes in all three rounds. Decisions use exact integer nanosecond sums.
+Each arm has 20 warmup calls, 30 wall calls and a separate 30-event batch. The
+original warmup has no per-call drain. Arm order is A/B, B/A, A/B across rounds.
+Scopes include original HCCL and receive processing. Producer additionally
+refreshes the coefficient snapshot per call; cached reuses the same real case's
+snapshot. Producer cost is not multiplied by 40.
+
+round scope      baseline ms  pool ms   ratio      worst-case ratio  failed /24
+1     producer    1.076844    1.115206   1.035625       1.244877          11
+1     cached      1.013003    1.017940   1.004874       1.406827           8
+2     producer    1.093495    1.151386   1.052941       1.359844          11
+2     cached      1.013069    1.033244   1.019914       1.275006           8
+3     producer    1.060572    1.084702   1.022752       1.318872           6
+3     cached      0.973436    0.982013   1.008811       1.347332           6
+
+Producer wall aggregate is slower by 3.563%, 5.294%, 2.275%; cached is slower
+by 0.487%, 1.991%, 0.881%. Every scope/round fails both the aggregate and worst-
+case requirements. No ranks, cases or outliers were excluded and rounds were
+not pooled. Eight ranks share correlated collective samples, not 240 independent
+samples. Per-call synchronization and rank arrival affect these measurements.
+
+Separate event ratios (descriptive only) are producer 1.026317/1.039980/0.999716
+and cached 0.971296/1.039897/0.993757. They do not override the wall-call gate;
+host and event durations are not added. The complete aggregation retains sample
+timestamps, rank means and host arrival/return/end envelopes. These envelopes
+are host observations, not device collective arrivals or network transfer time.
+
+Correctness and lifecycle
+
+The new candidate is fixed to one provider-wide pool, 24 plans and 32 retirement
+slots. It uses the same frozen native v2 DSO and guard-only DSO as the earlier
+8-plan experiment, with a new adapter policy/source binding. Workspace is
+1,898,213,376 bytes =1810.27734375 MiB per rank, excluding other device storage.
+Physical dies 8..15 were exposed as logical ranks/devices 0..7.
+
+Fresh correctness: eight ranks x six actual KV lengths x four probes =192
+distinct layer-0 payload cases. All 15 categories passed per case (2880 checks):
+native/captured send and original-HCCL receive equality, full source/reference
+owners and descriptors, complete sentinel arena and canaries, offset-256 fresh
+owner extent/distinctness and retained-output preservation, missing-snapshot
+refusal without mutation, production automatic reclaim and a four-call original-
+HCCL burst without per-call drain. This is not 40-layer payload coverage. The
+isolated WORLD group runs the original collective code; it is not a live model
+Ulysses ProcessGroup instance. Correctness made 192 candidate submissions/rank
+(1536 globally), distinct from the 192-input count.
+
+Each timing round made 3840 candidate submissions/rank. Observed plan peaks:
+  correctness: all ranks 3
+  round1: [11,9,9,11,9,11,10,11]
+  round2: [15,14,18,13,16,15,12,15]
+  round3: [10,11,6,5,6,6,6,7]
+Round2 observed pending_peak=19 on all ranks. These runs therefore exercised
+more than eight plans, but do not prove arbitrary in-flight capacity sufficiency.
+All reports recorded zero pool exhaustion, retirement overflow or poison.
+After close/drain/producer finalization, every pool had native_closed=closed=1,
+resident workspace=0, retired_count=0 and retained_call_slots=0. Reclaim/finalize
+counters identify the producer thread, distinct from the native callback thread;
+they do not independently prove every Tensor's last destructor thread.
+
+Cold create producer intervals were correctness 112.596..141.853 ms, round1
+106.654..116.335 ms, round2 319.582..367.996 ms, round3 109.111..122.855 ms.
+No explicit sync belongs to that interval. Cold create costs and workspace are
+reported separately, not included as a proposed steady-state gain. There is no
+forced exhaustion test or general model lifecycle admission here. Comparisons
+with the prior partial 8-plan timings are not an isolated performance ablation.
+
+Launches and provenance
+
+Correctness: 0310d4fc6ca78719ec55ecbb470c6479
+Round1:      9d19d7a3b947e1e50f3f10b2a63a4b98
+Round2:      208c12edb335d76a28d2209536f27b12
+Round3:      9786ec9f57ced5998060f0e02735e0b8
+All four supervisors ended exit_code0, fatal null, remaining_owned_processes[].
+The compact receipt binds each launch/result/log, 32 rank reports, source pins,
+native/guard compilation ancestors, runtime binding and full aggregate. The
+exact commands are retained in supervisor launch.json and in the receipt.
+
+Runtime binding SHA:
+  6f44f7356adfdbc03e140b3ef96b021ca9e5e8d873391dfcb94bf1837ba1a781
+Frozen native v2 build-receipt SHA:
+  31da75582cba83570c337ea3a80887f99412f833d5871a70282581d95799c4f4
+Real matrix SHA:
+  135caf06dcdd680c3ac8f4138e7c78ed136d5577b5a2361c88242822ea86f7da
+
+The frozen recovery/aggregate_qk_repeatable_matrix.py was run after all device
+jobs completed. Independent stdlib verification recomputed every case and
+aggregate decision from integer timestamps; rechecked all192 metadata records,
+the 71 source/manifest/library/header pins, arm/scope order and pool closures;
+and checked that preceding measured batches ended before the next launch start.
+No torch import or device call was made by archival verification. Tensor payload
+bytes were not reread; full-owner hashes are bound to the fresh device reports.
+
+Further host-admission or warm-handle changes need a separate source/config
+binding and fresh correctness/screening. This failed screen grants no model
+admission or 900/950 ms chunk claim, and the preserved historical combination
+must not be replaced by this unqualified candidate.
