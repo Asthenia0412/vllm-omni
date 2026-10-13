@@ -1,0 +1,117 @@
+QK repeatable-pool integration v1: correctness passed; timing aborted
+2026-10-13
+
+This is an isolated operator/consumer result for the fixed 8-plan candidate.
+It does not admit this route into the model or restore the historical performance
+claim. The exact source, configuration, native/guard ancestors, rank reports,
+supervisor identities and descriptive statistics are pinned in:
+  recovery/validation/qk-repeatable-integration-v1-20261013.json
+
+Candidate and scope
+
+The independent, default-off PoolProvider/PoolRoute/PoolLease uses the frozen v2
+repeatable executor DSO, shared real coefficient snapshots and fresh offset-256
+padded owners. It reuses only the combined DSO's validate_lease guard. The original
+all_to_all_5D implementation and receive order remain unchanged. The isolated
+torchrun WORLD ProcessGroup is not the live model's Ulysses ProcessGroup instance.
+
+Policy: one provider-wide pool, 8 plans, retirement capacity 32. Each plan has
+79,092,224 workspace bytes; initial resident workspace is 632,737,792 bytes
+(603.42578125 MiB) per rank. This is workspace only, not total device memory.
+There is no auto-growth, native fallback, retry or added per-call warmup drain.
+All runs used physical dies 8..15, exposed as logical ranks/devices 0..7.
+
+Correctness: fresh eight-rank run passed
+
+Run b9761b0b7fad5d50bfd25f5c9f0e6f6c ended with exit_code 0, fatal null and no
+remaining owned processes. Eight reports each contain 24 actual input cases:
+six KV lengths (4680..28080 in steps of 4680), four probes, payload layer 0.
+These are 192 distinct captured cases, not 40-layer payloads or repeated synthetic
+coverage. Each case passed all 15 named categories, totaling 2880 category checks.
+
+The checks cover captured-reference/native send and original-HCCL receive bitwise
+equality; full input/reference owners and descriptors; complete sentinel arena
+and canaries before/after HCCL; fresh owner extent/offset/distinctness; prior-output
+preservation; missing-snapshot refusal without mutation/submission; producer-side
+automatic reclaim; and four fresh outputs through original HCCL without an
+explicit per-call device drain. The full list and each report pin are in the JSON.
+
+Each rank submitted 192 candidate calls across its 24 cases (1536 calls globally,
+distinct from the 192-input count). All ranks observed used_plan_peak=3 and 189
+plan reuses. Event-not-ready counts by rank were [43, 8, 22, 21, 17, 13, 17, 19].
+Thus this run exercised non-ready events and multiple plans; it does not establish
+general in-flight/exhaustion coverage. The harness explicitly keeps that broader
+coverage claim false. Correctness recorded zero exhaustion/retirement overflow.
+
+Before close, all callbacks had completed, with three active retained call slots
+and one retired call. After SDK close, external drain and producer finalization,
+all eight pools had native_closed=closed=1, resident workspace=0, retired_count=0
+and retained_call_slots=0. Reclaim/finalize TIDs matched each producer TID and
+differed from its callback consumer TID. Automatic reclaim was checked within
+each case; this is additional evidence beyond the earlier two-probe explicit-
+reclaim smoke. It still does not establish the full model's owner lifecycle.
+
+Cold create wall times were 6.833..13.526 ms across ranks. These are producer-side
+create intervals with no explicit synchronization; they are neither steady-state
+costs nor proof that all device-side initialization finished in that interval.
+
+Timing: round 1 invalid due to pool exhaustion
+
+Run 4e7f7ff01683c1a41b871d002843f120 ended with exit_code 1, fatal null and no
+remaining owned processes. Here fatal null is a supervisor field, not success:
+the native callback raised POOL_EXHAUSTED: no completed plan; retire workers.
+The log has this error on ranks 1..5. The asynchronous error surfaced in the
+wall30 phase barrier/work.wait after the 20-call warmup of case 14
+(KV18720, probe1). The first 13 cases had completed, so this was not a failure
+before all timing data. Failed reports contain no close/stats receipt.
+
+Only rank1..rank5 JSON reports survived, each with all records for those first
+13 cases: 4680/P0..P3, 9360/P0..P3, 14040/P0..P3, 18720/P0. Rank0/6/7 reports
+are missing. No partial case14 record was serialized. All surviving reports
+are passed=false. There is no valid eight-rank/24-case timing round, no three-
+round screen and no performance PASS. Workers were retired; no fallback/retry
+was used. The fixed eight-plan policy failed this unchanged warmup schedule.
+
+Partial timings, descriptive only
+
+All available five ranks, all 13 completed cases and all 30 samples per arm and
+scope are included. Nothing within the available data was excluded. For each
+case and arm, take the maximum of the five rank means; then average the 13 case
+maxima. This is max5, not max8. Event samples belong to a separate measured batch.
+
+scope                         baseline wall   pool wall   pool/baseline
+producer + original consumer    1.062242 ms   1.103318 ms    1.038669
+cached + original consumer      0.976713 ms   0.996467 ms    1.020225
+
+The corresponding event ratios are 1.025097 and 1.054248. Wall case ratios range
+from 0.779869 to 1.315813 for producer and 0.838161 to 1.192649 for cached.
+The compact JSON retains every case's five rank means and both scope summaries.
+These partial observations do not show a twofold slowdown; their aggregate
+direction also does not show improvement. Missing ranks/cases, failure-based
+truncation and single-round A-before-B order prevent full-matrix inference.
+Per-call synchronization and rank arrival effects remain part of this diagnostic
+method. None of these numbers is a model/chunk speed or a screening PASS.
+
+Provenance and stopping boundary
+
+Runtime binding SHA:
+  afa8b0c231deb5b611309051496690b6bbd624957620c20c90cac32d8fbb6cc2
+Native v2 build-receipt SHA:
+  31da75582cba83570c337ea3a80887f99412f833d5871a70282581d95799c4f4
+Source-freeze SHA:
+  563fd0df5171651df92cf7292b0c550e5da0dda388b88e69ec746cc68865f3c9
+Matrix SHA:
+  135caf06dcdd680c3ac8f4138e7c78ed136d5577b5a2361c88242822ea86f7da
+
+Archival verification used only stdlib: all 192 metadata identities, the frozen
+correctness verifier, supervisor launch/result bindings, partial sample counts/
+order/wall arithmetic, and 70 source/manifest/library/header pins were rechecked.
+No torch import or device call was made, and captured tensor payload bytes were
+not reread. Their complete-owner hash checks belong to the pinned device reports.
+
+A fixed 24-plan policy is a proposed separate candidate with new source/config
+binding and fresh correctness/timing receipts. This receipt does not test it.
+Any follow-up must retain the agreed 20-call warmup without per-call drains,
+30 wall samples and separate 30 event samples. Changing the pool cannot convert
+this failed round into a PASS. The route remains default-off and model-unadmitted;
+no 80-chunk paired model, 600-chunk acceptance or 900/950 ms claim is made here.

@@ -1,0 +1,86 @@
+QK repeatable pool: next host-cost candidates, 2026-10-13
+
+Status and scope
+Read-only source review of the original integration worktree, separate from
+the fixed-24-plan qualification. No runtime source changes, device runs, new
+instrumentation or measured speedup are part of this review. Partial timings
+from an unsuccessful launch are not a formal performance result. Both proposals
+below require independent source/manifests, correctness and complete-call gates.
+They must not be applied to a currently frozen qualification run.
+
+Pinned evidence (SHA-256, bytes, absolute path)
+da7660157323e552edf7cb3d6111d5f7720283ab3044a5e37ecef14bc1777bc1  21615
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-integration-worktree/vllm_omni/diffusion/layers/lingbot_qk_repeatable_pool.py
+fd65a7c9856f1e8726cd7350b257a0f9e11bde570632405cbb25fd179120e724  30599
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-integration-worktree/recovery/experiments/qk_repeatable_pool_v2/host.cpp
+f90d7f466c79db1651946539cd5fb7376daf784066ba0532b9d7c5581d7bae5d  167400
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/host-cost-v1/NPUCachingAllocator.cpp
+ba393be1672c7ce84dbbe9e9705ad9164a70af52a1883d487931ab1e212278ab  340274
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/host-cost-v1/ProcessGroupHCCL.cpp
+
+Candidate A: use the already-created single pool handle on the warm route
+The admitted warm prepare path calls check_policy() twice and ordinary() twice:
+once in PoolRoute.prepare, again inside ensure_pool. Thus the two effective
+policy getters are each called twice, and get_npu_format is called ten times
+across five inputs. ensure_pool then performs five base.describe dispatcher
+calls, materializes their eleven-field descriptors, recursively builds tuple
+keys and looks up the same provider-wide pool. Addresses are excluded from the
+key but still returned by describe. These are source counts, not measured costs.
+
+The frozen native run independently executes admit/dense, producer thread and
+ACL context/stream checks, five original-input signature checks, and sixteen
+native input/output signature checks. Original-input checks precede allocation;
+all checks precede reclaim, recordStream and native submission (host.cpp:326-350).
+
+Minimal proposal: retain one Python check_policy and ordinary check, then use a
+provider-owned integer handle published only after successful cold creation and
+workspace-budget validation. The provider remains bounded to one pool. Keep
+public ensure_pool unchanged for cold creation and explicit correctness calls.
+Do not cache input/output tensors or reuse output arenas. No native recompile is
+needed for this proposal. Warm calls would remove the duplicated checks and all
+five Python describe/key-construction calls; the C++ checks stay authoritative.
+
+Preserve ordinary unsupported-input refusal before writes, immutable coefficient
+snapshot admission, and fatal handling of invalid owner/metadata/context. A warm
+descriptor mismatch must fail in native run before allocation/submission; it must
+not create another pool or fall back. Keep the Lease guard immediately before
+the original HCCL call, its owners and failure quarantine unchanged. CPU tests
+should count one policy/admission call, zero warm describe calls, and exercise
+unsupported refusal plus propagated native descriptor rejection. Actual-192 and
+complete-call qualification must be fresh; no speedup is inferred here.
+
+Candidate B: omit registrations only for six private native temporaries
+The current C++ run registers fourteen Tensor references: five source inputs,
+six newly allocated intermediates, the output owner, its send view and raw's V
+view. For the captured distinct source owners this is twelve distinct storages;
+raw/V and owner/send duplicate registrations. NPUCachingAllocator.cpp:1588
+inserts the stream without an allocation-stream equality shortcut; free calls
+insert_events when stream_uses is nonempty (around lines 1500 and 3047).
+
+Start only with qn, kn, qs, ks, qrope and krope. They do not escape into HCCL.
+Call ownership spans queued_calls -> active plan -> completed retirement; the
+consumer may retire only after the event recorded after exact pack is COMPLETE.
+Failure quarantines Calls. That explicit lifetime, rather than an assumption
+about the allocation stream, is the proposed basis for omitting their same-
+stream registrations. Keep every Tensor reference in Call; remove only selected
+recordStream operations. Do not change event generations, retirement, producer
+reclaim or two-phase close. This requires a separately built native candidate.
+
+Keep all five source-input registrations and the output owner/send registrations
+in the first candidate. Source owners can originate elsewhere. The pack event
+does not establish HCCL completion. Before any later output-registration change,
+verify the installed ProcessGroup path and effective memory-reuse mode: archived
+alltoall_base uses collective input record/stash protection and output protection
+(ProcessGroupHCCL.cpp:4438-4454, 6983-7087); Work wait may erase registrations or
+unstash after inserting stream dependencies (around 1060-1092). These archived
+sources alone do not prove the effective runtime mode or all consumer lifetimes.
+
+Validation must cover real original HCCL, prompt release as well as retained
+leases, allocation churn, burst/reuse and fatal quarantine. Removing only the
+two duplicate registrations may reduce host calls but does not remove a distinct
+storage's final event. Reclaim TID does not prove the thread of the last Tensor
+destructor because framework callback references may survive in a release queue.
+
+Ordering: finish fixed-capacity qualification; screen A independently; only then
+consider B. Report complete-call and model results separately, and do not add
+isolated savings estimates. No new benefit or model admission is claimed.
