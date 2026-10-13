@@ -215,6 +215,19 @@ wall窗口及A/B阶段顺序；checker16项、聚合器10项CPU测试均通过�
    说明：ROOT/qk-record-once-worktree/recovery/QK_REPEATABLE_EVENT_POOL_SUPPORT_V1_20261013.txt。
    独立分支最新归档提交21ac09a16502c494344cae5398a05078111f5396，
    与本地3b980ac2f73097ec12891ac7a597a8a80b176501的tree一致。
+   v2已独立修正：consumer将完成的Call转入有界队列，producer锁外回收；
+   SDK close与Tensor finalize分离。新的两个真实probe检查通过，显式回收
+   和finalize在producer3435124，consumer3437264；SDK close后仍保留
+   75.428MiB及active1，finalize后resident0/active0/closed1，source/arena/
+   canary和native输出逐位一致。run0dc75d773adb0843415f3b66b146ce4c clean退出。
+   这只证明两probe及显式回收；自动热路径回收、实际inflight/溢出、HCCL、
+   actual192、完整调用性能及模型生命周期仍未验证。v2没有晋升为模型路径。
+   报告：ROOT/qk-record-once-worktree/recovery/QK_REPEATABLE_EVENT_POOL_V2_RESULTS_20261013.txt。
+   独立分支最新提交3701367fdfd73174cb74212690606765e749fb50，
+   与本地e3fa031559e42396ade7d15b1438b3b55b09e4cb的tree一致。
+   下一步接入使用独立Provider/Route/Lease及新运行manifest，保留原comm.py
+   的collective/receive实现及228份infra；禁止伪装成原combined Lease或改旧
+   receipt继承资格。新源码运行绑定必须重新冻结，不能只给旧manifest换SHA。
 3. 对已通过筛选的恢复部分冻结新build/config/env，并验证实际dispatch。QK保持
    当前baseline，低调度路径缺口继续单列，不能称历史完整获胜组合已恢复。
    新的候选仍须匹配参考做paired80；纯搬运latent/RGB要求逐位相同。旧构建结果
