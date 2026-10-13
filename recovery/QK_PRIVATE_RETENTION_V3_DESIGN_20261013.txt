@@ -1,0 +1,102 @@
+QK Candidate B: independent private-retention v3 (source only)
+2026-10-13
+
+Scope
+Retain the warm-handle route and all existing native arithmetic. Omit only the
+six allocator recordStream registrations for qn/kn/qs/ks/qrope/krope. This is a
+new native binary/namespace, not the frozen v2 binary or a requalification of it.
+No build, device correctness, speed or model admission is inherited.
+
+Actual allocate_call owner order for with_send=true
+0..4: raw, query weight, key weight, expanded cosine, expanded sine.
+5..10: qn, kn, qs, ks, qrope, krope (six distinct private allocations).
+11..13: padded output owner, send view, V view.
+Cold with_send=false owns only the first eleven; no cold allocation changes.
+
+Before reclaim, recordStream or queue submission, v3 checks fourteen owners,
+exact TensorImpl identities against the actual source/native output objects,
+and distinct StorageImpl for each private allocation against all other owners.
+The existing full native descriptor/extent checks still precede this block.
+Indices 0..4 and 11..13 retain their original registrations, including original
+alias duplicates. Full owners, ins/outs and fresh allocations remain unchanged.
+Runtime owner checks are included in the measured complete-call cost.
+
+Lifetime proof and limits
+The original queued_calls and callback [p,c] retain Call before submission;
+plan.active retains it after callback selection. All native computation and
+pack use the original bound default stream. The event is recorded after pack.
+Only a same-consumer-thread RECORDED event with matching recorded_generation
+may be queried. COMPLETE permits retirement; producer reclaim releases only
+retired Calls. Generation, event query, fixed capacities, retirement, allocator
+ownership, failure quarantine, close and producer finalize are unchanged.
+No private allocation reaches HCCL; source, send/owner and V protections remain.
+Producer reclaim TID does not prove the last Tensor destructor thread because
+the framework may also retain and release callback captures independently.
+
+Official CANN 9.1 query semantics:
+https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/910/API/runtimeapi/aclcppdevg_03_0086.html
+Official event-based memory reuse guidance:
+https://www.hiascend.com/doc_center/source/zh/canncommercial/900/programug/acldevg/runtime_doc_dev_0024.html
+The query documentation warns that cross-thread Record/Query ordering matters.
+The original consumer TID and generation checks must therefore remain intact.
+
+Source and registration boundary
+qk_private_retention_contract.py requires parent v2 SHA-256
+fd65a7c9856f1e8726cd7350b257a0f9e11bde570632405cbb25fd179120e724.
+Candidate bytes must be exactly the checked registration-block replacement and
+independent namespace/diagnostic comment changes. Any other source edit fails.
+The new CPU builder independently compiles/registers lingbot_qk_private_retention_v3,
+records the complete source delta and exact parent compilation receipt, and
+retains torch 2.10.0+cpu / torch_npu 2.10.0.post4 / arch22 contracts.
+
+The new binder preserves the original binding checks and separately pins the
+new native, adapter, contract helper, checker, aggregator, launcher and tests.
+Original comm, coefficient producer and protected 228 Python files must match.
+Original v2 adapter/binder/native/builder are not edited. Runtime validates a v3
+build schema and namespace and rejects inherited qualification.
+
+Consumer bridge
+The original collective accepts exact original PoolRoute/PoolLease types and
+its registered provider identity. The private operator-only loader first fully
+validates its independent v3 manifest, then installs its PrivateProvider into
+the EMPTY original registry. Existing foreign provider state is rejected.
+No validator, function, tensor, lease or consumer is monkeypatched. The exact
+original Route/Lease classes, full hot policy/config/native admission and guard
+are reused. The manifest explicitly records the bridge and pins both adapters.
+The original standalone-only config/environment keys are reused; the pinned v3
+manifest selects this candidate. Production construction remains default off
+and still rejects enabled operator-only routes. This creates no serving entry.
+
+Independent qualification required
+Fresh actual192 layer0 correctness: six history lengths, four probes, eight
+ranks, unchanged HCCL, full sources/target arenas and canaries. Additional
+untimed original-consumer bursts must release Python leases and fresh input
+wrappers, preserve retained output results, add bounded private-size allocator
+churn and observe plan reuse/reclaim. Default-stream churn alone cannot prove
+absence of all possible allocator races. No fixed burst proves arbitrary depth.
+Post-submit fault/retirement handling needs a separately supervised correctness
+failure launch; no native fault hook is present in this source candidate.
+Timing needs matching fresh eight-rank correctness receipts and three separate
+20-warmup/30-wall/30-event rounds. Original exact 10%/5% complete-call gates
+remain; no isolated recordStream savings are multiplied by forty or called
+model improvements. Model admission and long-run/lifecycle acceptance remain due.
+
+Explicit root-owned future commands (not run while writing this candidate)
+source recovery/env.sh
+export PYTHONPATH="$PWD:$LINGBOT_RECOVERY_ROOT/dependencies/vllm-ascend"
+python recovery/experiments/qk_private_retention_v3/build.py \
+  --provider-manifest /absolute/original/host_manifest.json \
+  --provider-manifest-sha256 SHA256 \
+  --parent-v2-build /absolute/frozen-v2/build-receipt.json \
+  --parent-v2-build-sha256 SHA256 \
+  --output "$LINGBOT_RECOVERY_ROOT/build/qk-private-retention-native.20261013v1"
+Then freeze current sources under schema lingbot_qk_private_retention_source_freeze_v3
+and bind with recovery/bind_qk_private_retention_runtime.py, keeping original
+guard compilation ancestry and the newly built v3 receipt. The immutable output
+must be "$LINGBOT_RECOVERY_ROOT/build/qk-private-retention.20261013v1".
+Only after build/binding review:
+bash recovery/run_qk_private_retention.sh correctness
+bash recovery/run_qk_private_retention.sh timing 1
+bash recovery/run_qk_private_retention.sh timing 2
+bash recovery/run_qk_private_retention.sh timing 3
+No changes to REST, model arithmetic, camera/control, precision or history.

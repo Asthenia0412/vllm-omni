@@ -1,0 +1,86 @@
+QK private-retention v3: correctness passed; three-round speed gate rejected
+2026-10-13
+
+Change and build
+The independent native CPU build and registration passed without initializing
+an NPU. The exact-source contract permits independent names, owner identity and
+private-storage checks, and omission of six private recordStream registrations.
+All 14 Call owners remain retained; five source owners and output/send/V retain
+the original registrations. Arithmetic, event generations, retirement, reclaim,
+quarantine, two-phase close, communication and coefficient production are unchanged.
+The original 228 protected Python files match their historical content.
+The source-only design is preserved as written before device qualification.
+
+Fresh correctness
+Eight ranks x six history lengths x four probes = 192 real layer-0 inputs.
+All 16 check categories pass per input: captured/native sends, original HCCL
+receives, source/reference owners, descriptors, sentinel arena/canaries and
+retained outputs. This is not payload coverage for all 40 layers.
+
+Each case additionally submits 12 calls with fresh native source owners and
+original HCCL, without an explicit per-call drain. The helper returns only send
+and receive; Python lease/module/route/source locals expire before the burst
+ends. Three complete physical owners are cloned on-device; the unchanged
+SharedCoefficients producer creates the two fresh expanded coefficient owners.
+Six private-sized allocations and fills per call run on their own pressure
+stream, with all 72 owners retained until the batch drain. Retained outputs and
+prior canaries match, and completed-plan reuse/producer reclaim are observed.
+
+These bounded checks do not prove private address reuse, actual device overlap,
+arbitrary in-flight capacity, fresh source bytes after release, or full failure
+and serving lifecycle safety. No native fault hook was added. Post-submit fault
+qualification was not performed.
+
+Complete-call screen
+Each arm/scope/case/round uses 20 warmup calls, 30 wall calls and a separate
+30-event batch. The case metric is max_rank(mean of 30 wall samples); the scope
+metric is the equal-weight average of 24 cases. Each scope in all three rounds
+must satisfy B/A<=0.90 and every case B/A<=1.05, using integer nanoseconds.
+All samples remain; no ranks, cases or outliers are removed or pooled.
+
+round scope    baseline_ms pool_ms improvement worst_case_B/A failed_cases gate
+1 producer 1.093972 0.940836 13.998% 1.119615 2/24 FAIL
+1 cached   0.980118 0.835370 14.768% 1.097679 1/24 FAIL
+2 producer 1.118102 0.923375 17.416% 0.966219 0/24 PASS
+2 cached   1.010594 0.889813 11.951% 1.440869 3/24 FAIL
+3 producer 1.144926 0.960555 16.103% 1.057819 1/24 FAIL
+3 cached   1.064957 0.881074 17.267% 1.100796 1/24 FAIL
+
+All six aggregate improvement gates pass; five of six worst-case gates fail.
+All three rounds therefore fail the strict screen. The candidate stays disabled
+and is not admitted to model testing. No chunk/FPS gain is inferred, and isolated
+improvements are not added to the warm-handle result. Further model/fault/final600
+qualification is deferred for this rejected version.
+
+All four supervisors exit 0, with no fatal receipt or remaining owned process.
+All 32 rank reports close with zero resident workspace, retained call slots,
+retired count, pending work, errors, exhaustion and overflow. Reclaim TID does not
+prove the final Tensor destructor's thread. Workspace remains 1,898,213,376 bytes
+per rank. Eight ranks share correlated collective samples.
+
+Validation and evidence
+15 new native/binding/bridge CPU tests and 40 original binding/adapter/matrix
+tests passed. Ten new matrix/stress/gate tests passed normally and with python -O.
+Independent source review checked the native delta, registry bridge, immutable
+binding and pressure-stream ordering. Shell syntax passed. Final staged diff
+check found one extra blank line at the frozen adapter EOF; the qualified source
+bytes are retained unchanged rather than invalidating the timing source pins.
+Independent integer recomputation corroborated all six metrics and gates; 131
+pins plus 228 protected files were rehashed, all 32 reports/8 supervisor records
+checked, and timing windows found non-overlapping. Device payloads were not read
+again by archival verification. No mainstream PR implementation changed.
+
+recovery/validation/qk-private-retention-screen-20261013.json binds the native
+build/library, source freeze, all 32 reports, supervisor identities and summary.
+ROOT/audits/qk-private-retention-v1/three-round-summary.json retains full cases,
+samples, event diagnostics and host envelopes. Wall and event times are not added.
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+
+Remaining work
+The model baseline remains mean 924.6-928.3 ms and P99 939.5-944.0 ms from
+warm40+161 screening. The 900/950 target, final600, playback and lifecycle gates
+remain incomplete. Next, collect a new eight-rank full-stack trace for plain
+BSND, batched VAE and Stage A; follow upstream compute, rank arrivals, HCCL and
+consumer dependencies. The old row-copy/cross-off trace does not represent this
+stack. No CPU, GIL, allocator or network cause is assumed. Async metadata stays
+explicitly off while historical low-dispatch restoration remains unresolved.

@@ -1,0 +1,17 @@
+Independent QK Candidate B, private-retention v3, 2026-10-13.
+SOURCE ONLY. No build/device/performance/model qualification claimed.
+Read ../../QK_PRIVATE_RETENTION_V3_DESIGN_20261013.txt.
+
+New namespace: lingbot_qk_private_retention_v3.
+New receipt: lingbot_qk_private_retention_cpu_build_v3.
+Exact parent source and private6 registration delta are enforced by
+../../qk_private_retention_contract.py before CPU compilation and binding.
+Original v2 native/builder and all owner/event/retirement/close logic remain
+unchanged. Only six private allocator recordStream registrations are omitted;
+all full Call owners remain strongly retained through matched device completion.
+
+Explicit CPU build/registration must precede fresh immutable source binding.
+The builder requires --provider-manifest, --provider-manifest-sha256,
+--parent-v2-build, --parent-v2-build-sha256, --output. All paths/SHA must identify
+the frozen v2 compilation base and a new output directory. Registration queries
+only dependencies and stat_names, and requires NPU initialization remain false.
