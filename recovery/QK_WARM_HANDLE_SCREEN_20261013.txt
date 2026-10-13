@@ -1,0 +1,57 @@
+QK warm-handle: actual192 correctness passed; three-round speed gate rejected
+2026-10-13
+
+Scope
+Only Python warm selection changes relative to fixed24 pool: a validated integer
+handle avoids repeated policy/admission, five descriptor reads and key building.
+Original native v2 DSO, arithmetic, fresh outputs, HCCL and lifecycle remain.
+No model admission; historical single-host identity is still unproven.
+
+Fresh device correctness passed on physical NPU4-7 / driver dies8-15:
+8 ranks x6 history lengths x4 probes =192 real layer0 inputs,15 checks each.
+Includes original HCCL send/receive, full source/reference owners/descriptors,
+sentinel arena/canaries, fresh and retained outputs, missing snapshot refusal,
+automatic producer reclaim and four-call burst. This is not all40-layer payload
+or full serving lifecycle coverage.
+
+Frozen screen:20 warmup,30 wall and separate30 event calls per arm/scope/case.
+Case metric=max_rank(mean30 wall); equal24-case aggregate. Each scope in every
+round requires B/A<=0.90 and every case B/A<=1.05. All samples retained; no pooling.
+
+round scope    baseline_ms pool_ms improvement worst_case_B/A failed_cases gate
+1 producer 1.118883 0.998483 10.761% 1.064993 1/24 FAIL
+1 cached   1.035942 0.859511 17.031% 1.093422 1/24 FAIL
+2 producer 1.092347 1.005371 7.962% 1.074253 2/24 FAIL
+2 cached   1.000325 0.860104 14.018% 1.041153 0/24 PASS
+3 producer 1.046047 0.970332 7.238% 1.112875 1/24 FAIL
+3 cached   1.002196 0.865068 13.683% 1.189187 2/24 FAIL
+
+Decision
+All three rounds fail the complete gate. Cached aggregate improves13.7%-17.0%,
+but worst-case regressions exceed5% in rounds1/3. Producer aggregate improves
+7.2%-10.8%, below10% in rounds2/3; worst-case gate fails in all3. Candidate stays
+default-off and does not enter the model. No chunk/FPS gain is claimed.
+
+All four supervisors exit0,fatal=null,remaining_owned_processes=[]. Each pool
+closes with zero resident workspace,retained call slots,pending,retired count;
+zero exhaustion,retirement overflow and poison. These bounded runs do not prove
+arbitrary in-flight capacity or every final Tensor destructor's thread.
+
+Evidence
+recovery/validation/qk-warm-handle-screen-20261013.json binds all32 rank receipts,
+launch/result identity,source/fixture/manifest pins and full aggregate.
+ROOT/audits/qk-pool-warm-handle-v1/three-round-summary.json retains full samples,
+case gates,event diagnostics and host envelopes. Host waits/events are not added.
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+
+Next
+Separately review removal of six private temporary recordStream registrations.
+Only completed-event retention may justify this; keep source/output registrations
+and original HCCL Lease. It needs an independent native build,source binding,
+actual192 correctness,allocation/lifecycle stress and three-round speed gate.
+ASYNC_METADATA stays0 under restore-first order. Current model baseline remains
+mean924.6-928.3ms/P99939.5-944.0ms (warm40+161),not a final600 acceptance.
+
+Original plan recovered from V88 archive with SHA84ff91107e0c3329193c9e2004a48ce02f0df8676026b3654523f89a9b531988.
+CPU extraction receipt:ROOT/audits/original-plan-v88/extraction-receipt.json.
+Historical throughput does not qualify this reconstructed runtime.
