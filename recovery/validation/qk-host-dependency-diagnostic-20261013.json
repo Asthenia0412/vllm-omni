@@ -1,0 +1,1806 @@
+{
+  "schema": "lingbot_qk_host_dependency_validation_receipt_v1",
+  "diagnostic_only": true,
+  "performance_timing_eligible": false,
+  "gate_passed": false,
+  "model_admitted": false,
+  "total_rank_samples": 46080,
+  "profile_pins": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank0.json",
+      "bytes": 5457960,
+      "sha256": "790b4013594ed5595cfc7f5b6aa258fed925755bdefd1b48c8cdfc5b4b624209"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank1.json",
+      "bytes": 5457960,
+      "sha256": "4bba4e80096ae3f357b9b24a3ad7a204d18ef69621de1c4c0425d69c806361ad"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank2.json",
+      "bytes": 5457960,
+      "sha256": "82fb600c3a0c559d7f1c920dcf043dd6311dd6e35ccfcc22a36325c6b5bbd339"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank3.json",
+      "bytes": 5457960,
+      "sha256": "6d98ca230ac892391520d9729d9f2e4872289bc09b5d4d8fe57d0afe6c6af679"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank4.json",
+      "bytes": 5457960,
+      "sha256": "f2aa214a02bda841e1c96cd6ff7788fcef277b62465fd603ca54ecdedc2fc351"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank5.json",
+      "bytes": 5457960,
+      "sha256": "cc5eda10aac13c6538254e86f40acc650feb4012831f79d4b16de043518f2b08"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank6.json",
+      "bytes": 5457960,
+      "sha256": "076f3dc75f660c7762032194575e5b985b19f2c5f7046652b146710415c829d4"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile/rank7.json",
+      "bytes": 5457960,
+      "sha256": "c351fbf4c0c6532ea4ee3ac2a9b3c956f27e2381a9cceaf5270536a3ff8fb3d3"
+    }
+  ],
+  "run": {
+    "launch": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-runs/6e781c83255db1e8096838a132840ac0/launch.json",
+      "bytes": 1138,
+      "sha256": "38c2c4feca02aace02898da8f1ab7de65f99dfcf2c2d02ada03f073a4f1d1f8f"
+    },
+    "result": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-runs/6e781c83255db1e8096838a132840ac0/result.json",
+      "bytes": 1191,
+      "sha256": "8c05d10d1ec45bc6d23f1f048639df10a748cc89feca14e9b0999395ac868c79"
+    },
+    "nonce": "6e781c83255db1e8096838a132840ac0",
+    "options": {
+      "--mode": "profile",
+      "--fixtures": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures",
+      "--manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+      "--correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness",
+      "--diagnostic-correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/correctness",
+      "--output": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-checks/profile"
+    }
+  },
+  "manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+    "bytes": 8320,
+    "sha256": "19d282194022d7c6544a2c06ac738e9fa1ce1f1c23e952b0698e5e8e757b0bbd"
+  },
+  "sources": {
+    "harness": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_real_matrix.py",
+      "bytes": 24351,
+      "sha256": "2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519"
+    },
+    "loader": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    "capture_contract": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+      "bytes": 22079,
+      "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+    },
+    "original_collective": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/distributed/comm.py",
+      "bytes": 15443,
+      "sha256": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f"
+    },
+    "coefficient_producer": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_native_bf16_qk.py",
+      "bytes": 7946,
+      "sha256": "42a5c7c45bd750f1b489f2fa89a4cb66a3946867b90b231097f3533946264014"
+    },
+    "baseline_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 11282,
+      "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+    },
+    "combined_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_qk_combined.py",
+      "bytes": 10282,
+      "sha256": "d9c83b3d394cb7fd4cfc777b6c52374d384260446ffa5ffbec77dd161c53d756"
+    },
+    "padded_consumer_hook": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 32237,
+      "sha256": "3a189a2bdeb60ca001007424bb329efb863693e97b338ac997cd6dcb3543ada6"
+    }
+  },
+  "diagnostic_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/diagnose_qk_host_dependencies.py",
+    "bytes": 20775,
+    "sha256": "a3757158dde34cc1b6ce7772c12d30cc09c90a6bb306c633ed62559d0c369cae"
+  },
+  "matrix_sha256": "135caf06dcdd680c3ac8f4138e7c78ed136d5577b5a2361c88242822ea86f7da",
+  "boot_id": "12b4f8e9-d399-4224-be54-322cd3294f2a",
+  "gc_observation_complete": true,
+  "gc_by_rank": [
+    {
+      "rank": 0,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 1,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 2,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 3,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 4,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 5,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 6,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 7,
+      "event_count": 10,
+      "paired_count": 5,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    }
+  ],
+  "old_python_wrapper_release": {
+    "lease_alive_samples": 0,
+    "receive_alive_samples": 0
+  },
+  "stage_summary": {
+    "pre_sync": {
+      "count": 46080,
+      "mean_wall_ms": 0.02195342951388889,
+      "mean_thread_cpu_ms": 0.021956985243055553,
+      "max_wall_ms": 3.959622,
+      "gt2ms": 2,
+      "gt5ms": 0,
+      "voluntary_switches": 409,
+      "involuntary_switches": 13,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 44344
+    },
+    "pre_call_gap": {
+      "count": 46080,
+      "mean_wall_ms": 0.0033875414930555556,
+      "mean_thread_cpu_ms": 0.003255968967013889,
+      "max_wall_ms": 0.0677,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 5,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 945
+    },
+    "producer": {
+      "count": 23040,
+      "mean_wall_ms": 0.07258892256944445,
+      "mean_thread_cpu_ms": 0.07294522222222222,
+      "max_wall_ms": 1.141689,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 5,
+      "involuntary_switches": 29,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 22592
+    },
+    "producer_to_prepare": {
+      "count": 23040,
+      "mean_wall_ms": 0.0036598302517361113,
+      "mean_thread_cpu_ms": 0.0030306657986111114,
+      "max_wall_ms": 0.06001,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 3,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 1
+    },
+    "prepare": {
+      "count": 46080,
+      "mean_wall_ms": 0.31292945145399303,
+      "mean_thread_cpu_ms": 0.31344572265625,
+      "max_wall_ms": 3.329336,
+      "gt2ms": 8,
+      "gt5ms": 0,
+      "voluntary_switches": 9,
+      "involuntary_switches": 305,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 41681
+    },
+    "prepare_to_exchange": {
+      "count": 46080,
+      "mean_wall_ms": 0.006245085828993056,
+      "mean_thread_cpu_ms": 0.004420960503472223,
+      "max_wall_ms": 0.191472,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 3,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 0
+    },
+    "exchange_pre_collective": {
+      "count": 46080,
+      "mean_wall_ms": 0.009525119683159722,
+      "mean_thread_cpu_ms": 0.009587109809027777,
+      "max_wall_ms": 1.29979,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 7,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 31623
+    },
+    "collective_host_call": {
+      "count": 46080,
+      "mean_wall_ms": 0.16785828561197916,
+      "mean_thread_cpu_ms": 0.15605083311631943,
+      "max_wall_ms": 6.840454,
+      "gt2ms": 44,
+      "gt5ms": 8,
+      "voluntary_switches": 46656,
+      "involuntary_switches": 141,
+      "same_thread_gc_overlap_ns": 385732,
+      "samples_with_same_thread_gc": 8,
+      "negative_wall_minus_cpu_samples": 16591
+    },
+    "exchange_post_collective": {
+      "count": 46080,
+      "mean_wall_ms": 0.010963849848090278,
+      "mean_thread_cpu_ms": 0.009611675347222223,
+      "max_wall_ms": 0.874517,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 106,
+      "involuntary_switches": 12,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 3
+    },
+    "call_return_gap": {
+      "count": 46080,
+      "mean_wall_ms": 0.0024310313585069443,
+      "mean_thread_cpu_ms": 0.0023663248697916666,
+      "max_wall_ms": 0.503404,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 8226
+    },
+    "old_held_release": {
+      "count": 46080,
+      "mean_wall_ms": 0.016021101475694445,
+      "mean_thread_cpu_ms": 0.016312495225694446,
+      "max_wall_ms": 1.039929,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 73,
+      "involuntary_switches": 15,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 45682
+    },
+    "replace_to_post_sync": {
+      "count": 46080,
+      "mean_wall_ms": 0.0035736672526041667,
+      "mean_thread_cpu_ms": 0.0031527560763888888,
+      "max_wall_ms": 0.070981,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 4,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 60
+    },
+    "post_sync": {
+      "count": 46080,
+      "mean_wall_ms": 0.4313660563368056,
+      "mean_thread_cpu_ms": 0.3720062306857639,
+      "max_wall_ms": 7.55304,
+      "gt2ms": 457,
+      "gt5ms": 76,
+      "voluntary_switches": 45978,
+      "involuntary_switches": 316,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 112
+    },
+    "host_call_including_old_release": {
+      "count": 46080,
+      "mean_wall_ms": 0.5674858431640625,
+      "mean_thread_cpu_ms": 0.5530390345052084,
+      "max_wall_ms": 7.168696,
+      "gt2ms": 63,
+      "gt5ms": 12,
+      "voluntary_switches": 46849,
+      "involuntary_switches": 520,
+      "same_thread_gc_overlap_ns": 385732,
+      "samples_with_same_thread_gc": 8,
+      "negative_wall_minus_cpu_samples": 12639
+    },
+    "sample": {
+      "count": 46080,
+      "mean_wall_ms": 1.024378996267361,
+      "mean_thread_cpu_ms": 0.9501550065104166,
+      "max_wall_ms": 8.040904,
+      "gt2ms": 761,
+      "gt5ms": 150,
+      "voluntary_switches": 93236,
+      "involuntary_switches": 853,
+      "same_thread_gc_overlap_ns": 385732,
+      "samples_with_same_thread_gc": 8,
+      "negative_wall_minus_cpu_samples": 7
+    }
+  },
+  "samples_overlapping_same_thread_gc": [
+    {
+      "rank": 0,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101227393,
+      "end_ns": 177490102525413,
+      "wall_ns": 1298020,
+      "thread_cpu_ns": 1163960,
+      "wall_minus_thread_cpu_ns": 134060,
+      "voluntary_switches": 3,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 43850,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101614826,
+          "end_ns": 177490101947419,
+          "wall_ns": 332593,
+          "thread_cpu_ns": 281620,
+          "wall_minus_thread_cpu_ns": 50973,
+          "voluntary_switches": 2,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 43850
+        }
+      }
+    },
+    {
+      "rank": 1,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101233483,
+      "end_ns": 177490102528743,
+      "wall_ns": 1295260,
+      "thread_cpu_ns": 1233640,
+      "wall_minus_thread_cpu_ns": 61620,
+      "voluntary_switches": 2,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 49060,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101573316,
+          "end_ns": 177490101836948,
+          "wall_ns": 263632,
+          "thread_cpu_ns": 257220,
+          "wall_minus_thread_cpu_ns": 6412,
+          "voluntary_switches": 1,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 49060
+        }
+      }
+    },
+    {
+      "rank": 2,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101281934,
+      "end_ns": 177490102542494,
+      "wall_ns": 1260560,
+      "thread_cpu_ns": 1158880,
+      "wall_minus_thread_cpu_ns": 101680,
+      "voluntary_switches": 1,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 49700,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101825188,
+          "end_ns": 177490102120110,
+          "wall_ns": 294922,
+          "thread_cpu_ns": 295940,
+          "wall_minus_thread_cpu_ns": -1018,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 49700
+        }
+      }
+    },
+    {
+      "rank": 3,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101235193,
+      "end_ns": 177490102529093,
+      "wall_ns": 1293900,
+      "thread_cpu_ns": 1252840,
+      "wall_minus_thread_cpu_ns": 41060,
+      "voluntary_switches": 1,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 41951,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101565556,
+          "end_ns": 177490101778228,
+          "wall_ns": 212672,
+          "thread_cpu_ns": 213850,
+          "wall_minus_thread_cpu_ns": -1178,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 41951
+        }
+      }
+    },
+    {
+      "rank": 4,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101234903,
+      "end_ns": 177490102526383,
+      "wall_ns": 1291480,
+      "thread_cpu_ns": 1191320,
+      "wall_minus_thread_cpu_ns": 100160,
+      "voluntary_switches": 4,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 44430,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101602326,
+          "end_ns": 177490101898588,
+          "wall_ns": 296262,
+          "thread_cpu_ns": 272370,
+          "wall_minus_thread_cpu_ns": 23892,
+          "voluntary_switches": 3,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 44430
+        }
+      }
+    },
+    {
+      "rank": 5,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101238733,
+      "end_ns": 177490102531983,
+      "wall_ns": 1293250,
+      "thread_cpu_ns": 1132640,
+      "wall_minus_thread_cpu_ns": 160610,
+      "voluntary_switches": 4,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 50420,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101577786,
+          "end_ns": 177490101855578,
+          "wall_ns": 277792,
+          "thread_cpu_ns": 241530,
+          "wall_minus_thread_cpu_ns": 36262,
+          "voluntary_switches": 3,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 50420
+        }
+      }
+    },
+    {
+      "rank": 6,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101237033,
+      "end_ns": 177490102529453,
+      "wall_ns": 1292420,
+      "thread_cpu_ns": 1236860,
+      "wall_minus_thread_cpu_ns": 55560,
+      "voluntary_switches": 2,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 43440,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101581006,
+          "end_ns": 177490101808648,
+          "wall_ns": 227642,
+          "thread_cpu_ns": 224050,
+          "wall_minus_thread_cpu_ns": 3592,
+          "voluntary_switches": 1,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 43440
+        }
+      }
+    },
+    {
+      "rank": 7,
+      "row": 1274,
+      "kv_len": 9360,
+      "probe": 1,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "sample": 14,
+      "start_ns": 177490101240993,
+      "end_ns": 177490102531053,
+      "wall_ns": 1290060,
+      "thread_cpu_ns": 1225200,
+      "wall_minus_thread_cpu_ns": 64860,
+      "voluntary_switches": 2,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 62881,
+      "stages": {
+        "collective_host_call": {
+          "start_ns": 177490101579646,
+          "end_ns": 177490101868158,
+          "wall_ns": 288512,
+          "thread_cpu_ns": 275520,
+          "wall_minus_thread_cpu_ns": 12992,
+          "voluntary_switches": 1,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 62881
+        }
+      }
+    }
+  ],
+  "caveats": [
+    "Instrumentation changes work and GC scheduling; these durations never admit a performance candidate.",
+    "Disjoint stages partition samples; host_call and sample totals overlap stages and must not be added again.",
+    "Thread CPU and context counters are sequential observations; wall-minus-thread-CPU is signed, not a CPU-idle estimate.",
+    "GC matching uses only same native thread and clips overlap to each sample/stage; correlation is not causation.",
+    "Missing/dropped GC observations imply partial coverage, not evidence that no collection occurred.",
+    "collective_host_call spans original all_to_all_5D, including metadata admission, output allocation, distributed call and output layout processing.",
+    "Same-ordinal eight-rank host call skew is not device entry, HCCL transfer duration, or proof of a causal wait.",
+    "Weakref death is Python wrapper release, not device storage reclamation.",
+    "Layer0 actual fixtures and isolated WORLD reproduce call structure, not whole-model or chunk performance."
+  ],
+  "full_analysis": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-host-dependencies/summary-v2.json",
+    "bytes": 1136249,
+    "sha256": "8743a937c6e7183458f1c74feb5d6f0b5487fa84dc4197c275c2fedd98a7cf3e"
+  },
+  "report": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_HOST_DEPENDENCY_DIAGNOSTIC_20261013.txt",
+    "bytes": 5633,
+    "sha256": "96dd98bc56b49f364e03aa4584cf63a83f1f025b8d3af86c75f1243ed9b7f7ba"
+  },
+  "analyzer_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/summarize_qk_host_dependencies.py",
+    "bytes": 20047,
+    "sha256": "b0eda1818c969fbbea9e29f52547c3b61d6531d47847e73f71cc01ada0e361ba"
+  },
+  "cpu_test_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_host_dependency_summary_cpu.py",
+    "bytes": 3818,
+    "sha256": "4b697e9f2952e885f018d8eaee114b979b873e21bf7615bd68ddfc66ae0750e1"
+  },
+  "cpu_checks": {
+    "normal": 8,
+    "optimized_python": 8,
+    "torch_imported": false,
+    "harness_lifecycle_review": "7 normal + 7 optimized tests independently inspected; no device run by reviewing agent"
+  },
+  "correctness_supervisor": {
+    "launch": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-runs/c5de03b81ad74bd3d9989597da7d474b/launch.json",
+      "bytes": 1015,
+      "sha256": "474a7761d43868d2538e95df7cf7c89c3ac949fd2c055629fe8cc555eba589e4"
+    },
+    "result": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-host-dependency-runs/c5de03b81ad74bd3d9989597da7d474b/result.json",
+      "bytes": 1068,
+      "sha256": "ae8bd2dc76f28bced36e053a97a6a3c020aa60617324a3e9a6fa90125c19dfa1"
+    },
+    "nonce": "c5de03b81ad74bd3d9989597da7d474b",
+    "exit_code": 0,
+    "fatal": null,
+    "remaining_owned_processes": []
+  },
+  "non_additive_propagation_example": {
+    "rank": 0,
+    "row": 2622,
+    "kv_len": 14040,
+    "probe": 2,
+    "scope": "cached_snapshot_and_original_consumer",
+    "arm": "combined",
+    "sample": 42,
+    "start_ns": 177492104630242,
+    "end_ns": 177492111798938,
+    "wall_ns": 7168696,
+    "thread_cpu_ns": 578130,
+    "wall_minus_thread_cpu_ns": 6590566,
+    "voluntary_switches": 5,
+    "involuntary_switches": 0,
+    "same_thread_gc_overlap_ns": 0,
+    "stages": {
+      "pre_sync": {
+        "start_ns": 177492104600331,
+        "end_ns": 177492104630242,
+        "wall_ns": 29911,
+        "thread_cpu_ns": 30080,
+        "wall_minus_thread_cpu_ns": -169,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "pre_call_gap": {
+        "start_ns": 177492104630242,
+        "end_ns": 177492104632862,
+        "wall_ns": 2620,
+        "thread_cpu_ns": 2500,
+        "wall_minus_thread_cpu_ns": 120,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "prepare": {
+        "start_ns": 177492104632862,
+        "end_ns": 177492104910094,
+        "wall_ns": 277232,
+        "thread_cpu_ns": 279100,
+        "wall_minus_thread_cpu_ns": -1868,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "prepare_to_exchange": {
+        "start_ns": 177492104910094,
+        "end_ns": 177492104917714,
+        "wall_ns": 7620,
+        "thread_cpu_ns": 6100,
+        "wall_minus_thread_cpu_ns": 1520,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "exchange_pre_collective": {
+        "start_ns": 177492104917714,
+        "end_ns": 177492104921664,
+        "wall_ns": 3950,
+        "thread_cpu_ns": 4980,
+        "wall_minus_thread_cpu_ns": -1030,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "collective_host_call": {
+        "start_ns": 177492104921664,
+        "end_ns": 177492111762118,
+        "wall_ns": 6840454,
+        "thread_cpu_ns": 250290,
+        "wall_minus_thread_cpu_ns": 6590164,
+        "voluntary_switches": 5,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "exchange_post_collective": {
+        "start_ns": 177492111762118,
+        "end_ns": 177492111772458,
+        "wall_ns": 10340,
+        "thread_cpu_ns": 8290,
+        "wall_minus_thread_cpu_ns": 2050,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "call_return_gap": {
+        "start_ns": 177492111772458,
+        "end_ns": 177492111774578,
+        "wall_ns": 2120,
+        "thread_cpu_ns": 2160,
+        "wall_minus_thread_cpu_ns": -40,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "old_held_release": {
+        "start_ns": 177492111774578,
+        "end_ns": 177492111798938,
+        "wall_ns": 24360,
+        "thread_cpu_ns": 24710,
+        "wall_minus_thread_cpu_ns": -350,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "replace_to_post_sync": {
+        "start_ns": 177492111798938,
+        "end_ns": 177492111803018,
+        "wall_ns": 4080,
+        "thread_cpu_ns": 3640,
+        "wall_minus_thread_cpu_ns": 440,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      },
+      "post_sync": {
+        "start_ns": 177492111803018,
+        "end_ns": 177492111866409,
+        "wall_ns": 63391,
+        "thread_cpu_ns": 64130,
+        "wall_minus_thread_cpu_ns": -739,
+        "voluntary_switches": 0,
+        "involuntary_switches": 0,
+        "same_thread_gc_overlap_ns": 0
+      }
+    },
+    "same_ordinal_collective": {
+      "collective_host_start_skew_ns": 47621,
+      "latest_host_collective_start_rank": 0,
+      "collective_host_return_skew_ns": 6709313,
+      "latest_host_collective_return_rank": 0,
+      "peers": [
+        {
+          "rank": 0,
+          "timestamps": {
+            "pre_sync_begin": 177492104600331,
+            "pre_sync_end": 177492104630242,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104632862,
+            "prepare_end": 177492104910094,
+            "exchange_begin": 177492104917714,
+            "collective_begin": 177492104921664,
+            "collective_end": 177492111762118,
+            "exchange_end": 177492111772458,
+            "call_return_before_replace": 177492111774578,
+            "old_held_replace_end": 177492111798938,
+            "post_sync_begin": 177492111803018,
+            "post_sync_end": 177492111866409
+          },
+          "collective_wall_ns": 6840454,
+          "collective_thread_cpu_ns": 250290,
+          "collective_voluntary_switches": 5,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 63391,
+          "previous_sample_post_end_ns": 177492104595901
+        },
+        {
+          "rank": 1,
+          "timestamps": {
+            "pre_sync_begin": 177492104598411,
+            "pre_sync_end": 177492104616941,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104619811,
+            "prepare_end": 177492104864813,
+            "exchange_begin": 177492104871083,
+            "collective_begin": 177492104874043,
+            "collective_end": 177492105092835,
+            "exchange_end": 177492105101985,
+            "call_return_before_replace": 177492105104125,
+            "old_held_replace_end": 177492105117995,
+            "post_sync_begin": 177492105121495,
+            "post_sync_end": 177492105496478
+          },
+          "collective_wall_ns": 218792,
+          "collective_thread_cpu_ns": 196430,
+          "collective_voluntary_switches": 2,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 374983,
+          "previous_sample_post_end_ns": 177492104594941
+        },
+        {
+          "rank": 2,
+          "timestamps": {
+            "pre_sync_begin": 177492104606341,
+            "pre_sync_end": 177492104628682,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104631992,
+            "prepare_end": 177492104895944,
+            "exchange_begin": 177492104902044,
+            "collective_begin": 177492104905614,
+            "collective_end": 177492105100225,
+            "exchange_end": 177492105110005,
+            "call_return_before_replace": 177492105112125,
+            "old_held_replace_end": 177492105124945,
+            "post_sync_begin": 177492105128255,
+            "post_sync_end": 177492105515649
+          },
+          "collective_wall_ns": 194611,
+          "collective_thread_cpu_ns": 192110,
+          "collective_voluntary_switches": 1,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 387394,
+          "previous_sample_post_end_ns": 177492104603101
+        },
+        {
+          "rank": 3,
+          "timestamps": {
+            "pre_sync_begin": 177492104601301,
+            "pre_sync_end": 177492104624891,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104627731,
+            "prepare_end": 177492104869433,
+            "exchange_begin": 177492104875773,
+            "collective_begin": 177492104878953,
+            "collective_end": 177492105086515,
+            "exchange_end": 177492105094995,
+            "call_return_before_replace": 177492105097275,
+            "old_held_replace_end": 177492105110675,
+            "post_sync_begin": 177492105114455,
+            "post_sync_end": 177492105512959
+          },
+          "collective_wall_ns": 207562,
+          "collective_thread_cpu_ns": 189310,
+          "collective_voluntary_switches": 4,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 398504,
+          "previous_sample_post_end_ns": 177492104597381
+        },
+        {
+          "rank": 4,
+          "timestamps": {
+            "pre_sync_begin": 177492104613421,
+            "pre_sync_end": 177492104639922,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104643532,
+            "prepare_end": 177492104895904,
+            "exchange_begin": 177492104901954,
+            "collective_begin": 177492104905104,
+            "collective_end": 177492105095065,
+            "exchange_end": 177492105104055,
+            "call_return_before_replace": 177492105106525,
+            "old_held_replace_end": 177492105120495,
+            "post_sync_begin": 177492105124185,
+            "post_sync_end": 177492105514009
+          },
+          "collective_wall_ns": 189961,
+          "collective_thread_cpu_ns": 191340,
+          "collective_voluntary_switches": 0,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 389824,
+          "previous_sample_post_end_ns": 177492104609061
+        },
+        {
+          "rank": 5,
+          "timestamps": {
+            "pre_sync_begin": 177492104600001,
+            "pre_sync_end": 177492104621371,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104624581,
+            "prepare_end": 177492104869173,
+            "exchange_begin": 177492104874773,
+            "collective_begin": 177492104877973,
+            "collective_end": 177492105052805,
+            "exchange_end": 177492105061425,
+            "call_return_before_replace": 177492105063835,
+            "old_held_replace_end": 177492105076195,
+            "post_sync_begin": 177492105079905,
+            "post_sync_end": 177492105501318
+          },
+          "collective_wall_ns": 174832,
+          "collective_thread_cpu_ns": 170080,
+          "collective_voluntary_switches": 2,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 421413,
+          "previous_sample_post_end_ns": 177492104596401
+        },
+        {
+          "rank": 6,
+          "timestamps": {
+            "pre_sync_begin": 177492104598241,
+            "pre_sync_end": 177492104621971,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104624911,
+            "prepare_end": 177492104882364,
+            "exchange_begin": 177492104889174,
+            "collective_begin": 177492104892604,
+            "collective_end": 177492105085585,
+            "exchange_end": 177492105094985,
+            "call_return_before_replace": 177492105096955,
+            "old_held_replace_end": 177492105110085,
+            "post_sync_begin": 177492105113895,
+            "post_sync_end": 177492105504038
+          },
+          "collective_wall_ns": 192981,
+          "collective_thread_cpu_ns": 188120,
+          "collective_voluntary_switches": 1,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 390143,
+          "previous_sample_post_end_ns": 177492104594361
+        },
+        {
+          "rank": 7,
+          "timestamps": {
+            "pre_sync_begin": 177492104597641,
+            "pre_sync_end": 177492104619671,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492104622571,
+            "prepare_end": 177492104896344,
+            "exchange_begin": 177492104906044,
+            "collective_begin": 177492104911574,
+            "collective_end": 177492105081025,
+            "exchange_end": 177492105089655,
+            "call_return_before_replace": 177492105091625,
+            "old_held_replace_end": 177492105103975,
+            "post_sync_begin": 177492105107905,
+            "post_sync_end": 177492105496988
+          },
+          "collective_wall_ns": 169451,
+          "collective_thread_cpu_ns": 170930,
+          "collective_voluntary_switches": 0,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 389083,
+          "previous_sample_post_end_ns": 177492104593281
+        }
+      ]
+    },
+    "next_ordinal_collective": {
+      "collective_host_start_skew_ns": 7034355,
+      "latest_host_collective_start_rank": 0,
+      "collective_host_return_skew_ns": 7014856,
+      "latest_host_collective_return_rank": 0,
+      "peers": [
+        {
+          "rank": 0,
+          "timestamps": {
+            "pre_sync_begin": 177492111871539,
+            "pre_sync_end": 177492111897429,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492111900769,
+            "prepare_end": 177492112806736,
+            "exchange_begin": 177492112813146,
+            "collective_begin": 177492112816296,
+            "collective_end": 177492112976378,
+            "exchange_end": 177492112985508,
+            "call_return_before_replace": 177492112988098,
+            "old_held_replace_end": 177492113003048,
+            "post_sync_begin": 177492113007518,
+            "post_sync_end": 177492113551162
+          },
+          "collective_wall_ns": 160082,
+          "collective_thread_cpu_ns": 161910,
+          "collective_voluntary_switches": 0,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 543644,
+          "previous_sample_post_end_ns": 177492111866409
+        },
+        {
+          "rank": 1,
+          "timestamps": {
+            "pre_sync_begin": 177492105500598,
+            "pre_sync_end": 177492105520819,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492105524189,
+            "prepare_end": 177492105779881,
+            "exchange_begin": 177492105785991,
+            "collective_begin": 177492105788961,
+            "collective_end": 177492106077733,
+            "exchange_end": 177492106087063,
+            "call_return_before_replace": 177492106089263,
+            "old_held_replace_end": 177492106101893,
+            "post_sync_begin": 177492106104873,
+            "post_sync_end": 177492113541502
+          },
+          "collective_wall_ns": 288772,
+          "collective_thread_cpu_ns": 217800,
+          "collective_voluntary_switches": 6,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 7436629,
+          "previous_sample_post_end_ns": 177492105496478
+        },
+        {
+          "rank": 2,
+          "timestamps": {
+            "pre_sync_begin": 177492105519429,
+            "pre_sync_end": 177492105544159,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492105547719,
+            "prepare_end": 177492105813971,
+            "exchange_begin": 177492105820301,
+            "collective_begin": 177492105823991,
+            "collective_end": 177492106015903,
+            "exchange_end": 177492106025433,
+            "call_return_before_replace": 177492106027643,
+            "old_held_replace_end": 177492106040003,
+            "post_sync_begin": 177492106043213,
+            "post_sync_end": 177492113554792
+          },
+          "collective_wall_ns": 191912,
+          "collective_thread_cpu_ns": 189420,
+          "collective_voluntary_switches": 1,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 7511579,
+          "previous_sample_post_end_ns": 177492105515649
+        },
+        {
+          "rank": 3,
+          "timestamps": {
+            "pre_sync_begin": 177492105517519,
+            "pre_sync_end": 177492105539789,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492105542759,
+            "prepare_end": 177492105794551,
+            "exchange_begin": 177492105800181,
+            "collective_begin": 177492105803751,
+            "collective_end": 177492106007692,
+            "exchange_end": 177492106016163,
+            "call_return_before_replace": 177492106018353,
+            "old_held_replace_end": 177492106031173,
+            "post_sync_begin": 177492106034123,
+            "post_sync_end": 177492113546332
+          },
+          "collective_wall_ns": 203941,
+          "collective_thread_cpu_ns": 183540,
+          "collective_voluntary_switches": 5,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 7512209,
+          "previous_sample_post_end_ns": 177492105512959
+        },
+        {
+          "rank": 4,
+          "timestamps": {
+            "pre_sync_begin": 177492105517839,
+            "pre_sync_end": 177492105540549,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492105543829,
+            "prepare_end": 177492105794121,
+            "exchange_begin": 177492105800751,
+            "collective_begin": 177492105804601,
+            "collective_end": 177492105998362,
+            "exchange_end": 177492106006892,
+            "call_return_before_replace": 177492106009022,
+            "old_held_replace_end": 177492106023083,
+            "post_sync_begin": 177492106026343,
+            "post_sync_end": 177492113552552
+          },
+          "collective_wall_ns": 193761,
+          "collective_thread_cpu_ns": 194860,
+          "collective_voluntary_switches": 0,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 7526209,
+          "previous_sample_post_end_ns": 177492105514009
+        },
+        {
+          "rank": 5,
+          "timestamps": {
+            "pre_sync_begin": 177492105505808,
+            "pre_sync_end": 177492105527229,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492105530469,
+            "prepare_end": 177492105772781,
+            "exchange_begin": 177492105778811,
+            "collective_begin": 177492105781941,
+            "collective_end": 177492105961522,
+            "exchange_end": 177492105970292,
+            "call_return_before_replace": 177492105972952,
+            "old_held_replace_end": 177492105986292,
+            "post_sync_begin": 177492105990012,
+            "post_sync_end": 177492113543052
+          },
+          "collective_wall_ns": 179581,
+          "collective_thread_cpu_ns": 172810,
+          "collective_voluntary_switches": 1,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 7553040,
+          "previous_sample_post_end_ns": 177492105501318
+        },
+        {
+          "rank": 6,
+          "timestamps": {
+            "pre_sync_begin": 177492105507668,
+            "pre_sync_end": 177492105530409,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492105533289,
+            "prepare_end": 177492105788181,
+            "exchange_begin": 177492105794301,
+            "collective_begin": 177492105797581,
+            "collective_end": 177492105970712,
+            "exchange_end": 177492105979532,
+            "call_return_before_replace": 177492105982212,
+            "old_held_replace_end": 177492105994542,
+            "post_sync_begin": 177492105997652,
+            "post_sync_end": 177492113545162
+          },
+          "collective_wall_ns": 173131,
+          "collective_thread_cpu_ns": 174540,
+          "collective_voluntary_switches": 0,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 7547510,
+          "previous_sample_post_end_ns": 177492105504038
+        },
+        {
+          "rank": 7,
+          "timestamps": {
+            "pre_sync_begin": 177492105501768,
+            "pre_sync_end": 177492105525159,
+            "producer_begin": -1,
+            "producer_end": -1,
+            "prepare_begin": 177492105530109,
+            "prepare_end": 177492105809041,
+            "exchange_begin": 177492105815711,
+            "collective_begin": 177492105819041,
+            "collective_end": 177492106040553,
+            "exchange_end": 177492106050263,
+            "call_return_before_replace": 177492106052563,
+            "old_held_replace_end": 177492106065623,
+            "post_sync_begin": 177492106068803,
+            "post_sync_end": 177492113539182
+          },
+          "collective_wall_ns": 221512,
+          "collective_thread_cpu_ns": 200730,
+          "collective_voluntary_switches": 5,
+          "collective_involuntary_switches": 0,
+          "post_sync_wall_ns": 7470379,
+          "previous_sample_post_end_ns": 177492105496988
+        }
+      ]
+    }
+  },
+  "stage_stall_counts_gt2ms_by_arm_scope": [
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "prepare",
+      "count": 11520,
+      "mean_wall_ms": 0.37698425416666664,
+      "mean_thread_cpu_ms": 0.37733961024305557,
+      "max_wall_ms": 2.54922,
+      "gt2ms": 2,
+      "gt5ms": 0,
+      "voluntary_switches": 5,
+      "involuntary_switches": 135,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 10254
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "collective_host_call",
+      "count": 11520,
+      "mean_wall_ms": 0.1434620078125,
+      "mean_thread_cpu_ms": 0.13450553559027778,
+      "max_wall_ms": 5.557635,
+      "gt2ms": 10,
+      "gt5ms": 1,
+      "voluntary_switches": 8713,
+      "involuntary_switches": 77,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 4384
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "old_held_release",
+      "count": 11520,
+      "mean_wall_ms": 0.01835929548611111,
+      "mean_thread_cpu_ms": 0.018655030381944444,
+      "max_wall_ms": 0.173741,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 21,
+      "involuntary_switches": 6,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 11426
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "post_sync",
+      "count": 11520,
+      "mean_wall_ms": 0.4213198452256945,
+      "mean_thread_cpu_ms": 0.3585517005208333,
+      "max_wall_ms": 5.363103,
+      "gt2ms": 121,
+      "gt5ms": 14,
+      "voluntary_switches": 11490,
+      "involuntary_switches": 121,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 35
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "prepare",
+      "count": 11520,
+      "mean_wall_ms": 0.23497672647569445,
+      "mean_thread_cpu_ms": 0.23594006944444443,
+      "max_wall_ms": 3.126045,
+      "gt2ms": 2,
+      "gt5ms": 0,
+      "voluntary_switches": 2,
+      "involuntary_switches": 34,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 10790
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "collective_host_call",
+      "count": 11520,
+      "mean_wall_ms": 0.19426366414930554,
+      "mean_thread_cpu_ms": 0.17870116840277778,
+      "max_wall_ms": 6.20195,
+      "gt2ms": 13,
+      "gt5ms": 4,
+      "voluntary_switches": 14965,
+      "involuntary_switches": 14,
+      "same_thread_gc_overlap_ns": 385732,
+      "samples_with_same_thread_gc": 8,
+      "negative_wall_minus_cpu_samples": 3733
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "old_held_release",
+      "count": 11520,
+      "mean_wall_ms": 0.01949141588541667,
+      "mean_thread_cpu_ms": 0.01976275434027778,
+      "max_wall_ms": 1.039929,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 28,
+      "involuntary_switches": 6,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 11413
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "post_sync",
+      "count": 11520,
+      "mean_wall_ms": 0.44950273506944444,
+      "mean_thread_cpu_ms": 0.3886597361111111,
+      "max_wall_ms": 6.699053,
+      "gt2ms": 130,
+      "gt5ms": 28,
+      "voluntary_switches": 11499,
+      "involuntary_switches": 52,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 21
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "prepare",
+      "count": 11520,
+      "mean_wall_ms": 0.3841534886284722,
+      "mean_thread_cpu_ms": 0.3841847057291667,
+      "max_wall_ms": 2.695702,
+      "gt2ms": 1,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 81,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 10004
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "collective_host_call",
+      "count": 11520,
+      "mean_wall_ms": 0.14124921432291668,
+      "mean_thread_cpu_ms": 0.13254692274305557,
+      "max_wall_ms": 5.154071,
+      "gt2ms": 10,
+      "gt5ms": 1,
+      "voluntary_switches": 8406,
+      "involuntary_switches": 22,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 4606
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "old_held_release",
+      "count": 11520,
+      "mean_wall_ms": 0.012702628819444443,
+      "mean_thread_cpu_ms": 0.013004678819444445,
+      "max_wall_ms": 0.139181,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 20,
+      "involuntary_switches": 2,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 11429
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "post_sync",
+      "count": 11520,
+      "mean_wall_ms": 0.41807704991319444,
+      "mean_thread_cpu_ms": 0.3611032065972222,
+      "max_wall_ms": 6.010268,
+      "gt2ms": 107,
+      "gt5ms": 14,
+      "voluntary_switches": 11489,
+      "involuntary_switches": 71,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 28
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "prepare",
+      "count": 11520,
+      "mean_wall_ms": 0.2556033365451389,
+      "mean_thread_cpu_ms": 0.2563185052083333,
+      "max_wall_ms": 3.329336,
+      "gt2ms": 3,
+      "gt5ms": 0,
+      "voluntary_switches": 2,
+      "involuntary_switches": 55,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 10633
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "collective_host_call",
+      "count": 11520,
+      "mean_wall_ms": 0.19245825616319445,
+      "mean_thread_cpu_ms": 0.17844970572916666,
+      "max_wall_ms": 6.840454,
+      "gt2ms": 11,
+      "gt5ms": 2,
+      "voluntary_switches": 14572,
+      "involuntary_switches": 28,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 3868
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "old_held_release",
+      "count": 11520,
+      "mean_wall_ms": 0.013531065711805556,
+      "mean_thread_cpu_ms": 0.01382751736111111,
+      "max_wall_ms": 0.072101,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 4,
+      "involuntary_switches": 1,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 11414
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "post_sync",
+      "count": 11520,
+      "mean_wall_ms": 0.43656459513888884,
+      "mean_thread_cpu_ms": 0.37971027951388886,
+      "max_wall_ms": 7.55304,
+      "gt2ms": 99,
+      "gt5ms": 20,
+      "voluntary_switches": 11500,
+      "involuntary_switches": 72,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 28
+    }
+  ],
+  "all_gt2ms_stage_same_thread_gc_overlap_ns": 0,
+  "non_hot_host_snapshots": [
+    {
+      "rank": 0,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    },
+    {
+      "rank": 1,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    },
+    {
+      "rank": 2,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    },
+    {
+      "rank": 3,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    },
+    {
+      "rank": 4,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    },
+    {
+      "rank": 5,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    },
+    {
+      "rank": 6,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    },
+    {
+      "rank": 7,
+      "affinity_count_start": 320,
+      "affinity_unchanged": true,
+      "gc_enabled_start": true,
+      "gc_enabled_end": true,
+      "gc_thresholds_start": [
+        700,
+        10,
+        10
+      ],
+      "gc_thresholds_end": [
+        700,
+        10,
+        10
+      ],
+      "cpu_cgroup_files_start": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      },
+      "cpu_cgroup_files_end": {
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/sshd.service/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/system.slice/cpu.cfs_period_us": "100000\n",
+        "/sys/fs/cgroup/cpu/cpu.stat": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_quota_us": "-1\n",
+        "/sys/fs/cgroup/cpu/cpu.cfs_period_us": "100000\n"
+      }
+    }
+  ]
+}

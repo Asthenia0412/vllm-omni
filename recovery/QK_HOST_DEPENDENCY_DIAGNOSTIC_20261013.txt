@@ -1,0 +1,88 @@
+QK host dependency diagnostic, 2026-10-13 — diagnostic only; QK remains NOT ADMITTED
+
+Scope and result
+- This is the record-once candidate's separate instrumented diagnostic, after its
+  three-round complete-call performance gate FAILED. It does not change that gate.
+- Correctness: eight ranks × 24 actual layer0 cases; original checks plus both
+  arms/scopes through the instrumented wrapper passed. Profile: eight ranks ×
+  24 cases × two scopes × two arms × 60 observations = 46,080 rank-samples.
+  These are correlated rank observations, not 46,080 independent experiments.
+- Runtime, original all_to_all_5D, arithmetic, collective order, and formal timing
+  harness remain unchanged. New marker/GC/weakref work changes scheduling; these
+  diagnostic durations cannot be used as speed-gate samples or chunk savings.
+
+Disjoint stage observations (counts strictly >2 ms / >5 ms; maximum)
+  prepare                       8 /  0; 3.329336 ms
+  original all_to_all_5D host   44 /  8; 6.840454 ms
+  exchange post-collective      0 /  0; 0.874517 ms
+  old held replacement/release  0 /  0; 1.039929 ms
+  pre-call device synchronize   2 /  0; 3.959622 ms
+  post-call device synchronize 457 / 76; 7.553040 ms
+  Producer and other marker gaps have no >2 ms observation.
+  Host call including old-held release: 63 / 12; maximum 7.168696 ms.
+  This total overlaps constituent stages and must not be added to them.
+
+The collective_host_call marker encloses the WHOLE original all_to_all_5D:
+metadata/lease admission, output allocation, dist.all_to_all_single and output
+reshape/transpose/contiguous processing. It does not isolate HCCL transport or
+device collective entry. Its internal source boundary is comm.py:155-236.
+
+GC and owner observations
+- Every rank recorded 10 GC events = five matched intervals; dropped=errors=0,
+  with no unmatched starts/stops. Only sample row1274 intersects GC on the
+  measured thread: 41,951–62,881 ns per rank, inside the collective host path.
+  No >2 ms disjoint stage intersects a recorded same-thread GC interval.
+  This run does not support blaming its large stalls on Python GC; it does not
+  establish that GC can never affect a different run.
+- At all 46,080 replacements, old lease and receive Python wrappers were dead
+  immediately after assignment (both weakref alive counts zero). This is wrapper
+  lifetime evidence, not proof that device storage was reclaimed then.
+- CPU/thread observations are sequential, non-atomic. Signed wall-minus-CPU is
+  preserved, never labelled CPU idle. Context switches are correlation evidence.
+
+Concrete propagation example (all timestamps are perf_counter_ns, same boot)
+  Actual case KV14040, probe2, cached scope, combined arm, sample42 / row2622.
+  Eight ranks enter the original all_to_all_5D host path within 47,621 ns.
+  Rank0: 177492104921664 -> 177492111762118, wall 6.840454 ms,
+         thread CPU 0.250290 ms, voluntary context switches +5, involuntary +0.
+  The other seven ranks finish the SAME sample's post-sync between
+         177492105496478 and 177492105515649, before rank0's host call returns.
+  Thus this observed long host return cannot be equated with all ranks spending
+  that interval transferring this sample's payload.
+
+  On sample43 / row2623, those seven ranks advance first and their post-sync
+  spans grow to 7.436629–7.553040 ms (thread CPU 7.369250–7.482590 ms).
+  Rank0 reaches the NEXT collective host call at 177492112816296; all eight
+  post-sync calls finish between 177492113539182 and 177492113554792.
+  This records a late host return followed by next-call rank skew and waiting.
+  It does not isolate a lock, allocator, dispatcher, scheduler or transport cause.
+  The original 6.840 ms and following seven waits must not be summed as separate
+  recoverable delays. Full current/next-call eight-rank timestamps are retained.
+
+Non-hot CPU snapshots
+- All workers retain their 320-CPU affinity and normal GC settings [700,10,10].
+- Recorded CPU cgroup hierarchy has quota=-1 and unchanged zero throttling counts.
+  This run does not support CPU quota throttling; it does not exclude contention,
+  runtime waits, CPU migration or GIL reacquisition inside the broad host span.
+
+Next diagnostic boundary, if needed
+- Distinguish output allocation, distributed-call return, and layout processing
+  inside the broad all_to_all_5D span, using an isolated observer or host scheduling
+  trace while preserving original communication and timing methods.
+- No claim that record-once QK passed, no metadata A/B admission, no model speedup.
+  Root is proceeding separately with cross-only model regression and QK off.
+
+Evidence and reproducibility
+- Correctness supervisor: qk-host-dependency-runs/c5de03b81ad74bd3d9989597da7d474b
+- Profile supervisor: qk-host-dependency-runs/6e781c83255db1e8096838a132840ac0
+  Both exit0, fatal null, no remaining owned processes.
+- Full analysis: ROOT/audits/qk-host-dependencies/summary-v2.json
+  (summary-v1 retained; v2 adds next-call evidence and precise host-path boundary).
+- Committable receipt: recovery/validation/qk-host-dependency-diagnostic-20261013.json
+- Analyzer: recovery/summarize_qk_host_dependencies.py (stdlib only).
+  CPU tests: test_qk_host_dependency_summary_cpu.py, eight tests normal + eight -O.
+  Instrumented harness CPU lifecycle tests independently reviewed: seven + seven -O.
+- Receipt pins raw rank reports, supervisors, runtime manifest/source, diagnostic
+  source, analyzer/tests and full analysis. No original model weights rehashed.
+- ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+  Source worktree: ROOT/qk-record-once-worktree.
