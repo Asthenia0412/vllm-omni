@@ -1,0 +1,1804 @@
+{
+  "schema": "lingbot_qk_collective_boundary_diagnostic_receipt_v2",
+  "diagnostic_only": true,
+  "performance_timing_eligible": false,
+  "gate_passed": false,
+  "model_admitted": false,
+  "total_rank_samples": 46080,
+  "logical_samples_per_rank": 5760,
+  "actual_cases": 192,
+  "layer_payloads": [
+    0
+  ],
+  "all40_payloads": false,
+  "profiles": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank0.json",
+      "bytes": 8002424,
+      "sha256": "c8ab5bccbfff67197c361529149f075ea51f6c63a86ee2cad31434d5fdff2923"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank1.json",
+      "bytes": 8002424,
+      "sha256": "424ba76339102d18db9c6b024514b81c816bc4761e6cf65d98a5b809eee811d0"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank2.json",
+      "bytes": 8002424,
+      "sha256": "adb34a92df6653daefe92e30e0698c2e524dc3181c508a817aae3ba6a346e08d"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank3.json",
+      "bytes": 8002424,
+      "sha256": "13340e24bdfcd6622c6ee97006d7cb5df0a01f9deffb76a0742a3f21141678c7"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank4.json",
+      "bytes": 8002424,
+      "sha256": "3cc5de82bf17e8c62194a89fb45271c3755068e8a3a5a29c82e8a80928edf4ee"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank5.json",
+      "bytes": 8002424,
+      "sha256": "46b4b56949e09fee24b3faa4a36d98e6d30c378fecf86138ee607d8c2ce1b748"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank6.json",
+      "bytes": 8002424,
+      "sha256": "a597f2d6c8ac36b1133f47f25cb90b5782a96ca6094a4e3c8f7661b2fec29521"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank7.json",
+      "bytes": 8002424,
+      "sha256": "edb46cf0c54b53d5839a414af6d1e5e1bfb6cd9a571f39219769198f7173f016"
+    }
+  ],
+  "supervisors": {
+    "profile": {
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-runs/18483514545dca28a8676c8d8f2f6d64/launch.json",
+        "bytes": 1160,
+        "sha256": "20a5b8b2a8ad4a1e1d764b76e00b00b972a195e8abbc43210b57545d9de23ce9"
+      },
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-runs/18483514545dca28a8676c8d8f2f6d64/result.json",
+        "bytes": 1213,
+        "sha256": "fbe0b8232a33e82f3eb7869aca3b4810d15464431e2fc54a8409452cb067de33"
+      },
+      "nonce": "18483514545dca28a8676c8d8f2f6d64",
+      "options": {
+        "--mode": "profile",
+        "--fixtures": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures",
+        "--manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+        "--correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness",
+        "--diagnostic-correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2",
+        "--output": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2"
+      }
+    },
+    "correctness": {
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-runs/a1d2ca57d71ab6161ebdfcc20115a448/launch.json",
+        "bytes": 1028,
+        "sha256": "1ffc85d8f19e9e3126829620a8d9c0aeb5ef04f04c1e4ae8c6b6bacb57e2a1e8"
+      },
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-runs/a1d2ca57d71ab6161ebdfcc20115a448/result.json",
+        "bytes": 1081,
+        "sha256": "5c73b8cb6fd7a537a761522695ae4b85aa9bc358a9b0e82aa630689951665784"
+      },
+      "nonce": "a1d2ca57d71ab6161ebdfcc20115a448",
+      "options": {
+        "--mode": "correctness",
+        "--fixtures": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures",
+        "--manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+        "--correctness-dir": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness",
+        "--output": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2"
+      }
+    }
+  },
+  "correctness_receipts": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank0.json",
+      "bytes": 50103,
+      "sha256": "65af33e2cc83ca48227dee59a4355380feb5106288d901a17a01283531010795"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank1.json",
+      "bytes": 50103,
+      "sha256": "f8166a93f076aa7db0e8896fe724268ad2e38fd8cd156f8602649b9931f2704a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank2.json",
+      "bytes": 50103,
+      "sha256": "bfd365af6570c69cf6ae2019dc8c9858a275991c063ad8817af34ed34ed020c8"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank3.json",
+      "bytes": 50103,
+      "sha256": "1a0f10ddeaf5e5c46a5a0c44763ea8489cb7e05e9a730c70fae1cdf25dec1c82"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank4.json",
+      "bytes": 50103,
+      "sha256": "62f1499e0808c740e45dbf20aeeb13052904bed59a10b99685bef81b1e7aad5e"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank5.json",
+      "bytes": 50103,
+      "sha256": "17bad4bfe591085d03730f810716e6272f4087eeb7a31fd7b8419d81af8cd0da"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank6.json",
+      "bytes": 50103,
+      "sha256": "2aec12d99f03591cd1b746c285ca4fcc44abec9722753d3c5326c6f56a6260bf"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-checks/correctness/rank7.json",
+      "bytes": 50103,
+      "sha256": "0ca94d59eee96f27e2f32074d2a56b9524bd238c06928c4f627d5e8f521e679e"
+    }
+  ],
+  "diagnostic_correctness_receipts": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank0.json",
+      "bytes": 110161,
+      "sha256": "988e533ed7664f443ae81ec935cd243214efe4ad734ab5d2fd9a373745b626e9"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank1.json",
+      "bytes": 110161,
+      "sha256": "f81fed1eb1b715459a56d747de95c935051ddbb95a75fb7ad9aea8e46f437e05"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank2.json",
+      "bytes": 110161,
+      "sha256": "672d726c4f3a479722ddb0318735de36c439746b0e114eb73474405b11b89967"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank3.json",
+      "bytes": 110161,
+      "sha256": "e6dc5d16d6a524db59bc8e55330c39ca82248ec117e6e098b1d889b51d28754b"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank4.json",
+      "bytes": 110161,
+      "sha256": "04ca69fcc3e39033ccce06b1651a41f9d486d498debbccb9bf57c95cdd2ca9c4"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank5.json",
+      "bytes": 110161,
+      "sha256": "35ec0f86986e5e6549c36d15781e8c37650f01ef6ebf04001fe565a591abe331"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank6.json",
+      "bytes": 110161,
+      "sha256": "ce0282cd6e29b276f06a4a13a38d668051f423e76d2cc6502931cfb4ede2f0e0"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness-v2/rank7.json",
+      "bytes": 110161,
+      "sha256": "67c9ed54fff3e79acdadd66bccdac12b22816c5c0ef94ceac80ddce7ca43c7e1"
+    }
+  ],
+  "diagnostic_schema": "lingbot_qk_collective_boundaries_diagnostic_v2",
+  "diagnostic_method": "frozen_per_call_sync_private_constructor_and_scoped_module_delegates_v2",
+  "diagnostic_sources": {
+    "wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/diagnose_qk_collective_boundaries.py",
+      "bytes": 17739,
+      "sha256": "ccc232f720d298d0f4f31201fc7645d49a82ea5493e94049212dd1e40ed29be2"
+    },
+    "observer": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/observe_qk_collective_host.py",
+      "bytes": 14663,
+      "sha256": "412e96c61b2a64b26e8cc183bafd728d08ad8442413701b851bdee45989b22ab"
+    },
+    "frozen_diagnostic": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/diagnose_qk_host_dependencies.py",
+      "bytes": 20775,
+      "sha256": "a3757158dde34cc1b6ce7772c12d30cc09c90a6bb306c633ed62559d0c369cae"
+    }
+  },
+  "expected_collective_code": {
+    "source_path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/distributed/comm.py",
+    "source_sha256": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f",
+    "code_fingerprint_method": "python_typed_code_fields_v1",
+    "code_sha256": "a2091be4862f9333b5f90d72b4965dda2646db173b552f1494f75602e0dce260",
+    "python": "3.12.14 (main, Sep 24 2026, 17:56:52) [Clang 22.1.3 ]",
+    "optimize": 0,
+    "derivation": "compile pinned full module without execution; unchanged imported code must match"
+  },
+  "sources": {
+    "harness": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_real_matrix.py",
+      "bytes": 24351,
+      "sha256": "2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519"
+    },
+    "loader": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    "capture_contract": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+      "bytes": 22079,
+      "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+    },
+    "original_collective": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/distributed/comm.py",
+      "bytes": 15443,
+      "sha256": "8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f"
+    },
+    "coefficient_producer": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_native_bf16_qk.py",
+      "bytes": 7946,
+      "sha256": "42a5c7c45bd750f1b489f2fa89a4cb66a3946867b90b231097f3533946264014"
+    },
+    "baseline_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 11282,
+      "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+    },
+    "combined_wrapper": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_qk_combined.py",
+      "bytes": 10282,
+      "sha256": "d9c83b3d394cb7fd4cfc777b6c52374d384260446ffa5ffbec77dd161c53d756"
+    },
+    "padded_consumer_hook": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/qk_single_host_integration_v1.py",
+      "bytes": 32237,
+      "sha256": "3a189a2bdeb60ca001007424bb329efb863693e97b338ac997cd6dcb3543ada6"
+    }
+  },
+  "manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-record-once.20261013v1/qk_combined_manifest.json",
+    "bytes": 8320,
+    "sha256": "19d282194022d7c6544a2c06ac738e9fa1ce1f1c23e952b0698e5e8e757b0bbd"
+  },
+  "matrix_sha256": "135caf06dcdd680c3ac8f4138e7c78ed136d5577b5a2361c88242822ea86f7da",
+  "boot_id": "12b4f8e9-d399-4224-be54-322cd3294f2a",
+  "analyzer_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/summarize_qk_collective_boundaries.py",
+    "bytes": 23039,
+    "sha256": "32f3eec026c669a51e3f0d8988c62054fe4c8656baa81ab0d4417ba070a7305a"
+  },
+  "scalar_helper_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/summarize_qk_host_dependencies.py",
+    "bytes": 20047,
+    "sha256": "b0eda1818c969fbbea9e29f52547c3b61d6531d47847e73f71cc01ada0e361ba"
+  },
+  "fingerprint_helper_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/observe_qk_collective_host.py",
+    "bytes": 14663,
+    "sha256": "412e96c61b2a64b26e8cc183bafd728d08ad8442413701b851bdee45989b22ab"
+  },
+  "stage_summary": {
+    "guard_before_allocation": {
+      "count": 46080,
+      "mean_wall_ms": 0.03750160184461805,
+      "mean_thread_cpu_ms": 0.03743555490451389,
+      "max_wall_ms": 0.832647,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 745,
+      "involuntary_switches": 31,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 37248
+    },
+    "receive_allocation": {
+      "count": 46080,
+      "mean_wall_ms": 0.029895622808159723,
+      "mean_thread_cpu_ms": 0.026865956597222223,
+      "max_wall_ms": 1.2703,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 20534,
+      "involuntary_switches": 24,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 15268
+    },
+    "allocation_to_dist_bridge": {
+      "count": 46080,
+      "mean_wall_ms": 0.0066176932508680555,
+      "mean_thread_cpu_ms": 0.006258517361111111,
+      "max_wall_ms": 0.045011,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 7,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 1135
+    },
+    "public_dist_call": {
+      "count": 46080,
+      "mean_wall_ms": 0.08523354782986112,
+      "mean_thread_cpu_ms": 0.08170860915798611,
+      "max_wall_ms": 7.220327,
+      "gt2ms": 49,
+      "gt5ms": 5,
+      "voluntary_switches": 751,
+      "involuntary_switches": 69,
+      "same_thread_gc_overlap_ns": 2114858,
+      "samples_with_same_thread_gc": 17,
+      "negative_wall_minus_cpu_samples": 44348
+    },
+    "output_layout_and_return": {
+      "count": 46080,
+      "mean_wall_ms": 0.022233147547743054,
+      "mean_thread_cpu_ms": 0.021549042317708333,
+      "max_wall_ms": 3.347557,
+      "gt2ms": 2,
+      "gt5ms": 0,
+      "voluntary_switches": 5,
+      "involuntary_switches": 15,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0,
+      "negative_wall_minus_cpu_samples": 190
+    },
+    "inner_call_total_overlaps_five_stages": {
+      "count": 46080,
+      "mean_wall_ms": 0.18148161328125,
+      "mean_thread_cpu_ms": 0.17381768033854167,
+      "max_wall_ms": 7.298178,
+      "gt2ms": 51,
+      "gt5ms": 6,
+      "voluntary_switches": 22035,
+      "involuntary_switches": 146,
+      "same_thread_gc_overlap_ns": 2114858,
+      "samples_with_same_thread_gc": 17,
+      "negative_wall_minus_cpu_samples": 21441
+    }
+  },
+  "gc_observation_complete": true,
+  "gc_by_rank": [
+    {
+      "rank": 0,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 1,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 2,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 3,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 4,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 5,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 6,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    },
+    {
+      "rank": 7,
+      "event_count": 8,
+      "paired_count": 4,
+      "dropped": 0,
+      "errors": 0,
+      "unmatched": [],
+      "observation_complete": true
+    }
+  ],
+  "old_python_wrapper_alive": {
+    "lease_alive": 0,
+    "receive_wrapper_alive": 0
+  },
+  "caveats": [
+    "New wrapper and observer overhead change dispatch/GC timing; diagnostic data never admit the failed QK candidate.",
+    "Only five inner host stages are disjoint. Their total, enclosing outer call and outer sync overlap and cannot be added as savings.",
+    "Receive allocation measures initial empty_like only; output processing may itself allocate.",
+    "Public dist host entry/return is not device entry/completion, transport time, or an identified lock wait.",
+    "Same/next-call eight-rank timestamps show host ordering association, not a standalone causal device timeline.",
+    "GC is matched only on the same native thread and clipped to each interval. Missing/dropped pairs remain partial.",
+    "Wall/CPU/context observations are sequential, not atomic; signed wall-minus-CPU is not an idle estimate.",
+    "Scalar helpers are reused with explicit source pins; old broad schema, raw-marshal-v1 or old PASS is never relabelled as v2 correctness."
+  ],
+  "full_external_summary": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-collective-boundaries/summary-v2.json",
+    "bytes": 1017817,
+    "sha256": "57d236a76092c0aa3d9bed03850b3b02823def9c71acb4635b355e38046265ae"
+  },
+  "by_scope_arm_stage": [
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "allocation_to_dist_bridge",
+      "count": 11520,
+      "mean_wall_ms": 0.006309536111111111,
+      "mean_thread_cpu_ms": 0.0060468394097222215,
+      "max_wall_ms": 0.045011,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "guard_before_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.01775829548611111,
+      "mean_thread_cpu_ms": 0.017765092881944444,
+      "max_wall_ms": 0.059121,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 1,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "output_layout_and_return",
+      "count": 11520,
+      "mean_wall_ms": 0.02213851892361111,
+      "mean_thread_cpu_ms": 0.021451921875,
+      "max_wall_ms": 3.182885,
+      "gt2ms": 1,
+      "gt5ms": 0,
+      "voluntary_switches": 1,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "public_dist_call",
+      "count": 11520,
+      "mean_wall_ms": 0.08433940607638889,
+      "mean_thread_cpu_ms": 0.08145881076388889,
+      "max_wall_ms": 4.912639,
+      "gt2ms": 10,
+      "gt5ms": 0,
+      "voluntary_switches": 137,
+      "involuntary_switches": 5,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "baseline",
+      "stage": "receive_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.03039112291666667,
+      "mean_thread_cpu_ms": 0.02585502517361111,
+      "max_wall_ms": 0.510785,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 8256,
+      "involuntary_switches": 1,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "allocation_to_dist_bridge",
+      "count": 11520,
+      "mean_wall_ms": 0.006875846961805557,
+      "mean_thread_cpu_ms": 0.00641234201388889,
+      "max_wall_ms": 0.037011,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 1,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "guard_before_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.057128076736111116,
+      "mean_thread_cpu_ms": 0.057041539062499994,
+      "max_wall_ms": 0.832647,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 333,
+      "involuntary_switches": 14,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "output_layout_and_return",
+      "count": 11520,
+      "mean_wall_ms": 0.02262721336805556,
+      "mean_thread_cpu_ms": 0.021966949652777776,
+      "max_wall_ms": 3.347557,
+      "gt2ms": 1,
+      "gt5ms": 0,
+      "voluntary_switches": 3,
+      "involuntary_switches": 3,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "public_dist_call",
+      "count": 11520,
+      "mean_wall_ms": 0.0844169790798611,
+      "mean_thread_cpu_ms": 0.08114027864583334,
+      "max_wall_ms": 5.439463,
+      "gt2ms": 10,
+      "gt5ms": 1,
+      "voluntary_switches": 347,
+      "involuntary_switches": 16,
+      "same_thread_gc_overlap_ns": 38200,
+      "samples_with_same_thread_gc": 1
+    },
+    {
+      "scope": "cached_snapshot_and_original_consumer",
+      "arm": "combined",
+      "stage": "receive_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.028081775694444443,
+      "mean_thread_cpu_ms": 0.026977086805555554,
+      "max_wall_ms": 0.373223,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 1391,
+      "involuntary_switches": 6,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "allocation_to_dist_bridge",
+      "count": 11520,
+      "mean_wall_ms": 0.0063990326388888895,
+      "mean_thread_cpu_ms": 0.006136967881944444,
+      "max_wall_ms": 0.03943,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 6,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "guard_before_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.01783686414930556,
+      "mean_thread_cpu_ms": 0.017818666666666667,
+      "max_wall_ms": 0.07024,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 6,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "output_layout_and_return",
+      "count": 11520,
+      "mean_wall_ms": 0.021835236284722222,
+      "mean_thread_cpu_ms": 0.02113582204861111,
+      "max_wall_ms": 0.385783,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 1,
+      "involuntary_switches": 9,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "public_dist_call",
+      "count": 11520,
+      "mean_wall_ms": 0.08699106996527778,
+      "mean_thread_cpu_ms": 0.08252387934027779,
+      "max_wall_ms": 7.220327,
+      "gt2ms": 16,
+      "gt5ms": 3,
+      "voluntary_switches": 92,
+      "involuntary_switches": 28,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "stage": "receive_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.03202266458333333,
+      "mean_thread_cpu_ms": 0.026675850694444444,
+      "max_wall_ms": 1.2703,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 9376,
+      "involuntary_switches": 11,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "allocation_to_dist_bridge",
+      "count": 11520,
+      "mean_wall_ms": 0.0068863572916666674,
+      "mean_thread_cpu_ms": 0.006437920138888889,
+      "max_wall_ms": 0.031201,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "guard_before_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.05728317100694444,
+      "mean_thread_cpu_ms": 0.057116921006944446,
+      "max_wall_ms": 0.557304,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 412,
+      "involuntary_switches": 10,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "output_layout_and_return",
+      "count": 11520,
+      "mean_wall_ms": 0.02233162161458333,
+      "mean_thread_cpu_ms": 0.021641475694444447,
+      "max_wall_ms": 0.800767,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 3,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "public_dist_call",
+      "count": 11520,
+      "mean_wall_ms": 0.08518673619791667,
+      "mean_thread_cpu_ms": 0.08171146788194446,
+      "max_wall_ms": 5.126271,
+      "gt2ms": 13,
+      "gt5ms": 1,
+      "voluntary_switches": 175,
+      "involuntary_switches": 20,
+      "same_thread_gc_overlap_ns": 2076658,
+      "samples_with_same_thread_gc": 16
+    },
+    {
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "combined",
+      "stage": "receive_allocation",
+      "count": 11520,
+      "mean_wall_ms": 0.029086928038194446,
+      "mean_thread_cpu_ms": 0.027955863715277775,
+      "max_wall_ms": 0.290212,
+      "gt2ms": 0,
+      "gt5ms": 0,
+      "voluntary_switches": 1511,
+      "involuntary_switches": 6,
+      "same_thread_gc_overlap_ns": 0,
+      "samples_with_same_thread_gc": 0
+    }
+  ],
+  "same_thread_gc_samples_count": 17,
+  "examples": [
+    {
+      "rank": 6,
+      "row": 3393,
+      "kv_len": 18720,
+      "probe": 2,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "sample": 33,
+      "start_ns": 181426158241835,
+      "end_ns": 181426165540013,
+      "wall_ns": 7298178,
+      "thread_cpu_ns": 166580,
+      "wall_minus_thread_cpu_ns": 7131598,
+      "voluntary_switches": 2,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 0,
+      "inner_stages": {
+        "guard_before_allocation": {
+          "start_ns": 181426158241835,
+          "end_ns": 181426158259496,
+          "wall_ns": 17661,
+          "thread_cpu_ns": 18000,
+          "wall_minus_thread_cpu_ns": -339,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "receive_allocation": {
+          "start_ns": 181426158259496,
+          "end_ns": 181426158290766,
+          "wall_ns": 31270,
+          "thread_cpu_ns": 24510,
+          "wall_minus_thread_cpu_ns": 6760,
+          "voluntary_switches": 1,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "allocation_to_dist_bridge": {
+          "start_ns": 181426158290766,
+          "end_ns": 181426158297206,
+          "wall_ns": 6440,
+          "thread_cpu_ns": 6250,
+          "wall_minus_thread_cpu_ns": 190,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "public_dist_call": {
+          "start_ns": 181426158297206,
+          "end_ns": 181426165517533,
+          "wall_ns": 7220327,
+          "thread_cpu_ns": 96140,
+          "wall_minus_thread_cpu_ns": 7124187,
+          "voluntary_switches": 1,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "output_layout_and_return": {
+          "start_ns": 181426165517533,
+          "end_ns": 181426165540013,
+          "wall_ns": 22480,
+          "thread_cpu_ns": 21680,
+          "wall_minus_thread_cpu_ns": 800,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        }
+      },
+      "same_call": {
+        "public_dist_host_start_skew_ns": 81470,
+        "latest_host_start_rank": 7,
+        "public_dist_host_return_skew_ns": 7155517,
+        "latest_host_return_rank": 6,
+        "peers": [
+          {
+            "rank": 0,
+            "inner_timestamps": {
+              "call_begin": 181426158237205,
+              "allocation_begin": 181426158254325,
+              "allocation_end": 181426158285666,
+              "dist_begin": 181426158291556,
+              "dist_end": 181426158366326,
+              "call_end": 181426158386607
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157745751,
+              "pre_sync_end": 181426157768172,
+              "producer_begin": 181426157770522,
+              "producer_end": 181426157841062,
+              "prepare_begin": 181426157844192,
+              "prepare_end": 181426158204775,
+              "exchange_begin": 181426158210595,
+              "collective_begin": 181426158226095,
+              "collective_end": 181426158391507,
+              "exchange_end": 181426158400967,
+              "call_return_before_replace": 181426158402957,
+              "old_held_replace_end": 181426158420377,
+              "post_sync_begin": 181426158423497,
+              "post_sync_end": 181426158783180
+            }
+          },
+          {
+            "rank": 1,
+            "inner_timestamps": {
+              "call_begin": 181426158237755,
+              "allocation_begin": 181426158255506,
+              "allocation_end": 181426158290606,
+              "dist_begin": 181426158296966,
+              "dist_end": 181426158371886,
+              "call_end": 181426158393287
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157744381,
+              "pre_sync_end": 181426157763342,
+              "producer_begin": 181426157765802,
+              "producer_end": 181426157832132,
+              "prepare_begin": 181426157835662,
+              "prepare_end": 181426158204705,
+              "exchange_begin": 181426158210385,
+              "collective_begin": 181426158226235,
+              "collective_end": 181426158398507,
+              "exchange_end": 181426158408797,
+              "call_return_before_replace": 181426158411337,
+              "old_held_replace_end": 181426158428087,
+              "post_sync_begin": 181426158431617,
+              "post_sync_end": 181426158777310
+            }
+          },
+          {
+            "rank": 2,
+            "inner_timestamps": {
+              "call_begin": 181426158291696,
+              "allocation_begin": 181426158309266,
+              "allocation_end": 181426158329296,
+              "dist_begin": 181426158335606,
+              "dist_end": 181426158435327,
+              "call_end": 181426158458027
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157757952,
+              "pre_sync_end": 181426157779562,
+              "producer_begin": 181426157782642,
+              "producer_end": 181426157858002,
+              "prepare_begin": 181426157861562,
+              "prepare_end": 181426158256716,
+              "exchange_begin": 181426158262946,
+              "collective_begin": 181426158278826,
+              "collective_end": 181426158464057,
+              "exchange_end": 181426158474067,
+              "call_return_before_replace": 181426158476677,
+              "old_held_replace_end": 181426158500087,
+              "post_sync_begin": 181426158503747,
+              "post_sync_end": 181426158790820
+            }
+          },
+          {
+            "rank": 3,
+            "inner_timestamps": {
+              "call_begin": 181426158246245,
+              "allocation_begin": 181426158263476,
+              "allocation_end": 181426158295536,
+              "dist_begin": 181426158301596,
+              "dist_end": 181426158382107,
+              "call_end": 181426158404057
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157745411,
+              "pre_sync_end": 181426157765802,
+              "producer_begin": 181426157768362,
+              "producer_end": 181426157838422,
+              "prepare_begin": 181426157841872,
+              "prepare_end": 181426158212325,
+              "exchange_begin": 181426158218595,
+              "collective_begin": 181426158234315,
+              "collective_end": 181426158409467,
+              "exchange_end": 181426158419517,
+              "call_return_before_replace": 181426158421607,
+              "old_held_replace_end": 181426158437517,
+              "post_sync_begin": 181426158440267,
+              "post_sync_end": 181426158782160
+            }
+          },
+          {
+            "rank": 4,
+            "inner_timestamps": {
+              "call_begin": 181426158242275,
+              "allocation_begin": 181426158260616,
+              "allocation_end": 181426158291926,
+              "dist_begin": 181426158298176,
+              "dist_end": 181426158377106,
+              "call_end": 181426158398847
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157746621,
+              "pre_sync_end": 181426157767682,
+              "producer_begin": 181426157770782,
+              "producer_end": 181426157839312,
+              "prepare_begin": 181426157842492,
+              "prepare_end": 181426158207995,
+              "exchange_begin": 181426158214175,
+              "collective_begin": 181426158230035,
+              "collective_end": 181426158404437,
+              "exchange_end": 181426158414547,
+              "call_return_before_replace": 181426158416567,
+              "old_held_replace_end": 181426158433267,
+              "post_sync_begin": 181426158436127,
+              "post_sync_end": 181426158778230
+            }
+          },
+          {
+            "rank": 5,
+            "inner_timestamps": {
+              "call_begin": 181426158233175,
+              "allocation_begin": 181426158251365,
+              "allocation_end": 181426158276816,
+              "dist_begin": 181426158282536,
+              "dist_end": 181426158362016,
+              "call_end": 181426158383457
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157745121,
+              "pre_sync_end": 181426157763822,
+              "producer_begin": 181426157766272,
+              "producer_end": 181426157835712,
+              "prepare_begin": 181426157839102,
+              "prepare_end": 181426158200245,
+              "exchange_begin": 181426158205835,
+              "collective_begin": 181426158221315,
+              "collective_end": 181426158388567,
+              "exchange_end": 181426158398037,
+              "call_return_before_replace": 181426158399997,
+              "old_held_replace_end": 181426158416787,
+              "post_sync_begin": 181426158420177,
+              "post_sync_end": 181426158776740
+            }
+          },
+          {
+            "rank": 6,
+            "inner_timestamps": {
+              "call_begin": 181426158241835,
+              "allocation_begin": 181426158259496,
+              "allocation_end": 181426158290766,
+              "dist_begin": 181426158297206,
+              "dist_end": 181426165517533,
+              "call_end": 181426165540013
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157748701,
+              "pre_sync_end": 181426157769912,
+              "producer_begin": 181426157772982,
+              "producer_end": 181426157840892,
+              "prepare_begin": 181426157844222,
+              "prepare_end": 181426158208305,
+              "exchange_begin": 181426158214155,
+              "collective_begin": 181426158230235,
+              "collective_end": 181426165545873,
+              "exchange_end": 181426165558724,
+              "call_return_before_replace": 181426165560864,
+              "old_held_replace_end": 181426165586684,
+              "post_sync_begin": 181426165590234,
+              "post_sync_end": 181426165638104
+            }
+          },
+          {
+            "rank": 7,
+            "inner_timestamps": {
+              "call_begin": 181426158268936,
+              "allocation_begin": 181426158286196,
+              "allocation_end": 181426158356906,
+              "dist_begin": 181426158364006,
+              "dist_end": 181426158447587,
+              "call_end": 181426158470067
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426157763292,
+              "pre_sync_end": 181426157786082,
+              "producer_begin": 181426157788592,
+              "producer_end": 181426157862222,
+              "prepare_begin": 181426157865652,
+              "prepare_end": 181426158232425,
+              "exchange_begin": 181426158238505,
+              "collective_begin": 181426158255876,
+              "collective_end": 181426158475827,
+              "exchange_end": 181426158486157,
+              "call_return_before_replace": 181426158488247,
+              "old_held_replace_end": 181426158506168,
+              "post_sync_begin": 181426158510068,
+              "post_sync_end": 181426158795410
+            }
+          }
+        ]
+      },
+      "next_call": {
+        "public_dist_host_start_skew_ns": 7135277,
+        "latest_host_start_rank": 6,
+        "public_dist_host_return_skew_ns": 7130446,
+        "latest_host_return_rank": 6,
+        "peers": [
+          {
+            "rank": 0,
+            "inner_timestamps": {
+              "call_begin": 181426159274934,
+              "allocation_begin": 181426159291944,
+              "allocation_end": 181426159321184,
+              "dist_begin": 181426159327144,
+              "dist_end": 181426159400335,
+              "call_end": 181426159420445
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426158786700,
+              "pre_sync_end": 181426158808230,
+              "producer_begin": 181426158810700,
+              "producer_end": 181426158879420,
+              "prepare_begin": 181426158882440,
+              "prepare_end": 181426159241883,
+              "exchange_begin": 181426159247723,
+              "collective_begin": 181426159263364,
+              "collective_end": 181426159426125,
+              "exchange_end": 181426159435515,
+              "call_return_before_replace": 181426159437535,
+              "old_held_replace_end": 181426159454655,
+              "post_sync_begin": 181426159457835,
+              "post_sync_end": 181426166889654
+            }
+          },
+          {
+            "rank": 1,
+            "inner_timestamps": {
+              "call_begin": 181426159265634,
+              "allocation_begin": 181426159283544,
+              "allocation_end": 181426159317804,
+              "dist_begin": 181426159324164,
+              "dist_end": 181426159399425,
+              "call_end": 181426159420545
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426158780920,
+              "pre_sync_end": 181426158799680,
+              "producer_begin": 181426158802730,
+              "producer_end": 181426158867860,
+              "prepare_begin": 181426158870900,
+              "prepare_end": 181426159232763,
+              "exchange_begin": 181426159238523,
+              "collective_begin": 181426159254283,
+              "collective_end": 181426159426795,
+              "exchange_end": 181426159436995,
+              "call_return_before_replace": 181426159439015,
+              "old_held_replace_end": 181426159455655,
+              "post_sync_begin": 181426159458915,
+              "post_sync_end": 181426166882714
+            }
+          },
+          {
+            "rank": 2,
+            "inner_timestamps": {
+              "call_begin": 181426159333444,
+              "allocation_begin": 181426159351264,
+              "allocation_end": 181426159409895,
+              "dist_begin": 181426159417925,
+              "dist_end": 181426159538226,
+              "call_end": 181426159561686
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426158795890,
+              "pre_sync_end": 181426158820610,
+              "producer_begin": 181426158824470,
+              "producer_end": 181426158904101,
+              "prepare_begin": 181426158908201,
+              "prepare_end": 181426159298594,
+              "exchange_begin": 181426159305044,
+              "collective_begin": 181426159320524,
+              "collective_end": 181426159568536,
+              "exchange_end": 181426159578776,
+              "call_return_before_replace": 181426159580866,
+              "old_held_replace_end": 181426159606406,
+              "post_sync_begin": 181426159610186,
+              "post_sync_end": 181426166898514
+            }
+          },
+          {
+            "rank": 3,
+            "inner_timestamps": {
+              "call_begin": 181426159285434,
+              "allocation_begin": 181426159302504,
+              "allocation_end": 181426159332754,
+              "dist_begin": 181426159338944,
+              "dist_end": 181426159417005,
+              "call_end": 181426159439155
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426158785550,
+              "pre_sync_end": 181426158806710,
+              "producer_begin": 181426158810180,
+              "producer_end": 181426158880080,
+              "prepare_begin": 181426158883450,
+              "prepare_end": 181426159251933,
+              "exchange_begin": 181426159258003,
+              "collective_begin": 181426159273604,
+              "collective_end": 181426159444855,
+              "exchange_end": 181426159454935,
+              "call_return_before_replace": 181426159457045,
+              "old_held_replace_end": 181426159473725,
+              "post_sync_begin": 181426159476625,
+              "post_sync_end": 181426166885554
+            }
+          },
+          {
+            "rank": 4,
+            "inner_timestamps": {
+              "call_begin": 181426159282784,
+              "allocation_begin": 181426159300334,
+              "allocation_end": 181426159331764,
+              "dist_begin": 181426159338214,
+              "dist_end": 181426159414415,
+              "call_end": 181426159436405
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426158781470,
+              "pre_sync_end": 181426158803950,
+              "producer_begin": 181426158806430,
+              "producer_end": 181426158874650,
+              "prepare_begin": 181426158877680,
+              "prepare_end": 181426159248113,
+              "exchange_begin": 181426159254453,
+              "collective_begin": 181426159270094,
+              "collective_end": 181426159441845,
+              "exchange_end": 181426159451555,
+              "call_return_before_replace": 181426159453595,
+              "old_held_replace_end": 181426159470795,
+              "post_sync_begin": 181426159473805,
+              "post_sync_end": 181426166886424
+            }
+          },
+          {
+            "rank": 5,
+            "inner_timestamps": {
+              "call_begin": 181426159272514,
+              "allocation_begin": 181426159289864,
+              "allocation_end": 181426159314984,
+              "dist_begin": 181426159320694,
+              "dist_end": 181426159403945,
+              "call_end": 181426159426065
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426158780360,
+              "pre_sync_end": 181426158800460,
+              "producer_begin": 181426158803350,
+              "producer_end": 181426158871290,
+              "prepare_begin": 181426158874680,
+              "prepare_end": 181426159237943,
+              "exchange_begin": 181426159243693,
+              "collective_begin": 181426159259433,
+              "collective_end": 181426159431285,
+              "exchange_end": 181426159441045,
+              "call_return_before_replace": 181426159443125,
+              "old_held_replace_end": 181426159459235,
+              "post_sync_begin": 181426159462555,
+              "post_sync_end": 181426166881944
+            }
+          },
+          {
+            "rank": 6,
+            "inner_timestamps": {
+              "call_begin": 181426166416600,
+              "allocation_begin": 181426166434070,
+              "allocation_end": 181426166449861,
+              "dist_begin": 181426166455971,
+              "dist_end": 181426166529871,
+              "call_end": 181426166551751
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426165641694,
+              "pre_sync_end": 181426165661294,
+              "producer_begin": 181426165663754,
+              "producer_end": 181426165734725,
+              "prepare_begin": 181426165737515,
+              "prepare_end": 181426166382570,
+              "exchange_begin": 181426166388740,
+              "collective_begin": 181426166405090,
+              "collective_end": 181426166557081,
+              "exchange_end": 181426166566952,
+              "call_return_before_replace": 181426166569012,
+              "old_held_replace_end": 181426166587152,
+              "post_sync_begin": 181426166590962,
+              "post_sync_end": 181426166886294
+            }
+          },
+          {
+            "rank": 7,
+            "inner_timestamps": {
+              "call_begin": 181426159295224,
+              "allocation_begin": 181426159312504,
+              "allocation_end": 181426159347054,
+              "dist_begin": 181426159354394,
+              "dist_end": 181426159448245,
+              "call_end": 181426159470755
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181426158800170,
+              "pre_sync_end": 181426158825850,
+              "producer_begin": 181426158828880,
+              "producer_end": 181426158899931,
+              "prepare_begin": 181426158902531,
+              "prepare_end": 181426159262084,
+              "exchange_begin": 181426159268534,
+              "collective_begin": 181426159283884,
+              "collective_end": 181426159476205,
+              "exchange_end": 181426159487385,
+              "call_return_before_replace": 181426159489525,
+              "old_held_replace_end": 181426159507115,
+              "post_sync_begin": 181426159511155,
+              "post_sync_end": 181426166900614
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rank": 2,
+      "row": 981,
+      "kv_len": 9360,
+      "probe": 0,
+      "scope": "producer_plus_layer0_and_original_consumer",
+      "arm": "baseline",
+      "sample": 21,
+      "start_ns": 181422538476300,
+      "end_ns": 181422544461647,
+      "wall_ns": 5985347,
+      "thread_cpu_ns": 398260,
+      "wall_minus_thread_cpu_ns": 5587087,
+      "voluntary_switches": 1,
+      "involuntary_switches": 0,
+      "same_thread_gc_overlap_ns": 0,
+      "inner_stages": {
+        "guard_before_allocation": {
+          "start_ns": 181422538476300,
+          "end_ns": 181422538495340,
+          "wall_ns": 19040,
+          "thread_cpu_ns": 19220,
+          "wall_minus_thread_cpu_ns": -180,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "receive_allocation": {
+          "start_ns": 181422538495340,
+          "end_ns": 181422538512380,
+          "wall_ns": 17040,
+          "thread_cpu_ns": 16890,
+          "wall_minus_thread_cpu_ns": 150,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "allocation_to_dist_bridge": {
+          "start_ns": 181422538512380,
+          "end_ns": 181422538519030,
+          "wall_ns": 6650,
+          "thread_cpu_ns": 6560,
+          "wall_minus_thread_cpu_ns": 90,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "public_dist_call": {
+          "start_ns": 181422538519030,
+          "end_ns": 181422544245706,
+          "wall_ns": 5726676,
+          "thread_cpu_ns": 139920,
+          "wall_minus_thread_cpu_ns": 5586756,
+          "voluntary_switches": 1,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        },
+        "output_layout_and_return": {
+          "start_ns": 181422544245706,
+          "end_ns": 181422544461647,
+          "wall_ns": 215941,
+          "thread_cpu_ns": 215670,
+          "wall_minus_thread_cpu_ns": 271,
+          "voluntary_switches": 0,
+          "involuntary_switches": 0,
+          "same_thread_gc_overlap_ns": 0
+        }
+      },
+      "same_call": {
+        "public_dist_host_start_skew_ns": 175871,
+        "latest_host_start_rank": 2,
+        "public_dist_host_return_skew_ns": 5823047,
+        "latest_host_return_rank": 2,
+        "peers": [
+          {
+            "rank": 0,
+            "inner_timestamps": {
+              "call_begin": 181422538304279,
+              "allocation_begin": 181422538322089,
+              "allocation_end": 181422538337609,
+              "dist_begin": 181422538343159,
+              "dist_end": 181422538422659,
+              "call_end": 181422538442760
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537819735,
+              "pre_sync_end": 181422537841325,
+              "producer_begin": 181422537843945,
+              "producer_end": 181422537913375,
+              "prepare_begin": 181422537915795,
+              "prepare_end": 181422538272618,
+              "exchange_begin": 181422538278428,
+              "collective_begin": 181422538293468,
+              "collective_end": 181422538447830,
+              "exchange_end": 181422538457740,
+              "call_return_before_replace": 181422538460400,
+              "old_held_replace_end": 181422538477560,
+              "post_sync_begin": 181422538480740,
+              "post_sync_end": 181422539088785
+            }
+          },
+          {
+            "rank": 1,
+            "inner_timestamps": {
+              "call_begin": 181422538306769,
+              "allocation_begin": 181422538324699,
+              "allocation_end": 181422538355219,
+              "dist_begin": 181422538361179,
+              "dist_end": 181422538436750,
+              "call_end": 181422538458330
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537815775,
+              "pre_sync_end": 181422537836535,
+              "producer_begin": 181422537838955,
+              "producer_end": 181422537905295,
+              "prepare_begin": 181422537909165,
+              "prepare_end": 181422538274208,
+              "exchange_begin": 181422538280198,
+              "collective_begin": 181422538295528,
+              "collective_end": 181422538463970,
+              "exchange_end": 181422538473900,
+              "call_return_before_replace": 181422538475960,
+              "old_held_replace_end": 181422538493500,
+              "post_sync_begin": 181422538496250,
+              "post_sync_end": 181422539088745
+            }
+          },
+          {
+            "rank": 2,
+            "inner_timestamps": {
+              "call_begin": 181422538476300,
+              "allocation_begin": 181422538495340,
+              "allocation_end": 181422538512380,
+              "dist_begin": 181422538519030,
+              "dist_end": 181422544245706,
+              "call_end": 181422544461647
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537832285,
+              "pre_sync_end": 181422537856385,
+              "producer_begin": 181422537860905,
+              "producer_end": 181422537943836,
+              "prepare_begin": 181422537947676,
+              "prepare_end": 181422538439110,
+              "exchange_begin": 181422538446210,
+              "collective_begin": 181422538463130,
+              "collective_end": 181422544470777,
+              "exchange_end": 181422544482098,
+              "call_return_before_replace": 181422544484168,
+              "old_held_replace_end": 181422544515878,
+              "post_sync_begin": 181422544519648,
+              "post_sync_end": 181422544588038
+            }
+          },
+          {
+            "rank": 3,
+            "inner_timestamps": {
+              "call_begin": 181422538304599,
+              "allocation_begin": 181422538321849,
+              "allocation_end": 181422538352579,
+              "dist_begin": 181422538358379,
+              "dist_end": 181422538439700,
+              "call_end": 181422538461070
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537817175,
+              "pre_sync_end": 181422537837385,
+              "producer_begin": 181422537840065,
+              "producer_end": 181422537907125,
+              "prepare_begin": 181422537910355,
+              "prepare_end": 181422538271888,
+              "exchange_begin": 181422538277998,
+              "collective_begin": 181422538293198,
+              "collective_end": 181422538467380,
+              "exchange_end": 181422538477200,
+              "call_return_before_replace": 181422538479300,
+              "old_held_replace_end": 181422538498030,
+              "post_sync_begin": 181422538500910,
+              "post_sync_end": 181422539090485
+            }
+          },
+          {
+            "rank": 4,
+            "inner_timestamps": {
+              "call_begin": 181422538313439,
+              "allocation_begin": 181422538331449,
+              "allocation_end": 181422538347969,
+              "dist_begin": 181422538353849,
+              "dist_end": 181422538437110,
+              "call_end": 181422538459060
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537818075,
+              "pre_sync_end": 181422537839025,
+              "producer_begin": 181422537842005,
+              "producer_end": 181422537910175,
+              "prepare_begin": 181422537913395,
+              "prepare_end": 181422538279538,
+              "exchange_begin": 181422538285688,
+              "collective_begin": 181422538301558,
+              "collective_end": 181422538465020,
+              "exchange_end": 181422538475170,
+              "call_return_before_replace": 181422538477190,
+              "old_held_replace_end": 181422538495000,
+              "post_sync_begin": 181422538497790,
+              "post_sync_end": 181422539093125
+            }
+          },
+          {
+            "rank": 5,
+            "inner_timestamps": {
+              "call_begin": 181422538325209,
+              "allocation_begin": 181422538342969,
+              "allocation_end": 181422538358299,
+              "dist_begin": 181422538363839,
+              "dist_end": 181422538440410,
+              "call_end": 181422538461360
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537826255,
+              "pre_sync_end": 181422537849665,
+              "producer_begin": 181422537852645,
+              "producer_end": 181422537923145,
+              "prepare_begin": 181422537926586,
+              "prepare_end": 181422538290848,
+              "exchange_begin": 181422538296878,
+              "collective_begin": 181422538312669,
+              "collective_end": 181422538467210,
+              "exchange_end": 181422538477390,
+              "call_return_before_replace": 181422538479520,
+              "old_held_replace_end": 181422538495520,
+              "post_sync_begin": 181422538498360,
+              "post_sync_end": 181422539096805
+            }
+          },
+          {
+            "rank": 6,
+            "inner_timestamps": {
+              "call_begin": 181422538342159,
+              "allocation_begin": 181422538359249,
+              "allocation_end": 181422538397769,
+              "dist_begin": 181422538404999,
+              "dist_end": 181422538480490,
+              "call_end": 181422538502330
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537830175,
+              "pre_sync_end": 181422537852615,
+              "producer_begin": 181422537855725,
+              "producer_end": 181422537928266,
+              "prepare_begin": 181422537931096,
+              "prepare_end": 181422538308219,
+              "exchange_begin": 181422538314309,
+              "collective_begin": 181422538330299,
+              "collective_end": 181422538508110,
+              "exchange_end": 181422538518690,
+              "call_return_before_replace": 181422538520650,
+              "old_held_replace_end": 181422538540330,
+              "post_sync_begin": 181422538543070,
+              "post_sync_end": 181422539095365
+            }
+          },
+          {
+            "rank": 7,
+            "inner_timestamps": {
+              "call_begin": 181422538309199,
+              "allocation_begin": 181422538327499,
+              "allocation_end": 181422538356349,
+              "dist_begin": 181422538362179,
+              "dist_end": 181422538436670,
+              "call_end": 181422538458450
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422537825775,
+              "pre_sync_end": 181422537846985,
+              "producer_begin": 181422537849415,
+              "producer_end": 181422537914875,
+              "prepare_begin": 181422537918135,
+              "prepare_end": 181422538276788,
+              "exchange_begin": 181422538282408,
+              "collective_begin": 181422538298468,
+              "collective_end": 181422538464480,
+              "exchange_end": 181422538474480,
+              "call_return_before_replace": 181422538476810,
+              "old_held_replace_end": 181422538493700,
+              "post_sync_begin": 181422538496420,
+              "post_sync_end": 181422539097175
+            }
+          }
+        ]
+      },
+      "next_call": {
+        "public_dist_host_start_skew_ns": 5579824,
+        "latest_host_start_rank": 2,
+        "public_dist_host_return_skew_ns": 5590744,
+        "latest_host_return_rank": 2,
+        "peers": [
+          {
+            "rank": 0,
+            "inner_timestamps": {
+              "call_begin": 181422539581029,
+              "allocation_begin": 181422539598879,
+              "allocation_end": 181422539629269,
+              "dist_begin": 181422539635599,
+              "dist_end": 181422539712170,
+              "call_end": 181422539732520
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422539092425,
+              "pre_sync_end": 181422539114295,
+              "producer_begin": 181422539116805,
+              "producer_end": 181422539185896,
+              "prepare_begin": 181422539189066,
+              "prepare_end": 181422539548928,
+              "exchange_begin": 181422539554978,
+              "collective_begin": 181422539570009,
+              "collective_end": 181422539737960,
+              "exchange_end": 181422539747820,
+              "call_return_before_replace": 181422539749710,
+              "old_held_replace_end": 181422539767200,
+              "post_sync_begin": 181422539770410,
+              "post_sync_end": 181422545663067
+            }
+          },
+          {
+            "rank": 1,
+            "inner_timestamps": {
+              "call_begin": 181422539587029,
+              "allocation_begin": 181422539603699,
+              "allocation_end": 181422539633349,
+              "dist_begin": 181422539639139,
+              "dist_end": 181422539708620,
+              "call_end": 181422539727940
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422539091795,
+              "pre_sync_end": 181422539112535,
+              "producer_begin": 181422539115425,
+              "producer_end": 181422539181625,
+              "prepare_begin": 181422539185256,
+              "prepare_end": 181422539552208,
+              "exchange_begin": 181422539558148,
+              "collective_begin": 181422539573569,
+              "collective_end": 181422539732820,
+              "exchange_end": 181422539742230,
+              "call_return_before_replace": 181422539744230,
+              "old_held_replace_end": 181422539761430,
+              "post_sync_begin": 181422539764590,
+              "post_sync_end": 181422545669787
+            }
+          },
+          {
+            "rank": 2,
+            "inner_timestamps": {
+              "call_begin": 181422545163813,
+              "allocation_begin": 181422545181973,
+              "allocation_end": 181422545198163,
+              "dist_begin": 181422545205603,
+              "dist_end": 181422545293604,
+              "call_end": 181422545384795
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422544593108,
+              "pre_sync_end": 181422544619669,
+              "producer_begin": 181422544623859,
+              "producer_end": 181422544713019,
+              "prepare_begin": 181422544717349,
+              "prepare_end": 181422545125453,
+              "exchange_begin": 181422545132903,
+              "collective_begin": 181422545150393,
+              "collective_end": 181422545392365,
+              "exchange_end": 181422545404305,
+              "call_return_before_replace": 181422545407065,
+              "old_held_replace_end": 181422545436445,
+              "post_sync_begin": 181422545439635,
+              "post_sync_end": 181422545674437
+            }
+          },
+          {
+            "rank": 3,
+            "inner_timestamps": {
+              "call_begin": 181422539586869,
+              "allocation_begin": 181422539603479,
+              "allocation_end": 181422539632479,
+              "dist_begin": 181422539639179,
+              "dist_end": 181422539722400,
+              "call_end": 181422539743230
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422539093875,
+              "pre_sync_end": 181422539113645,
+              "producer_begin": 181422539116465,
+              "producer_end": 181422539183756,
+              "prepare_begin": 181422539187316,
+              "prepare_end": 181422539554558,
+              "exchange_begin": 181422539560038,
+              "collective_begin": 181422539575529,
+              "collective_end": 181422539749080,
+              "exchange_end": 181422539759050,
+              "call_return_before_replace": 181422539761160,
+              "old_held_replace_end": 181422539778170,
+              "post_sync_begin": 181422539781470,
+              "post_sync_end": 181422545659417
+            }
+          },
+          {
+            "rank": 4,
+            "inner_timestamps": {
+              "call_begin": 181422539590939,
+              "allocation_begin": 181422539608089,
+              "allocation_end": 181422539633319,
+              "dist_begin": 181422539639749,
+              "dist_end": 181422539720750,
+              "call_end": 181422539741970
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422539096965,
+              "pre_sync_end": 181422539116705,
+              "producer_begin": 181422539119765,
+              "producer_end": 181422539189736,
+              "prepare_begin": 181422539193266,
+              "prepare_end": 181422539557178,
+              "exchange_begin": 181422539563609,
+              "collective_begin": 181422539578999,
+              "collective_end": 181422539747230,
+              "exchange_end": 181422539756860,
+              "call_return_before_replace": 181422539759080,
+              "old_held_replace_end": 181422539775990,
+              "post_sync_begin": 181422539779260,
+              "post_sync_end": 181422545664957
+            }
+          },
+          {
+            "rank": 5,
+            "inner_timestamps": {
+              "call_begin": 181422539598669,
+              "allocation_begin": 181422539616739,
+              "allocation_end": 181422539653399,
+              "dist_begin": 181422539659979,
+              "dist_end": 181422539735270,
+              "call_end": 181422539756960
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422539100575,
+              "pre_sync_end": 181422539123435,
+              "producer_begin": 181422539126475,
+              "producer_end": 181422539197576,
+              "prepare_begin": 181422539201146,
+              "prepare_end": 181422539564369,
+              "exchange_begin": 181422539570799,
+              "collective_begin": 181422539586669,
+              "collective_end": 181422539762870,
+              "exchange_end": 181422539772500,
+              "call_return_before_replace": 181422539774480,
+              "old_held_replace_end": 181422539789910,
+              "post_sync_begin": 181422539793140,
+              "post_sync_end": 181422545669087
+            }
+          },
+          {
+            "rank": 6,
+            "inner_timestamps": {
+              "call_begin": 181422539616479,
+              "allocation_begin": 181422539633539,
+              "allocation_end": 181422539664579,
+              "dist_begin": 181422539670569,
+              "dist_end": 181422539748300,
+              "call_end": 181422539769570
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422539098775,
+              "pre_sync_end": 181422539127245,
+              "producer_begin": 181422539129955,
+              "producer_end": 181422539201676,
+              "prepare_begin": 181422539205086,
+              "prepare_end": 181422539583789,
+              "exchange_begin": 181422539589879,
+              "collective_begin": 181422539605129,
+              "collective_end": 181422539774820,
+              "exchange_end": 181422539784730,
+              "call_return_before_replace": 181422539786680,
+              "old_held_replace_end": 181422539804070,
+              "post_sync_begin": 181422539807240,
+              "post_sync_end": 181422545673657
+            }
+          },
+          {
+            "rank": 7,
+            "inner_timestamps": {
+              "call_begin": 181422539584999,
+              "allocation_begin": 181422539603449,
+              "allocation_end": 181422539619789,
+              "dist_begin": 181422539625779,
+              "dist_end": 181422539702860,
+              "call_end": 181422539724310
+            },
+            "outer_timestamps": {
+              "pre_sync_begin": 181422539100515,
+              "pre_sync_end": 181422539122295,
+              "producer_begin": 181422539124625,
+              "producer_end": 181422539192886,
+              "prepare_begin": 181422539196516,
+              "prepare_end": 181422539552278,
+              "exchange_begin": 181422539558098,
+              "collective_begin": 181422539573689,
+              "collective_end": 181422539729480,
+              "exchange_end": 181422539738870,
+              "call_return_before_replace": 181422539740880,
+              "old_held_replace_end": 181422539758660,
+              "post_sync_begin": 181422539761880,
+              "post_sync_end": 181422545675067
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "report": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_COLLECTIVE_BOUNDARIES_DIAGNOSTIC_20261013.txt",
+    "bytes": 6201,
+    "sha256": "bfdce608504f96e2777ca53732623f21a76a2b4d4f0402f10e4aee742059cb71"
+  },
+  "cpu_tests": {
+    "source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_collective_boundary_summary_cpu.py",
+      "bytes": 3485,
+      "sha256": "e0ab21e2720cfd259035236d463c21be4492e9afbfd3d7b324d121f9c585cf9d"
+    },
+    "targeted_tests_passed": 7,
+    "device_calls": false
+  },
+  "independent_review": "qk_restore_audit: v2 schema/fingerprint, supervisor/correctness/source binding, exact row mapping, disjoint stages, same-TID GC and same/next-call association reviewed without blockers.",
+  "admission_state": "Diagnostic only. Prior formal QK candidate screen remains failed; no model admission, final600 claim, chunk savings or lock/network attribution."
+}

@@ -1,0 +1,77 @@
+窄 collective 诊断 v1 失败与 v2 code fingerprint 修复（2026-10-13）
+
+本记录没有新的设备正确性或性能结论。
+
+保留的失败
+==========
+owned run：
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-runs/df3dcce6a00f9c402aad74957102d6be
+原 receipts：
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/correctness
+
+八 rank 在 observer 构造时因 ObservationError('collective code SHA mismatch')
+退出，发生在首个 observed collective 调用之前。主管报告 exit1、fatal=null、
+owned=[]。该运行不是正确性 PASS，也没有可用于性能判断的观察样本。
+
+修改前已保存 v1 observer、wrapper、frozen diagnostic 和两个 CPU test 文件，
+包含原路径、完整 SHA、大小：
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-collective-boundaries/failed-v1-source/pins.json
+同目录保存上述文件及 cpu-cause-evidence.json。原失败 receipts 不覆盖、不改写。
+
+CPU 诊断
+========
+仅使用 Python 标准库读取真实 comm.cpython-312.pyc，并 fresh compile 原 comm.py；
+没有 import torch/torch_npu，没有执行 comm 模块，也没有运行设备。
+
+18 个 code 字段全部相同：
+co_argcount, co_posonlyargcount, co_kwonlyargcount, co_nlocals, co_stacksize,
+co_flags, co_code, co_consts, co_names, co_varnames, co_filename, co_name,
+co_qualname, co_firstlineno, co_linetable, co_exceptiontable, co_freevars, co_cellvars。
+
+然而 marshal.dumps(code) 的 SHA 不同。fresh compile 的 raw marshal SHA 也会
+随序列化对象的引用/intern 状态不同而与此前运行中的 fresh SHA 不同。
+这证明 raw marshal 对象图序列化不适合作为这里的代码字段等价指纹；不能把
+这次 mismatch 解释为 collective 算法改变或候选数值失败。
+
+修复
+====
+observer.code_fingerprint(code) 使用 python_typed_code_fields_v1：
+- 确定性 typed JSON 编码上述 18 个字段及递归 nested code/constants。
+- bool 与 int 分型，float/complex 保留 IEEE 字节，bytes 与 str 分型。
+- frozenset 按编码排序；不依赖对象 identity、intern 或引用共享图。
+- 包含 Python cache tag、文件名、行号/行表、异常表及 flags。
+- 遇到未知 constant 类型直接拒绝。
+
+expected hash 仍由已 pin 原始源码独立 compile 推导；不把观察到的实际 hash
+直接作为 expected，不跳过 guard。source SHA、运行期间 code object identity、
+原 module globals/API identity 检查均保留。
+
+新 receipt 明确记录 code_fingerprint_method。observer/wrapper schema 与 wrapper
+method 升为 v2，旧 v1 raw-hash receipt 不能进入新 profile 的正确性授权链。
+frozen diagnose_qk_host_dependencies.py 与运行时源码均未修改。
+
+CPU 验证
+========
+安装 Python 3.12.14 下 17 项 stdlib CPU tests 全部通过，约 0.012 秒。
+新增覆盖真实 pyc 往返与 fresh compile 等价、引用图差异、literal 分型、
+nested code 变异、flags/constant/line/exception 字段变异拒绝及未知类型拒绝。
+此前 forwarding、owner 不留存、异常清理、旧正确性 receipt 拒绝等测试继续通过。
+
+真实 comm.py source SHA：
+8a9953035e676ab61fa429a3f8c9ddf7ad942b25a5385d4556a0d44fef4d7b7f
+真实 pyc 与 fresh compile 的新 code SHA 均为：
+a2091be4862f9333b5f90d72b4965dda2646db173b552f1494f75602e0dce260
+
+v2 observer SHA：
+412e96c61b2a64b26e8cc183bafd728d08ad8442413701b851bdee45989b22ab
+v2 wrapper SHA：
+ccc232f720d298d0f4f31201fc7645d49a82ea5493e94049212dd1e40ed29be2
+未修改的 frozen diagnostic SHA：
+a3757158dde34cc1b6ce7772c12d30cc09c90a6bb306c633ed62559d0c369cae
+
+完整 CPU 证据及 source pins：
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-collective-boundaries/fixed-v2-code-evidence.json
+
+后续只允许 fresh owned run 写新目录 correctness-v2。待新八 rank 正确性通过、
+主管确认清理完成后，才可运行与 v2 source/code pins 匹配的新 profile。
+CPU 修复验证不能替代这一步，也不代表 QK 候选通过速度门槛或模型准入。

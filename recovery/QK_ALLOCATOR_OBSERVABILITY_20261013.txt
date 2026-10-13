@@ -1,0 +1,150 @@
+QK allocator 可观测性：只读源码核查（2026-10-13）
+
+范围与结论
+==========
+本记录只检查安装包的小型 Python/header 文件及此前下载的同版本官方源码。
+没有 import torch、启用 API、运行设备、附加 profiler、改 allocator/runtime，
+也没有新增性能或正确性结论。
+
+当前需要验证的是：combined 相对完整 baseline 额外登记的两份 Q/K RMSNorm
+输出 storage，是否经异步 release thread 的释放、event 插入或 allocator 锁
+竞争影响主机调用。源码只能提出这条依赖链，不能证明它造成当前长尾。
+此前诊断中 old-held 替换最长约 1.04 ms，不能据此排除其他线程的异步释放；
+同样也不能把它、kernel 时间及同步等待相加作为端到端回退量。
+
+精确版本
+========
+安装包 version.py 声明 torch_npu 2.10.0.post4，git commit：
+5dd8ef3f9b375b5ae4a83538d5785754148c3302
+
+安装目录：
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu
+
+已有同版本官方源码目录：
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/host-cost-v1
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/upstream
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/owner-lifecycle-v1
+
+版本声明和同 commit 源码绑定不等于重新验证安装二进制的构建过程。
+本轮没有重做大型文件哈希。既有 source-pins.json、upstream/pins.json 和
+owner-lifecycle-v1/download-pins.json 保存此前来源与哈希。
+
+1. Memory history：可跟踪生命周期，没有时间或线程字段
+====================================================
+本机提供的下划线接口（内部接口，不承诺跨版本稳定）：
+torch_npu.npu.memory._record_memory_history(
+    enabled="all", context="all", stacks="all", max_entries=<有限容量>)
+torch_npu.npu.memory._snapshot()
+
+可记录 alloc、free_requested、free_completed、segment/map 等动作，以及地址、
+大小、stream 和 traceback。context/stacks 选择会改变记录成本。
+
+安装的 TraceEntry 只有 action、device、address、context、stream、size，
+没有 timestamp、TID、recordStream membership、event ID 或 mutex 等待字段。
+因此可以关联地址的分配和回收顺序，不能单独证明释放发生在哪条线程，
+也不能直接与 6–7 ms 主机等待做精确时间关联。
+
+边界：
+- free_requested 在 allocator mutex 已获取后记录，不涵盖此前获取锁的等待。
+- free_completed 表示 allocator 将块放回可复用池；可能由后续分配触发事件查询，
+  不等于设备 event 真正完成的精确时刻。
+- 地址可能被复用，必须按 allocation generation 区分，不能仅按裸地址连接。
+- 同尺寸临时输出不一定是两个 norm。需可信栈/来源确定角色，不能只按大小猜测。
+- max_entries 为环形容量。达到容量时不能声称历史完整；应缩短窗口或增大有界容量。
+- recordHistory() 会清空历史。因此先取 snapshot，再关闭 history。
+- _snapshot() 获取 allocator 锁并生成快照，只应在诊断窗口之外执行。
+- _dump_snapshot() 还会保存设备内存信息，失败时会自行启停 profiler；本窄诊断
+  应直接取 _snapshot()，再于窗口外序列化，避免这些额外行为。
+
+源码位置：
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/npu/memory.py
+  838: _record_memory_history；878: 实现；889: _snapshot；966: _dump_snapshot。
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUCachingAllocator.h
+  164: TraceEntry 定义。
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/host-cost-v1/NPUCachingAllocator.cpp
+  1054: recordHistory 清空缓冲；1477: free；1495: FREE_REQUESTED；
+  2396: free_block/ FREE_COMPLETED；3140: record_trace 环形记录；3528: snapshot。
+
+2. Memory profiler：格式支持地址、时间、线程，仍不是锁等待区间
+============================================================
+本机 torch_npu.profiler.profile 支持 profile_memory=True。
+安装 parser 的 MemoryUseBean schema 包含 ptr、TIME_NS、stream、THREAD_ID、
+PROCESS_ID 以及 allocator/component/data type。allocator 源码在 MALLOC、
+MEMORY_FREE 和 MEMORY_BLOCK_FREE 处上报内存数据。
+
+因此短独立 profiler 窗口是关联释放线程与时间的候选方法。必须先验证实际
+产出的原始记录完整、TID/时间可用，并映射 owned worker 的线程身份；本次仅
+确认接口和 schema，没有启用 profiler，不能宣称已观察到 release thread。
+
+MEMORY_FREE 在 free() 尾部上报，此前已在 mutex 内处理 insert_events 或直接
+free_block；它不是 free 开始时间，更不是获取锁的开始时间。MEMORY_BLOCK_FREE
+同样不直接度量设备 event 耗时。内存记录未提供 mutex 地址、等待时长、
+recordStream 集合或直接的 (storage,event) 映射。
+
+源码位置：
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/profiler/profiler.py
+  36 起: profile_memory 参数传给 profiler interface。
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/profiler/analysis/prof_bean/_memory_use_bean.py
+  12: MemoryEnum（ptr/time/stream/TID/PID）；29 起: parser 与时间转换。
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/profiler/npu_profiler.h
+  37: MemoryDataType；50: MemoryUsage；141: 上报函数声明。
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/host-cost-v1/NPUCachingAllocator.cpp
+  1463: MALLOC；1528: MEMORY_FREE；2448: MEMORY_BLOCK_FREE。
+
+3. Sanitizer callbacks：有登记/事件语义，但会扰动 GIL 与锁路径
+===========================================================
+安装的内部 _npu_trace 提供注册回调：
+- register_callback_for_npu_record_stream(ptr, stream)
+- register_callback_for_npu_erase_stream(ptr, stream)
+- allocation/deallocation(ptr)
+- event_record(event, stream)、event_wait(event, stream) 等。
+
+recordStream callback 在 stream_uses set 插入后触发。重复登记也会触发 callback，
+所以 callback 次数不是新增 membership 数量。记录 allocation generation、
+record/erase/free 全序列可辅助重建已观察的集合，但缺失事件或窗口初始状态
+不明时不能声称集合完整。
+
+重要扰动：PyCallbackTrigger 每次获取 Python GIL，并 import/call Python。
+event_record callback 在 LaunchRecordEventTask 返回后触发；insert_events 经
+free() 调用它时 allocator mutex 仍被持有。因此此类 hook 会增加或改变待测
+GIL/allocator 锁依赖，不能把 hook 下的耗时当作原始长尾原因或性能收益证据。
+框架完整 sanitizer 还会进入 dispatch mode，也不是零开销的观察器。
+
+接口没有直接 (storage,event) 对应关系。event_record 表示主机提交路径已返回，
+不是设备 event 完成；也没有 mutex wait-start/end hook。若后续选择这些内部
+接口，应限于单独短生命周期语义验证、固定容量标量记录、窗口外输出及全新
+worker，先核查 GIL/锁顺序；本记录不授权将其加入现有计时或 frozen harness。
+
+源码位置：
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/utils/_npu_trace.py
+  11: CallbackRegistry；81 起: event/memory callbacks；121: record_stream 注册。
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/npu/_sanitizer.py
+  29: enable；58: stream-check dispatch mode 与回调注册。
+/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/sanitizer/PyCallbackTrigger.h
+  6: CONCRETE_TRACE_NPU 获取 GIL 并调用 Python。
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/host-cost-v1/NPUCachingAllocator.cpp
+  1588: mutex 下 set 插入；3047: insert_events；3229: allocation callback；
+  3246: deallocation callback；3411 起: recordStream 与 callback。
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/upstream/AsyncTaskQueueInterface.cpp
+  223: LaunchRecordEventTask，callback 在 LaunchRecordTask 后。
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/upstream/NPUQueue.cpp
+  909: StartRelease；920: release queue/thread 初始化。
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/upstream/OpParamMaker.cpp
+  713: 将 callback 转移到 release queue；728: 清理 callback/参数。
+
+官方源码对应 commit 基址：
+https://github.com/Ascend/pytorch/tree/5dd8ef3f9b375b5ae4a83538d5785754148c3302/torch_npu
+
+后续顺序（尚未执行）
+====================
+先完成已经准备的五段 host observer 的新正确性及诊断，定位尾部在 guard、
+receive allocation、bridge、dist API 还是 output layout。五段仅分割内层
+调用，不与外层 collective 耗时、kernel 或同步等待重复相加。
+
+若仍需验证异步释放依赖，再独立使用短 memory profiler/history 窗口，绑定
+storage generation、可信来源和释放线程。真正的锁竞争归因需要同线程的
+sched_switch/wakeup、futex/符号栈等证据；低 thread CPU、voluntary switches
+或 free 事件的时间邻近均不能独自证明 allocator/HCCL/GIL 原因。
+
+不凭源码推测删除 registrations，不在正式计时中启用这些诊断，不将任何
+诊断 PASS 视为候选速度门槛通过或完整历史组合恢复。

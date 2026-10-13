@@ -1,0 +1,94 @@
+QK 原始 collective 的 host 边界诊断（v2，2026-10-13）
+
+结论：本次超过 2 ms 的内部 host 尾部主要位于原始
+ torch.distributed.all_to_all_single 公共调用内部，而不是初始 receive
+allocation、调用前 guard 或旧 Python wrapper 的释放。两臂都出现迟返；
+此结果没有恢复 QK 候选的准入，也不是模型或正式算子加速结论。
+
+证据范围
+八个 rank、24 个实际 layer-0 case/rank（六种历史长度 × 四 probes），
+两种 scope × baseline/combined 两臂，每组 20 warm + 60 diagnostic samples，
+共 46,080 个相关的 rank-sample。不是 46,080 次独立实验，也不是全 40 层
+payload 回放。实际 192-case 正确性链、新 wrapper 每 rank 96 次正确性及
+八 rank 新诊断均通过；两次 supervisor 都 exit 0 / fatal null / owned []。
+完整来源、库、实际矩阵、八份原始输出和 supervisor SHA 见伴随 receipt。
+
+五个内部阶段互不重叠，单位 ms：
+阶段                         wall均值  threadCPU均值  最大值    >2ms  >5ms
+guard_before_allocation       0.037502  0.037436       0.832647     0     0
+receive_allocation            0.029896  0.026866       1.270300     0     0
+allocation_to_dist_bridge     0.006618  0.006259       0.045011     0     0
+public_dist_call              0.085234  0.081709       7.220327    49     5
+output_layout_and_return      0.022233  0.021549       3.347557     2     0
+
+内部总区间均值 0.181482、最大 7.298178，51 次 >2 ms、6 次 >5 ms。
+总区间包含上面五段，不可再次相加；外层 collective、post-sync 又与这些
+区间有包含/传播关系，同样不能累加为可节省的时间。receive allocation
+仅测初始 empty_like；输出 layout 仍可能另有分配。
+
+public_dist_call 的分臂结果（每组 11,520 个 rank-sample）：
+scope     arm        wall均值    最大值    >2ms  >5ms
+producer  baseline   0.086991   7.220327    16     3
+producer  combined   0.085187   5.126271    13     1
+cached    baseline   0.084339   4.912639    10     0
+cached    combined   0.084417   5.439463    10     1
+
+尾部不是 combined 独有。五次 >5 ms 的 public call 都只观测到约
+0.096–0.140 ms 的同线程 CPU、voluntary context switch +1、同线程 GC
+重叠为 0。只能定位到 public API 内的 host 迟返；不能据此命名锁、网络、
+驱动或设备根因。公共调用还包含框架/装饰器/提交与等待的完整 host 路径。
+
+combined guard 均值 producer 0.057283 / cached 0.057128 ms；baseline
+0.017837 / 0.017758 ms。此处包含各自 admission 分支及观察器成本，不能
+当作无观察器的完整 QK 调用收益，更不能乘层数直接推导 chunk 改善。
+
+GC、对象生命周期和观测限制
+每 rank 8 个 GC event、4 个完整 interval；dropped/errors 均为 0，未配对
+为 0。17 个内部样本与同线程 GC 重叠（合计 2.115 ms，只是 rank 工作量），
+均在 public call；没有任何 >2 ms 内部阶段与同线程 GC 重叠。这不证明
+其他运行中 GC 无影响。旧 lease/receive Python wrapper 在替换后仍存活的
+标记全部为 0；Python wrapper 死亡不等于 device storage 已释放。
+wall、thread CPU 和 context switch 读取依次执行，不是原子快照，短区间
+存在 wall-minus-CPU 为负；不得把这个差值当 idle 时间。
+
+跨样本传播实例（完整八 rank 时间戳见 receipt 和外部 summary）
+KV=18720、probe=2、producer、baseline、sample=33 / row=3393：
+rank 6 public call：181426158297206 → 181426165517533 ns，7.220327 ms；
+同线程 CPU 0.096140 ms、voluntary +1、GC overlap 0。
+本次八 rank public-entry 差仅 0.081470 ms。其他七 rank 的本次 post-sync
+在 181426158776740–181426158795410 ns 已返回，早于 rank 6 host call
+返回；不等于证明 rank 6 自身设备尾部已完成。
+下一次 sample=34 / row=3394，rank 6 public entry=181426166455971 ns；
+其他七 rank entry=181426159320694–181426159417925 ns，差 7.135277 ms。
+其他七 rank 随后 post-sync 等待 7.288328–7.431819 ms，rank 6 等待
+0.295332 ms；八 rank 都在 181426166881944–181426166900614 ns 返回。
+串行 host 控制流必须等待前次调用返回才能提交下次，因此此例呈现迟返与
+下一次 rank 到达差、等待的传播关联。它不是设备入口时间线，也不能把
+前次 7.22 ms 加上七个 rank 的下一次等待当作优化收益。
+
+版本与验证
+v1 首次观察器构造因 raw marshal 的 code hash 不一致而拒绝，发生在首次
+观察调用前，保留原失败证据。CPU 检查证明原 pyc 与 freshcompile 的
+18 个 code 字段一致，但 marshal 的引用/驻留序列化表示不同。
+v2 使用 python_typed_code_fields_v1，并保留 source SHA、已加载函数/code
+和每次原 API identity 检查；新 correctness 必须重新通过，未继承旧 PASS。
+此 fingerprint 是来源/代码身份检查，不是一般语义等价证明。
+
+观察器复用冻结原 run_arm、instrumented_correctness 和原 all_to_all_5D；
+仅在本次调用的私有模块 delegate 中记录整数边界，不保存 tensor、不增加
+设备同步、不改变 collective 次序。观察器和诊断 wrapper 本身会改变
+调度/GC，数据不能用于正式 gate。独立 summary CPU 定向测试 7 项通过，
+并经另一 agent 只读复核；源码、测试及原始输出哈希在 receipt 中固定。
+
+本轮不修改 runtime，QK record-once 正式三轮筛选失败状态保持，async
+metadata 仍关闭。下一步若继续定位 public API 内迟返，应在不改数学、
+collective 次序和 owner 契约的前提下，补框架提交/等待及线程调度证据；
+任何修复仍需回到原完整调用筛选和模型配对验收。
+
+外部完整 summary：
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-collective-boundaries/summary-v2.json
+原始 profile：
+/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-collective-boundaries-checks/profile-v2/rank0..7.json
+correctness run：a1d2ca57d71ab6161ebdfcc20115a448
+profile run：18483514545dca28a8676c8d8f2f6d64
+保留 v1 失败 run：df3dcce6a00f9c402aad74957102d6be
