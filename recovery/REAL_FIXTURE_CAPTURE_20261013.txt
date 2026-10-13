@@ -1,0 +1,163 @@
+Real QK/cross fixture capture: independent correctness service (2026-10-13)
+
+STATUS
+The collector, install hook and CPU reader/contract tests are implemented.
+No device capture, full-owner readback admission or new 192-case qualification
+is claimed by this document. The retained old QK payload covers only eight
+ranks at request2/chunk11/probe0/layer0. It is not the matrix below.
+
+SCOPE AND BASELINE
+Keep SP8/TP1/ring1, all eight dies, 832x480, four DMD probes, full history,
+BF16 attention, FFN W8A8 and current batched recv/VAE paths. Capture the current
+multiple-dispatch recovery QK and plain recovery cross BSND, independently of
+the combined-guard/typed-entry candidates. These are fresh reconstructed
+reference inputs, not restored historical binary evidence.
+
+Capture selects the first real (host_kv_len, probe) occurrence of request2.
+The six actual visible lengths are 4680,9360,14040,18720,23400,28080. Values
+come from the prepared ARDiffusionPagedLayerInputs.host_kv_len, never from
+chunk arithmetic. Request identity, chunk and probe are preserved as evidence.
+
+Layer 0: full physical-owner payloads for 8 ranks x 4 probes x 6 lengths:
+  192 real QK cases and 192 real cross cases.
+All 40 layers: source/output descriptors and actual manager/context metadata:
+  15360 QK+cross descriptor cases (1920 per rank).
+This is explicitly NOT 40 layers of real payload. Do not repeat layer0 values
+40 times and call them real layer coverage. The per-layer coefficient_generation
+records prove which real forward shared the coefficient expansion; an isolated
+benchmark must distinguish a shared producer per forward from a producer per
+leaf. Layer0-only replay cannot establish complete 40-layer numerical coverage.
+
+MINIMAL HOOKS (no engine/distributed/entrypoints/worker changes)
+1. The existing pipeline.load_weights output_capture.install hook delegates
+   only when LINGBOT_REAL_FIXTURE_CAPTURE=1; its default remains 0.
+2. The existing denoise_step output_capture.bind(state) supplies real context.
+   A diagnostic instance wrapper limits capture to the active denoise probe,
+   excluding condition prefill, clean commits and unrelated forwards.
+3. Self-attention pre-hooks read prepared cache/manager metadata for all layers.
+4. The diagnostic wrapper around recovery.prepare_send captures the original
+   pre-RMS raw QKV and original shared coefficient generation. It calls the
+   original preparation exactly once and returns the same Send lease/owners.
+5. Cross-attention module pre/post hooks capture actual Q/K/V and native output
+   before the projection, including the real text-cache views/owners.
+6. A correctness-only observer around the existing provider.call records one
+   qk_send/cross dispatch with identical operands and returned output. Missing
+   receipts, unsupported fallback, duplicate calls or substituted outputs fail.
+   A requested backend flag alone never qualifies a case.
+
+SOURCE PINS / INSTALLATION
+The source-pinned build manifest MUST include both:
+  vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py
+  vllm_omni/diffusion/layers/lingbot_output_capture.py
+The helper refuses startup otherwise. The existing provider verifies the host
+DSO, kernel library, source files, framework/header ABI, SoC/JIT policy and fatal
+protocol. The recorder stores manifest SHA and both hook/source pins per rank.
+Build/launch remains root-controlled and all device experiments stay serial.
+
+Launch a NEW correctness service with its normal fatal/owner/environment setup:
+  ROOT_LINGBOT_SP8_EXPERIMENT_MODE=correctness
+  LINGBOT_OUTPUT_CAPTURE_DIR=/mnt/sfs_turbo/<fresh-fixture-run>
+  LINGBOT_REAL_FIXTURE_CAPTURE=1
+  LINGBOT_REAL_FIXTURE_DIR=/mnt/sfs_turbo/<same-fresh-fixture-run>
+Use a fresh output directory (rank directories must not exist). Do not enable
+legacy SP8/fusion/region captures concurrently. Select bool model configuration:
+  lingbot_npu_recovery_qk: true
+  lingbot_npu_recovery_cross: true
+  lingbot_npu_recovery_cross_combined: false
+Disable MC2 and retain eager execution. Do not enable the QK combined candidate
+for this reference service. Its source may exist in the pinned build.
+
+Use the existing root controller: complete request1 warm40, then a fresh request2
+of at least16 chunks. Count actual six-length coverage; missing lengths are a
+failed capture, not something to fill by synthetic inputs or chunk relabeling.
+The bind hook records all observed request IDs; check that selected request2 is
+the intended fresh request, rather than an internal startup request. A first
+one-case device smoke is required before committing to the full capture: validate
+full-owner ND/unblocked readback, hook order, actual cross backend and real cache
+metadata on every rank. Smoke output is partial evidence and remains separate.
+
+OWNERS AND FAILURE CONTRACT
+Each snapshot records eleven C++ storage descriptor fields: physical/origin
+format, base shape/stride, physical sizes, view shape/stride, storage offset,
+allocation byte count, allocation origin pointer and view pointer. Dtype, element
+size, device, logical bytes and available version counter are added.
+
+For admitted unblocked formats0/2/30, require dense physical base, no hidden
+extent, byte count exactly equal to the complete allocation, valid positive
+view spans and pointer+offset agreement. A full-owner as_strided view reads from
+storage origin. No format labels are mutated and logical input views are not
+replaced. This readback path is CPU-reviewed; live NPU admission still needs the
+smoke above. Unsupported/invalid descriptors fail the correctness request.
+
+All selected layer0 input owners are read before AND after the original call;
+full raw bytes and descriptors must be identical. Output owners are read after
+the original call. Strong references remain live through readback/call/consumer;
+on failure the original tensors/traceback are quarantined and the existing fatal
+channel requests all-eight-worker retirement. There is no poststart fallback.
+
+Metadata-only layers claim descriptor/version stability, not source byte proof.
+Capturing a full owner does not prove a future candidate destination's canary:
+all cases explicitly mark destination_canary_verified=false. Candidate screening
+must allocate its own complete arenas/canaries and validate their entire bytes.
+No KV pool or staging arena payload is copied by this QK/cross fixture mode;
+manager capacities, block IDs and owner identities are recorded for context.
+Recv/KV arena correctness is a separate campaign.
+
+FILES / REPLAY SCHEMA
+  rankR/coverage.json
+  rankR/qk_kv4680_p0_l00.json ... cross_kv28080_p3_l39.json
+  rankR/owners/<sha256>.u8
+QK inputs: qkv, query_weight, key_weight, cosine, sine, expanded_cosine,
+expanded_sine. Output: native_send. Cross inputs: query,key,value. Output:
+native_output. JSON inputs/outputs each contain descriptors, owners and
+view_owner_ids. Owner IDs are scoped to the case AND section. Content-addressed
+files deduplicate immutable bytes, but equal content hash is NOT owner identity;
+live allocation pointers determine aliasing within a snapshot.
+
+Minimal CPU reconstruction example (not a device admission):
+  case = json.loads(case_path.read_text())
+  snap = case['inputs']; cpu_owners = {}; tensors = {}
+  dtype_map = {'torch.bfloat16':torch.bfloat16, 'torch.float32':torch.float32}
+  for name, d in snap['descriptors'].items():
+      oid = snap['view_owner_ids'][name]
+      if oid not in cpu_owners:
+          owner = snap['owners'][oid]
+          raw = (case_path.parent / owner['relative_path']).read_bytes()
+          assert len(raw) == owner['storage_bytes']
+          assert hashlib.sha256(raw).hexdigest() == owner['raw_sha256']
+          cpu_owners[oid] = torch.frombuffer(bytearray(raw), dtype=dtype_map[d['dtype']]).clone()
+      tensors[name] = cpu_owners[oid].as_strided(d['shape'],d['stride'],d['storage_offset'])
+Keep cpu_owners alive. Device replay must allocate the complete owner once,
+create all views from that owner and independently revalidate its physical
+format/extent/strides/offsets before invoking the candidate. A logical contiguous
+clone is insufficient to reproduce the original storage contract.
+
+CPU AUDIT (after capture, outside timing)
+  python recovery/check_real_fixtures.py /mnt/sfs_turbo/<fresh-fixture-run> \
+    --hash-payloads --output /mnt/sfs_turbo/<fresh-fixture-run>/matrix-audit.json
+Checks all8 rank identities, the complete 192-per-role payload matrix, all40
+layer descriptors, actual shared history/probe locations, source proof labels,
+backend receipts, source/build agreement and every full-owner payload hash.
+Omitting --hash-payloads only checks sizes/metadata and explicitly reports that
+payload hashes were not verified. Neither output admits a kernel, model or
+performance result. The reader never fabricates missing cases.
+
+VOLUME ESTIMATE (BF16 observed geometry; exact owners decide actual bytes)
+Per layer0 QK input owners: 19,489,280 bytes; packed send:17,971,200 bytes.
+Per cross case Q=5,990,400, K/V=10,485,760, output=5,990,400 bytes.
+192-per-role, no content dedup:11,505,991,680 bytes =10.716 GiB.
+If each rank's constant cross K/V owner deduplicates across24 cases:
+9,576,611,840 bytes =8.919 GiB. Repeated QK weights/coefficients can reduce this
+further; never assume dedup before inspecting actual owners/hashes.
+Allow another roughly0.1-0.3 GiB for all40 JSON descriptors and reserve20 GiB.
+Before/after source readbacks transfer more bytes than retained files; capture
+latencies and NFS writes are diagnostic costs and cannot be used as timing.
+
+TESTS / LIMITS
+  python -m unittest discover -s recovery -p test_real_fixture_capture.py -v
+Ten CPU tests cover coverage identity/cardinality, omissions/duplicates,
+owner-bounds/format/pointer rejection, stale probe context, exact backend
+receipts, metadata-only claim limits, and global matrix/hash-reader behavior.
+The global-reader test uses explicitly synthetic CPU metadata, not real inputs.
+No device execution, 192-case screen, source canary, latent/RGB80 parity or
+long-run performance is claimed until separately recorded by the root controller.

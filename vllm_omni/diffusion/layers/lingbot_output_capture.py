@@ -85,6 +85,13 @@ class Capture:
 def install(pipeline):
     if os.environ.get('ROOT_LINGBOT_SP8_EXPERIMENT_MODE')!='correctness':
         raise ValueError('Output capture is allowed only in a separate correctness service')
+    fixture_mode = os.environ.get('LINGBOT_REAL_FIXTURE_CAPTURE', '0')
+    if fixture_mode not in ('0', '1'):
+        raise ValueError('LINGBOT_REAL_FIXTURE_CAPTURE must be 0 or 1')
+    if fixture_mode == '1':
+        from vllm_omni.diffusion.layers.lingbot_real_fixture_capture import install as install_fixtures
+
+        return install_fixtures(pipeline)
     if pipeline._lingbot_output_mc2_enabled:
         raise ValueError('Capture the complete native output path with MC2 disabled')
     recorder = Capture(pipeline.transformer)

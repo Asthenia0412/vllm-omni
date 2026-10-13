@@ -296,7 +296,10 @@ class _Send:
 
 
 def validate_padded_send(metadata, send, lease, world_size):
-    """Only the independently enabled K3 route may bypass the old offset0 ABI."""
+    """Admit each explicitly registered padded-owner route independently."""
+    from .lingbot_qk_combined import Lease, validate_padded_send as validate_combined
+    if type(lease) is Lease:
+        return validate_combined(metadata, send, lease, world_size)
     need(type(lease) is _Send and type(lease.route) is _Route
          and lease.route in _REGISTERED_ROUTES and not lease.used
          and not lease.route.poisoned and metadata is lease.metadata and send is lease.send
@@ -522,6 +525,9 @@ def configure_hccl_smoke(manifest_pin):
 
 
 def try_prepared_send(module, raw, rotary, *, ring_size):
+    combined = getattr(module, "_lingbot_qk_combined_route", None)
+    if combined is not None:
+        return combined.prepare(raw, rotary, ring_size)
     if getattr(module, "_lingbot_recovery_qk", False):
         from .lingbot_recovery import prepare_send
         return prepare_send(module, raw, rotary, ring_size)

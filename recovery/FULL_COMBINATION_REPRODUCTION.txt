@@ -59,6 +59,26 @@ Verification sequence
 5. Preserve original lifecycle/playback/quality acceptance scope. No release
    or complete-goal claim from a short run or synthetic operator checks.
 
+User-authorized follow-up: asynchronous KV metadata (after full restoration)
+--------------------------------------------------------------------------
+The existing VLLM_LINGBOT_NPU_ASYNC_METADATA=1 path uses a bounded pinned host
+pool with post-copy events. Keep it disabled for the restored baseline; its
+historical inherited setting remains unproven. Do not label it a recovered
+winning optimization. The latest user-supplied old-trace attribution identifies
+16 related stream synchronizations per denoise chunk, with four complete-chunk
+wait totals about1.2/2.0/25.6/36.7ms. These are waits, not proven endpoint savings.
+
+After cross H40 BSND/combined and QK single-host restoration, run this as its
+own A/B variable. Audit pinned host ownership, event completion and slot reuse;
+device destinations remain owned by their forward contexts. Exercise source
+mutation, pending-copy cancellation, fresh requests, window sliding and prompt
+updates. Require paired latent/RGB equality and bounded surviving pool state.
+Use eight-rank traces to correlate H2D waits, upstream work, collective start
+skew and downstream consumption; clean complete-chunk mean/P99 determine gain.
+Do not count RGB .cpu() wait again as engine overhead: the old trace shows it
+mostly drains pending VAE work. Only the winning complete combination enters
+the original three independent warm40+600 final runs.
+
 Current artifacts are backed up on recovery/lingbot-sp8-20261012, remote
 commit e9414e428e4fcb876f5a7edec4c703cf69646078 (source tree matches local
 f9aef297 snapshot). That backup does not establish performance reproduction.

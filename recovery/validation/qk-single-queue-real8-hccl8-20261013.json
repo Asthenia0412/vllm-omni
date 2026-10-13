@@ -1,0 +1,1382 @@
+{
+  "schema": "lingbot_qk_single_queue_guard_v2_real8_correctness_hccl_receipt",
+  "passed": true,
+  "scope": {
+    "request_ordinal": 2,
+    "chunk": 11,
+    "probe": 0,
+    "layer": 0,
+    "ranks": 8
+  },
+  "actual192": false,
+  "all40": false,
+  "model_admitted": false,
+  "performance_validated": false,
+  "build": {
+    "schema": "lingbot_qk_single_queue_cpu_build_guard_v2",
+    "operator_namespace": "lingbot_qk_single_queue_guard_v2",
+    "provider_manifest": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+      "bytes": 7452,
+      "sha256": "d62fe29c616b53f3bf81421018620e9ed8da91f862fa524d2f319fc6b3a9a80e"
+    },
+    "source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/single_queue.cpp",
+      "bytes": 13588,
+      "sha256": "165416ff07eaf677a01ab14310e3590c64e9a1d4785fcad62208715bbc2e1ef2"
+    },
+    "library": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/liblingbot_qk_single_queue_guard_v2.so",
+      "bytes": 177248,
+      "sha256": "986528c1a4af3aff1d4b9523ad032afb07e28d6e4b0c82d434c97bc3879617d5"
+    },
+    "kernel": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+      "bytes": 402128,
+      "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+    },
+    "dependencies": [
+      {
+        "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libopapi.so",
+        "bytes": 44155312,
+        "sha256": "3e10def2f7158482f3967b9db6ad2707cca8691198ddae8cc52bbbaf61bb2675"
+      },
+      {
+        "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libopapi.so",
+        "bytes": 44155312,
+        "sha256": "3e10def2f7158482f3967b9db6ad2707cca8691198ddae8cc52bbbaf61bb2675"
+      },
+      {
+        "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libopapi.so",
+        "bytes": 44155312,
+        "sha256": "3e10def2f7158482f3967b9db6ad2707cca8691198ddae8cc52bbbaf61bb2675"
+      },
+      {
+        "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libopapi.so",
+        "bytes": 44155312,
+        "sha256": "3e10def2f7158482f3967b9db6ad2707cca8691198ddae8cc52bbbaf61bb2675"
+      },
+      {
+        "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libnnopbase.so",
+        "bytes": 4328144,
+        "sha256": "308dda461704a6e5f70de6e0eac4495e9829b9cec3328563b75a5b382c6e438b"
+      },
+      {
+        "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libnnopbase.so",
+        "bytes": 4328144,
+        "sha256": "308dda461704a6e5f70de6e0eac4495e9829b9cec3328563b75a5b382c6e438b"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+        "bytes": 402128,
+        "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+      }
+    ],
+    "command": [
+      "g++",
+      "-std=c++17",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-D_GLIBCXX_USE_CXX11_ABI=1",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/single_queue.cpp",
+      "-o",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/liblingbot_qk_single_queue_guard_v2.so",
+      "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include",
+      "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/torch/csrc/api/include",
+      "-I/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include",
+      "-I/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/include",
+      "-I/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/csrc/lingbot_recovery",
+      "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
+      "-L/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
+      "-L/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
+      "-L/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib",
+      "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/lib",
+      "-Wl,-rpath,/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/lib",
+      "-Wl,-rpath,/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/lib64",
+      "-Wl,-rpath,/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib",
+      "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+      "-ltorch_npu",
+      "-ltorch_cpu",
+      "-ltorch",
+      "-lc10",
+      "-lopapi",
+      "-lnnopbase",
+      "-lascendcl",
+      "-ldl"
+    ],
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "torch_npu_git": "5dd8ef3f9b375b5ae4a83538d5785754148c3302",
+    "registration": true,
+    "npu_initialized": false,
+    "device_admitted": false,
+    "model_admitted": false
+  },
+  "build_receipt": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/build-receipt.json",
+    "bytes": 4809,
+    "sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14"
+  },
+  "isolated_checks": [
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device0.json",
+        "bytes": 1556,
+        "sha256": "bd8dbd0084d13a81f1396c57d2b654e3f5aaf0d1bb0a46b4753d3e8a38655a96"
+      },
+      "result": {
+        "rank": 0,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device1.json",
+        "bytes": 1556,
+        "sha256": "dac26f9b92b2d374cbe80397e254f4375879ffd9493ae970842dad4ba165c684"
+      },
+      "result": {
+        "rank": 1,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device2.json",
+        "bytes": 1556,
+        "sha256": "b093603795f433869f8c4531c5731e6ec60edea49cc6d9d06b305bf8edc2f3a2"
+      },
+      "result": {
+        "rank": 2,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device3.json",
+        "bytes": 1556,
+        "sha256": "3222f28e0d24b41ab0f6e7d1b0b1e72886b7f8bd90fcd00cbb2e4afc1ed779b2"
+      },
+      "result": {
+        "rank": 3,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device4.json",
+        "bytes": 1556,
+        "sha256": "4acdbddf25a9e14929a6eb372054fdac2b2e919766aebf831f736740cd5580a8"
+      },
+      "result": {
+        "rank": 4,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device5.json",
+        "bytes": 1556,
+        "sha256": "69b68f589fc2c9b6ba9f1334786ea08959a59e378a6a32cb3ac02c7b77ab59ed"
+      },
+      "result": {
+        "rank": 5,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device6.json",
+        "bytes": 1556,
+        "sha256": "a70d6edba6dde25d62696c8bae55c923af6aa40f62b7c30c881ef157e2068f75"
+      },
+      "result": {
+        "rank": 6,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device7.json",
+        "bytes": 1556,
+        "sha256": "90a7e246666eded13fbae0805361482d2429c5ad8d2b03e686ff069634ffcc64"
+      },
+      "result": {
+        "rank": 7,
+        "checks": [
+          "wrong_current_device_rejected_before_output_allocation",
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "real_full_target_arena_canaries",
+          "real_native_send",
+          "real_fresh_send1",
+          "real_fresh_send2",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "mode": "correctness",
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "bytes": 4625,
+          "sha256": "1f4e465222b032080c9252be278cd2bac25673bfc5af46b8c2cbaa2294231093"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    }
+  ],
+  "hccl_checks": [
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank0.json",
+        "bytes": 1916,
+        "sha256": "3a8761626e479a38683b0decb6dd17a10eed1c9cccc98e8388b9fa3ffbe89cfd"
+      },
+      "result": {
+        "rank": 0,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank1.json",
+        "bytes": 1916,
+        "sha256": "f7d606cf018dd4c27043283ddbad67a9e2a9b6eda2d999436c9872f41739d4bc"
+      },
+      "result": {
+        "rank": 1,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank2.json",
+        "bytes": 1916,
+        "sha256": "b91b075aa75d5bf442ab2fc71e3a15a8c333275c523d31831902052d9fff8a45"
+      },
+      "result": {
+        "rank": 2,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank3.json",
+        "bytes": 1916,
+        "sha256": "cc5b62cb3fbcaca83b5f98f2c7939e01831c901e841b21d74e189d9a7656d0a6"
+      },
+      "result": {
+        "rank": 3,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank4.json",
+        "bytes": 1916,
+        "sha256": "1a97ff6e16d609cbd3eb3ccb8dfcad929b21b54aa9ff698bfc0acbae46e8f5e7"
+      },
+      "result": {
+        "rank": 4,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank5.json",
+        "bytes": 1916,
+        "sha256": "2ec568e9fe7e128892ed94604117898bdbe9de1a074bebf563e18e806c2a699d"
+      },
+      "result": {
+        "rank": 5,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank6.json",
+        "bytes": 1916,
+        "sha256": "6281f122b8ccbaaa9b77f1749dabbba9c7e2be759173e7e82d2fc4dec78232ec"
+      },
+      "result": {
+        "rank": 6,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8/rank7.json",
+        "bytes": 1916,
+        "sha256": "c149d504b7449eea2421bb90e6bbb330a367100a1f21eb5b09032c4769c9177d"
+      },
+      "result": {
+        "rank": 7,
+        "checks": [
+          "retained_historical_query_RMS",
+          "retained_historical_key_RMS",
+          "expanded_cosine_snapshot",
+          "expanded_sine_snapshot",
+          "sentinel_padded_original_hccl_bytes",
+          "sentinel_full_arena_after_hccl",
+          "fresh_padded_original_hccl_bytes",
+          "fresh_owner_hccl_read_preservation",
+          "source_full_owner000",
+          "source_full_owner001",
+          "source_full_owner002",
+          "source_full_owner003",
+          "source_full_owner004",
+          "source_full_owner005",
+          "source_full_owner006",
+          "source_full_owner007",
+          "source_full_owner008"
+        ],
+        "fixture_scope": {
+          "request_ordinal": 2,
+          "chunk": 11,
+          "probe": 0,
+          "layer": 0,
+          "ranks": 8
+        },
+        "fixture_manifest_sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325",
+        "prototype_receipt_sha256": "4b9bb9f5d251a034197ebee584f4c93ca3232532568fbb4529cc823657b97b14",
+        "actual192": false,
+        "all40": false,
+        "all_probes": false,
+        "historical_binary_restored": false,
+        "model_admitted": false,
+        "passed": true,
+        "hccl_original_order_verified": true,
+        "reused_leases_rejected": true,
+        "group": "dist.group.WORLD ranks0..7",
+        "collective_derivation": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/comm-derivation.json",
+          "bytes": 974,
+          "sha256": "425564d1458d606b8daa7b1422498d03d248c9bad19c2f90023f23519c4195a5"
+        },
+        "no_runtime_monkeypatch": true,
+        "performance_validated": false,
+        "harness": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "bytes": 3502,
+          "sha256": "0455f1eb6165c7b6fd811091218cc65d7bf8fa8607dc1effb488e4ad3369936e"
+        },
+        "common": {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/qk_case_common.py",
+          "bytes": 11625,
+          "sha256": "15654fc2fbbeac1beee7d9394348fb19b1eefdbfc6482a9893a4c12b2f922c56"
+        }
+      }
+    }
+  ],
+  "closures": [
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/1eb14724983cd563c845dd284579f378/result.json",
+        "bytes": 677,
+        "sha256": "dacc7eeabd34e6392f9076ecd301ef6107f3ab78dcff414a034a46c7d9e47266"
+      },
+      "result": {
+        "nonce": "1eb14724983cd563c845dd284579f378",
+        "leader": {
+          "pid": 1225630,
+          "uid": 1003,
+          "pgid": 1225630,
+          "start": 17140492
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "7",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device7.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/2a780f98f7ec4523cf516e70fa071c13/result.json",
+        "bytes": 677,
+        "sha256": "81a029c484feed04e965e4918b3fd713f38ee7f540ca1ea9264163ba61b9bbdb"
+      },
+      "result": {
+        "nonce": "2a780f98f7ec4523cf516e70fa071c13",
+        "leader": {
+          "pid": 1214391,
+          "uid": 1003,
+          "pgid": 1214391,
+          "start": 17133366
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "3",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device3.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/413bb9d37ddbe725f53257ae23406d94/result.json",
+        "bytes": 677,
+        "sha256": "ac4773c7efc9a0ae50be96d3ecd1264a7c39fd49c71c66f9be3dfa332b4a7ec0"
+      },
+      "result": {
+        "nonce": "413bb9d37ddbe725f53257ae23406d94",
+        "leader": {
+          "pid": 1206478,
+          "uid": 1003,
+          "pgid": 1206478,
+          "start": 17128017
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "0",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device0.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/5dc53945fb6e339df1aea82056333a00/result.json",
+        "bytes": 677,
+        "sha256": "64e9d4bf6600e71b79895bd8979b6227ffdbbeb1b551e1ae648d011a0529ac96"
+      },
+      "result": {
+        "nonce": "5dc53945fb6e339df1aea82056333a00",
+        "leader": {
+          "pid": 1217148,
+          "uid": 1003,
+          "pgid": 1217148,
+          "start": 17135210
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "4",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device4.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/a044d5b54d277c0656a03315c07f2788/result.json",
+        "bytes": 677,
+        "sha256": "bd3ed8d38d8da09c048c1bc2dbf2ad0fa1f8fd26b42ca16bc5b0e353bb61e327"
+      },
+      "result": {
+        "nonce": "a044d5b54d277c0656a03315c07f2788",
+        "leader": {
+          "pid": 1219445,
+          "uid": 1003,
+          "pgid": 1219445,
+          "start": 17136947
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "5",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device5.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/a5bf11e5470c1f60736c7b107db13172/result.json",
+        "bytes": 677,
+        "sha256": "8e03a8f2b506b07bc4c3515a3a483b5548ea175595e476147031ab9154ffce3a"
+      },
+      "result": {
+        "nonce": "a5bf11e5470c1f60736c7b107db13172",
+        "leader": {
+          "pid": 1222886,
+          "uid": 1003,
+          "pgid": 1222886,
+          "start": 17138786
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "6",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device6.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/cf34c354786319bad99a1541c4a6ca2d/result.json",
+        "bytes": 677,
+        "sha256": "da07e6a4343aa022c5e61a257c0f14963553b2d6c0c4b1bfc450ebead712a9b6"
+      },
+      "result": {
+        "nonce": "cf34c354786319bad99a1541c4a6ca2d",
+        "leader": {
+          "pid": 1208647,
+          "uid": 1003,
+          "pgid": 1208647,
+          "start": 17129859
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "1",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device1.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-check-runs/d7e9433ddee2d434ab3f39df2b8eeb94/result.json",
+        "bytes": 677,
+        "sha256": "a872e7e3fe093ccb11f680e5ede26171bc2808037b419497d6f279b127b0a28c"
+      },
+      "result": {
+        "nonce": "d7e9433ddee2d434ab3f39df2b8eeb94",
+        "leader": {
+          "pid": 1211240,
+          "uid": 1003,
+          "pgid": 1211240,
+          "start": 17131584
+        },
+        "command": [
+          "python",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real.py",
+          "--execute",
+          "--device",
+          "2",
+          "--mode",
+          "correctness",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-device2.json"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    },
+    {
+      "receipt": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-hccl-runs/ff3a3a796371912c4563b136c1b4ab9d/result.json",
+        "bytes": 683,
+        "sha256": "6fed6ba10b5b93cf093969f18c54adb135f48bf2ab8300cc50ecce05c1158a70"
+      },
+      "result": {
+        "nonce": "ff3a3a796371912c4563b136c1b4ab9d",
+        "leader": {
+          "pid": 1228642,
+          "uid": 1003,
+          "pgid": 1228642,
+          "start": 17142908
+        },
+        "command": [
+          "torchrun",
+          "--standalone",
+          "--nnodes=1",
+          "--nproc-per-node=8",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/check_real_hccl.py",
+          "--execute",
+          "--output",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/guard-v2/real-hccl8"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": 0,
+        "remaining_owned_processes": []
+      }
+    }
+  ]
+}

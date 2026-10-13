@@ -1,0 +1,27 @@
+Rejected direct-native single-queue diagnostic, preserved for reproducibility.
+The copied host.cpp is byte-identical to the corrected guard-v2 device-tested
+source, as pinned by historical-build-receipt.json. Build paths in that receipt
+are historical provenance, not installation paths. build.py accepts the local
+recovery provider manifest and creates fresh actual dependency/source pins.
+
+Guard-v2 passed retained real8 correctness and padded HCCL. Its three independent
+typed-entry timing ratios were 1.27426 / 1.27392 / 1.27417 (candidate/base wall),
+and it was rejected. See recovery/validation/qk-single-queue-typed-screen-20261013.json.
+These timings exclude Python route guards/shared producer. No full model
+speed or actual192 admission is claimed. Nothing imports this code at model
+startup; no production config flag selects it.
+
+Mechanism: public ACLNN RMSQ/RMSK/RotaryV2Q/RotaryV2K executors prepared outside
+one queue-owned callback; existing exact send follows. Original historical
+single-host source is unavailable: one Python entry did not prove one queue.
+Current public-native combined admission preserves op-plugin workspace caches
+and ancillary execution policy; it is a separate candidate.
+
+Sources: torch-npu commit5dd8ef3f9b375b5ae4a83538d5785754148c3302;
+op-plugin8b9c8534fa41eff367a41c155843daa530ab3a08. Exact V2 interleave is mode1.
+Framework callback ownership: OpCommand.cpp -> NPUQueue.cpp -> OpParamMaker.cpp
+-> NPUDefine.cpp; queue copies/moves std::function before enqueue returns.
+Official nonrepeatable executor ownership contract:
+https://www.hiascend.com/doc_center/source/en/CANNCommunityEdition/910/API/aolapi/operatorlist_00021.html
+Never destroy a consumed executor. Partial failures quarantine owners/executors
+until the owned supervisor retires all workers. Do not retry raw execution.

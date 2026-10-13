@@ -1,0 +1,91 @@
+QK full-combination restoration: public-native combined admission (2026-10-13)
+
+STATUS / MEANING
+Default-off experiment: lingbot_npu_recovery_qk_combined=false in both native and
+candidate templates. The original historical adapter/OPP body was not recovered.
+Historical evidence establishes one host adapter call, padded offset256 ownership,
+full-width RMS and interleaved BF16 RoPE; it does not establish a single kernel or
+single framework queue entry. This implementation is independent reconstruction.
+
+The separate direct-native single-queue prototype passed old real8 and HCCL but
+was 27.4% slower in three typed-entry timing rounds. It is rejected, archived under
+recovery/experiments/qk_single_queue, and cannot be selected by model configuration.
+Those isolated timings excluded model Python guards; see the committed receipt
+recovery/validation/qk-single-queue-typed-screen-20261013.json.
+
+IMPLEMENTATION
+csrc/lingbot_qk_combined/host.cpp keeps the current installed public native calls:
+RMSNorm(Q full5120), RMSNorm(K full5120), RotaryV2(Q), RotaryV2(K), exact send pack.
+Both RMS and RoPE retain their BF16 output boundaries. Native op-plugin workspace
+caching, ancillary deterministic/resource handling and queue scheduling remain in
+use. Only pack uses the existing verified raw launcher inside framework RunOpApiV2.
+No nested framework operator is called from that callback.
+
+One consolidated C++ admission checks inference/current device/default stream,
+capture, dtype/shape/physical format and actual allocation extents. Invalid owner
+metadata throws; an ordinary unsupported case returns two None values before
+allocation/submission and becomes Python None. No started error falls back.
+
+The actual model prepares SharedCoefficients once per forward for all40 layers.
+The new route accepts only that exact shared provider, original cosine/sine object
+identities and a positive generation. A missing snapshot refuses before get() can
+expand or mutate state. This preserves the producer and avoids counting expansion
+once per layer. Q/K gamma, original/expanded coefficient owners and outputs remain
+strongly held. Each admitted call allocates a fresh BF16 owner8986112 and exposes
+send[8,585,3,1,5,128] at offset256; no production memset or output reuse.
+
+A new explicit Lease type is accepted by the existing padded-send hook.
+The original diffusion/distributed/comm.py remains byte-identical, including
+collective group/order and receive reorder. The new guard checks owner pointers,
+full capacity, canonical strides, raw metadata association and stream before HCCL.
+State/consumer failures poison the shared recovery provider, retain owners and
+report to the same eight-worker fatal supervisor; reuse never retries a request.
+
+BUILD / ROLLBACK
+Run CPU builds under the repository's recovery/env.sh in a fresh process:
+  python recovery/build_host.py --output <fresh-host-dir> --kernels <verified-copy.so>
+  python recovery/build_qk_combined.py --provider-manifest <fresh-host-dir>/host_manifest.json --output <fresh-qk-dir>
+The host manifest must be rebuilt after runtime source changes and includes both
+real-fixture helper/output-capture sources. The QK manifest pins source, module,
+framework/header ABI, actual resolved kernel ELF and parent provider manifest.
+Never reuse an old manifest after editing its pinned files.
+
+An eventual dedicated candidate config sets the new bool true, old recovery_qk
+false and historical qk_single_host_admission_v1 false. Export explicit absolute
+LINGBOT_QK_COMBINED_MANIFEST and its SHA256 alongside the owned supervisor's recovery
+manifest/fatal channel. Enable only after the next independent acceptance steps.
+Rollback is the default false flag and current recovery_qk=true under a fresh
+source-pinned service. Never switch flags or providers in a live worker group.
+
+VALIDATION / COMPLETE CALL
+CPU tests: recovery/test_qk_combined_cpu.py checks pre-producer refusal, shared
+poison/quarantine and non-assert lease checks, including under python -O.
+CPU registration/unsupported CPU input does not initialize an NPU.
+New combined device/model/performance admission remains pending.
+
+recovery/check_qk_combined.py is explicit --execute only and requires a scoped
+supervisor. The current portable loader accepts only retained request2/chunk11/
+probe0/layer0 fixtures on eight ranks. They are not full192 or40-layer payloads.
+- correctness: historical RMS/public native output, full sentinel arena/canaries,
+  complete source owners, and full Python wrapper/consumer result.
+- timing: actual producer.prepare plus first-layer call, and cached-snapshot call,
+  are measured separately, each with Python policy/get/admission/native/lease and
+  consumer checks. No isolated sums become chunk gains.
+- --hccl under torchrun8 includes the actual original all_to_all_5D and receive
+  reorder through the explicit Lease exchange. Without --hccl, it is a clearly
+  labeled pre-HCCL diagnostic and cannot grant the complete-call speed gate.
+Three fresh rounds20warm/30wall+30events and original model/fullcase gates remain.
+Fresh all192 fixtures are collected independently by REAL_FIXTURE_CAPTURE_20261013.
+Layer0 payload across8x4x6 plus all40-layer descriptors is not all40 payload.
+
+Pinned source evidence for guard overhead
+At exact torch-npu commit5dd8ef3f9b375b5ae4a83538d5785754148c3302:
+- NPUGraphsUtils.cpp calls AclmdlRICaptureGetInfo with s.stream(false).
+- Module.cpp current/default stream wrappers return IDs; Stream.cpp construction
+  and equality preserve stream objects without reading the raw stream pointer.
+Thus current_stream/default_stream comparison and is_current_stream_capturing
+have no explicit MakeSureQueueEmpty in these pinned source paths. Do not claim
+that the six repeated Python guards drain queues or perform ACL stream sync.
+- Stream.npu_stream and _npu_getCurrentRawStream use stream(), which can call
+  MakeSureQueueEmpty. Queue draining and device completion are different events.
+Actual dispatch/dependency profiling remains necessary for attribution.

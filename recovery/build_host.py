@@ -48,6 +48,8 @@ def main():
                 "sdk": str(sdk), "command": command, "registration_passed": True,
                 "device_validated": False, "model_validated": False, "historical_admission_inherited": False}
     modules = ["layers/lingbot_recovery.py", "layers/lingbot_recv_kv_sp8.py",
+               "layers/lingbot_qk_combined.py", "layers/lingbot_real_fixture_capture.py",
+               "layers/lingbot_output_capture.py",
                "layers/lingbot_sp8_fatal.py", "layers/qk_single_host_integration_v1.py",
                "layers/lingbot_fixed_timestep_bank_stageA_v1.py",
                "models/lingbot_world/transformer.py", "attention/backends/cross_combined_integration_v1.py",

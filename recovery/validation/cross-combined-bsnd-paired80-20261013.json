@@ -1,0 +1,284 @@
+{
+  "passed": true,
+  "scope": "paired model latent/RGB bit parity only; not arena/canary, quality or timing acceptance",
+  "reference": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80",
+  "candidate": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80",
+  "ranks": [
+    {
+      "rank": 0,
+      "latent_chunks": 80,
+      "rgb_frames": 957
+    },
+    {
+      "rank": 1,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 2,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 3,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 4,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 5,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 6,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    },
+    {
+      "rank": 7,
+      "latent_chunks": 80,
+      "rgb_frames": 0
+    }
+  ],
+  "schema": "lingbot_recovery_cross_combined_bsnd_paired80_v1",
+  "original_historical_provider_identity_recovered": false,
+  "performance_accepted": false,
+  "reference_contract": "current public BSND FIA, not SDPA; same rebuilt QK, recv, batched VAE and other restored paths",
+  "manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+    "bytes": 7452,
+    "sha256": "d62fe29c616b53f3bf81421018620e9ed8da91f862fa524d2f319fc6b3a9a80e"
+  },
+  "comparator": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/compare_captures.py",
+    "bytes": 3452,
+    "sha256": "0e36ca9d7700613b2a198e617ec8191a4996ac9f053b1c2842ad211c1777ff2b"
+  },
+  "runs": [
+    {
+      "kind": "reference",
+      "config": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/reference-bsnd.yaml",
+        "bytes": 2357,
+        "sha256": "c64a9c8ae3a7d7f012bc4700d7336cc8ae863f858d76506d5e27543d3f44bc8a"
+      },
+      "config_values": "async_chunk: false\ndistributed_executor_backend: mp\ndtype: bfloat16\npipeline: lingbot_world\nstages:\n- default_sampling_params:\n    extra_args:\n      flow_shift: 5.0\n    num_inference_steps: 4\n    output_type: pil\n  devices: 0,1,2,3,4,5,6,7\n  enforce_eager: true\n  engine_backend: vllm_omni.experimental.ar_diffusion.engine.ARDiffusionEngine\n  max_num_seqs: 1\n  model_class_name: LingBotWorldCausalDMDPipeline\n  model_config:\n    ar_diffusion_height: 480\n    ar_diffusion_kv_config:\n      gpu_memory_fraction: 0.4\n      npu_history_staging_layers:\n      - 0\n      - 1\n      - 2\n      - 3\n      - 4\n      - 5\n      - 6\n      - 7\n      - 8\n      - 9\n      - 10\n      - 11\n      - 12\n      - 13\n      - 14\n      - 15\n      - 16\n      - 17\n      - 18\n      - 19\n      - 20\n      - 21\n      - 22\n      - 23\n      - 24\n      - 25\n      - 26\n      - 27\n      - 28\n      - 29\n      - 30\n      - 31\n      - 32\n      - 33\n      - 34\n      - 35\n      - 36\n      - 37\n      - 38\n      - 39\n      npu_min_free_headroom_bytes: 4294967296\n      reuse_history_staging: true\n      warmup_cudagraph: false\n    ar_diffusion_width: 832\n    lingbot_condition_prefill: true\n    lingbot_npu_chunk_prefix_cache: true\n    lingbot_npu_fusion_backend: 'off'\n    lingbot_npu_native_bf16_qk: true\n    lingbot_npu_qkv_sp_pack: false\n    lingbot_npu_quant: w8a8\n    lingbot_npu_quant_scope: ffn\n    lingbot_npu_quant_weight_format: nz\n    lingbot_npu_text_block_offload: true\n    lingbot_npu_uniform_timestep: true\n    lingbot_npu_vae_exact_pack: false\n    lingbot_reuse_last_step_kv: true\n    lingbot_vae_decode_fast_path: exact\n    lingbot_vae_spatial_sharding: true\n    lingbot_npu_pixel_output_mode: root_uint8_p2p\n    lingbot_npu_leased_post_attention: false\n    lingbot_npu_cross_combined_guard_cpp_v1: false\n    lingbot_npu_qk_single_host_admission_v1: false\n    lingbot_npu_pixel_device_interleave: true\n    lingbot_npu_fixed_timestep_bank: true\n    lingbot_npu_fixed_timestep_bank_diagnostics: false\n    lingbot_npu_recovery_qk: true\n    lingbot_npu_recovery_cross: true\n    lingbot_npu_recovery_vae_pack: true\n    lingbot_npu_recovery_descriptor: true\n    lingbot_npu_recovery_cross_combined: false\n  parallel_config:\n    ring_degree: 1\n    sequence_parallel_size: 8\n    tensor_parallel_size: 1\n    ulysses_degree: 8\n  stage_id: 0\n  step_execution: true\n  streaming_output: true\n",
+      "launch": {
+        "nonce": "a8483caf0e27d176ee10ef6330a9cd85",
+        "leader": {
+          "pid": 1090851,
+          "uid": 1003,
+          "pgid": 1090851,
+          "start": 17068754
+        },
+        "command": [
+          "vllm",
+          "serve",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+          "--omni",
+          "--deploy-config",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/reference-bsnd.yaml",
+          "--port",
+          "7816",
+          "--init-timeout",
+          "1800",
+          "--stage-init-timeout",
+          "1800"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null
+      },
+      "closed": {
+        "nonce": "a8483caf0e27d176ee10ef6330a9cd85",
+        "leader": {
+          "pid": 1090851,
+          "uid": 1003,
+          "pgid": 1090851,
+          "start": 17068754
+        },
+        "command": [
+          "vllm",
+          "serve",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+          "--omni",
+          "--deploy-config",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/reference-bsnd.yaml",
+          "--port",
+          "7816",
+          "--init-timeout",
+          "1800",
+          "--stage-init-timeout",
+          "1800"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": -9,
+        "remaining_owned_processes": []
+      },
+      "rollout": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/model-runs/a8483caf0e27d176ee10ef6330a9cd85/rollout80.json",
+        "bytes": 20286,
+        "sha256": "6bce972f3955681abaff8fd06e6b66b7847821e7e91255fee9600a54f22f2e52"
+      },
+      "capture_manifests": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank0/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 48154,
+          "sha256": "4d62de0ce62cf98908a44e41eef18e6bd1e4017567d4e534e5ee69f2e1586bbe"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank1/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 24315,
+          "sha256": "56cceb9b859d601faaa0833240660f07563442f1821b42033f591bb69f352c1a"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank2/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 24315,
+          "sha256": "a14639d26ab0c104148bb57bc4b6d1cfe7d48be5bf9480270fce5cb501a53605"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank3/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 24315,
+          "sha256": "e8299f56c1d01d5cb87a090ce9568353a2d3b757c5a0f3d2e8af9c1f9de27a5d"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank4/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 24315,
+          "sha256": "a9dcc2b3507b5f53d649c2d8e67082444d8207193784af9390fbe0b163c838c7"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank5/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 24315,
+          "sha256": "a0b03e56fb5bced0b473b7cf16d64511d94c4abefffa9fd517e4443f31ce6c89"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank6/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 24315,
+          "sha256": "d26b2c0ab1c8bca57aac4e290d108be7ddbc627f49976b9d2010b8a1114044c2"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/reference-bsnd80/rank7/video_stream-15f563aa4a9d4bf7aed887db02cd7cce-923dfbeb/capture.json",
+          "bytes": 24315,
+          "sha256": "23837a73be48103d124150bc23d37e42cfc72e29a6d588276228abf9fd0ce7d2"
+        }
+      ]
+    },
+    {
+      "kind": "candidate",
+      "config": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/candidate-bsnd-combined.yaml",
+        "bytes": 2357,
+        "sha256": "7438051b79db8e058b390aee7d5d7c69432f200cd9a8975485e7bbce436bdfa6"
+      },
+      "config_values": "async_chunk: false\ndistributed_executor_backend: mp\ndtype: bfloat16\npipeline: lingbot_world\nstages:\n- default_sampling_params:\n    extra_args:\n      flow_shift: 5.0\n    num_inference_steps: 4\n    output_type: pil\n  devices: 0,1,2,3,4,5,6,7\n  enforce_eager: true\n  engine_backend: vllm_omni.experimental.ar_diffusion.engine.ARDiffusionEngine\n  max_num_seqs: 1\n  model_class_name: LingBotWorldCausalDMDPipeline\n  model_config:\n    ar_diffusion_height: 480\n    ar_diffusion_kv_config:\n      gpu_memory_fraction: 0.4\n      npu_history_staging_layers:\n      - 0\n      - 1\n      - 2\n      - 3\n      - 4\n      - 5\n      - 6\n      - 7\n      - 8\n      - 9\n      - 10\n      - 11\n      - 12\n      - 13\n      - 14\n      - 15\n      - 16\n      - 17\n      - 18\n      - 19\n      - 20\n      - 21\n      - 22\n      - 23\n      - 24\n      - 25\n      - 26\n      - 27\n      - 28\n      - 29\n      - 30\n      - 31\n      - 32\n      - 33\n      - 34\n      - 35\n      - 36\n      - 37\n      - 38\n      - 39\n      npu_min_free_headroom_bytes: 4294967296\n      reuse_history_staging: true\n      warmup_cudagraph: false\n    ar_diffusion_width: 832\n    lingbot_condition_prefill: true\n    lingbot_npu_chunk_prefix_cache: true\n    lingbot_npu_fusion_backend: 'off'\n    lingbot_npu_native_bf16_qk: true\n    lingbot_npu_qkv_sp_pack: false\n    lingbot_npu_quant: w8a8\n    lingbot_npu_quant_scope: ffn\n    lingbot_npu_quant_weight_format: nz\n    lingbot_npu_text_block_offload: true\n    lingbot_npu_uniform_timestep: true\n    lingbot_npu_vae_exact_pack: false\n    lingbot_reuse_last_step_kv: true\n    lingbot_vae_decode_fast_path: exact\n    lingbot_vae_spatial_sharding: true\n    lingbot_npu_pixel_output_mode: root_uint8_p2p\n    lingbot_npu_leased_post_attention: false\n    lingbot_npu_cross_combined_guard_cpp_v1: false\n    lingbot_npu_qk_single_host_admission_v1: false\n    lingbot_npu_pixel_device_interleave: true\n    lingbot_npu_fixed_timestep_bank: true\n    lingbot_npu_fixed_timestep_bank_diagnostics: false\n    lingbot_npu_recovery_qk: true\n    lingbot_npu_recovery_cross: false\n    lingbot_npu_recovery_vae_pack: true\n    lingbot_npu_recovery_descriptor: true\n    lingbot_npu_recovery_cross_combined: true\n  parallel_config:\n    ring_degree: 1\n    sequence_parallel_size: 8\n    tensor_parallel_size: 1\n    ulysses_degree: 8\n  stage_id: 0\n  step_execution: true\n  streaming_output: true\n",
+      "launch": {
+        "nonce": "14a374a736bc30b1d7adbe4f3f924383",
+        "leader": {
+          "pid": 1138722,
+          "uid": 1003,
+          "pgid": 1138722,
+          "start": 17091591
+        },
+        "command": [
+          "vllm",
+          "serve",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+          "--omni",
+          "--deploy-config",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/candidate-bsnd-combined.yaml",
+          "--port",
+          "7816",
+          "--init-timeout",
+          "1800",
+          "--stage-init-timeout",
+          "1800"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null
+      },
+      "closed": {
+        "nonce": "14a374a736bc30b1d7adbe4f3f924383",
+        "leader": {
+          "pid": 1138722,
+          "uid": 1003,
+          "pgid": 1138722,
+          "start": 17091591
+        },
+        "command": [
+          "vllm",
+          "serve",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world",
+          "--omni",
+          "--deploy-config",
+          "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/candidate-bsnd-combined.yaml",
+          "--port",
+          "7816",
+          "--init-timeout",
+          "1800",
+          "--stage-init-timeout",
+          "1800"
+        ],
+        "mode": "correctness",
+        "manifest": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.K0uh0D7x/host_manifest.json",
+        "fatal": null,
+        "exit_code": -9,
+        "remaining_owned_processes": []
+      },
+      "rollout": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/model-runs/14a374a736bc30b1d7adbe4f3f924383/rollout80.json",
+        "bytes": 20276,
+        "sha256": "79e8a68cd43f67837376635e7cb369a5aa60f78fe4571c860cd897f71cd4ddcf"
+      },
+      "capture_manifests": [
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank0/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 48163,
+          "sha256": "d85cd3af5a79aea045195c4ab0f65658830a5dc62a313606d1032c4a7a627047"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank1/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 24324,
+          "sha256": "5108906f732ec7f96c926fcc4006547cd78ae8ba8314058fd0d415b50af1e851"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank2/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 24324,
+          "sha256": "c2b01ab0573e47bbf2612bdad1a912205932d59a6e4789895783dd75424128f6"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank3/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 24324,
+          "sha256": "27dc84dbfe57c4d19bed390dc72fbf58b21e72651b368ecfee13b833b960ea67"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank4/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 24324,
+          "sha256": "afd17b4d5a24b981b54d1fbd474796d9e1abd19b95f3e7c62af584fff6d1f489"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank5/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 24324,
+          "sha256": "0a7ad709d0277ee2fdbd48b7f099cc7c89bc0a9823e1d43503f583d896caa942"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank6/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 24324,
+          "sha256": "912016f27c429f773a45947b24439d7a20a84ac7fe69aea1f5b517c7951db184"
+        },
+        {
+          "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/captures/candidate-bsnd-combined80/rank7/video_stream-eb5b1accc2924e27b566211319638f43-a411d062/capture.json",
+          "bytes": 24324,
+          "sha256": "e7809eaa6cbdbf357610940904133f45b181a36138c167f914647d1c68393924"
+        }
+      ]
+    }
+  ]
+}

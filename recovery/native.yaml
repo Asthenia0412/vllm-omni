@@ -84,6 +84,7 @@ stages:
     lingbot_npu_fixed_timestep_bank: false
     lingbot_npu_fixed_timestep_bank_diagnostics: false
     lingbot_npu_recovery_qk: false
+    lingbot_npu_recovery_qk_combined: false
     lingbot_npu_recovery_cross: false
     lingbot_npu_recovery_cross_combined: false
     lingbot_npu_recovery_vae_pack: false

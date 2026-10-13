@@ -1,0 +1,1061 @@
+{
+  "schema": "lingbot_historical_checkpoint_partial_identity_audit_v1",
+  "created_utc": "2026-10-13T03:41:58.701141+00:00",
+  "scope": "CPU read-only targeted historical metadata + 2 current checkpoint tensor ranges (40 KiB) + 16 retained tiny norm owners (160 KiB). No NPU calls or full weight-shard hashing.",
+  "full_historical_checkpoint_identity_verified": false,
+  "original_repository_and_revision_verified": false,
+  "partial_runtime_weight_match_verified": true,
+  "partial_match_is_not_full_checkpoint_identity": true,
+  "current_download_manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world/recovery_download.json",
+    "bytes": 5812,
+    "sha256": "76dfe4387dc545a486774330408c12678e53ac1e5c0a9fc946b5807472306f04"
+  },
+  "current_integrity_receipt": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/validation/model-integrity-20261013.json",
+    "bytes": 7016,
+    "sha256": "0e210b20bf2cd4bda63281acb37b0b83f596c38454b257eee0711664c27b2120"
+  },
+  "current_model_repo": "robbyant/lingbot-world-v2-14b-causal-fast-diffusers",
+  "current_model_revision": "59cccf49f2d2dd27418ae7a04b82b10868d455c2",
+  "fixture_manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/manifest.json",
+    "bytes": 127639,
+    "sha256": "dd2f82acbd58322c271ecc49cd24ca4333a1d8e441b286653b1684f72d4c7325"
+  },
+  "fixture_scope": {
+    "request_ordinal": 2,
+    "chunk": 11,
+    "probe": 0,
+    "layer": 0,
+    "ranks": 8
+  },
+  "fixture_original_raw_sha_verified": true,
+  "fixture_original_capture_pt_reloaded": false,
+  "index": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world/transformer/diffusion_pytorch_model.safetensors.index.json",
+    "bytes": 127685,
+    "sha256": "d8bf5a1c94cdad4a9dd8b9ec4f5e89505ffbc227205a1b5a6c3bf04f7ba48d81"
+  },
+  "conversion": "All selected F32 values finite; IEEE BF16 round-to-nearest-ties-even: uint16((u32+0x7fff+((u32>>16)&1))>>16). Matches captured BF16 runtime bytes; does not prove original on-disk FP32 bytes.",
+  "weights": [
+    {
+      "key": "blocks.0.self_attn.norm_q.weight",
+      "shard_path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world/transformer/diffusion_pytorch_model-00001-of-00008.safetensors",
+      "shard_whole_file_read_or_hashed_in_this_audit": false,
+      "header_bytes": 18360,
+      "header_sha256": "d926fcb59bde043fd604ab9592aeeaf0b86e88b45f68d2609e2f3989b76a9ee2",
+      "descriptor": {
+        "dtype": "F32",
+        "shape": [
+          5120
+        ],
+        "data_offsets": [
+          1510434816,
+          1510455296
+        ]
+      },
+      "original_tensor_bytes": 20480,
+      "tensor_f32_sha256": "ba5a9768659b97f57afed55fd206fc24362a3b1c058ed1afc8e84e6ef7ba02ae",
+      "tensor_bf16_rne_sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5",
+      "rank_matches": [
+        {
+          "rank": 0,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank0/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank0/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank0/result.json",
+            "bytes": 35090,
+            "sha256": "3e811da14890eb9964691a6cd0e785af2a5715de1f16d30ed3153670e70d2614"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:0",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 1,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank1/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank1/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank1/result.json",
+            "bytes": 35098,
+            "sha256": "d849b3bb8aaee93fea857ce40e1d91fe9c3607eff304fda31d02697c358186e3"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:1",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 2,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank2/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank2/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank2/result.json",
+            "bytes": 35108,
+            "sha256": "94c596adc13f77daa6cd3b708a02548758b69fe17ff1ba1e38d010c05b622be8"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:2",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 3,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank3/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank3/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank3/result.json",
+            "bytes": 35110,
+            "sha256": "7b2c28b98983be646585c1a2006cf54bd48dc0226c362ebbbaa2fa69e88becff"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:3",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 4,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank4/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank4/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank4/result.json",
+            "bytes": 35110,
+            "sha256": "d4e934b6477e6bcf341fb19c6b35f1f95c2f2da374a81e85046728176f2ccfa3"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:4",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 5,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank5/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank5/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank5/result.json",
+            "bytes": 35110,
+            "sha256": "12783d467560c5995c668944db886a2600a526f9f1a26307d02312a195596d64"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:5",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 6,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank6/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank6/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank6/result.json",
+            "bytes": 35110,
+            "sha256": "04d53f790c8eb2e6669fbf19ef93061c5e7fbdcf04dc3d62d03753bddcc2ac6c"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:6",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 7,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank7/before.owner003.u8",
+            "bytes": 10240,
+            "sha256": "43540951882f83dab1e68543d9ea5fa94ec28f2f32a47020e7b37dacb54f2ee5"
+          },
+          "record": {
+            "member": "output/rank7/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank7/result.json",
+            "bytes": 35110,
+            "sha256": "bc637b88457c88d3ee28c4027c7454e99028db74c1c893de4a4b47457395d41b"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447399424,
+            "data_ptr": 20697447399424,
+            "dtype": "torch.bfloat16",
+            "device": "npu:7",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        }
+      ]
+    },
+    {
+      "key": "blocks.0.self_attn.norm_k.weight",
+      "shard_path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/models/lingbot-world/transformer/diffusion_pytorch_model-00001-of-00008.safetensors",
+      "shard_whole_file_read_or_hashed_in_this_audit": false,
+      "header_bytes": 18360,
+      "header_sha256": "d926fcb59bde043fd604ab9592aeeaf0b86e88b45f68d2609e2f3989b76a9ee2",
+      "descriptor": {
+        "dtype": "F32",
+        "shape": [
+          5120
+        ],
+        "data_offsets": [
+          1510414336,
+          1510434816
+        ]
+      },
+      "original_tensor_bytes": 20480,
+      "tensor_f32_sha256": "fdc6a1996d55cf2430266c4af2e61fdd50824c803deaea53d2ba90eff7f69b96",
+      "tensor_bf16_rne_sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995",
+      "rank_matches": [
+        {
+          "rank": 0,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank0/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank0/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank0/result.json",
+            "bytes": 35090,
+            "sha256": "3e811da14890eb9964691a6cd0e785af2a5715de1f16d30ed3153670e70d2614"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:0",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 1,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank1/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank1/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank1/result.json",
+            "bytes": 35098,
+            "sha256": "d849b3bb8aaee93fea857ce40e1d91fe9c3607eff304fda31d02697c358186e3"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:1",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 2,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank2/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank2/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank2/result.json",
+            "bytes": 35108,
+            "sha256": "94c596adc13f77daa6cd3b708a02548758b69fe17ff1ba1e38d010c05b622be8"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:2",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 3,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank3/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank3/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank3/result.json",
+            "bytes": 35110,
+            "sha256": "7b2c28b98983be646585c1a2006cf54bd48dc0226c362ebbbaa2fa69e88becff"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:3",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 4,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank4/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank4/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank4/result.json",
+            "bytes": 35110,
+            "sha256": "d4e934b6477e6bcf341fb19c6b35f1f95c2f2da374a81e85046728176f2ccfa3"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:4",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 5,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank5/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank5/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank5/result.json",
+            "bytes": 35110,
+            "sha256": "12783d467560c5995c668944db886a2600a526f9f1a26307d02312a195596d64"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:5",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 6,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank6/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank6/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank6/result.json",
+            "bytes": 35110,
+            "sha256": "04d53f790c8eb2e6669fbf19ef93061c5e7fbdcf04dc3d62d03753bddcc2ac6c"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:6",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        },
+        {
+          "rank": 7,
+          "owner": {
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank7/before.owner004.u8",
+            "bytes": 10240,
+            "sha256": "9946f04eb4c96d7bc028d0fe579c95620ce402c2aafa1f433b29b8058acac995"
+          },
+          "record": {
+            "member": "output/rank7/result.json",
+            "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/qk-restore/real-replay/output/rank7/result.json",
+            "bytes": 35110,
+            "sha256": "bc637b88457c88d3ee28c4027c7454e99028db74c1c893de4a4b47457395d41b"
+          },
+          "descriptor": {
+            "npu_format": 2,
+            "origin_format": 2,
+            "base_sizes": [
+              5120
+            ],
+            "base_strides": [
+              1
+            ],
+            "physical_sizes": [
+              5120
+            ],
+            "shape": [
+              5120
+            ],
+            "stride": [
+              1
+            ],
+            "storage_offset": 0,
+            "storage_bytes": 10240,
+            "storage_data_ptr": 20697447410176,
+            "data_ptr": 20697447410176,
+            "dtype": "torch.bfloat16",
+            "device": "npu:7",
+            "element_bytes": 2,
+            "logical_bytes": 10240,
+            "is_contiguous": true
+          },
+          "match_after_f32_to_bf16_rne": true
+        }
+      ]
+    }
+  ],
+  "metadata_search": {
+    "targeted_patterns": [
+      "*identity*.json",
+      "*environment*.json",
+      "*startup*.json",
+      "*full_tree*.json",
+      "*manifest*.json",
+      "deploy*.yaml"
+    ],
+    "targeted_subdirectories": [
+      "stageA_final600_v91",
+      "stageA_final600_v93",
+      "stageA_clean_timing_v89",
+      "handoff_20261012_v1"
+    ],
+    "file_count": 50,
+    "files": [
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/FIA_MM2_V_prefetch_V87_metadata_archive_manifest_CPU_v1.json",
+        "bytes": 1328845,
+        "sha256": "a2979cd41264423e5f6cfcbcb282057e445270f93d4d1dfdc857ea6f6a2baa24"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/FIA_caller_context_V88_checkpoint_20261011_manifest.json",
+        "bytes": 1977729,
+        "sha256": "46187553224b2797e34ffeb18a466db54995bc749581a49cd5f7f45c6cce8828"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/FIA_caller_context_V88_timing9_20261011_manifest.json",
+        "bytes": 339872,
+        "sha256": "73f2201b6ccb8dd10b5cb928c1033475cb62d97847d10f21743db720bb3f1ab1"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/deploy_fixed_timestep_stageA_clean_v89.yaml",
+        "bytes": 2534,
+        "sha256": "f3b564cd30974a7415182ca59f2c2d10b06358ad801ae78d6ccc30537357e171"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/environment_fixed_timestep_stageA_clean_v89.json",
+        "bytes": 2128,
+        "sha256": "7056e7200b8ec37142ac06d9d7707c67cf952aab3aa1c6747fb4918fa1318cff"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/handoff_20261012_v1/GITHUB_BACKUP_STATUS_20261012.json",
+        "bytes": 1621,
+        "sha256": "acd140513ca972a208b4c328a674bd3a4954541cceaccc9f5093773d4714923f"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/handoff_20261012_v1/HANDOFF.txt",
+        "bytes": 10285,
+        "sha256": "727ec982f18d4eb6c033cbe1ae577941dfcccc9b4024647d1acc3267353c4092"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/handoff_20261012_v1/MANIFEST.json",
+        "bytes": 1316212,
+        "sha256": "3f4e1d4a8d94c2f0aebae78e7c68e2146a7d1b7cb14ada8bc21dbc39a4555641"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_stageA_diagnostic_startup_CPU_v89.json",
+        "bytes": 7356,
+        "sha256": "5b5277598a7de3c520a85a7e1e16ec9e6bfbbafb7fff7267c42e03641d164711"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_stageA_full_tree_CPU_v89.json",
+        "bytes": 1176245,
+        "sha256": "e7ecf5182f93f5cc079b73acd66ad9e9b75dadfc634e054518f10f6c5beb06a6"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_stageA_startup_CPU_v89.json",
+        "bytes": 8477,
+        "sha256": "7d2d91cf20ac4a4189d8b99edbd742eafe84dad2a00fc3474972a7d34bb1e356"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_stageA_startup_environment_CPU_v89.json",
+        "bytes": 1492,
+        "sha256": "d13f21639bd5a49f79a7577012eb6cfbbd8ed478130d700b16f618a4ecccf9e9"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_startup_environment_CPU_v89_argv.json",
+        "bytes": 2945,
+        "sha256": "5667b73b1e46fe524ad484b6b9d65e056832d09098994ebc4aca47882406bb3a"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_fixed_timestep_startup_environment_CPU_v89_receipt.json",
+        "bytes": 3744,
+        "sha256": "00ec768b3485d2fcf19d85f99cbd141d7a5b893d1ba2777ecc770cfb262dc398"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_F3_identity_and_bounded_tier_scope_CPU_v92_argv.json",
+        "bytes": 1044,
+        "sha256": "f5a46af936def814cd27c38d5de2090ba679ec427724a034cdcbe7b50bf055c8"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_F3_identity_and_bounded_tier_scope_CPU_v92_receipt.json",
+        "bytes": 1845,
+        "sha256": "ace4f12820a5a5c1ffdda02c39652a4ca53e2d21e139017552dddf818cd8ce3a"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_baseline_v89_live_identity.json",
+        "bytes": 11083,
+        "sha256": "a69f5a2cc94a7bb450e99374a71f7793b9f2df444f1de40487d77444085fa71f"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_candidate_v89_live_identity.json",
+        "bytes": 11094,
+        "sha256": "a819ddc28f738c928ad4a1d1b97abd9330fbf5ddf4af80f9681113acec902eb3"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_A1_v90_live_identity.json",
+        "bytes": 12761,
+        "sha256": "b4930d999f3cc2b503c89085926de4b9d6e5c604175d718f1c642e2ecca529f7"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_A2_v90_live_identity.json",
+        "bytes": 12761,
+        "sha256": "0a87d4ae3cf1324ad5ae5588da8281a9233e197c189dd7943f68a893febc3afa"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_A3_v90_live_identity.json",
+        "bytes": 12761,
+        "sha256": "0027625b1378e6d723992ef3a77cd1a8dbb2881a32198fd285af03d3887c17c7"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_B1_v90_live_identity.json",
+        "bytes": 12586,
+        "sha256": "9ec0d0312705792c034e79813e3faf4b225b24086bd81d473330352a3573a56c"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_B2_v90_live_identity.json",
+        "bytes": 12587,
+        "sha256": "b059c775f2ffd717785369fd91e3311d2d3c730afac3437a38297ae128111ff5"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_clean_B3_v90_live_identity.json",
+        "bytes": 12587,
+        "sha256": "e539bb915f9036bff94504c3c72b0e9717b5a64cc3f01b344a8545974e7f80c9"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_full_tree_CPU_v91_argv.json",
+        "bytes": 2449,
+        "sha256": "88f91f08a2a263756f309f7b737e9f50ca811a7a0097f59d08aae75b045ae2c6"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_full_tree_CPU_v91_receipt.json",
+        "bytes": 3248,
+        "sha256": "2b2830cc5887e327fcd57a51cb2c99d909e59e1078108575a0e5793a3fbccfa4"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_full_tree_CPU_v91b.json",
+        "bytes": 303,
+        "sha256": "e82ef487ce429f25d29896295e8ad8c904f91070962b06ab4c038b29353bbf1b"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_full_tree_CPU_v91b_argv.json",
+        "bytes": 1920,
+        "sha256": "650b2107e85837f793f0b4f02b0322070c6ddb4387688d80933383af56eec78c"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final600_full_tree_CPU_v91b_receipt.json",
+        "bytes": 2718,
+        "sha256": "4e32dd57ca67958d2adc7d39e882ac7d77445715eb3cd245ea01820b826ab851"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F1_v91_live_identity.json",
+        "bytes": 13390,
+        "sha256": "495609c5e2e5932c2e5599b9910c7cb2f864df2ffcaab9f73a6c7a07d580bbd0"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F2_v91_live_identity.json",
+        "bytes": 13390,
+        "sha256": "372ab53ebfa3be8b86ed390cb241f666e414b67f04c281433cc067a092fb95a6"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v91_live_identity.json",
+        "bytes": 13390,
+        "sha256": "c864c8b2aa6cec758cde5b5f7382b58231f7ed10ac73a1f134857a1db270a90c"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/root_stageA_final_F3_v93_live_identity.json",
+        "bytes": 13390,
+        "sha256": "0930882078ac2f22af67592ec3de184ce4ff2bdd816586c57a3243f0d9e194b5"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/A1_command.json",
+        "bytes": 962,
+        "sha256": "b9469bdf0bc57a4c4757bf66da1b1a97f52c4454de78b9757458a9aa4aa8b008"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/A2_command.json",
+        "bytes": 962,
+        "sha256": "be26d82908d6c6641f6966bcca104e16e502b11987b1af9f20fc5d60a27c808c"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/A3_command.json",
+        "bytes": 962,
+        "sha256": "d3c213600a3e681e02a4aa48ea92cb6f556c81f5bdfcb745b481d93185ead870"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/B1_command.json",
+        "bytes": 916,
+        "sha256": "087422bf4df99339db9496f5b9f9dd2ba08a253b61cdd63554228a5e9d07043c"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/B2_command.json",
+        "bytes": 916,
+        "sha256": "8c15e82f0b13248a1f726cb709632b9f1b1e7c972596f913b04faed10c33a291"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/B3_command.json",
+        "bytes": 916,
+        "sha256": "442b4023d7d04a4c46604b8d18f3df4bf3d076b8e1bec14f6817f409f44b2fb5"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/baseline_clean_deploy.yaml",
+        "bytes": 2535,
+        "sha256": "36c05517672681d9378e21524f101cfb7868d0e08fbafeaa6555ccf92c999f9e"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/candidate_clean_deploy.yaml",
+        "bytes": 2534,
+        "sha256": "f3b564cd30974a7415182ca59f2c2d10b06358ad801ae78d6ccc30537357e171"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_clean_timing_v89/prepared_clean_timing_CPU_v1.json",
+        "bytes": 27240,
+        "sha256": "d290e3940ed62c8b33f0e7c55e3b332a64847dac60e493a9f563ff0a225d9089"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F1_command.json",
+        "bytes": 912,
+        "sha256": "1c3e63b1e6a49b00e17104d1c403b3ae4f0265d86ba9306eb0b189cd9182a1c7"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F2_command.json",
+        "bytes": 912,
+        "sha256": "487a624b696039e73c8932f9becd736737f5b032db9110cbb9be97d5f51224f0"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/F3_command.json",
+        "bytes": 912,
+        "sha256": "260c0bab52286b6bec5d0809543b80077eec77e34e159c3f290c6a64121d7ddb"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v91/prepared_final600_CPU_v1.json",
+        "bytes": 19691,
+        "sha256": "ebf2ddcaf307feb31bdd4374126a85e5fa2ea7355583ef0cdddb4e841fac4a76"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F1_command.json",
+        "bytes": 912,
+        "sha256": "a8b75567da276078ef9d8d033ea4dad1506fb9a8f440bdd06f699d689894e982"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F2_command.json",
+        "bytes": 912,
+        "sha256": "bed1d10ca09de6f844a0a31611d04bae873ccc8e689d4c0b97b304be3df2c213"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/F3_command.json",
+        "bytes": 912,
+        "sha256": "8d2fafec934ccbea12a82bfd268641679c34f59d9d4a13d0972b76d391b67a2e"
+      },
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/stageA_final600_v93/prepared_final600_CPU_v1.json",
+        "bytes": 19691,
+        "sha256": "8354779e6d3a258dfa1a39095a2c8e5fb91b5b936def49fa2af86d40ad79ea18"
+      }
+    ],
+    "relevant_hits": [
+      {
+        "path": "/mnt/sfs_turbo/lingbot-profiling-zhoutaichang-20261011.o3ltN4V6/handoff_20261012_v1/HANDOFF.txt",
+        "line": 99,
+        "excerpt": "\u91cd\u3001\u539f\u9a8c\u6536\u63a7\u5236\u5668\u3001\u539f\u59cb\u8ba1\u5212/\u62a5\u544a/\u65e5\u5fd7\u548c\u8d28\u91cf\u6570\u636e\u3002\n\n\u622a\u81f3\u4ea4\u63a5\uff1aSFS\u5df2\u6062\u590d\uff0c/mnt/data\u4ecd\u7f3a\u5931\uff1b\u4e0a\u8ff0/tmp\u5305\u4e5f\u5df2\u56e0\u91cd\u542f\u4e22\u5931\u3002\n\u539fenv\u811a\u672c\u66fe\u6ce8\u660e\u6a21\u578b\u5728/tmp/models/lingbot-world\uff1b\u8be5\u8def\u5f84\u5f53\u524d\u4e0d\u5b58\u5728\uff0c\u5b9e\u9645\u6743\u91cd\u6765\u6e90/\u7248\u672c\u5fc5\u987b\u4ece\u539f\u542f\u52a8\u8bb0\u5f55\u6062\u590d\u3002\n\u65e0\u9700\u8fc1\u79fb\u65e7PID/nonce/lease/READY/\u8bbe\u5907\u9501\uff1b\u65b0\u673a\u5668\u91cd\u65b0\u5efa\u7acb\u8fdb\u7a0b\u4e0e\u8bbe\u5907\u5f52\u5c5e\u3002\n\u7f3a\u5931\u6e90\u7801/\u4e8c\u8fdb\u5236\u65f6\uff0c\u4e0d\u628aCLEAN\u8bef\u5f53\u72ec\u7acb\u5b89\u88c5\u5305\uff0c\u4e5f\u4e0d\u7ed5\u8fc7SHA guard\u3002\n\n7. \u5728\u53e6\u4e00\u53f0\u673a\u5668\u91cd\u542f\u7684\u987a\u5e8f\n1) \u89e3\u5305\u672c\u4ea4\u63a5\u5305\u5e76\u6821\u9a8cSHA\uff1b\u4fdd\u5b58\u539f\u6587\u4ef6\u53ca\u8bc1\u636e\u4e0d\u8986\u76d6\u3002\n2) \u627e\u56de\u539f/mnt/data\u5de5\u7a0b"
+      }
+    ],
+    "old_revision_or_model_file_hash_receipt_found": false,
+    "not_exhaustive_filesystem_search": true
+  },
+  "conclusions": [
+    "All 8 ranks retain identical two layer-0 QK norm weights; all 16 raw-owner hashes were independently checked and match BF16 RNE conversion of current checkpoint tensors.",
+    "This establishes only 10240 BF16 scalar values across 2 parameters (replicated, not 16 independent parameters).",
+    "No identity is established for the remaining 39 transformer layers, other layer-0 parameters, VAE, text encoder, tokenizer, scheduler, or original full FP32 norm bytes.",
+    "Historical handoff explicitly records /tmp/models/lingbot-world as lost and repository/revision still needing original launch-record recovery.",
+    "The surviving final-run live-identity records pin old manifest/server-command paths but those pins alone do not reveal their contents or checkpoint identity.",
+    "Current 26-file repository/revision integrity is separate from equality to the missing historical checkpoint."
+  ]
+}
