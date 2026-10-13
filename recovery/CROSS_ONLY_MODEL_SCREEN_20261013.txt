@@ -1,86 +1,73 @@
-Cross-only restoration model screen (2026-10-13)
+Cross-only paired model screen, 2026-10-13 — FAILED; no candidate admission
 
-Only cross attention differs: A uses recovery_cross=true / combined=false;
-B swaps those two flags. Both use the existing public-native recovery_qk=true,
-QK combined=false. The failed QK candidates are not admitted to these runs.
-A is byte-identical to the actual full fixture configuration; B preserves every
-other value, including SP8/TP1/ring1, 832x480,4 DMD, FFN W8A8 NZ, complete history,
-batched VAE pack, recv/staging, Stage A bank and uint8/P2P output. All services use
-dies8..15 and metadata0. Runtime sources and the host.qkcombined.8e52a4eb manifest
-are unchanged; only new preparation/controller/analysis sources are added.
+Reference A is plain public BSND FIA with the reconstructed historical QK path.
+Candidate B changes only the mutually exclusive cross flags to the combined C++
+admission + same BSND FIA. This is not comparison to the earlier 944 ms SDPA run.
+Both arms keep QK-combined OFF and async metadata OFF. SP8/TP1/ring1,832x480,
+4DMD, full history, StageA, FFN W8A8 NZ, recv/VAE/pixel paths remain fixed.
 
-Prepared directory:
-  /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/cross-model-screen/20261013-v1
-  config-A.yaml SHA0936fc60eea35c23acd8be0689e20ee51ad57dca2e197cf217746e50cf49b2d5
-  config-B.yaml SHA15de68d0fb802dfa00a0aed5fd498879e73595623923d439bbc92937bd632f48
-  config-freeze.json pins the source config, image, model-integrity receipt and
-  manifest SHA7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67.
+Fresh model correctness prerequisite passed:
+  Eight ranks x80 latent chunks (640 comparisons),957 primary-rank pre-encoding
+  RGB frames, all bitwise equal. Each arm used a separate service and request,
+  seed42, flow_shift5, forward camera, same image and default prompt, actual12FPS.
+  This proves the paired80 output contract, not final browser/lifecycle acceptance.
 
-Preparation is CPU-only and does not overwrite any existing frozen plan:
-  python recovery/prepare_cross_model_screen.py --config-freeze <directory>/config-freeze.json
-It seals plan.json and one launch.sh per stage. The complete order is
-  correctness-A, correctness-B, compare, timing-A1, timing-B1, timing-B2,
-  timing-A2, timing-A3, timing-B3.
+Six fresh services, ordered A1 -> B1 -> B2 -> A2 -> A3 -> B3
+Each completed a separate40-chunk warmup then161 measured chunks. Raw metric is
+client media inter-arrival; window11..159 contains149 samples. P99 is the existing
+linear interpolation. No pooling, trimming, outlier removal or gate changes.
+All six use source commit f48c20b31a25ac3d2e42a471c0cc2248c9456c3c.
 
-Root already executed the fresh single80 requests for A and B manually. Their
-contemporaneous intentional-retirement.json files precede the identity-based
-retirement; live environment snapshots were saved before shutdown. Adoption
-checks those records and the existing completed outputs; it sends no request:
-  python recovery/run_cross_model_screen.py --plan <directory>/plan.json \
-    --stage correctness-A --run <A-owned-supervisor-directory> --adopt-completed --execute
-  python recovery/run_cross_model_screen.py --plan <directory>/plan.json \
-    --stage correctness-B --run <B-owned-supervisor-directory> --adopt-completed --execute
-  python recovery/run_cross_model_screen.py --plan <directory>/plan.json \
-    --stage compare --execute
-The comparison is the existing compare_captures.py: eight ranks x80 latent
-chunks,957 uint8 RGB frames on rank0, bitwise equality and finite latents. This
-paired workload is not a replacement for all video-quality/lifecycle acceptance.
+Run    mean ms      P99 ms       max ms       TTFC ms      last arrival s
+A1     928.262885   942.128100    946.296571   3800.653918   151.793541
+B1     926.096251   944.014427    948.074501   3806.374614   151.511481
+B2     927.916780   945.198977    949.789552   3845.099147   151.810193
+A2     927.063994   944.020571    946.786074   3861.191840   151.738722
+A3     924.638337   939.464344    944.528842   3880.577931   151.370231
+B3     925.794271   940.703155    940.938121   3755.855281   151.308930
+Each measured request has1929 frames and complete ordered chunks. Each main
+window has zero intervals >1000 ms; longest over-deadline sequence is zero.
+Last arrival is request-relative client media arrival, not startup-inclusive wall
+runtime or browser playback time. TTFC includes that request's initial work.
 
-For each timing stage, in the order above:
-  bash <directory>/<stage>/launch.sh
-This foreground launcher first runs source/pin/previous-stage preflight, clears
-inherited selected policy/capture/profile variables, restores the pinned ordinary
-A environment, and execs the existing supervise.py. It prints its owned run path.
-In a separate terminal/controller, still in MAIN with recovery/env.sh sourced:
-  python recovery/run_cross_model_screen.py --plan <directory>/plan.json \
-    --stage <stage> --run <printed-owned-supervisor-directory> --execute
-The controller invokes the existing run_timing.py exactly once: fresh warm40,
-then fresh161 request,12FPS actual encoding. It checks actual seed42,forward
-camera,flow_shift5,832x480,complete chunk/frame order,commands/image and model,
-then retires only that launch's uid/pgid/start identity. Each later timing service
-must start after the previous controller-observed retirement BOOTTIME boundary.
-No capture service is reused for timing. The default without --execute performs
-preflight only; no request, comparison, process retirement or device call occurs.
+Predeclared paired screening gate:
+- A1-B1 mean improvement +2.166634 ms; A2-B2 -0.852786 ms; A3-B3 -1.155934 ms.
+  Two of three candidate means regress, so the all-three-improve rule fails.
+- Baseline three means' raw MAD=1.198890489868 ms (no consistency scaling).
+  Required average improvement=max(5,3*MAD)=5 ms.
+  Actual average improvement=0.052638098447 ms, so this rule also fails.
+- All three B P99 values are <= paired A P99+5 ms. This does not override the
+  failed mean rules. The isolated full-call cross screen's earlier38–39% benefit
+  did not reproduce as an accepted whole-model improvement here.
 
-Resume is per stage. Completed stage.json is revalidated and skipped. For a
-completed request whose original controller ended before receipt finalization,
-use the SAME --run with --adopt-completed and the saved live environment plus
-retirement evidence. Never resend a request to an already used service. Partial
-or failed requests are not automatically retried: preserve their files and use a
-new explicitly prepared attempt. Invalid/untrusted startup evidence yields
-failure.json with needs_manual_retirement; unknown processes are never killed.
+Decision: keep combined cross default OFF as a performance candidate. Do not
+promote or run final600 acceptance on the strength of these results. No run meets
+the full mean<=900 / P99<=950 target because all means remain above900 ms. These
+161-chunk screens are not substitutes for three independent warm40+600 runs.
+There is no new arithmetic-quality or final playback/lifecycle acceptance claim.
 
-Persistent model services may exit-15/-9 after successful requests because the
-owned supervisor retires every worker. Such a code alone is not accepted: the
-stage also requires a passing request, no fatal report, no remaining owned
-processes and a bound prior retirement intent. Other exits remain failures.
+Evidence checks
+- A YAML bytes match the original actual-fixture fullcapture configuration. B
+  differs only in plain/combined cross routing. Config/build/source/header,
+  model-integrity/image and benchmark/controller pins verified.
+- Request commands and serialized workloads checked; raw40/161 frame/chunk/order
+  and inter-arrival consistency checked. main-window values independently rebuilt.
+- Fresh paired80 prerequisite and capture request IDs/payload directories bound.
+- Selected live environment snapshots exactly match plan; QK-combined and metadata
+  experiments are excluded. This is not a claim that every env variable was saved.
+- Six unique supervisor nonces/process identities, clean owned retirement and
+  sequential boot-clock retirement-before-next-launch checks verified.
+- A1-after-paired80 is enforced by the pinned launch/controller preflight; compare
+  has no completion clock, so that first transition is not independently proved
+  by timestamp. The six timing services' non-overlap is independently checked.
+- Ten targeted summary CPU tests passed; independent code review passed. Runtime,
+  original communication and the228 historical infrastructure files were not edited.
 
-Every stage binds plan/config/build/controller sources, launch/result, selected
-live environment, raw rollout and request command. Timing adds warm40 and161
-protocol evidence. Correctness binds capture request IDs and fresh payload dirs.
-The plan pins workload/default-seed source and the already-passing model-integrity
-SHA; it does not claim a fresh rehash of all model weights. Environment scope is
-selected LingBot/thread/device/allocator policy, not every inherited process
-variable or complete loader PATH/LD_LIBRARY_PATH. No CPU/NPU policy is tuned.
-
-A/B correctness used git HEAD622560e6 before these new controller/analysis files.
-Root commits these additions once before timing-A1 so all six timing starts have
-the same source HEAD. Runtime manifest/source SHA continuity is independently
-checked. The six-run summary uses unchanged mean/MAD and paired P99 gates; this
-screen is not the three independent warm40+600 final acceptance.
-
-CPU contract tests passed six under normal Python and six under python-O:
-  python -m unittest discover -s recovery -p test_cross_model_screen_cpu.py -v
-  python -O -m unittest discover -s recovery -p test_cross_model_screen_cpu.py -v
-No NPU execution was performed by the preparer/controller author while creating
-these files. Root owns all launches, requests and device scheduling.
+Files
+  recovery/summarize_cross_model_screen.py
+  recovery/test_cross_model_summary_cpu.py
+  recovery/validation/cross-only-six-model-screen-20261013.json
+  ROOT/audits/cross-model-screen/20261013-v1/six-run-summary.json
+  ROOT/audits/cross-model-screen/20261013-v1/plan.json
+Raw timing/capture arrays remain outside the repository and are pinned by receipts.
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
