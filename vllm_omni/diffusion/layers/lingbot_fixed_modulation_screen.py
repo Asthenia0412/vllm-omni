@@ -28,10 +28,18 @@ def need(ok, message):
 
 def configure(pipeline, model_config):
     directory = os.environ.get("LINGBOT_STAGEB_OPERATOR_SCREEN_DIR")
+    host_profile = os.environ.get("LINGBOT_STAGEB_HOST_PROFILE", "0")
+    need(host_profile in ("0", "1"), "host profile mode must be explicit0/1")
     pipeline.transformer._lingbot_stageB_operator_screen = None
     if not directory:
+        need(host_profile == "0", "host profile requires an explicit diagnostic directory")
         return
-    need(model_config.get("lingbot_npu_fixed_modulation_stageB") is True,
+    if host_profile == "1":
+        need(model_config.get("lingbot_npu_fixed_modulation_cpp_v2") is True
+             and model_config.get("lingbot_npu_fixed_modulation_stageB", False) is False,
+             "host profile requires the independent CPPv2 candidate")
+    need(model_config.get("lingbot_npu_fixed_modulation_stageB") is True
+         or model_config.get("lingbot_npu_fixed_modulation_cpp_v2") is True,
          "explicit StageB flag is required")
     need(os.environ.get("ROOT_LINGBOT_SP8_EXPERIMENT_MODE") == "profile",
          "screening is permitted only in an owned diagnostic service")
@@ -43,12 +51,13 @@ def configure(pipeline, model_config):
          "persistent audit directory required")
     need(not any(os.environ.get(k) for k in ("LINGBOT_CAPTURE_DIR", "LINGBOT_PROFILE_CONTROL")),
          "operator timing must not include tensor capture or profiler")
-    pipeline.transformer._lingbot_stageB_operator_screen = Screen(path)
+    pipeline.transformer._lingbot_stageB_operator_screen = Screen(path, host_profile=host_profile == "1")
 
 
 class Screen:
-    def __init__(self, directory):
+    def __init__(self, directory, *, host_profile=False):
         self.directory = directory
+        self.host_profile = host_profile
         self.cases = {}
         self.session = None
         self.snapshot_bytes = 0
@@ -72,7 +81,8 @@ class Screen:
             return forward
         need(not self.failed, "failed screen requires worker restart")
         from . import lingbot_fixed_timestep_bank_stageA_v1 as stageA
-        from . import lingbot_fixed_modulation_stageB as stageB
+        from .lingbot_fixed_modulation_dispatch import for_transformer
+        stageB = for_transformer(transformer)
         need(type(token) is stageA._CallToken and length in LENGTHS and uniform,
              "actual fixed-step context and one of six actual histories required")
         session = token.probe.session
@@ -118,6 +128,11 @@ class Screen:
         return restored
 
     def run(self, transformer, stageB, torch):
+        need(os.environ.get("LINGBOT_STAGEB_HOST_PROFILE", "0") == ("1" if self.host_profile else "0"),
+             "host profile policy changed after construction")
+        if self.host_profile:
+            from .lingbot_fixed_modulation_host_profile import run
+            return run(self, transformer, stageB, torch, EXPECTED)
         import torch.distributed as dist
         from vllm_omni.diffusion.distributed.parallel_state import get_sp_group
         rank = int(get_sp_group().ulysses_rank)

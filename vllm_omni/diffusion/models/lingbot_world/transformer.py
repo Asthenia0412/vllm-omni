@@ -1616,7 +1616,9 @@ class CausalLingBotWorldTransformer3DModel(nn.Module):
         # optional staging so block graphs can keep a static FP32 input address.
         timestep_projection = prepare_timestep_projection(self, timestep_projection)
         timestep_projection = self._stage_timestep_projection(timestep_projection)
-        from vllm_omni.diffusion.layers import lingbot_fixed_modulation_stageB as fixed_modulation
+        from vllm_omni.diffusion.layers.lingbot_fixed_modulation_dispatch import for_transformer
+
+        fixed_modulation = for_transformer(self)
 
         fixed_modulation_forward = fixed_modulation.prepare_forward(
             self, fixed_timestep_token, timestep, fixed_modulation_source,

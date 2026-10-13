@@ -1,0 +1,76 @@
+StageB v2 host diagnostic: cProfile over unchanged actual full-region calls
+
+This is a separate, default-off observation mode. It changes no StageA/StageB
+guard, C++ DSO, arithmetic, sealed function or code object. The prior v2 operator
+candidate remains rejected after its second round; no qualification is inherited.
+
+Opt in only through LINGBOT_STAGEB_HOST_PROFILE=1 plus an explicit operator audit
+directory, CPPv2 flag, root-owned profile supervisor, metadataOFF, and the new
+source-pinned host-profile plan. Values other than0/1 fail. The default path
+constructs no Screen and imports no helper, cProfile, pstats or torch for this
+feature. Changing mode after Screen construction fails. Host profile and formal
+20-warm/30-wall/30-event branches are mutually exclusive, with distinct schemas.
+
+The existing Screen captures all24 actual history/probe contexts in one active
+session: six lengths4680..28080, four probes. It retains genuine StageA tokens,
+source owners and snapshots of the actual post-SP staging values. After all160
+modulation entries have published, each context is restaged without advancing KV,
+camera, VAE or DMD state. All40 real layer parameters and cached outputs are used.
+Modulation itself is independent of KV length; this is not192 attention workloads.
+
+For each case, initial native and candidate logical output checks occur outside
+cProfile. Then each arm has its own fresh cProfile instance around exactly20
+Screen.invoke calls. A native invoke restages and computes40 original expressions;
+a candidate invoke restages, performs prepare_forward and40 ordered get calls.
+The20 returned output groups stay alive until cProfile is disabled and a device
+drain finishes. First/last profiled output groups and readonly sources are checked
+outside cProfile. No profiler-side device synchronization, barrier, file hashing,
+JSON writing or per-layer timing is inserted inside the observed loop.
+
+cProfile observes only the current Python thread. Its default timer reports
+instrumented host wall intervals, which can include blocking inside a framework
+call. It does not separate consumer threads, kernel execution, actual collective
+arrival, allocation locks or queue backpressure. Output retention also differs
+from formal operator timing. Do not interpret these numbers as unperturbed host
+cost, add nested cumtime values, or use any report for a speed/model gate.
+
+Per-rank JSON records nonce, helper/screen source identity, actual24-case matrix,
+method primitive/total counts, tottime/cumtime and caller rows. The cProfile
+function tuple is cc,nc,tt,ct; its caller tuple is nc,cc,tt,ct. Serialization
+normalizes both to explicitly named fields. Existing profilers are rejected,
+never replaced. On any profiled exception or failed drain, returned owners and
+traceback are quarantined, the existing Screen fatal channel is used, and the
+owned supervisor retires all workers without an automatic retry/native fallback.
+
+Profiling detection supports both legacy sys.getprofile and Python3.12
+sys.monitoring. It rejects any reserved tool ID0..5, even without global events,
+so local-event tools cannot be overwritten. Target Python3.12.14 cProfile uses
+monitoring tool2 while sys.getprofile is None. The initial system-Python-only
+tests missed this difference; the helper and tests were corrected before any
+device launch. The exact target interpreter
+/home/zhoutaichang/venvs/vllm-omni/bin/python passed all16 helper and22 controller
+stdlib CPU tests in normal and -O modes. Python3.11 without sys.monitoring keeps
+the legacy check. These tests do not qualify device correctness or performance.
+
+The separate host-profile controller checks source/DSO/ABI both before startup
+and after reports. It rejects formal timing receipts and verifies observed
+Screen.invoke count20 for each arm, CPP prepare_forward20/get800 for candidate,
+and no such CPP calls for native, using actual pinned paths and method names.
+Only one service is generated; completed=true means diagnostic collection closed,
+not performance/quality/lifecycle admission. Forced owned retirement is not proof
+of a normal application shutdown. Logical checks do not prove full arenas/canaries.
+
+CPU checks: recovery/test_stageB_host_profile_cpu.py exercises real cProfile with
+stdlib doubles, observed counts/recursion, profiling exclusion for sync/writes,
+owner retention, no retry, and fail-closed/default-off selection. These are not
+NPU correctness, hardware scheduling, performance or model acceptance tests.
+
+Preparation (CPU metadata/file work only; use a fresh output directory):
+  python recovery/prepare_stageB_host_profile.py --parent-plan <v2-execution-plan>
+    --output <ROOT/audits/stageB-host-profile/execution-v1> --port 7816
+    --cpp-build <ROOT/build/stageB-metadata-guard.20261013v2/build-receipt.json>
+
+Execution is root-owned and explicit, never run by the preparing/review agent:
+  python recovery/run_stageB_host_profile.py --plan <new-plan.json> --execute
+
+No device experiment or recompilation was performed by the implementing agents.

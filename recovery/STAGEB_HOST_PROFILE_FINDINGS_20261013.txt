@@ -1,0 +1,39 @@
+StageB host profile 独立审查，2026-10-13
+
+范围与结果
+只读核验 execution-v1/profile1；未修改冻结 worktree，未导入 torch，未运行 CPU tests/服务/设备。独立 stdlib 审核程序 review_completed_profile.py 和结果 INDEPENDENT_HOST_PROFILE_REVIEW.json 位于同目录。
+
+nonce=590ea9e1e5db7fcbb04a67a8cfeadec4；leader pid/pgid2855707，uid1003，start20903192。controller completed=true，fatal=null，remaining_owned_processes=[]。service -9 / supervisor247 是有记录的 intentional retirement，不是正常 shutdown 或完整生命周期验收。
+
+当前磁盘实际 SHA：424 个源码/库/头文件/配置/receipt/请求文件通过核对，包括 CPP runtime→原始 CPU build receipt→source/DSO/16 headers/93 ABI libraries，以及 native provider compilation bytes 与当前 runtime sources。228 个历史基础 Python 文件与历史 parity SHA 一致，StageA SHA 保持3ea53af8a7f4bdc3e0a78137d235c8019c20f262549f6acc0c951c4c44ad24cc。
+目标解释器 /home/zhoutaichang/venvs/vllm-omni/bin/python 3.12.14 的原记录为 helper16 + controller22 + screen6，正常与-O均 PASS。本次只核对已有 receipt 和当前测试源码 SHA，未重跑。早期 getprofile-only 的两个失败保留在 receipt，不能算通过的目标测试。
+
+每 rank 有六个真实历史标签 × 四 probes；共192 context。每个 arm 独立 cProfile20次真实 Screen.invoke。candidate 每 context 实际 prepare_forward20、Forward.get800；合计3840 prepare、153600 get。native 同样记录800 unsqueeze、800 float、800 chunk，没有 CPP core prepare/get。所有有限非负统计、调用者计数、逻辑正确性通过，未出现正式 wall/event/gate 字段。8 chunk 顺序连续、9+7×12=93帧、实际12FPS编码。生成/播放数字仅来自被诊断打断的 smoke，不作性能/播放结论。
+
+Profile 在最终 drain 前关闭，20组输出保留到同步和正确性检查结束；每组开始 barrier、同步、source检查、NFS输出均在 profiler 外。实际记录未出现 synchronize/write_report/file_pin 的被profile调用。保留时间与正式逐调用计时不同，cProfile本身有扰动，仅当前线程，可能包含 enqueue backpressure 或 host阻塞。
+
+计时边界
+192 context 等权描述统计，下面单位是每个完整40层 invoke 的 profile时间，即原20次总量除20，不能称干净算子时延：
+  candidate prepare_forward cum: mean0.485804ms，min0.452383，max0.896944。
+  candidate 40个get合计 cum: mean1.504620ms；self1.283505ms。
+  candidate Screen.invoke cum: mean2.076060ms；native1.710990ms。
+这些不是现有 gate 的重算，不作配对显著性/硬件关键路径结论，不与 device/event相加。
+
+rank0/H28080/P3 的20次完整region：prepare cum9.712186ms；800个get cum29.941784ms、self25.581280ms。prepare内每forward4次StageA._light、10次_version；实际全matrix都为80/200次每20调用。这支持重复检查确实执行，不能据此删除它们，也不能把嵌套的check_context/_light/_version累加。
+
+全部192 candidate记录都没有 ScriptMethod 独立行。Forward.get self不是纯Python解释器时间：它还包含 cProfile未拆出的 Entry.validate 属性访问、自定义类桥接、C++ Snapshot checks及任何内部阻塞。native表达式中的 + 也没有独立行，所以 native genexpr self同样不等于纯Python时间。
+
+源码证据（均是本次实际安装/冻结代码）
+  worktree/vllm_omni/diffusion/layers/lingbot_fixed_modulation_stageB_cpp.py:290 prepare_forward；358 Forward.__init__；382 get。
+  worktree/recovery/experiments/stageB_metadata_guard_v2/host.cpp: Snapshot.check 与 Entry.validate；每层原时点检查parameter/result/sixviews/Frame共9快照，无NPU写/队列/recordStream。
+  /home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch/include/torch/csrc/jit/python/pybind_utils.h:1128 runAndInsertCall；1255 invokeScriptMethodFromPython。路径包含 maybeTorchFunctionDispatch、schema→IValue stack、callee.run，普通非tracing分支释放GIL；源支持包装步骤存在，不证明其中任何一步占此次1.283505ms。
+  同安装 include/torch/custom_class_detail.h: WrapMethod/call_torchbind_method_from_stack 将IValue栈转回typed调用。_classes.py 取得_get_custom_class_python_wrapper。
+
+下一可测机制（未实施、没有收益声明）
+建议独立默认关闭的 typed host binding，与现有ScriptMethod路径A/B；可复用完全相同的Frame/Entry/Snapshot实现，但用直接typed Python/C++入口，避开每层ScriptMethod查找、schema/IValue stack及不必要的短调用GIL往返。先证明新入口仍然逐层在消费前检查九个Tensor/Storage owner、逻辑/物理metadata、version enabled/value和producer线程/inference模式；保留Forward/session/generation/provider/layer-order保护、独立storage强引用以及A drain后的释放顺序。不把检查移动到forward开头，不用仅缓存地址替代检查。新的入口、DSO及binding要独立namespace/source/ABI pins，不能继承当前逻辑正确性或v2的资格。
+
+实际收益需要重新用未profile的真实完整40层调用门槛筛选；若该入口不能减少完整调用≥10%或引入owner/错误传播差异，停止该候选。不应把1.283505ms self全部当可节省量；其中很可能包括必须保留的C++校验。本诊断也不能保证这一小region足以补足模型约25ms/chunk差距。
+
+若保持现有ScriptMethod入口，另一个源码支持但未测的局部机制是同一次Entry.validate内按实际StorageImpl去重只读physical/extent比较：result与六views共用一个已验证owner，可在逐view验证TensorImpl/StorageImpl/logical/version之后只对该共同Storage读取一次。仍在同一层时点进行、仍保留所有Tensor和独立Storage强引用；这仅是冗余存储读取候选，不允许取消各view的逻辑和version检查。当前profile不能区分此成本与桥接成本，暂不并行改两个因素。
+
+正式结论维持：StageB v2 第二轮未达到10%完整调用门槛，第三轮未执行、未进模型。此诊断没有改变该决定。它不证明完整arena/canary、任意参数热修改、长期生命周期、600chunk或真实浏览器播放。

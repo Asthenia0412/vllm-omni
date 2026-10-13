@@ -1,0 +1,80 @@
+StageB host diagnosis — actual eight-rank collection closed, 2026-10-13
+
+This is diagnostic evidence, not a new speed result. StageB v2 remains OFF:
+its second clean operator round improved only5.28%, below the10% gate; third
+round/model testing were stopped. No current generation performance changes.
+
+Independent observation
+One fresh owned service on four physical910C packages4-7 / driver8-15 collected
+eight rank reports, each with six actual history labels and four probes. After
+the original immutable bank published, each actual context/arm ran20 unchanged
+40-layer enqueue calls under cProfile. Candidate actual counts per context:
+prepare_forward20, get800; native counts800 each unsqueeze/float/chunk and no
+candidate prepare/get. Retained snapshots/probe capabilities identify the real
+session. Modulation is independent of history length; this is not192 attention
+workloads. Logical output/view-layout and readonly-source checks passed.
+
+Profiling, final synchronization and file writes are explicitly separated.
+The20 output groups stay alive through the unprofiled drain. No sealed callable
+or code object is replaced. The mode is defaultOFF and mutually exclusive with
+formal20warm/30wall/30event screening; distinct schemas forbid speed admission.
+The Python3.12 getprofile-only failure was caught before device work and kept.
+The fix also checks reserved sys.monitoring tools. TargetPython3.12.14 helper16,
+controller22 and oldScreen6 tests pass normally and with-O; these are CPU tests.
+
+Independent reviewer verified424 actual fileSHA pins, including16CPP headers,
+93ABI libraries, original StageA bytes and228 historical infrastructure files,
+all192 context counters, source/request/nonce binding, and existing CPU receipts.
+The diagnostic request had8 ordered chunks/93frames at12FPS. Intentional owned
+retirement ended service-9/supervisor247, fatal=null, remaining owners=[]. This
+is collection/owned-cleanup evidence, not healthy shutdown/lifecycle acceptance.
+
+Instrumented host description
+192 contexts are equally weighted; each profile's20-call totals are divided20:
+  prepare_forward cumulative mean:                 0.485804ms
+  forty get calls cumulative mean:                 1.504620ms
+  forty get calls self mean:                       1.283505ms
+  candidate Screen.invoke cumulative mean:         2.076060ms
+  native Screen.invoke cumulative mean:            1.710990ms
+
+These are perturbed current-thread host intervals, potentially including blocked
+enqueue work, with a different retention pattern from clean timing. Never use
+them to recompute the speed gate, sum nested spans or predict chunk savings.
+No ScriptMethod row appears separately. get.self includes unseparated Python,
+custom-class bridging, C++metadata checks and possible blocking; it is not pure
+Python time. Installed PyTorch source confirms schema/IValue boxing and a GIL
+release in this bridge, but it does not prove how much either costs here.
+
+Next bounded experiment
+Compare an independently namespaced typed host binding with the current
+ScriptMethod entry. Reuse the exact Snapshot/Frame/Entry logic; keep all nine
+owner checks at every original layer-consumption point, strong Tensor+Storage
+ownership, versions, producer-thread/inference checks, session generations,
+provider/layer order and original StageA drain-before-release. Change only the
+binding initially. Do not deduplicate metadata or move checks simultaneously.
+Fresh complete-call screening is required; no benefit is assumed. This small
+region may be insufficient to close the remaining approximately25ms/chunk gap.
+
+Qualified baseline restored
+The original qualified plainBSND service is running on port7816, health200, on
+all8 owned dies in packages4-7. An independent40-chunk warm request completed
+477ordered frames at12FPS. Source/config/environment and live PID/UID/PGID/start
+identities were checked. This restoration smoke is not a new performance run.
+Baseline mean924.6-928.3ms / P99939.5-944.0ms remains the latest qualified score;
+mean900 and final three warm40+600/playback/lifecycle acceptance remain unmet.
+
+Reproduction/evidence
+ recovery/prepare_stageB_host_profile.py
+ recovery/run_stageB_host_profile.py
+ recovery/review_stageB_host_profile.py
+ recovery/STAGEB_HOST_PROFILE_FINDINGS_20261013.txt
+ recovery/validation/stageB-host-profile-independent-20261013.json
+ recovery/validation/stageB-host-profile-cpu-20261013.json
+ ROOT/audits/stageB-host-profile-v1/execution-v1/plan.json
+ ROOT/audits/stageB-host-profile-v1/execution-v1/profile1/checks/rank0..7.json
+ ROOT/audits/qualified-baseline-restoration-20261013-v1/restored-baseline.json
+ ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+
+Raw cProfile reports remain in persistent storage with SHA-pinned receipts.
+Full arenas/canaries, paired80latent/RGB, new arithmetic/video quality and final
+browser/lifecycle acceptance are not established by this host diagnosis.
