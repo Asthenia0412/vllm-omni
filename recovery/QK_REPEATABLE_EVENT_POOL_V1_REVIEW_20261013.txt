@@ -1,0 +1,168 @@
+QK repeatable event pool v1: independent source review (2026-10-13)
+
+Scope and conclusion
+
+This is a read-only review of frozen v1, not a new device test or a v2
+admission. The reviewer changed only this independent document. No runtime,
+v1 source/design, support harness, library, or device execution was changed.
+
+The constrained API-support test was approved for capacity 1, two different
+real rank-0 probe inputs, an explicit drain before/after each call, externally
+retained input/output owners, and the test-arena entry. Root reports a clean
+PASS: different input values/addresses, native/captured bitwise outputs, full
+arena/canaries/sources, four native repeatable statuses 0, one plan reuse, and
+successful close (closed=1, resident workspace=0). Initial workspace was
+75.428 MiB. That evidence establishes this limited API/address-refresh case;
+it does not establish overlapping calls, queue exhaustion, production arena
+allocation, HCCL ownership, the full 192 cases, model correctness, or speed.
+The independently archived support receipt is the authority for those device
+results: recovery/validation/qk-repeatable-pool-support-v1-20261013.json, with
+its note recovery/QK_REPEATABLE_EVENT_POOL_SUPPORT_V1_20261013.txt. This review
+records the parent coordinator's report; it did not rerun the device test.
+
+One source-reachable lifecycle risk must be fixed before inflight or timing
+experiments: v1 can drop the final Tensor owner from a framework queue consumer
+callback, under the pool mutex. Tensor destruction can enqueue allocator event
+work into that same queue. A full queue can then require the current consumer
+to wait for itself. This is NOT an observed deadlock, and no failed device run
+is claimed. The successful two-call drained smoke does not cover this branch.
+
+Frozen source identities
+
+All paths below are relative to:
+  ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+  NEW=ROOT/qk-record-once-worktree
+  AUDIT=ROOT/audits/qk-restore
+
+NEW/recovery/experiments/qk_repeatable_pool/host.cpp
+  bytes 23191
+  sha256 205114b1e5645abea7923e577f667b3f003d546a4ba3391821e01c232128dd24
+NEW/recovery/QK_REPEATABLE_EVENT_POOL_DESIGN_20261013.txt
+  bytes 9760
+  sha256 f33678e0a48efd9670b2a132594e83d5b89fcbb78904f9f767d5f58e61d37927
+NEW/recovery/check_qk_repeatable_pool_support.py
+  bytes 19415
+  sha256 64c9fd81bc5c63714c1faafc3295c477a9a3400869b1485693c55b8b358ea7a0
+
+Framework source is pinned to torch_npu commit
+5dd8ef3f9b375b5ae4a83538d5785754148c3302 (installed 2.10.0.post4).
+AUDIT/host-cost-v1/NPUCachingAllocator.cpp
+  sha256 f90d7f466c79db1651946539cd5fb7376daf784066ba0532b9d7c5581d7bae5d
+AUDIT/host-cost-v1/ProcessGroupHCCL.cpp
+  sha256 ba393be1672c7ce84dbbe9e9705ad9164a70af52a1883d487931ab1e212278ab
+AUDIT/owner-lifecycle-v1/NPUEvent.cpp
+  sha256 64c562524cc9d4ea9697a5d599ef50049053d53a6a40a77820e26f970ca5bda7
+AUDIT/upstream/AsyncTaskQueueInterface.cpp
+  sha256 fc9fa91f1ff6c4c82aeb2a22984f5ddad2f1957d74d8381642f8f79e25992d0d
+AUDIT/upstream/NPUStream.cpp
+  sha256 cdb8042a4cf8e680d2f0d0ed03944a63401d46a6bbaf6696c7f262aee03c4df1
+AUDIT/upstream/NPUQueue.cpp
+  sha256 83fdaeddead232298f013db4e4e2c979439843e154d1e775a06409b5f46acf99
+
+Exact lifecycle chain
+
+1. host.cpp:120-140 allocates six intermediate storages and a fresh send arena
+   (or adopts a caller test arena). Call owns inputs, stage views/outputs,
+   intermediates, send, arena, and V view. At :281 every entry in c->owners is
+   recorded on the admitted default stream. There are 14 registrations and,
+   for distinct input storages, 12 unique storages: 5 inputs + 6 intermediates
+   + 1 send arena. Raw/V and send/arena are alias pairs.
+2. NPUCachingAllocator.cpp:3411-3431 returns early only for null or nonlocal
+   allocator pointers. Its per-device recordStream at :1588-1594 directly
+   inserts the stream into block->stream_uses. There is NO same-allocation-
+   stream early return in this pinned implementation. Therefore the risk is
+   not limited to a send later recorded on an HCCL stream.
+3. host.cpp:293 resets the previous plan.active inside the queue callback and
+   pool mutex. At :345 workspace Tensor owners are cleared; :347 clears active
+   Call owners; :349 clears cold owners, also inside the close callback/mutex.
+   The six intermediates have no output reference returned to the caller.
+   Once other callback-copy references have been released, these operations
+   can be their last strong owner release. The four BF16 intermediates each
+   occupy 5,990,400 logical bytes; each FP32 RMS statistic occupies 2,340 bytes.
+4. NPUCachingAllocator.cpp:1476-1510 free() takes the allocator mutex and calls
+   insert_events when stream_uses is nonempty (outside graph capture).
+   :3047-3070 insert_events obtains allocator events and calls event->record.
+5. NPUEvent.cpp:115-126 calls LaunchRecordEventTask. At
+   AsyncTaskQueueInterface.cpp:186-220 / :223-227, an enabled task queue and
+   nonsynchronous-launch stream enqueue RECORD_EVENT through enCurrentNPUStream.
+6. NPUStream.cpp:739-780 selects the per-stream or default repository and calls
+   Enqueue; this path has no consumer-thread inline-execution bypass.
+   NPUQueue.cpp:598-636 waits on eventfd_read if the queue is full.
+   ReadQueue executes the callback at :448/:451 before advancing its read index
+   at :489. Thus a final owner release inside this active callback can require
+   queue progress which the callback itself prevents. This is a conditional,
+   source-supported reentrancy risk, not an experimentally reproduced hang.
+
+The exception catch is not itself a recursive pool-lock bug: the lock_guard
+inside the try block unwinds before catch invokes quarantine(). Quarantine
+retains the pool/call and disables admission. SDK/native failures remain
+terminal; this review does not recommend fallback or a retry.
+
+HCCL and event scope
+
+Only the packed send/arena storage is passed from this pool to the future
+All-to-All. Q/K RMS results, RMS statistics and RoPE results remain local;
+raw/gamma/coefficient inputs are local producers/parameters. A receive storage
+is allocated by the existing communication path outside this pool.
+
+ProcessGroupHCCL.cpp:6983-7085 maps alltoall_base to collective. The shared
+collective path at :4198-4235 protects inputs on the HCCL stream using either
+recordStream or the configured stash mechanism. The output hook at :7069-7078
+similarly protects the receive output. Exact behavior depends on the pinned
+multi-stream-memory-reuse option; do not assume one option from this source
+review alone. Existing lease/record-stream/HCCL protections must remain intact.
+
+The pool event is recorded after native RMS/RoPE and exact pack on the compute
+stream, before a later external HCCL consumer. Event completion qualifies
+reuse of that plan's SDK workspace/executor and local intermediates; it does
+NOT prove HCCL or downstream consumers have completed with the returned send.
+The fresh send arena and external returned/lease owners are essential. The
+caller-provided test arena API additionally relies on unique test arenas: its
+queued/active overlap checks do not track every externally retained old arena
+after plan retirement. The smoke used unique retained arenas and no HCCL.
+
+Event, address, and arithmetic observations
+
+- host.cpp:249-255 refuses querying an unrecorded generation. A NEW plan is
+  selected without treating a newly-created event as completed. A RECORDED
+  plan is reused only after COMPLETE for the matching recorded_generation.
+  NOT_READY is skipped; exhaustion is terminal. The generation is published
+  only after successful event recording at :317-318. No initial-event-status
+  or stale-generation reuse defect was found for the stated single producer
+  and bound consumer context/stream contract.
+- Native descriptors at :194-198 encode storage_offset and the physical extent
+  with the storage base pointer. Address refresh at :299-305 again passes the
+  storage base, not an already-offset data_ptr. Descriptor signatures reject
+  changed shape/stride/offset/format/extent. No double-offset error was found.
+- RMS remains full 5120 with epsilon 1e-6, followed by BF16 RoPE mode 1 and the
+  existing exact pack. The send view keeps offset 256 and the established
+  padded arena ABI. The source review does not substitute for numeric tests.
+- create/close retains partial failures in a process-lifetime registry. Close
+  requires caller drain, checks callback completion/event completion, and
+  destroys native descriptors/executors/events on the consumer. Its framework
+  Tensor destruction location is the lifecycle defect discussed above.
+
+Required direction for the separate v2 lifecycle change
+
+Move completed Call owners to a retirement queue without final destruction in
+the consumer. On the original producer, detach the retirement batch under the
+pool lock, then release its framework Tensor/shared_ptr owners AFTER unlocking.
+Keep queue storage bounded/preallocated, with explicit terminal exhaustion;
+do not introduce a consumer wait or unbounded retirement memory.
+
+Use two-phase close: the consumer validates completion, destroys SDK
+executors/descriptors/events, and transfers active/cold/workspace Tensor
+owners to retirement storage; after an external drain, the producer finalizes
+those owners outside the pool mutex. Distinguish native close completion from
+producer owner finalization in state/stats. Failed pools must retain all
+active/queued/retired/cold/workspace owners until worker retirement.
+
+A framework callback copy may also retain Call on its release queue. Therefore
+moving a shared_ptr is not a blanket proof that every final Tensor destructor
+runs on the producer. The requirement is that the active execution consumer
+cannot become the final releaser: the retirement owner must outlive that
+callback. Ordinary framework release-queue cleanup is a separate boundary.
+Keep the existing stream protections and HCCL lifetime unchanged in this fix.
+
+V2 requires its own source/build pins and tests; v1 smoke/PASS cannot be
+inherited. This document does not review unfinished v2 files or admit it.

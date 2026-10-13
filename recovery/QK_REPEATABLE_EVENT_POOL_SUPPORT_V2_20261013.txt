@@ -1,0 +1,80 @@
+QK repeatable pool v2: frozen two-probe support protocol (2026-10-13)
+
+Preparation status
+This document accompanies a new independent v2 harness. No v2 device result is
+claimed here. Root owns the serial launch and its separate receipt/supervisor.
+V1 results are provenance only. The new namespace/build/support schema each use
+v2, and v1_qualification_inherited must be false.
+
+Frozen files
+recovery/check_qk_repeatable_pool_support_v2.py
+sha256 e840787f40656095c1e82b989bc875866d4568ed99b01a58efff1aa52e057823
+recovery/test_qk_repeatable_pool_support_v2.py
+sha256 8071065aebb181396325fa9fc852ba1fb1173ee65bf83791cc062536a2868555
+
+CPU validation: 11 targeted tests passed normally and with python -O. Imports
+remain stdlib-only. Tests cover exact v2 ABI admission, old-v1 rejection, actual
+two-probe metadata/key identity, partial initialization failure, retirement,
+producer thread identity, SDK close retaining owners, final producer release,
+poison/pending/overflow rejection, explicit-execute behavior, and failure receipt.
+No CPU test imports torch, loads owner payloads, compiles a kernel or uses NPU.
+
+Device protocol (root-supervised correctness only)
+Use the same real rank0/layer0/probe0 and probe1 captured cases from one request,
+chunk and KV length. Verify SHA of both metadata and all source owner payloads,
+materialize complete owners, and preserve their live owner mapping. Public-native
+full5120 RMS/RoPE/pack must be bitwise equal to captured native_send before the
+candidate runs. Input values and all five input base addresses must differ.
+
+Create one plan and one retired-call slot. Each of the two calls uses a different
+pre-filled full padded arena; explicit synchronization surrounds each call.
+Require exact source/descriptor preservation, native output equality, full arena
+and both canaries, and unchanged retained first output. The second callback must
+reuse the completed event and retire the prior Call; it must not release it there.
+
+After two calls, explicitly invoke reclaim_retired(handle), which shares the
+normal run's internal producer reclaim implementation. Require retired_count0,
+producer_reclaimed_calls1 and producer_reclaim_tid==producer_tid; active Call
+and workspace stay owned. Check both retained sends/arenas and all input owners.
+This does not test automatic reclamation on a third run: the receipt explicitly
+sets hot_run_auto_reclaim_tested=false. It does test the same reclamation helper
+through its guarded public lifecycle entry. No third native call is introduced.
+
+Drain; close(handle); drain. Require native_closed1 but closed0, accepting0,
+active-call slot1, workspace_resident_bytes equal its initial nonzero value,
+and finalize_released_calls0. This proves the exposed intermediate state,
+combined with the separate C++ source ownership review; counters alone do not
+prove which thread ran the final allocator destructor.
+
+Invoke finalize_close(handle) on the original producer. Require closed1,
+native_closed1, retired_count0, active-call slots0, resident workspace0,
+finalize_released_calls2 (last active Call plus cold template) and producer TID.
+Drain after finalization because framework owner releases can enqueue allocator
+events. Recheck both retained complete output arenas, sends, input owners and
+final state. Externally held send references remain valid after pool teardown.
+
+Failure is terminal: retain source/output/provider references, snapshot available
+pool states, report through launch-owned failure protocol, and let the supervisor
+retire the process. No retry, fallback, reclaim, close, finalizer or device sync
+is attempted by the exception path.
+
+Scope exclusions
+No HCCL, inflight/not-ready scheduling, plan/retirement exhaustion, arbitrary
+caller arena reuse, production allocator entry, actual192 matrix, model run,
+performance result, historical identity, or full-combination admission is tested.
+All source/build/dependency paths and statistics field order are verified from
+the new CPU-build receipt, including parent_v1_source as provenance only.
+
+Invocation inside a root-owned correctness supervisor (same argv as v1)
+  PY recovery/check_qk_repeatable_pool_support_v2.py --execute \
+    --manifest V2_BUILD/build-receipt.json --manifest-sha256 EXACT_BUILD_SHA \
+    --harness-sha256 e840787f40656095c1e82b989bc875866d4568ed99b01a58efff1aa52e057823 \
+    --case FIXTURES/rank0/qk_kv4680_p0_l00.json --case-sha256 EXACT_P0_SHA \
+    --case FIXTURES/rank0/qk_kv4680_p1_l00.json --case-sha256 EXACT_P1_SHA \
+    --output NEW_UNIQUE_RECEIPT.json
+
+PY is the pinned service interpreter. Preserve ASCEND_RT_VISIBLE_DEVICES=
+8,9,10,11,12,13,14,15, rank/local-rank0 and world-size1, correctness experiment
+mode, launch-owned nonce/protocol, and the exact base provider manifest env.
+Set PYTHONPATH to the qk-record-once-worktree. This recipe is intentionally not
+a direct unsupervised launch. Without --execute the script performs no test.

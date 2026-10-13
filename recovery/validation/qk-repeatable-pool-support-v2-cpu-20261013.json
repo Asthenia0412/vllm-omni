@@ -1,0 +1,35 @@
+{
+  "schema": "lingbot_qk_repeatable_support_v2_cpu_contract_v1",
+  "passed": true,
+  "device_tested": false,
+  "npu_initialized": false,
+  "torch_imported": false,
+  "tests": 11,
+  "normal_exit_code": 0,
+  "optimized_exit_code": 0,
+  "interpreter": "/usr/bin/python",
+  "python": "3.9.9 (main, Jun 28 2026, 09:01:06) \n[GCC 10.3.1]",
+  "commands": [
+    "python -m unittest discover -s recovery -p test_qk_repeatable_pool_support_v2.py -v",
+    "python -O -m unittest discover -s recovery -p test_qk_repeatable_pool_support_v2.py -v"
+  ],
+  "sources": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_repeatable_pool_support_v2.py",
+      "bytes": 25034,
+      "sha256": "e840787f40656095c1e82b989bc875866d4568ed99b01a58efff1aa52e057823"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_repeatable_pool_support_v2.py",
+      "bytes": 7645,
+      "sha256": "8071065aebb181396325fa9fc852ba1fb1173ee65bf83791cc062536a2868555"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_REPEATABLE_EVENT_POOL_SUPPORT_V2_20261013.txt",
+      "bytes": 4924,
+      "sha256": "64e56c99e702256dd78e2e657f40b6cb5c33a7643bd08587f61abb85a6ab3834"
+    }
+  ],
+  "v1_qualification_inherited": false,
+  "scope": "stdlib metadata/admission/failure/lifecycle-state contracts; no torch, owner payload, compiler or device execution"
+}

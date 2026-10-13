@@ -1,0 +1,140 @@
+QK repeatable event pool v2: producer-owned release, 2026-10-13
+
+Scope and status
+New source-only ownership candidate. Namespace lingbot_qk_repeatable_pool_v2.
+This version has not been compiled, device-tested, performance-screened or
+model-admitted. It changes ownership/teardown, not native arithmetic or layouts.
+The independently preserved v1 API-support receipt covers only two drained real
+rank0 probes. It is not v2 qualification, inflight evidence or performance proof.
+
+Why v2 is necessary
+Pinned torch-npu source shows recordStream inserts a stream membership even on
+the allocating stream. Consequently all six fresh norm/rstd/RoPE intermediates
+can have such memberships, not merely tensors later given to HCCL. A last Tensor
+release in a framework consumer callback can enter allocator free/insert_events,
+then queue an allocator event on that same consumer. A full queue can wait for
+its own consumer. This is a source-review risk, not an observed v1 deadlock or a
+proven explanation of measured latency. v1 plan.active.reset and close performed
+framework owner destruction inside the consumer while holding the Pool mutex.
+
+Preserved computation and executor safety
+Exact v1 shape/stride/physical-owner checks, inference/default-stream/context/TID
+binding, full-width5120 RMS epsilon1e-6, BF16 boundaries, interleave mode1, native
+four-stage definitions, padded ND2 owner and raw exact pack are preserved.
+Cold create still makes fixed independent executor/workspace/event plans on the
+producer. A RECORDED plan is reusable only after its matching post-pack generation
+is COMPLETE. NEW plans are never queried to infer initial completion. All16 fresh
+address refreshes precede the same four native stage2 launches and exact pack.
+No callback public-native recursion, framework allocation, polling, synchronization,
+lazy plan construction, fallback or implicit retry is introduced.
+
+Bounded completed-call retirement
+create(..., capacity, retirement_capacity) accepts independent fixed capacities:
+1..64 plans and1..256 retired calls. The retired ring is allocated once during
+cold initialization. Each element is an empty shared_ptr until occupied.
+
+On reuse, the consumer first verifies the plan's recorded event is COMPLETE.
+It then checks that the bounded ring has an empty slot, moves plan.active into
+that slot, and only then assigns the new call to the now-empty plan.active.
+It never resets or overwrites the previous Call owner. queued_calls.erase occurs
+only while both the new plan.active and the callback capture still strongly own
+that same Call. Callback return releases only a non-final shared reference.
+Failure quarantine retains the callback Call and every pool-owned object.
+A full retirement ring is terminal RETIREMENT_EXHAUSTED (last_error=-3), detected
+before the selected plan is refreshed or overwritten. There is no growth, wait,
+busy retry or eviction. Ordinary no-ready-plan exhaustion remains last_error=-2.
+Retirement overflow may occur with queued submission bursts; it is not silently
+relabelled as native/allocator failure and must be reported separately.
+
+Producer reclamation
+run retains all original admission, input-key, arena/alias and intermediate-key
+validation before reclaiming old completed Calls. A test arena additionally may
+not alias an owner still held in the retired ring. The original producer reserves
+a local host container, acquires Pool mutex, validates the entire ring, and moves
+all occupied slots to that local container. It releases the mutex, then clears
+the local container on that producer thread. Thus allocator/event work caused by
+last Tensor release happens outside Pool mutex and outside the consumer callback.
+Reclamation does not query an event: only consumer-verified completed Calls can
+enter this ring. It does not authorize overwriting send owners still retained by
+an external consumer; those external owners/leases must outlive their real use.
+
+Normal run performs this producer reclamation before stream registration and
+enqueue of its new Call. Release cost remains part of a measured full call. There
+is also an explicit reclaim_retired(handle) for isolated correctness: it verifies
+the same producer/context/default stream plus inference/no-capture and invokes
+that identical producer reclamation function. It does not query an event, launch
+native work, synchronize or retry; only ordinary producer-side allocator release
+may enqueue its own events. Remaining retired Calls are released by finalize_close.
+The fixed ring bounds retirement; the existing
+framework submission queue and pending Call ownership remain separate. This design
+does not claim a total-memory cap for arbitrary unbounded producer submissions.
+
+Two-step close
+1. The caller stops new submissions and performs an explicit external drain,
+   outside any timing window. close(handle) sets accepting=false and enqueues one
+   cleanup callback on the same consumer. That callback requires pending0 and all
+   previously recorded plans COMPLETE. It destroys only SDK executors, ACL tensor
+   descriptors and progress events. It retains all framework Tensor owners:
+   active Calls, cold template, stage workspaces and retired Calls. On success it
+   sets native_closed=true; closed remains false and workspace_resident_bytes
+   remains unchanged. A close error quarantines the pool; no release retry follows.
+2. The caller drains after close and invokes finalize_close(handle) on the original
+   producer with the same context/stream/device. It requires native_closed=true,
+   accepting=false, pending0, empty queued Calls, healthy/unfinalized state.
+   Producer-reserved local containers receive active/cold/retired Calls and stage
+   workspaces under Pool mutex. Framework owners are destroyed only after unlocking.
+   The producer then publishes closed=true, resident workspace0, finalize TID and
+   release counters. Calling finalize too early is a terminal failure, not a wait.
+   Any detached owners remaining after an invariant failure are moved to quarantine.
+3. A final external drain is required before retiring/unloading the healthy process,
+   because producer-side allocator release may itself enqueue completion events.
+   Require closed1, native_closed1, poisoned0, accepting0, pending0, retired_count0,
+   retained_call_slots0, resident workspace0 and finalize_tid==producer_tid.
+
+The common producer_check rejects graph capture for run, public reclaim, close
+and finalize alike, including capture on the same default stream. Cleanup does not
+require inference mode to remain enabled after computation has ended. Both close
+and finalize are explicit correctness/lifecycle steps. Neither hides an internal
+device-wide synchronization. No failure path invokes another native
+operation, close, finalizer or fallback. The process-lifetime registry has no Tensor
+destructor at interpreter shutdown; failed workers retain ownership until the
+launch-owned supervisor retires them. Keep the DSO loaded for that lifetime.
+
+Statistics and qualification
+Existing counters retain their meanings. New counters are retirement_capacity,
+retired_count, retired_high_water, retired_total, retirement_overflows,
+producer_reclaimed_calls, producer_reclaim_tid, native_closed, finalizing,
+finalize_released_calls and finalize_tid. producer_reclaimed_calls counts retired
+Calls released on producer (including finalization); finalize_released_calls also
+includes the final active Call(s) and cold template. These are retained Call counts,
+not an exact device-active count or unique storage count. Events/slots/workspace
+bytes and retirement capacities must appear in every future timing receipt.
+
+Fresh v2 admission must verify support/numerics/arena/source/retained output again,
+then verify at least one real hot-path producer reclaim and the native_closed
+intermediate state before successful finalize. Inflight/not-ready/reuse, bounded
+plan exhaustion, bounded retirement overflow and caller-owner release need separate
+correctness/stress coverage before timing or model work. Original192 cases and
+HCCL consumer must subsequently pass; no first-stage scope expands implicitly.
+The original complete-call and model performance gates remain unchanged.
+
+Source and references
+Preserved v1 source and build are separately pinned by the v2 builder. The exact
+framework source version remains torch-npu2.10.0.post4 git
+5dd8ef3f9b375b5ae4a83538d5785754148c3302. Pinned allocator/queue audit locations:
+ROOT/audits/qk-restore/host-cost-v1/NPUCachingAllocator.cpp
+ROOT/audits/qk-restore/host-cost-v1/source-pins.json
+where ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012.
+Review trace: recordStream wrapper3411 / insertion1588; free1476 and
+insert_events3047; NPUEvent115; AsyncTaskQueueInterface187/223;
+NPUStream739 enCurrentNPUStream; NPUQueue598 full-queue eventfd_read.
+These source locations describe potential re-entry, not measured deadlock evidence.
+
+Official CANN9.1 APIs (same semantics as v1; actual v2 execution remains untested):
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00041.html
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00045.html
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00046.html
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/aolapi/operatorlist_00021.html
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/runtimeapi/aclcppdevg_03_0081.html
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/runtimeapi/aclcppdevg_03_0083.html
+https://www.hiascend.com/doc_center/source/zh/CANNCommunityEdition/910/API/runtimeapi/aclcppdevg_03_0086.html

@@ -1,0 +1,52 @@
+Isolated QK repeatable event pool v2, 2026-10-13.
+SOURCE ONLY: no CPU build, device test, performance or model admission yet.
+No production imports, flags or runtime changes select this namespace.
+The v1 support PASS does not transfer to this changed ownership implementation.
+
+Read ../../QK_REPEATABLE_EVENT_POOL_V2_DESIGN_20261013.txt.
+Future explicit build, owned by root (not performed while writing these files):
+  python recovery/experiments/qk_repeatable_pool_v2/build.py \
+    --provider-manifest /absolute/source-pinned/host_manifest.json \
+    --output /absolute/new-build-directory
+The builder pins unchanged v1 source, original nonrepeatable source, v2 source,
+its own source, v2 design, SDK/framework headers, provider manifest and exact kernel.
+CPU registration may query dependencies/stat_names only; no NPU initialization.
+
+ops = torch.ops.lingbot_qk_repeatable_pool_v2
+handle = ops.create(raw, qw, kw, cosine, sine, capacity, retirement_capacity)
+send, owner = ops.run(handle, raw, qw, kw, cosine, sine)
+send, owner = ops.run_with_test_arena(handle, raw, qw, kw, cosine, sine, arena)
+report = dict(zip(ops.stat_names(), ops.stats(handle)))
+
+Consumer moves only completed old Calls into a fixed-size retired ring. Producer
+releases retired Calls after admission and outside Pool mutex. Ordinary run does it;
+ops.reclaim_retired(handle) exposes that same release under original-producer,
+context/default-stream/inference/no-capture guards for isolated correctness. It
+contains no query/native/sync; allocator release may normally enqueue on producer.
+Capacity choices are explicit/fixed;
+RETIREMENT_EXHAUSTED is terminal, with no growth, polling, synchronization or fallback.
+All original owner/format/generation/math checks remain. External caller/HCCL owners
+must remain alive through their real consumers; a pool completion is not a lease
+allowing the caller to overwrite a send buffer.
+
+Healthy shutdown, on the original producer, outside timing:
+  stop new submissions
+  external queue/device drain
+  ops.close(handle)
+  external queue/device drain
+  require native_closed1, closed0, original workspace residency and healthy pool
+  ops.finalize_close(handle)
+  external queue/device drain
+  require native_closed1, closed1, workspace_resident_bytes0, retired_count0,
+          retained_call_slots0, pending0, poisoned0, accepting0,
+          finalize_tid==producer_tid
+The final drain covers allocator events that releasing owners on producer may queue.
+No callback frees a framework Tensor owner. Both phases reject premature/unhealthy
+use rather than waiting or retrying. After any exception, preserve full owners and
+DSO and retire the owned process; do not invoke either cleanup API as recovery.
+
+init status remains flat groups [plan,stage,stage1_status,repeatable_status,bytes],
+with -999 meaning not reached. handles() exposes failed initialization handles for
+receipts, never retry. stats counts retained Calls/slots, not exact live device work.
+Need new v2 API/numerical/owner validation, hot producer reclamation, two-phase close,
+inflight, explicit plan/retirement exhaustion and192/HCCL checks before any timing.

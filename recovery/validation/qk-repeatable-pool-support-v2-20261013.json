@@ -1,0 +1,608 @@
+{
+  "schema": "lingbot_qk_repeatable_pool_support_archive_v2",
+  "passed": true,
+  "api_support_only": true,
+  "method": "rank0_two_real_probes_completed_reuse_producer_reclaim_two_phase_close_v2",
+  "scope": "two real probes; test-arena; completed-event reuse; explicit producer reclaim; SDK close then producer finalize",
+  "source_pins_rechecked": true,
+  "pins": {
+    "build_receipt": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-repeatable-pool.20261013v2/build-receipt.json",
+      "bytes": 10177,
+      "sha256": "31da75582cba83570c337ea3a80887f99412f833d5871a70282581d95799c4f4"
+    },
+    "support": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-checks/support-v2/receipt.json",
+      "bytes": 18283,
+      "sha256": "02e3e64768817d2dafd2034f6f514905d6a981ad1bc2fbde37c5a333cd67dab5"
+    },
+    "supervisor_launch": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-runs/0dc75d773adb0843415f3b66b146ce4c/launch.json",
+      "bytes": 1365,
+      "sha256": "be91db4f4c2b44540b0fe6f29d47873df411f08a855fc144e5435e7a58b5a515"
+    },
+    "supervisor_result": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-runs/0dc75d773adb0843415f3b66b146ce4c/result.json",
+      "bytes": 1418,
+      "sha256": "fef57aa4dbcdc38fe3b34d372bf7bdb5f30dd44a9c47f93658bdfbd292fe146b"
+    },
+    "supervisor_log": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-repeatable-pool-runs/0dc75d773adb0843415f3b66b146ce4c/service.log",
+      "bytes": 2510,
+      "sha256": "67f54540417de811c8f425adc4e189e97b95755790f5ad59a8cd02d386bd6ceb"
+    },
+    "source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/experiments/qk_repeatable_pool_v2/host.cpp",
+      "bytes": 30599,
+      "sha256": "fd65a7c9856f1e8726cd7350b257a0f9e11bde570632405cbb25fd179120e724"
+    },
+    "builder": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/experiments/qk_repeatable_pool_v2/build.py",
+      "bytes": 5239,
+      "sha256": "fad11d2544df3fe2cd768f41c9c69bec87f3af2bbfa8586b3c0990d1d6db4ea6"
+    },
+    "design": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_REPEATABLE_EVENT_POOL_V2_DESIGN_20261013.txt",
+      "bytes": 9759,
+      "sha256": "044a694c7b018050adb2d28bdb496c2bedf6bf2d25cb104518a22e7934afffb9"
+    },
+    "original_nonrepeatable_source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/experiments/qk_single_queue/host.cpp",
+      "bytes": 13588,
+      "sha256": "165416ff07eaf677a01ab14310e3590c64e9a1d4785fcad62208715bbc2e1ef2"
+    },
+    "parent_v1_source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/experiments/qk_repeatable_pool/host.cpp",
+      "bytes": 23191,
+      "sha256": "205114b1e5645abea7923e577f667b3f003d546a4ba3391821e01c232128dd24"
+    },
+    "provider_manifest": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qk-record-once.20261013v1/host_manifest.json",
+      "bytes": 8496,
+      "sha256": "9c04e585968fba131aa3c18b7805117caf0b7b7d12af0be4568a03753c413e97"
+    },
+    "kernel": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+      "bytes": 402128,
+      "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+    },
+    "library": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/qk-repeatable-pool.20261013v2/liblingbot_qk_repeatable_pool_v2.so",
+      "bytes": 260048,
+      "sha256": "cca136b118224e7339aa00a1407ad35b6840c1a6ddc72def14fd462adcd01545"
+    },
+    "cpu_tests": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/test_qk_repeatable_pool_support_v2.py",
+      "bytes": 7645,
+      "sha256": "8071065aebb181396325fa9fc852ba1fb1173ee65bf83791cc062536a2868555"
+    },
+    "cpu_receipt": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/validation/qk-repeatable-pool-support-v2-cpu-20261013.json",
+      "bytes": 1518,
+      "sha256": "6fd77bda64f4a3a7c283fcbe8b0966a65cf068805ba8e34494a715a432867b34"
+    },
+    "v1_review": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/QK_REPEATABLE_EVENT_POOL_V1_REVIEW_20261013.txt",
+      "bytes": 10088,
+      "sha256": "485fa66fd708d67170dd16fc00c71b7c3f61e15c0754d69b6e3a1c04691f3fc2"
+    },
+    "provenance": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/experiments/qk_repeatable_pool_v2/PROVENANCE.txt",
+      "bytes": 3145,
+      "sha256": "a9dca3da93f9e895e86a09cb10fcc57cc3be1b2d32b46dbb6dd02337f7d7dac2"
+    }
+  },
+  "harness_sources": {
+    "check_qk_repeatable_pool_support_v2.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_repeatable_pool_support_v2.py",
+      "bytes": 25034,
+      "sha256": "e840787f40656095c1e82b989bc875866d4568ed99b01a58efff1aa52e057823"
+    },
+    "load_real_fixtures.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    "check_qk_real_matrix.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/check_qk_real_matrix.py",
+      "bytes": 24351,
+      "sha256": "2931463058a6661ec99c8cc8a4cc63ece2296b082deef4c71df801e7a9232519"
+    },
+    "qk_replay_fixture.py": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/recovery/qk_replay_fixture.py",
+      "bytes": 6026,
+      "sha256": "b25295259f496ef73eb2182adb908097901425bcf5aa5012e54805510938b0b7"
+    }
+  },
+  "capture_contract": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/qk-record-once-worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+    "bytes": 22079,
+    "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+  },
+  "sdk_dependencies": [
+    {
+      "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libopapi.so",
+      "bytes": 44155312,
+      "sha256": "3e10def2f7158482f3967b9db6ad2707cca8691198ddae8cc52bbbaf61bb2675"
+    },
+    {
+      "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libnnopbase.so",
+      "bytes": 4328144,
+      "sha256": "308dda461704a6e5f70de6e0eac4495e9829b9cec3328563b75a5b382c6e438b"
+    },
+    {
+      "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libacl_rt.so",
+      "bytes": 132936,
+      "sha256": "5a6518505ef66688f02b4bde97517ba217212f29304d59b3a6ef0db14ded6c83"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/kernels.P0h8kqbp/lib/liblingbot_recovery_copy.so",
+      "bytes": 402128,
+      "sha256": "1afa225b0f1c217aa547bd59a3f8e137b2600d85c9e056f4f1eb4817afe607d3"
+    }
+  ],
+  "build_headers": [
+    {
+      "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/include/aclnn/acl_meta.h",
+      "bytes": 8642,
+      "sha256": "9f2fb665b11e2c782639cec5bbb347c271dae80f0fb5441e9141b61dd144be1c"
+    },
+    {
+      "path": "/home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend/cann-9.1.0/aarch64-linux/include/acl/acl_rt.h",
+      "bytes": 203764,
+      "sha256": "22c603cb80ab582006d4f26697ceb14c059d7f3613cf13b3c72aeb0d3d36e3c1"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/NPUStorageImpl.h",
+      "bytes": 1719,
+      "sha256": "c4c488410e53760739c32de25dc00bcd53d0d55a55d48247d248671ccb06e9f1"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/core/npu/NPUStream.h",
+      "bytes": 4726,
+      "sha256": "4d0b32e2bffeda7a69713a5e679e1298015dcde35c3c07ac48823f26a649d21c"
+    },
+    {
+      "path": "/home/zhoutaichang/venvs/vllm-omni/lib/python3.12/site-packages/torch_npu/include/torch_npu/csrc/framework/OpCommand.h",
+      "bytes": 7099,
+      "sha256": "9b81f6549a627bfafcf577a1a56d78b0a256249111c76aa4c2306b4f50089427"
+    }
+  ],
+  "fixture_metadata": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p0_l00.json",
+      "bytes": 11043,
+      "sha256": "582e0b7b99e43f42eb31fb5f42e13daae0579a997faba15b26aec5acf47e6f50"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/capture-fixtures/launch-v1/full/fixtures/rank0/qk_kv4680_p1_l00.json",
+      "bytes": 11042,
+      "sha256": "8409c0d33e7bb69c24d1fc9e50a9d0ce194c1843b6e169915c7c53bfd8e7681c"
+    }
+  ],
+  "cases": [
+    {
+      "identity": {
+        "rank": 0,
+        "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+        "chunk": 0,
+        "kv_len": 4680,
+        "probe": 0,
+        "layer": 0,
+        "coefficient_generation": 161
+      },
+      "full_owner_sha256_verified": true,
+      "reference": "captured native_send plus frozen Runtime.native public-native equality",
+      "passed": true,
+      "arena_descriptor": {
+        "npu_format": 2,
+        "origin_format": 2,
+        "base_sizes": [
+          8986112
+        ],
+        "base_strides": [
+          1
+        ],
+        "physical_sizes": [
+          8986112
+        ],
+        "shape": [
+          8986112
+        ],
+        "stride": [
+          1
+        ],
+        "storage_offset": 0,
+        "storage_bytes": 17972224,
+        "storage_data_ptr": 20623606136832,
+        "data_ptr": 20623606136832
+      }
+    },
+    {
+      "identity": {
+        "rank": 0,
+        "request_id": "video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e",
+        "chunk": 0,
+        "kv_len": 4680,
+        "probe": 1,
+        "layer": 0,
+        "coefficient_generation": 162
+      },
+      "full_owner_sha256_verified": true,
+      "reference": "captured native_send plus frozen Runtime.native public-native equality",
+      "passed": true,
+      "arena_descriptor": {
+        "npu_format": 2,
+        "origin_format": 2,
+        "base_sizes": [
+          8986112
+        ],
+        "base_strides": [
+          1
+        ],
+        "physical_sizes": [
+          8986112
+        ],
+        "shape": [
+          8986112
+        ],
+        "stride": [
+          1
+        ],
+        "storage_offset": 0,
+        "storage_bytes": 17972224,
+        "storage_data_ptr": 20623648096256,
+        "data_ptr": 20623648096256
+      }
+    }
+  ],
+  "checks": [
+    "two_real_probes_raw_and_send_values_differ",
+    "all_five_input_addresses_are_fresh",
+    "public_native_equals_captured",
+    "full_sources_and_descriptors_before",
+    "all_four_repeatable_stages_supported",
+    "two_fresh_full_arena_canary_passes",
+    "native_bitwise_both_probes",
+    "completed_event_plan_reuse",
+    "retained_first_output_unchanged",
+    "all_full_sources_and_descriptors_after",
+    "completed_retired_call_released_by_original_producer",
+    "native_close_kept_framework_owners_and_workspace",
+    "successful_consumer_sdk_close_and_producer_finalize",
+    "final_external_drain_outputs_and_sources_retained"
+  ],
+  "initialization": [
+    {
+      "plan": 0,
+      "stage": 0,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 22768384
+    },
+    {
+      "plan": 0,
+      "stage": 1,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 22768384
+    },
+    {
+      "plan": 0,
+      "stage": 2,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 16777728
+    },
+    {
+      "plan": 0,
+      "stage": 3,
+      "stage1_status": 0,
+      "repeatable_status": 0,
+      "workspace_bytes": 16777728
+    }
+  ],
+  "statistics_by_stage": {
+    "create": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 0,
+      "callbacks_done": 0,
+      "pending": 0,
+      "pending_peak": 0,
+      "event_queries": 0,
+      "event_not_ready": 0,
+      "plan_reuses": 0,
+      "used_plan_peak": 0,
+      "generations": 0,
+      "pool_exhaustions": 0,
+      "producer_tid": 3435124,
+      "consumer_tid": 0,
+      "accepting": 1,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 0,
+      "retirement_capacity": 1,
+      "retired_count": 0,
+      "retired_high_water": 0,
+      "retired_total": 0,
+      "retirement_overflows": 0,
+      "producer_reclaimed_calls": 0,
+      "producer_reclaim_tid": 0,
+      "native_closed": 0,
+      "finalizing": 0,
+      "finalize_released_calls": 0,
+      "finalize_tid": 0
+    },
+    "run0": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 1,
+      "callbacks_done": 1,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 0,
+      "event_not_ready": 0,
+      "plan_reuses": 0,
+      "used_plan_peak": 1,
+      "generations": 1,
+      "pool_exhaustions": 0,
+      "producer_tid": 3435124,
+      "consumer_tid": 3437264,
+      "accepting": 1,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 1,
+      "retirement_capacity": 1,
+      "retired_count": 0,
+      "retired_high_water": 0,
+      "retired_total": 0,
+      "retirement_overflows": 0,
+      "producer_reclaimed_calls": 0,
+      "producer_reclaim_tid": 0,
+      "native_closed": 0,
+      "finalizing": 0,
+      "finalize_released_calls": 0,
+      "finalize_tid": 0
+    },
+    "run1": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 2,
+      "callbacks_done": 2,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 1,
+      "event_not_ready": 0,
+      "plan_reuses": 1,
+      "used_plan_peak": 1,
+      "generations": 2,
+      "pool_exhaustions": 0,
+      "producer_tid": 3435124,
+      "consumer_tid": 3437264,
+      "accepting": 1,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 1,
+      "retirement_capacity": 1,
+      "retired_count": 1,
+      "retired_high_water": 1,
+      "retired_total": 1,
+      "retirement_overflows": 0,
+      "producer_reclaimed_calls": 0,
+      "producer_reclaim_tid": 0,
+      "native_closed": 0,
+      "finalizing": 0,
+      "finalize_released_calls": 0,
+      "finalize_tid": 0
+    },
+    "reclaim_retired": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 2,
+      "callbacks_done": 2,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 1,
+      "event_not_ready": 0,
+      "plan_reuses": 1,
+      "used_plan_peak": 1,
+      "generations": 2,
+      "pool_exhaustions": 0,
+      "producer_tid": 3435124,
+      "consumer_tid": 3437264,
+      "accepting": 1,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 1,
+      "retirement_capacity": 1,
+      "retired_count": 0,
+      "retired_high_water": 1,
+      "retired_total": 1,
+      "retirement_overflows": 0,
+      "producer_reclaimed_calls": 1,
+      "producer_reclaim_tid": 3435124,
+      "native_closed": 0,
+      "finalizing": 0,
+      "finalize_released_calls": 0,
+      "finalize_tid": 0
+    },
+    "close_native": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 79092224,
+      "submitted": 2,
+      "callbacks_done": 2,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 2,
+      "event_not_ready": 0,
+      "plan_reuses": 1,
+      "used_plan_peak": 1,
+      "generations": 2,
+      "pool_exhaustions": 0,
+      "producer_tid": 3435124,
+      "consumer_tid": 3437264,
+      "accepting": 0,
+      "closed": 0,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 1,
+      "retirement_capacity": 1,
+      "retired_count": 0,
+      "retired_high_water": 1,
+      "retired_total": 1,
+      "retirement_overflows": 0,
+      "producer_reclaimed_calls": 1,
+      "producer_reclaim_tid": 3435124,
+      "native_closed": 1,
+      "finalizing": 0,
+      "finalize_released_calls": 0,
+      "finalize_tid": 0
+    },
+    "finalize_close_before_final_drain": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 0,
+      "submitted": 2,
+      "callbacks_done": 2,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 2,
+      "event_not_ready": 0,
+      "plan_reuses": 1,
+      "used_plan_peak": 1,
+      "generations": 2,
+      "pool_exhaustions": 0,
+      "producer_tid": 3435124,
+      "consumer_tid": 3437264,
+      "accepting": 0,
+      "closed": 1,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 0,
+      "retirement_capacity": 1,
+      "retired_count": 0,
+      "retired_high_water": 1,
+      "retired_total": 1,
+      "retirement_overflows": 0,
+      "producer_reclaimed_calls": 1,
+      "producer_reclaim_tid": 3435124,
+      "native_closed": 1,
+      "finalizing": 0,
+      "finalize_released_calls": 2,
+      "finalize_tid": 3435124
+    },
+    "finalize_close_after_final_drain": {
+      "capacity": 1,
+      "initialized": 1,
+      "workspace_initial_bytes": 79092224,
+      "workspace_resident_bytes": 0,
+      "submitted": 2,
+      "callbacks_done": 2,
+      "pending": 0,
+      "pending_peak": 1,
+      "event_queries": 2,
+      "event_not_ready": 0,
+      "plan_reuses": 1,
+      "used_plan_peak": 1,
+      "generations": 2,
+      "pool_exhaustions": 0,
+      "producer_tid": 3435124,
+      "consumer_tid": 3437264,
+      "accepting": 0,
+      "closed": 1,
+      "poisoned": 0,
+      "last_error": 0,
+      "last_step": -1,
+      "retained_call_slots": 0,
+      "retirement_capacity": 1,
+      "retired_count": 0,
+      "retired_high_water": 1,
+      "retired_total": 1,
+      "retirement_overflows": 0,
+      "producer_reclaimed_calls": 1,
+      "producer_reclaim_tid": 3435124,
+      "native_closed": 1,
+      "finalizing": 0,
+      "finalize_released_calls": 2,
+      "finalize_tid": 3435124
+    }
+  },
+  "workspace_bytes": 79092224,
+  "workspace_MiB": 75.42822265625,
+  "supervisor": {
+    "nonce": "0dc75d773adb0843415f3b66b146ce4c",
+    "leader": {
+      "pid": 3435124,
+      "uid": 1003,
+      "pgid": 3435124,
+      "start": 18511792
+    },
+    "mode": "correctness",
+    "exit_code": 0,
+    "fatal": null,
+    "remaining_owned_processes": []
+  },
+  "cpu_tests": {
+    "normal_passed": 11,
+    "optimized_passed": 11,
+    "torch_imported": false,
+    "device_calls": false,
+    "evidence": "implementation stdout observed; root independently repeated 11 tests; pinned CPU receipt, no separate root test-log artifact"
+  },
+  "observed_thread_ids": {
+    "producer": 3435124,
+    "consumer": 3437264,
+    "reclaim": 3435124,
+    "finalize": 3435124
+  },
+  "explicit_producer_reclaim_tested": true,
+  "two_phase_close_tested": true,
+  "hot_run_auto_reclaim_tested": false,
+  "v1_qualification_inherited": false,
+  "actual192_global_proven": false,
+  "original_hccl_included": false,
+  "inflight_tested": false,
+  "exhaustion_tested": false,
+  "production_run_allocator_tested": false,
+  "model_admitted": false,
+  "performance_admitted": false,
+  "historical_identity_proven": false,
+  "full_lifecycle_admitted": false,
+  "payload_rehash_scope": "The root-run support harness rehashed complete fixture owners. This archive rechecks metadata/source/library evidence pins, without re-reading owner payloads.",
+  "allocator_claim_boundary": "Counts prove this pool released strong references on the producer; retained outputs and framework callback release-queue references mean counters are not a trace of every final Tensor destructor or physical allocator free.",
+  "v1_cleanup_risk_resolution": "New v2 source transfers completed Call owners to a bounded ring, reclaims on producer outside mutex, and separates SDK cleanup from producer Tensor finalization. Two drained calls support this branch but do not establish inflight, overflow, HCCL or whole-model lifecycle safety; no observed v1 deadlock was claimed.",
+  "not_tested": [
+    "automatic hot-run reclamation on a third call",
+    "HCCL",
+    "eight-rank192 matrix",
+    "actual inflight/not-ready reuse",
+    "plan exhaustion",
+    "retirement overflow",
+    "production run allocator",
+    "adversarial last-reference lifecycle stress",
+    "performance",
+    "full model"
+  ]
+}

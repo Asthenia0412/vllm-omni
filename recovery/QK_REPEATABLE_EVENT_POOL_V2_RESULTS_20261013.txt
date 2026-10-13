@@ -1,0 +1,95 @@
+QK repeatable pool v2: completed two-probe API/lifecycle support, 2026-10-13
+
+Result
+PASS for the explicitly limited two-probe test. A fresh root-owned correctness
+process on logical die0 (physical die8) ran v2 native repeatable execution,
+completed-event reuse, explicit producer reclamation and two-phase close. The
+supervisor finished exit_code0, fatal=null, remaining_owned_processes=[].
+This does not admit performance, HCCL, the actual192 matrix or a model path.
+
+The four native stage1 and SetRepeatable statuses were all0. Both real inputs
+and all five input base addresses differed. Two independent padded arenas,
+including complete contents and both canaries, passed bitwise checks against
+captured native_send and the frozen public-native reference. Full source owners
+and descriptors remained unchanged; the first output stayed intact through the
+second call, reclamation and final close. There were14 named check categories.
+No arithmetic or layout change was introduced by the v2 ownership fix.
+
+Observed lifecycle
+  Stage                     native_closed closed active retired resident MiB
+  create                    0             0      0      0       75.42822265625
+  run0                      0             0      1      0       75.42822265625
+  run1                      0             0      1      1       75.42822265625
+  explicit reclaim          0             0      1      0       75.42822265625
+  SDK close + drain         1             0      1      0       75.42822265625
+  producer finalize         1             1      0      0        0
+  final external drain      1             1      0      0        0
+
+Producer TID3435124 and consumer TID3437264 were distinct. The recorded reclaim
+TID and finalize TID were both3435124. One prior completed Call was reclaimed;
+finalization released the final active Call and cold template (count2). There
+were2 submissions/generations/callback completions,1 completed-plan reuse,
+2 event queries by close,0 not-ready queries and0 plan/retirement overflows.
+Initial workspace was79,092,224 bytes: two22,768,384-byte RMS workspaces and
+two16,777,728-byte RoPE workspaces. It remained owned after SDK close and became
+0 only at producer finalization. These counters represent pool ownership,
+not a trace of physical allocator frees or every final Tensor destructor.
+
+Exact scope
+The selected real cases are rank0/layer0/chunk0/KV4680, probes0 and1, coefficient
+generations161 and162, from captured request
+video_stream-8e328ec04cba40afa917cde9574706c6-a0d4397e.
+Capacity was1 plan and1 retired Call. Calls were drained separately and used
+the test-arena API. Explicit reclaim_retired exercised the shared producer
+reclamation helper. Automatic reclamation by a third normal run was NOT tested;
+the raw and compact receipts retain hot_run_auto_reclaim_tested=false.
+
+V1 source review identified possible final Tensor destruction in a consumer
+callback leading to allocator-event queue reentry. V2 moves the pool's completed
+Call ownership to a bounded ring and releases it on the producer outside the
+pool mutex. SDK cleanup and framework Tensor release are now separate phases.
+This source repair plus two drained cases is not a full-model lifecycle proof.
+No v1 deadlock was observed or claimed. Existing external owners and framework
+release-queue callback copies can outlive a pool reference: counters alone do
+not establish where every final allocator destructor executes.
+
+Not covered: HCCL consumer lifetime; eight-rank actual192 replay; real inflight
+or not-ready reuse; plan exhaustion; retirement overflow; normal production
+arena allocation; adversarial last-reference stress; automatic hot-run reclaim;
+performance; full-model lifecycle or output correctness. V1 qualification is
+not inherited. No historical single-host identity or speed claim is made.
+
+Evidence and reproducibility
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+NEW=ROOT/qk-record-once-worktree
+The independently checked compact receipt is:
+  NEW/recovery/validation/qk-repeatable-pool-support-v2-20261013.json
+  sha256 b24ab448ce421f1e3c31986d935d992e9d8fb37e826abbe3525ab847685e7d7d
+It binds32 rechecked unique source/library/evidence files, SDK dependencies,
+headers, helper sources, capture contract, fixture metadata and launch argv.
+The original device harness verified complete fixture owner payload hashes;
+this archival audit did not re-read those large owner payloads.
+
+Raw result:
+  ROOT/qk-repeatable-pool-checks/support-v2/receipt.json
+  sha256 02e3e64768817d2dafd2034f6f514905d6a981ad1bc2fbde37c5a333cd67dab5
+Supervisor:
+  ROOT/qk-repeatable-pool-runs/0dc75d773adb0843415f3b66b146ce4c
+  leader pid/pgid3435124, uid1003, starttick18511792
+Build:
+  ROOT/build/qk-repeatable-pool.20261013v2/build-receipt.json
+  sha256 31da75582cba83570c337ea3a80887f99412f833d5871a70282581d95799c4f4
+DSO liblingbot_qk_repeatable_pool_v2.so:
+  sha256 cca136b118224e7339aa00a1407ad35b6840c1a6ddc72def14fd462adcd01545
+Source recovery/experiments/qk_repeatable_pool_v2/host.cpp:
+  sha256 fd65a7c9856f1e8726cd7350b257a0f9e11bde570632405cbb25fd179120e724
+Harness recovery/check_qk_repeatable_pool_support_v2.py:
+  sha256 e840787f40656095c1e82b989bc875866d4568ed99b01a58efff1aa52e057823
+
+CPU tests:11 passed normally and with python -O during preparation; root also
+independently repeated11 tests. CPU receipt is
+  recovery/validation/qk-repeatable-pool-support-v2-cpu-20261013.json.
+The frozen pre-run protocol is recovery/QK_REPEATABLE_EVENT_POOL_SUPPORT_V2_20261013.txt.
+The frozen design intentionally remains a pre-build design document; neither it
+nor the host/harness was edited after source/build qualification. This result
+report records the subsequent test without rewriting frozen provenance.
