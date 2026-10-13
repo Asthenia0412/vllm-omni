@@ -99,8 +99,8 @@ model_config:
 | `root_uint8_allgather` | Convert each spatial shard to uint8 before the final All-Gather; rank zero assembles and copies the result. |
 | `root_uint8_p2p` | Convert each shard to uint8, then use batched point-to-point send/receive to collect only on rank zero. |
 
-The non-native modes require eight-rank NPU width sharding, an unpatched
-streaming VAE and a request-owned decode cache. Unsupported geometry selects
+The non-native modes require eight-rank NPU width sharding, a streaming VAE
+with `patch_size: null`, and a request-owned decode cache. Unsupported geometry selects
 the native path before decoder execution. Every rank still runs the complete
 local decoder, halo exchange and temporal-cache update. Non-output ranks
 return chunk metadata without a video payload. VAE attention collectives,
@@ -116,12 +116,33 @@ borrowed graph outputs until its residual has been submitted. Completion events
 prevent slot reuse while any consumer remains in flight. The graph does not
 capture communication, KV writeback or VAE-cache advancement.
 
-Changed parameter owners or an execution failure abort the candidate; there
+Changed parameter owners, callable code, LayerNorm backend settings, or an execution failure abort the candidate; there
 is no mid-execution fallback. The launch-owned optional fatal-receipt channel
 retains active owners and reports that all eight workers must be restarted.
 These experimental modes require eight-rank correctness, paired model timing
 and lifecycle validation before enabling them in a serving deployment. CPU
 ownership tests alone do not provide that acceptance.
+
+Validate each pixel mode independently against `native`, with leased graphs
+disabled. Validate leased graphs separately with native pixel output before
+testing a combination. Use consecutive chunks and compare latent tensors,
+pre-encoding RGB bytes, frame counts, and PTS; also exercise cancellation,
+disconnect, close/reopen, window sliding, and prompt changes. All eight ranks
+must retain their decoder and temporal-cache work throughout these checks.
+
+The CPU contracts can be run without weights or NPU initialization:
+
+```bash
+TORCH_DEVICE_BACKEND_AUTOLOAD=0 OMP_NUM_THREADS=1 python -m pytest \
+  --noconftest -c pyproject.toml -o addopts='' \
+  tests/diffusion/layers/test_lingbot_pixel_output.py \
+  tests/diffusion/layers/test_lingbot_leased_post_attention.py -q
+```
+
+This isolated command omits the repository's integration fixtures. In a full
+development environment, run the same files with the normal fixtures and
+`-m "core_model and diffusion and cpu" --run-level=core_model` instead. Neither
+command establishes eight-rank HCCL or model-performance acceptance.
 
 ## Realtime in-process generation (deprecated)
 

@@ -34,7 +34,8 @@ def _parameters(block):
 def _callable_identity(value):
     # Accessing a bound method creates a new wrapper each time. Its function
     # and receiver identify the actual provider without rejecting that wrapper.
-    return (id(getattr(value, "__self__", None)), id(getattr(value, "__func__", value)))
+    function = getattr(value, "__func__", value)
+    return (id(getattr(value, "__self__", None)), id(function), id(getattr(function, "__code__", None)))
 
 
 def _provider_owners(block):
@@ -75,7 +76,14 @@ def _runtime_contract(block):
         ("norm.normalized_shape", tuple(norm.normalized_shape)),
         ("norm.elementwise_affine", norm.elementwise_affine),
     )
-    providers = tuple(_callable_identity(value) for value in _provider_owners(block))
+    provider_owners = _provider_owners(block)
+    # NPU LayerNorm may dispatch to MindIE-SD through a module-level flag.
+    # Changing that flag changes capture's provider without replacing a method.
+    constants += tuple(
+        ("norm._HAS_MINDIESD", getattr(getattr(value, "__func__", value), "__globals__", {}).get("_HAS_MINDIESD"))
+        for value in (getattr(norm, "_forward_method", None), getattr(norm, "forward_npu", None))
+    )
+    providers = tuple(_callable_identity(value) for value in provider_owners)
     # Forward hooks also alter the mathematical provider. Capturing after a
     # hook changes must not replay the old operation silently.
     hooks = tuple(
@@ -266,11 +274,15 @@ class LeasedPostAttention:
         self.max_signatures = max_signatures
         self.owners = _parameters(block)
         self.identities = _identity(self.owners)
+        providers = _provider_owners(block)
         self.provider_owners = (
             block.self_attn.o,
             block.norm3,
             getattr(block.self_attn.o, "quant_method", None),
-            *_provider_owners(block),
+            *providers,
+            # Keep old code objects alive so identity reuse cannot conceal a
+            # function's in-place code replacement while the graph is cached.
+            *(getattr(getattr(value, "__func__", value), "__code__", None) for value in providers),
         )
         self.runtime_contract = _runtime_contract(block)
         self.arenas = {}

@@ -9,7 +9,7 @@ import importlib.util
 import sys
 from contextlib import ExitStack
 from pathlib import Path
-from types import SimpleNamespace
+from types import MethodType, ModuleType
 
 import pytest
 import torch
@@ -83,10 +83,10 @@ def operands(tokens=3, width=8):
 
 
 def controller(leased, *, tokens=3, width=8, max_signatures=4):
-    block = SimpleNamespace(
-        self_attn=SimpleNamespace(o=torch.nn.Linear(width, width).bfloat16()),
-        norm3=torch.nn.LayerNorm(width).bfloat16(),
-    )
+    block = torch.nn.Module()
+    block.self_attn = torch.nn.Module()
+    block.self_attn.o = torch.nn.Linear(width, width).bfloat16()
+    block.norm3 = torch.nn.LayerNorm(width).bfloat16()
     for module in (block.self_attn.o, block.norm3):
         module.requires_grad_(False)
     runtime = Runtime()
@@ -228,6 +228,47 @@ def test_weight_mutation_is_rejected_before_slot_write(leased):
     assert not runner.arenas and not runtime.log
 
 
+def test_in_place_provider_code_change_is_rejected_before_slot_write(leased, monkeypatch):
+    block, _, runtime, failures = controller(leased)
+
+    def forward(projection, value):
+        return torch.nn.functional.linear(value, projection.weight, projection.bias)
+
+    def changed_forward(projection, value):
+        return torch.nn.functional.linear(value, projection.weight, projection.bias) + 1
+
+    block.self_attn.o.forward = MethodType(forward, block.self_attn.o)
+    runner = leased.LeasedPostAttention(block, runtime=runtime, failure_reporter=lambda *args: failures.append(args))
+    original_code = forward.__code__
+    monkeypatch.setattr(forward, "__code__", changed_forward.__code__)
+    _, *inputs = operands()
+    with pytest.raises(RuntimeError, match="runtime constant or provider changed"):
+        with runner.acquire(*inputs):
+            pass
+    assert any(owner is original_code for owner in runner.provider_owners)
+    assert not runner.arenas and not runtime.log and not failures
+
+
+def test_npu_norm_backend_flag_change_is_rejected_before_slot_write(leased, monkeypatch):
+    block, _, runtime, failures = controller(leased)
+
+    def forward_npu(norm, value):
+        if globals().get("_HAS_MINDIESD", False):
+            return value + 1
+        return torch.nn.functional.layer_norm(value, norm.normalized_shape, norm.weight, norm.bias, norm.eps)
+
+    monkeypatch.setitem(forward_npu.__globals__, "_HAS_MINDIESD", False)
+    block.norm3.forward_npu = MethodType(forward_npu, block.norm3)
+    block.norm3._forward_method = block.norm3.forward_npu
+    runner = leased.LeasedPostAttention(block, runtime=runtime, failure_reporter=lambda *args: failures.append(args))
+    monkeypatch.setitem(forward_npu.__globals__, "_HAS_MINDIESD", True)
+    _, *inputs = operands()
+    with pytest.raises(RuntimeError, match="runtime constant or provider changed"):
+        with runner.acquire(*inputs):
+            pass
+    assert not runner.arenas and not runtime.log and not failures
+
+
 def test_new_signature_limit_falls_back_without_evicting_live_arena(leased):
     _, runner, _, _ = controller(leased, max_signatures=1)
     projection, *inputs = operands()
@@ -252,8 +293,10 @@ def test_stream_change_before_producer_submission_is_fatal(leased):
 
 
 def test_default_install_and_missing_controller_do_not_change_module(leased):
-    block = SimpleNamespace()
-    leased.install(SimpleNamespace(blocks=[block]))
+    block = torch.nn.Module()
+    transformer = torch.nn.Module()
+    transformer.blocks = torch.nn.ModuleList([block])
+    leased.install(transformer)
     assert not hasattr(block, "_lingbot_leased_post_attention")
     _, hidden, gate, scale, shift = operands()
     with leased.acquire(block, hidden, gate, scale, shift) as lease:
@@ -293,10 +336,16 @@ def reverse_exchange_oracle(destination_rank):
     functions: list[ast.stmt] = [
         node for node in ast.parse(source.read_text()).body if isinstance(node, ast.FunctionDef)
     ]
+
+    class CPUPlatform:
+        @staticmethod
+        def synchronize():
+            return None
+
     namespace = dict(
         torch=torch,
         dist=dist,
-        current_omni_platform=SimpleNamespace(synchronize=lambda: None),
+        current_omni_platform=CPUPlatform(),
         __name__="cpu_owned_reverse_exchange",
     )
     exec(
@@ -357,10 +406,12 @@ def test_owned_reverse_exchange_retains_packing_receive_and_target_after_collect
         raise RuntimeError("injected failure after collective submission")
 
     dist.all_to_all_single = failed_collective
+    fatal_module = ModuleType("vllm_omni.diffusion.layers.lingbot_sp8_fatal")
+    monkeypatch.setattr(fatal_module, "report_failure", lambda *args: failures.append(args), raising=False)
     monkeypatch.setitem(
         sys.modules,
         "vllm_omni.diffusion.layers.lingbot_sp8_fatal",
-        SimpleNamespace(report_failure=lambda *args: failures.append(args)),
+        fatal_module,
     )
     with pytest.raises(RuntimeError, match="after collective submission"):
         exchange(sources[0], 1, 2, group="ulysses", _output_destination=target)
