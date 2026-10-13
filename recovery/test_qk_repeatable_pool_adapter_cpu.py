@@ -72,8 +72,8 @@ class Ops:
         self.state = dict.fromkeys(FIELDS, 0)
     def create(self, *values):
         self.creates.append(values)
-        self.state.update(producer_tid=threading.get_native_id(), initialized=8,
-            workspace_initial_bytes=632737792, workspace_resident_bytes=632737792)
+        self.state.update(producer_tid=threading.get_native_id(), initialized=24,
+            workspace_initial_bytes=1898213376, workspace_resident_bytes=1898213376)
         return 7
     def run(self, handle, *values):
         self.runs.append((handle, values))
@@ -182,7 +182,10 @@ class PoolAdapterContracts(unittest.TestCase):
             lease=r.prepare(a[0],(s.cosine,s.sine),1)
             self.assertIsInstance(lease,qk.PoolLease)
         self.assertEqual(len(p.ops.creates),1)
-        self.assertEqual(p.ops.creates[0][-2:],(8,32))
+        self.assertEqual(p.ops.creates[0][-2:],(24,32))
+        self.assertEqual(qk.POOL_POLICY,dict(max_pools=1,plan_capacity=24,
+            retirement_capacity=32,workspace_bytes_per_plan=79092224,
+            workspace_budget_bytes=24*79092224))
         self.assertEqual(len(p.ops.runs),40)
         self.assertEqual(len(p.pools),1)
         self.assertEqual(len(p.cold_records),1)
@@ -248,7 +251,7 @@ class PoolAdapterContracts(unittest.TestCase):
     def test_close_two_phases_preserve_owners_until_finalize(self):
         p=provider();p.ensure_pool(args())
         self.assertEqual(p.close_all_drained(),(7,))
-        self.assertEqual(p.snapshot(7)['workspace_resident_bytes'],632737792)
+        self.assertEqual(p.snapshot(7)['workspace_resident_bytes'],1898213376)
         self.assertEqual(p.snapshot(7)['closed'],0)
         with self.assertRaisesRegex(RuntimeError,'closing/closed'):p.check_policy()
         p.finalize_all_drained()

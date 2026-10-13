@@ -62,13 +62,13 @@ def validate_pool_state(stats,closed=False):
             'native_closed','finalizing','finalize_released_calls','finalize_tid')
     need(all(type(stats.get(name)) is int and stats[name]>=0 for name in fields),
          'Missing/negative/noninteger pool lifecycle counter')
-    need(stats['capacity']==stats['initialized']==8 and stats['retirement_capacity']==32,
-         'Pool capacity differs from frozen eight-plan/32-retirement contract')
+    need(stats['capacity']==stats['initialized']==24 and stats['retirement_capacity']==32,
+         'Pool capacity differs from frozen 24-plan/32-retirement contract')
     need(stats['workspace_initial_bytes']>0 and stats['producer_tid']>0 and stats['consumer_tid']>0,
          'Pool was not initialized/executed on identified threads')
     need(stats['submitted']==stats['callbacks_done']==stats['generations']>0
          and stats['event_not_ready']<=stats['event_queries']
-         and 1<=stats['used_plan_peak']<=8 and stats['retained_call_slots']<=8
+         and 1<=stats['used_plan_peak']<=24 and stats['retained_call_slots']<=24
          and stats['retired_count']<=stats['retired_high_water']<=32
          and stats['producer_reclaimed_calls']<=stats['retired_total'],
          'Inconsistent drained pool counters')
@@ -370,7 +370,7 @@ def aggregate(correctness_dir,correctness_run,timing_dirs,timing_runs):
         statistical_significance_claim=False,end_to_end_improvement_claim=False,model_admitted=False,
         historical_single_host_identity_proven=False,real_payload_layers=[0],all40_payloads=False,
         lifecycle_scope=dict(production_allocator=True,automatic_pool_reference_reclaim=True,
-            fixed_plan_capacity=8,fixed_retirement_capacity=32,provider_pool_count=1,
+            fixed_plan_capacity=24,fixed_retirement_capacity=32,provider_pool_count=1,
             burst_original_collectives=4,inflight_coverage_claim=False,forced_exhaustion_tested=False,
             last_tensor_destructor_thread_proven=False,two_phase_pool_close_verified=True))
 

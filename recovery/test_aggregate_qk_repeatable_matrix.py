@@ -94,8 +94,8 @@ class PredefinedMetric(unittest.TestCase):
 
 
 def pool_state(submitted=3):
-    return dict(capacity=8,initialized=8,workspace_initial_bytes=632737792,
-        workspace_resident_bytes=632737792,submitted=submitted,callbacks_done=submitted,
+    return dict(capacity=24,initialized=24,workspace_initial_bytes=1898213376,
+        workspace_resident_bytes=1898213376,submitted=submitted,callbacks_done=submitted,
         pending=0,pending_peak=2,event_queries=submitted-1,event_not_ready=0,
         plan_reuses=submitted-1,used_plan_peak=1,generations=submitted,pool_exhaustions=0,
         producer_tid=100,consumer_tid=101,accepting=1,closed=0,poisoned=0,last_error=0,last_step=-1,
@@ -125,6 +125,13 @@ class PoolEvidence(unittest.TestCase):
         # A successful finite burst is accepted without inventing inflight proof.
         agg.validate_lifecycle(lifecycle())
         agg.validate_closed(closed_pool())
+        maximum=pool_state(24)
+        maximum.update(used_plan_peak=24,retained_call_slots=24)
+        agg.validate_pool_state(maximum)
+        for field in ('used_plan_peak','retained_call_slots'):
+            over_capacity=copy.deepcopy(maximum);over_capacity[field]=25
+            with self.assertRaisesRegex(ValueError,'Inconsistent drained pool counters'):
+                agg.validate_pool_state(over_capacity)
 
     def test_prior_reclaim_counter_cannot_stand_in_for_third_call(self):
         evidence=lifecycle()
@@ -138,6 +145,7 @@ class PoolEvidence(unittest.TestCase):
             lambda x:x['burst'].update(per_call_device_drain=True),
             lambda x:x['burst'].update(inflight_coverage_claim=True),
             lambda x:x['burst']['after'].update(capacity=64),
+            lambda x:x['burst']['after'].update(capacity=8,initialized=8),
             lambda x:x['burst']['after'].update(poisoned=1),
             lambda x:x['automatic_reclaim']['after'].update(producer_reclaim_tid=101),
             lambda x:x['burst']['after'].update(event_queries=-1),

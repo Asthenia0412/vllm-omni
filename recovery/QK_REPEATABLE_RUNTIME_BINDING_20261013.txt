@@ -92,8 +92,8 @@ the new adapter must expose only the declared guard function. Actual call tracin
 and fresh correctness receipts remain separate evidence.
 
 pool_policy is fixed for this operator integration:
-  max_pools=1, plan_capacity=8, retirement_capacity=32,
-  workspace_bytes_per_plan=79092224, workspace_budget_bytes=632737792.
+  max_pools=1, plan_capacity=24, retirement_capacity=32,
+  workspace_bytes_per_plan=79092224, workspace_budget_bytes=1898213376.
 This is an explicit experiment budget, not measured capacity validation on all
 ranks/cases. Pool creation must check actual workspace statistics and stop if the
 budget is exceeded. The 75.428MiB/plan two-probe support result is not a full-model

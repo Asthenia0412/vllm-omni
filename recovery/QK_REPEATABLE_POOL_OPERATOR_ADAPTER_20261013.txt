@@ -25,9 +25,9 @@ and owner ABI. No raw new kernel launch or arithmetic change is introduced.
 
 Pool ownership and bounded cold cost
 All routes/layers in one worker share one PoolProvider and at most one pool.
-It has exactly8 executor plans and32 retired-call slots, not one pool per layer.
-The pinned workspace budget is8 x79,092,224 =632,737,792 bytes, or
-603.42578125 MiB/rank. This cold cost is reported separately. The fixed plan
+It has exactly 24 executor plans and 32 retired-call slots, not one pool per layer.
+The pinned workspace budget is 24 x 79,092,224 = 1,898,213,376 bytes, or
+1810.27734375 MiB/rank. This cold cost is reported separately. The fixed plan
 capacity permits testing the unchanged warm20 submission pattern; it is not a
 proof of sufficiency for a whole model or arbitrary inflight load. Real plan or
 retirement exhaustion is terminal; no hidden growth, eviction, fallback or wait.

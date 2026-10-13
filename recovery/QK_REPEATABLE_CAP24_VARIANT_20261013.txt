@@ -1,0 +1,52 @@
+QK repeatable-pool operator experiment: fixed capacity 24
+2026-10-13; source-only variant, no device or performance qualification inherited
+
+Scope
+This variant changes only the fixed Python adapter/binder pool policy and the
+aggregator's capacity/counter bounds, with matching CPU fixtures and documents.
+The v2 C++ DSO, native arithmetic, padded-send/owner ABI, original collective,
+benchmark, warmup, measurements and performance gates remain unchanged.
+The runtime-binding schema is unchanged; a fresh source freeze and manifests
+must pin these files. The compilation ancestor remains the frozen v2 DSO;
+using that binary does not transfer cap8 correctness or performance admission.
+
+Fixed policy, per rank
+max_pools=1; plan_capacity=24; retirement_capacity=32.
+workspace_bytes_per_plan=79,092,224.
+workspace_budget_bytes=1,898,213,376 = 1810.27734375 MiB
+= 1.767848968505859375 GiB. This is workspace alone, not total NPU memory.
+Pool exhaustion and retirement overflow remain terminal. No growth, busy wait,
+retry, fallback or device synchronization is introduced.
+
+Reason and bounded protocol argument
+The preceding cap8 run stopped with POOL_EXHAUSTED during the existing 20-call
+unsynchronized warmup. Its incomplete rank results cannot pass the full gate
+or establish a speedup. Existing receipts and manifests are not overwritten.
+The unchanged phase boundary drains earlier work before each warm20 batch.
+There are at most 20 candidate submissions before the next phase boundary;
+24 independent plans cover that batch without reducing warmup or adding sync.
+Each callback retires at most one prior call. Producer run reclaims the prior
+retired list before submitting, so a batch adds at most 20 retired calls,
+within the unchanged 32-slot retirement bound. Wall/event phases already
+complete each sample; case boundaries drain earlier work too.
+This argument assumes the existing framework/device drain semantics and one
+candidate submission per Replay.call. It is not a measured inflight proof or
+a capacity guarantee for production model concurrency. Framework callback
+references, allocator reserved memory, HCCL buffers and input owners are extra.
+
+Acceptance remains independent
+Fresh eight-rank, four-probe, six-history correctness is required for cap24,
+followed by three fresh timing rounds. Each scope is judged separately using
+max-rank(mean of 30 wall calls) per case, equally weighted over 24 cases:
+aggregate candidate/baseline <=0.90 and every case ratio <=1.05. No threshold,
+measurement or sample changes. Events are an independent diagnostic batch,
+not additive to wall time. No end-to-end/model-performance claim follows from
+source changes or CPU tests.
+
+CPU verification
+The unchanged four targeted suites contain 48 tests. Both normal Python and
+python -O passed all 48 tests after these edits; no torch/device import,
+compilation or hardware execution was requested. Added subcases verify that
+24 live plan slots are accepted, 25 are rejected, and old 8-plan receipts are
+rejected. The adapter test checks create(...,24,32) and the exact workspace
+budget. CPU evidence does not admit the operator or production model.

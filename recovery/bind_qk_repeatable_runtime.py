@@ -16,8 +16,8 @@ BUILD_SCHEMA = 'lingbot_qk_repeatable_event_pool_cpu_build_v2'
 NAMESPACE = 'lingbot_qk_repeatable_pool_v2'
 OWNERSHIP = 'bounded_consumer_retirement_producer_reclaim_two_phase_close_v2'
 VERSIONS = ('2.10.0+cpu', '2.10.0.post4', '5dd8ef3f9b375b5ae4a83538d5785754148c3302')
-POOL_POLICY = dict(max_pools=1, plan_capacity=8, retirement_capacity=32,
-                   workspace_bytes_per_plan=79092224, workspace_budget_bytes=632737792)
+POOL_POLICY = dict(max_pools=1, plan_capacity=24, retirement_capacity=32,
+                   workspace_bytes_per_plan=79092224, workspace_budget_bytes=1898213376)
 BASE_RELATIVE = tuple('vllm_omni/diffusion/' + suffix for suffix in (
     'layers/lingbot_recovery.py', 'layers/lingbot_recv_kv_sp8.py',
     'layers/lingbot_qk_combined.py', 'layers/lingbot_real_fixture_capture.py',

@@ -19,8 +19,8 @@ MANIFEST = "LINGBOT_QK_REPEATABLE_POOL_MANIFEST"
 MANIFEST_SHA = MANIFEST + "_SHA256"
 SCHEMA = "lingbot_qk_repeatable_runtime_binding_v1"
 NAMESPACE = "lingbot_qk_repeatable_pool_v2"
-POOL_POLICY = dict(max_pools=1, plan_capacity=8, retirement_capacity=32,
-                   workspace_bytes_per_plan=79092224, workspace_budget_bytes=632737792)
+POOL_POLICY = dict(max_pools=1, plan_capacity=24, retirement_capacity=32,
+                   workspace_bytes_per_plan=79092224, workspace_budget_bytes=1898213376)
 _OTHERS = ("lingbot_npu_recovery_qk", "lingbot_npu_recovery_qk_combined",
            "lingbot_npu_qk_single_host_admission_v1")
 _POLICY = (MANIFEST, MANIFEST_SHA, "LINGBOT_RECOVERY_MANIFEST", "LINGBOT_RECOVERY_MANIFEST_SHA256",
