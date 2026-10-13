@@ -1,0 +1,68 @@
+QK v1 三轮失败case的host阶段诊断（2026-10-13）
+
+结论：失败主要表现为调用返回后的完成等待增长；多个样例同时显示，某rank
+前一调用迟返，导致下一调用起点迟到、其余rank等待被放大。现有时间戳支持
+这一依赖关联，不能定位到具体API、device collective进入点或通信传输耗时。
+原strict gate保持失败，不修改门槛、不删除样本，也不推算chunk收益。
+
+范围与方法
+- 输入为冻结v1 QK真实192三轮原始wall30，全部24个rank报告重新核对已有SHA。
+  Wall与event来自独立批次；没有逐sample配对、相加或合并它们。
+- 超过case B/A=1.05的case共18个：三轮producer为3/2/4，cached为2/5/2。
+  选择每个失败case中candidate wall mean最慢的rank，比较该同一rank的A/B。
+  这是失败子集的描述性分解，不替代原max-rank mean完整调用判据。
+- 对这18个case等权平均：start→return减少0.081410ms，return→sync-end增加
+  0.212825ms，完整call净增加0.131416ms。17/18的前段减少，18/18的后段增加。
+  后段增加范围0.067131–0.345856ms/call。没有把host等待再加到kernel/event。
+- start→return包括Python/C++提交、可能的host等待、lease/HCCL包装，以及
+  held=self.call(...)赋值时释放上一份held的工作；它不是纯CPU计算时间，也
+  不是某一框架算子的准确返回时刻。后段包括剩余设备完成等待与synchronize
+  本身的开销；不是独立HCCL时间。阶段barrier在计时外，不加到call。
+
+两个可直接对齐的依赖样例（均为combined wall批）
+
+1. Round1 / producer / KV14040 / probe0，sample23与24。
+   以下以sample23最早host start为0，单位ms。
+   sample23：8rank start spread仅0.017570。其余7rank的sync-end位于
+   0.876807–0.893837；rank5 return=6.879885、sync-end=6.956066。
+   rank5本次start→return=6.872895，后段只有0.076181。
+   sample24：其余7rank start=0.895507–0.918208；rank5 start=6.980426。
+   start skew=6.084919。其余rank返回后的等待6.753344–6.830925ms；
+   rank5后段等待0.295893ms，八rank最后均在8.185306–8.200496ms结束。
+   因此上一sample的rank5迟返与下一sample的peer等待相连，不能将二者
+   当成两个独立损失相加。这个case的candidate mean=1.096729ms，B/A=1.139966。
+
+2. Round2 / cached / KV4680 / probe0，sample1。
+   8rank start spread仅0.025220ms。rank5 start→return=4.555866ms；
+   其余rank前段约0.429–0.523ms，后段约4.364–4.456ms，八rank在约
+   4.885–4.906ms结束。这里大部分等待发生在同一sample，不能只找
+   host start skew来识别迟到；内部提交/执行/返回边界还未被观测。
+
+Round3 / producer / KV9360 / probe3的sample27→28重复第一种形态：
+rank5前段7.045466ms，其他rank先完成；下一sample start skew=6.313231ms，
+peer后段等待约6.90–7.01ms。它是另一轮相似依赖证据，不证明固定rank5故障。
+
+重复性与限制
+- 18个失败case中，最长单次start→return所属rank覆盖全部0–7；频次为
+  rank0:2、1:1、2:1、3:4、4:5、5:3、6:1、7:1。没有单一固定rank解释全部失败。
+- 只有cached KV4680/probe0与KV14040/probe1分别在两轮重复失败；没有同一
+  scope/history/probe在全部三轮失败。尖峰既出现在早期也出现在中后期sample；
+  round2反转A/B顺序后仍有失败，不能仅归因于“总是第二个arm”或首call冷启动。
+- host return skew还可能来自同一进程被调度暂停、提交线程/queue等待、owner
+  释放或内部同步。本数据没有OS调度、Python栈、ACL提交、device时间线，不能
+  从这些host时间戳宣判record_stream、GC、allocator或HCCL本身为根因。
+- 不同rank每sample属于同一次相关collective，不能flatten成240个独立样本。
+
+对下一步的约束
+保持root正在验证的record-once为单一改变，并复用原完整调用/三轮门槛。
+它若改变owner处理成本，需要由新结果判断，v1数据本身没有证明其收益。
+如果长尾仍在，另开correctness/profile诊断，记录prepare、lease exchange和
+上一held释放边界，再关联CPU调度与八rank设备trace；正式计时harness和门槛
+不为消除尖峰而修改。不要把增加per-sample barrier或只看event当作性能修复。
+
+已保存证据（不复制大原始trace或计时报告进Git）：
+ROOT/audits/qk-restore/analyze_v1_wall_phases.py
+ROOT/audits/qk-restore/v1-wall-phase-diagnostic.json（约568KB）
+原完整gate：recovery/validation/qk-real192-three-round-screen-20261013.json
+ROOT=/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012。
+本诊断没有设备调用、runtime修改或门槛重判。root新一轮timing前CPU解析已停止。
