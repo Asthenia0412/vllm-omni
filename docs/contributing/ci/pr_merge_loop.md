@@ -68,7 +68,7 @@ Near-misses are often tip-stale after rebase. Same-day light nudge: “re-approv
 |---------------------------------------------|----------------|
 | CI / precheck mechanics | Auto → this tree + `.claude/skills/precheck-pr` (+ bot precheck sync); **≤1 regulation PR/day** |
 | Review bars (non-claim) | Auto → `.claude/skills/review-pr` (+ bot review sync) |
-| Claim / docs language | **Draft for maintainer yes** → then `docs/contributing` + skills |
+| Claim / docs language | **Draft for maintainer yes** → then `docs/contributing` / [Documentation Build Guide](../DOCS_GUIDE.md) + skills |
 
 One shared bible for humans and agents — not a bot-only shadow.
 
