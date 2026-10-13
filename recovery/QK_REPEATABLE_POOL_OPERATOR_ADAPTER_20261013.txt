@@ -1,0 +1,94 @@
+QK repeatable pool operator adapter: isolated CPU/source preparation, 2026-10-13
+
+Scope
+New runtime module: vllm_omni/diffusion/layers/lingbot_qk_repeatable_pool.py.
+This is a default-off independent operator route. No device, numeric, speed or
+model admission is inherited. configure_module reads the actual construction
+config; disabled is a no-op, enabled currently rejects model construction.
+Standalone replay explicitly uses configure_operator_module(module, config).
+That path validates LingBot eager/native-BF16/SP8-TP1-ring1 plus mutually
+exclusive QK flags. It is not a production admission bypass or model test.
+
+Binding and computation
+A new source-frozen runtime manifest binds the unchanged v2 DSO compilation
+ancestor, original native SDK/kernel dependencies, current base-provider binding,
+and current adapter/hooks/helper sources. A base source relocated into the new
+checkout must match ancestor bytes/SHA; its exact library/kernels and explicit
+compilation ancestor remain fixed. Old runtime Python paths are not rewritten
+inside old manifests and their admissions are not inherited.
+
+The independently loaded combined DSO exposes only validate_lease through a
+LeaseGuard wrapper; dependencies() is used for startup ELF resolution checking.
+No old combined Python load/_BOUND/provider/try_run or compute path is invoked.
+The v2 DSO retains the original four native arithmetic stages, padded output
+and owner ABI. No raw new kernel launch or arithmetic change is introduced.
+
+Pool ownership and bounded cold cost
+All routes/layers in one worker share one PoolProvider and at most one pool.
+It has exactly8 executor plans and32 retired-call slots, not one pool per layer.
+The pinned workspace budget is8 x79,092,224 =632,737,792 bytes, or
+603.42578125 MiB/rank. This cold cost is reported separately. The fixed plan
+capacity permits testing the unchanged warm20 submission pattern; it is not a
+proof of sufficiency for a whole model or arbitrary inflight load. Real plan or
+retirement exhaustion is terminal; no hidden growth, eviction, fallback or wait.
+
+Python lookup keys include producer TID, actual device and all five non-address
+shape/stride/offset/format/physical-owner extent descriptors. Fresh addresses do
+not create new pools. Raw stream-pointer getters and Stream hashing are avoided:
+in this framework those can drain the task queue. Ordinary admission already
+requires the current device's default stream. C++ create/run remains authoritative
+for the real ACL context, stream, physical metadata and recorded-generation
+safety. A context change is rejected by C++ before refresh/launch; Python does
+not guess a context or call an unqualified ctypes SDK query.
+
+ensure_pool validates current policy and input metadata; cold create is measured
+once with perf_counter_ns and reported in cold_records, without an explicit sync.
+The reported interval is producer wall time for create only, not a device event
+or steady-state performance measurement. There is no added hot instrumentation.
+Current ordinary/capture/format getters keep their installed framework semantics.
+There is no explicit device synchronization in the adapter; caller-owned
+correctness/timing protocols remain responsible for their own boundaries.
+
+Per-call data and HCCL
+PoolRoute only reads the already-prepared canonical SharedCoefficients snapshot.
+A miss refuses without get(), coefficient expansion or generation/cache mutation.
+Unsupported ordinary shape/dtype/device-type/stream/format/grad scope returns
+None before pool creation, native writes or communication. Invalid metadata,
+mixed/current-device mismatch, stale config, pool exhaustion and execution errors
+are fatal. Each successful call still allocates independent output/intermediate
+owners in the v2 DSO; no live send/output address is reused by Python.
+
+PoolLease retains raw, weights, coefficient snapshot, independent padded owner,
+send and metadata. The exact offset256 lease guard runs immediately before the
+unchanged all_to_all_5D submission. It preserves scatter3/gather1/group arguments,
+collective order and result layout. Input/send storages are already recorded in
+v2; HCCL retains its existing allocator protection. The newly produced consumer
+result is recorded once on the admitted stream. A failed collective or post-call
+Python step poisons the shared base and quarantines its owners; no fallback or
+retry occurs after submission. Output owners are retained before constructing
+the metadata/lease so post-submit Python failure cannot omit them.
+
+Close
+Caller drains; close_all_drained queues SDK cleanup without synchronizing.
+Caller drains again; finalize_all_drained requires native_closed1/closed0 and
+releases framework owners on the producer through v2. Caller drains a final
+time for allocator events. Closing/closed providers reject new sends and leases.
+Partial failure retains the provider/DSO/pool handles and owners until supervisor
+retirement. There is no automatic destructor or interpreter-shutdown cleanup.
+
+CPU validation
+15 targeted CPU contract tests passed normally and under python -O, using fake
+tensors/ops and no framework import, compilation or device operation. Coverage
+includes40 fake routes sharing one pool, stream getters that raise if touched,
+ordinary refusal without mutation, bounded-cache failure, source-path relocation
+with exact ancestor checks, post-submit owner quarantine, original collective
+parameters/one-use guard, shared poison, and the two close phases. These fake
+contracts are not actual40-layer, 192-case or HCCL/device evidence.
+
+Owned files for this task
+  vllm_omni/diffusion/layers/lingbot_qk_repeatable_pool.py
+  recovery/test_qk_repeatable_pool_adapter_cpu.py
+  recovery/QK_REPEATABLE_POOL_OPERATOR_ADAPTER_20261013.txt
+Root owns existing hook edits and the standalone matrix controller. A separate
+agent owns the source-binding writer. No existing runtime file was edited by
+this adapter task, and no source was compiled or run on a device here.

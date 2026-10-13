@@ -244,6 +244,8 @@ class LingBotSelfAttention(nn.Module):
         self._lingbot_recovery_qk = configured("qk")
         from vllm_omni.diffusion.layers.lingbot_qk_combined import configure_module
         self._lingbot_qk_combined_route = configure_module(self)
+        from vllm_omni.diffusion.layers.lingbot_qk_repeatable_pool import configure_module as configure_qk_pool
+        self._lingbot_qk_repeatable_pool_route = configure_qk_pool(self)
         if __import__("os").environ.get("ROOT_LINGBOT_QK_SINGLE_HOST_INTEGRATION_V1", "0") == "1":
             from vllm_omni.diffusion.layers.qk_single_host_integration_v1 import bind_construction_config
             bind_construction_config(self)

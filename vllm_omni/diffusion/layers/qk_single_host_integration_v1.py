@@ -297,6 +297,9 @@ class _Send:
 
 def validate_padded_send(metadata, send, lease, world_size):
     """Admit each explicitly registered padded-owner route independently."""
+    from .lingbot_qk_repeatable_pool import PoolLease, validate_padded_send as validate_pool
+    if type(lease) is PoolLease:
+        return validate_pool(metadata, send, lease, world_size)
     from .lingbot_qk_combined import Lease, validate_padded_send as validate_combined
     if type(lease) is Lease:
         return validate_combined(metadata, send, lease, world_size)
@@ -525,6 +528,9 @@ def configure_hccl_smoke(manifest_pin):
 
 
 def try_prepared_send(module, raw, rotary, *, ring_size):
+    pool = getattr(module, "_lingbot_qk_repeatable_pool_route", None)
+    if pool is not None:
+        return pool.prepare(raw, rotary, ring_size)
     combined = getattr(module, "_lingbot_qk_combined_route", None)
     if combined is not None:
         return combined.prepare(raw, rotary, ring_size)

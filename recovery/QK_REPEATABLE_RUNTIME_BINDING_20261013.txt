@@ -1,0 +1,122 @@
+Repeatable-pool operator runtime binding, 2026-10-13
+
+Purpose
+recovery/bind_qk_repeatable_runtime.py is a standard-library-only binder. It never
+imports torch, compiles, registers a library, initializes a device or grants a
+numerical/performance/model admission. It writes only two files into a new output
+directory: host_manifest.json and qk_repeatable_runtime_manifest.json. Original
+v2/base/guard build receipts remain immutable compilation ancestors.
+
+Source ownership
+Root owns qk_single_host_integration_v1.py, transformer construction hooks and
+recovery/check_qk_repeatable_matrix.py plus its tests. The QK agent owns the new
+layers/lingbot_qk_repeatable_pool.py and adapter tests. The trace agent owns this
+binder, its CPU tests and this note. The original all_to_all_5D communication
+function and shared coefficient producer must remain byte-identical to the guard
+compilation ancestor's recorded runtime source. No fake Lease/_BOUND substitutions
+or old compute calls are admitted by the binding.
+
+Required source freeze
+Generate a fresh root-owned freeze JSON only after hooks, adapter, binder, harness
+and tests are frozen. Use schema lingbot_qk_repeatable_source_freeze_v1 with:
+  source_root: canonical absolute selected integration worktree
+  frozen: true
+  scope: actual192_operator_integration
+  binder: {path,bytes,sha256} for the actual binder being executed
+  runtime_sources: current worktree pins for binder.RUNTIME_RELATIVE
+  harness_sources: current pins for binder.HARNESS_RELATIVE
+  test_sources: current pins for binder.TEST_RELATIVE
+  infrastructure_parity: current pin for binder.PARITY_RELATIVE
+Lists may include additional declared local dependencies. Required entries cannot
+be omitted, duplicated within a list, or moved outside the selected worktree.
+Test source pins describe frozen source; the binder does not claim tests executed.
+An explicit --freeze-sha256 binds this exact collection. There is no automatic
+"freeze current files anyway" fallback when a pin differs.
+
+A short CPU-only construction pattern, executed by root after freeze:
+  import json
+  from pathlib import Path
+  import bind_qk_repeatable_runtime as b
+  root = Path('/absolute/qk-repeatable-integration-worktree').resolve()
+  freeze = dict(schema=b.FREEZE_SCHEMA, source_root=str(root), frozen=True,
+      scope='actual192_operator_integration', binder=b.pin(b.__file__),
+      runtime_sources=[b.pin(root/name) for name in b.RUNTIME_RELATIVE],
+      harness_sources=[b.pin(root/name) for name in b.HARNESS_RELATIVE],
+      test_sources=[b.pin(root/name) for name in b.TEST_RELATIVE],
+      infrastructure_parity=b.pin(root/b.PARITY_RELATIVE))
+  # Write with exclusive-create mode to a new root-owned freeze path.
+
+Binding command (no real binding was generated while implementing this tool)
+  python recovery/bind_qk_repeatable_runtime.py \
+    --pool-build /absolute/qk-repeatable-pool.20261013v2/build-receipt.json \
+    --pool-build-sha256 EXACT_POOL_BUILD_SHA \
+    --guard-build /absolute/qk-record-once.20261013v1/qk_combined_manifest.json \
+    --guard-build-sha256 EXACT_GUARD_BUILD_SHA \
+    --freeze-manifest /absolute/new-source-freeze.json \
+    --freeze-sha256 EXACT_FREEZE_SHA \
+    --output /absolute/new-runtime-binding-directory
+
+Base manifest semantics
+The fresh base uses schema lingbot_recovery_build_v1 so the unchanged recovery
+loader can validate it. binding_schema identifies a source binding, not a new
+compilation. compilation_ancestor points to the actual old base build receipt.
+source/kernel-source bytes in the new checkout must equal the old compilation
+inputs. library and kernels retain their original exact pins. The historical
+registration_passed bit is supported only by this same binary's recorded CPU
+registration; registration_evidence states that scope. No registration happens
+here. Current runtime sources and the operator harness receive new pins. All
+old device/model/performance admissions are false. No command is rewritten as
+if the old binary were compiled from this new source path.
+
+Pool runtime schema
+schema: lingbot_qk_repeatable_runtime_binding_v1
+compilation_ancestor: exact immutable v2 CPU-build receipt pin
+source/library/namespace/dependencies/statistics_fields: exact original v2 values
+provider_manifest: pin of the newly written base binding
+abi_headers: duplicate-checked union of v2/base/guard ABI declarations
+runtime_sources/harness_sources/test_sources: current frozen local pins
+binder/freeze_manifest: exact CPU binding authority pins
+ownership_policy: bounded_consumer_retirement_producer_reclaim_two_phase_close_v2
+execution_scope: actual192_operator_integration
+binding_only=true, recompiled=false, registration_executed_by_binder=false,
+device_calls_by_binder=false, device_admitted=false, model_admitted=false,
+performance_admitted=false, historical_admission_inherited=false,
+v1_qualification_inherited=false.
+
+The guard object retains its own compilation_ancestor/source/library/dependencies/
+abi_headers and namespace lingbot_qk_combined_v1. allowed_operations contains only
+validate_lease. resolution_only_operations contains dependencies for startup
+symbol-resolution checking. No try_run, native_impl or old QK computation is
+selected, and this binding alone cannot enforce a library's Python callable access;
+the new adapter must expose only the declared guard function. Actual call tracing
+and fresh correctness receipts remain separate evidence.
+
+pool_policy is fixed for this operator integration:
+  max_pools=1, plan_capacity=8, retirement_capacity=32,
+  workspace_bytes_per_plan=79092224, workspace_budget_bytes=632737792.
+This is an explicit experiment budget, not measured capacity validation on all
+ranks/cases. Pool creation must check actual workspace statistics and stop if the
+budget is exceeded. The 75.428MiB/plan two-probe support result is not a full-model
+memory or lifecycle qualification.
+
+Integrity and stopping
+The binder rejects mismatched pool/guard base ancestors, changed host/kernel
+sources, differing kernel dependencies, framework ABI mismatch, inconsistent
+repeated pins, changed original communication/coefficient code, missing freeze
+inputs, or any current content/name difference in the historical228 protected
+Python files. Those are exactly four top-level trees: engine58, distributed38,
+entrypoints114 and worker18. Diffusion-specific files are outside that list.
+Every checked file is rehashed before and after emitting the two manifests.
+A concurrent edit is terminal; retain the failed output directory for audit and
+choose a new directory for a later independent binding. Never repair old receipts
+in place. Runtime loading must independently verify all current pins again.
+
+Validation performed during implementation
+python recovery/test_bind_qk_repeatable_runtime.py
+python -O recovery/test_bind_qk_repeatable_runtime.py
+Eleven tests passed in each mode using small synthetic source/library files.
+They cover immutable ancestry/no admission inheritance, mixed-base rejection,
+changed freeze/source/comm rejection, protected228 parity, repeated-path SHA
+mismatch, missing harness pins, existing output refusal, kernel mismatch and v1
+schema rejection. Tests do not load an actual library or import torch. Formal
+binding generation and all device experiments remain root-owned next steps.
