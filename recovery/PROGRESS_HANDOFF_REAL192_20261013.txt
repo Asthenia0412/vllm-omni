@@ -1,0 +1,261 @@
+LingBot 910C 恢复交接：真实192输入、独立正确性与当前性能边界
+2026-10-13；cross 三轮串行 rank clean timing 已完成并通过算子筛选
+
+当前结论
+
+完整历史获胜组合尚未恢复。当前可引用的干净模型计时仍是 partial：
+mean 944.15885 ms、P99 963.03828 ms/chunk，warm40 +161、窗口11–159。
+该运行启用重建 QK/recv、batched VAE、StageA 等，关闭 cross BSND/combined；
+不是完整组合，也不是三轮 final600 验收。历史 mean895–899 ms、P99911–914 ms
+属于旧二进制组合，不能移植到新实现的结果声明中。
+
+本轮新增了可信的真实输入矩阵：QK 与 cross 各192个 layer0 实际输入，均已
+完成独立设备正确性；QK combined 的完整调用三轮筛选失败。Cross combined 的
+完整 Attention.forward 三轮筛选通过，wall平均改善38.6%–39.5%，每轮最差case
+仍改善至少11.1%。这是串行die的独立调用证据，不代表模型chunk收益或最终达标。
+ASYNC_METADATA 继续显式0，不在当前恢复工作中混入新的变量。
+
+一、迁移时保存什么
+
+ROOT = /mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012
+源码 worktree = ROOT/worktree
+持久化 Git common directory = ROOT/vllm-omni.git
+当前恢复分支 = recovery/lingbot-sp8-20261012
+源模型 = ROOT/models/lingbot-world
+环境入口 = worktree/recovery/env.sh
+Python = /home/zhoutaichang/venvs/vllm-omni/bin/python
+CANN 根目录 = /home/zhoutaichang/tools/ascend-9.1-a3/usr/local/Ascend
+
+用户给出的容器绑定为：
+/mnt/sfs_turbo/ascend-ci-share-nv-action-vllm-benchmarks -> /root/.cache
+恢复 ROOT 是共享盘上的相邻目录，不能假定该绑定自动暴露 ROOT。新容器应
+显式挂载恢复 ROOT；源码、模型、build、dependencies、captures、audits、
+各 checks/runs 目录分别保留，不把原始 payload 或二进制只留在 /tmp。
+
+模型重新下载自 robbyant/lingbot-world-v2-14b-causal-fast-diffusers，固定 revision：
+59cccf49f2d2dd27418ae7a04b82b10868d455c2。
+26个文件的完整性检查通过；旧历史 checkpoint 的精确文件身份仍无法证明。
+验证证据见 recovery/validation/model-integrity-20261013.json。
+
+移动路径或改动 manifest 所绑定源码后必须新建 build 并重新验证，不能仅改
+JSON 中的绝对路径或沿用旧 SHA。当前真实192实验使用：
+ROOT/build/host.qkcombined.8e52a4eb/host_manifest.json
+  SHA256 7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67
+QK combined 独立构建：
+ROOT/build/qk-combined.4812aaf2/qk_combined_manifest.json
+  SHA256 6dcc477f6355d6dad15e6215e6eec0227390347fa46f50c447d984bd0a010e6d
+这些是可复查的当前构建，不是丢失的历史 OPP/DSO。
+
+固定负载为832x480、SP8/TP1/ring1、4 DMD、完整历史、BF16 attention、FFN
+W8A8 NZ、12 FPS 编码。当前 root 选择 visible driver devices8..15，逻辑0..7；
+设备实验串行。新机器须重新确认可用设备、die/package对应与通信拓扑，不能
+用逻辑编号或单个算子 harness 的收据替代实际硬件拓扑证据。
+
+二、已恢复功能与仍存在的缺口
+
+已恢复 Python：StageA 固定 timestep、FFN W8A8 NZ、历史 staging/prefix
+reuse、本地 uint8、root P2P 汇集、device interleave。OMP/MKL8、HISTORY_STAGING=1、
+PLANAR_RGB=1、PINNED_RGB=0 等启动条件需保留，不能仅看配置名称判断实际启用。
+
+recv/Q/current-KV/staging 与 VAE exact-pack 是独立重建库。VAE 从逐行小 DMA
+改为批量搬运后，isolated 检查和80块模型逐位检查通过；上述944 ms是之后的一次
+干净 partial 计时。相对1184 ms的一次观察差约240 ms，不能称六次配对收益或
+把旧 trace 的270 ms copy 工作量全部判为回退。
+
+QK：原 single-host adapter/OPP 的实现未找回。公开 native RMS/RoPE 保留其
+BF16边界，combined admission 重建了 consolidated C++ guard、fresh padded owner、
+lease 和原 HCCL 消费者。不能把“一个 host 入口”直接解释为单个设备 kernel或
+单个框架队列条目。独立 direct-native single-queue 原型曾慢27.4%，保持拒绝。
+最新 public-native combined admission 真实192正确性通过，但三轮性能未过门槛。
+
+Cross：plain public-native H40 BSND 与 combined C++ guard 都已重建；SDPA
+不是该恢复路径的逐位参考。旧 source-pinned构建已完成 BSND→BSND paired80，
+8x80 latent 与957 primary RGB 帧逐位相同；新的真实192验证还证明正常
+Attention.forward入口实际调用预期 provider。最新构建的独立完整调用筛选已通过；
+下一步是最新组合的模型paired80、六次启动筛选，不能直接沿用旧构建的模型资格。
+
+engine58 + distributed38 + entrypoints114 + worker18 =228个历史 Python 文件
+曾逐文件验证与 frozen StageA source 一致；不能为掩盖恢复问题改动这些文件。
+证据：recovery/validation/historical-infrastructure-source-parity-20261013.json。
+这份证据不表示所有 diffusion provider 文件未改，也不保证相同源码的运行时
+调度必然相同。后续修改必须保持范围并重查对应 pins。
+
+区域图、leased post-attention、输出通信流水和 MC2 未在历史获胜组合启用；
+这些不是“丢失的已验证收益”，当前不扩展到这些路线。
+
+三、真实192 fixture 与正确性已完成的范围
+
+独立 correctness 服务 warm40 后新请求16块，按实际 KV长度选取：
+4680、9360、14040、18720、23400、28080；每种长度4 probes、8 ranks。
+QK与cross各192个实际 layer0 payload；两类全40层共15360份 descriptor。
+992个完整 owner、9,357,189,120 bytes 已逐内容 SHA验证。保留 source物理布局、
+storage extent、offset、别名关系、实际 backend、系数 generation 与正确性参考。
+
+原始输入与计划：
+ROOT/audits/capture-fixtures/launch-v1/full/fixtures
+ROOT/audits/capture-fixtures/launch-v1/full/plan.frozen-before-request.json
+ROOT/audits/capture-fixtures/launch-v1/full/services/ee3320eae23939704ba92406aac1071b
+版本化收据：recovery/validation/real-fixtures-full192-capture-20261013.json。
+这不是40层 payload回放；不能复制 layer0 40次声称完整40层输入覆盖。
+
+独立 load_real_fixtures.py 使用完整 owner bytes、显式物理格式分配和实际
+11字段 descriptor验证，保留同一 snapshot 的别名与不同 input/reference owners。
+其真实设备 materialization 已由后续 QK/cross replay 实际使用并通过；最初仅做
+capture时尚未完成的 materializer设备资格，不能继续误写成“仍仅CPU验证”。
+
+QK combined：8 ranks x24实际 case，2496组检查通过，包括 native send和原
+all_to_all_5D/receive reorder、完整arena/canary、source/reference owners、fresh
+outputs、lease及descriptor不变。独立WORLD HCCL8复用原算法/顺序，但不是
+在线服务的同一个Ulysses group实例。finite参考及逐位等同性证明另有收据：
+recovery/validation/qk-combined-real192-correctness-hccl-20261013.json
+recovery/validation/qk-real192-finite-implication-20261013.json
+后者未额外调用candidate isfinite kernel，也未宣称padding应全为有限值。
+
+Cross：8 ranks x24实际 case，plain/combined共768次provider调用。通过完整
+Attention.forward入口、有限值、capture-native及双臂逐位相等、完整输出owner、
+fresh输出和source/descriptor检查。text KV为512，六种长度表示self-history上下文。
+public FIA输出不提供额外外圈canary，因此destination_canary_verified=false。
+recovery/validation/cross-real192-correctness-20261013.json
+这些算子结果不能替代最新组合的paired80、生命周期、视频质量或速度验收。
+
+四、QK三轮完整调用筛选结果
+
+预先冻结：每case以max_rank(mean(30次wall调用))为指标，24个case等权。
+每轮两scope分别要求aggregate B/A<=0.90且每个case B/A<=1.05；保留全部outlier。
+20次warmup，wall30和event30分开；一次collective的8rank相关，不能当240个
+独立样本。producer-inclusive与cached分开，不把producer开销按40层重复计算。
+
+                  Round1          Round2          Round3
+producer改善       9.110%          8.092%          6.955%
+producer最差B/A    1.139966        1.118831        1.246202
+cached改善        14.051%          5.021%         10.274%
+cached最差B/A      1.175503        1.233649        1.191411
+
+三轮严格门槛均失败；六个scope/round的最差case都退化超过5%。不移除spike、
+不改变汇总口径、不据此把QK combined加入获胜模型组合。其正确性证据仍保留。
+版本化说明：recovery/QK_REAL192_SCREEN_20261013.txt
+版本化数据：recovery/validation/qk-real192-three-round-screen-20261013.json
+完整sample派生数据：ROOT/audits/qk-restore/actual192-aggregate-v1.json（约19.9MB）。
+
+五、Cross三轮完整调用筛选与下一步顺序
+
+Cross三轮各使用独立supervisor，die0..7逐个运行fresh Python进程，避免其它rank
+fixture读取/H2D进入当前rank计时。每rank覆盖24实际case，20warm、30wall与独立
+30device-event；round2交换双臂顺序。仅在全部三轮完成后按预先冻结口径汇总。
+三轮supervisor均exit0、fatal=null、remaining_owned_processes=[]。
+
+指标为192个rank/history/probe case的完整调用wall均值等权平均；每轮要求改善
+>=10%，且每个case候选/原路径均值<=1.05；保留全部samples/outliers。
+
+                         Round1           Round2           Round3
+plain BSND wall均值ms    0.320354         0.315834         0.315246
+combined wall均值ms      0.196450         0.193807         0.190805
+平均改善                  38.677%          38.636%          39.474%
+最差case B/A             0.888896         0.642049         0.645155
+严格筛选                 PASS             PASS             PASS
+
+完整调用使用实际Attention constructor/forward、实际布局、Python/C++ admission、
+FIA分配/提交和输出处理。constructor配置来自capture YAML但隔离构造，不是完整
+服务startup；不包含Q/K投影、输出投影、HCCL或模型调度。逐调用同步也不同于模型
+异步提交。device event包含排队执行及可能的host提交空隙，不是纯FIA kernel时长。
+这是serial-rank isolated screen，不证明模型并发性能；不能按40层/4probe/8rank
+相乘推算chunk收益，也不能把rank时间戳拼成“同时八rank到达差”。
+
+原始检查：ROOT/cross-real-matrix-checks/{correctness,timing-round1,timing-round2,timing-round3}
+三轮supervisor：ROOT/cross-real-matrix-runs/
+  9a1da81cba1fd0cbbbb3b324baf8377c
+  8b914f4e6cd7ad1ae5a8903c28a3dd66
+  808deed8113e96b716767c07c28e5faa
+版本化筛选收据：recovery/validation/cross-real192-three-round-screen-20261013.json
+完整逐case派生数据：ROOT/audits/cross-real-matrix/three-round-screen-v1.json。
+checker：recovery/check_cross_real_matrix.py；聚合：recovery/summarize_cross_real_matrix.py。
+汇总校验精确serial8启动命令、capture/fixture/source/build身份、30个整数且不重叠
+wall窗口及A/B阶段顺序；checker16项、聚合器10项CPU测试均通过。
+
+1. Cross combined已获得进入模型验证的资格；使用当前baseline QK配对验证
+   plain BSND与combined。尚未获得最新完整模型的发布或最终性能资格。
+2. QK已有候选没有赢，保持当前baseline。利用完整调用证据重新定位Python
+   admission、提交路径与rank迟到；只有明确修改执行路径才建立下一候选，
+   不把旧失败实现原样重跑或默认启用。
+3. 对已通过筛选的恢复部分冻结新build/config/env，并验证实际dispatch。QK保持
+   当前baseline，低调度路径缺口继续单列，不能称历史完整获胜组合已恢复。
+   做匹配BSND参考的paired80；纯搬运latent/RGB要求逐位相同。旧构建结果不能
+   自动给新源码组合继承资格。
+4. 用完整八rank trace做因果关联、独立干净六次启动A1/B1/B2/A2/A3/B3筛选，
+   每次warm40+161，主窗口11–159；只能将已测获胜路径组合。
+5. 完整组合再做三次独立warm40+600，窗口11–598，每轮mean<=900 ms且P99<=950 ms；
+   保留max、1000ms超限及连续长度，完成帧序、PTS、播放和生命周期/质量检查。
+6. ASYNC_METADATA只在恢复基线之后做单变量A/B；现为显式0。历史父进程是否
+   继承过该变量无法证明，不能称恢复旧获胜开关。CPU所有权/event审查已有，
+   实际8die延迟copy、失败清理、slot压力、模型输出和生命周期仍须验证。
+
+旧row-copy/no-cross trace只用于该旧版本归因：chunk11/probe1/layer0样例rank0
+host提交晚4.914 ms，peer消费等待4.63–5.17 ms相互重叠；RGB长同步多数在等
+VAE完成。通信union包含等待，host start不是device collective arrival；host等待、
+kernel工作量及270 ms copy不可重复相加。不要用这些旧trace证明944 ms版本的原因。
+证据：recovery/TRACE_DEPENDENCY_AUDIT_20261013.txt；异步metadata边界见
+recovery/METADATA_TRANSFER_AUDIT_20261013.txt。
+
+六、只读整理的现有模型paired80 / clean timing入口（未执行）
+
+以下是root协调后可使用的参数，不表示当前未过门槛的候选被准入。每个服务
+选择独立run/capture目录，只停自己supervisor记录的uid/pgid/start/nonce进程。
+不在Cross clean timing期间跑大文件哈希、CPU tests、offline exporter或其他设备工作。
+
+公共条件：在ROOT/worktree下 source recovery/env.sh，明确
+ASCEND_RT_VISIBLE_DEVICES=8,9,10,11,12,13,14,15
+VLLM_LINGBOT_NPU_ASYNC_METADATA=0
+HISTORY_STAGING=1、OMP/MKL8、PLANAR_RGB=1、PINNED_RGB=0（完整变量名在env.sh）。
+当前source-pinned manifest为本说明开头host.qkcombined.8e52a4eb路径；若源码有改，
+先用新build重验，不沿用它。model=ROOT/models/lingbot-world；
+integrity=ROOT/worktree/recovery/validation/model-integrity-20261013.json；
+image=/home/zhoutaichang/.cache/vllm/assets/vllm_public_assets/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg。
+
+现有配置（只读确认，未改写）：
+ROOT/reference-bsnd.yaml：recovery_qk=true，recovery_cross=true，cross_combined=false。
+ROOT/candidate-bsnd-combined.yaml：recovery_qk=true，recovery_cross=false，cross_combined=true。
+两者QK combined保持false（旧文件未写该key时使用默认false）；两者batched VAE、
+StageA、完整staging和FFN设置一致。正式新launch应制作不可变副本并显式记录所有开关。
+ROOT/candidate-no-cross.yaml是944 ms partial的no-cross配置；不能作为BSND逐位参考。
+recovery/make_config.py的candidate模板目前也不默认启用cross或QK combined。
+
+Paired80每臂启动前设置：
+LINGBOT_CAPTURE_DIR=<该臂新建的持久化capture根目录>
+LINGBOT_CAPTURE_RANK=-1
+LINGBOT_CAPTURE_ACTIVATIONS=0
+关闭REAL_FIXTURE/OUTPUT_CAPTURE/COMPUTE_CAPTURE/profiler等本次不需要的诊断，
+不设置临时payload spool。每臂只发一次80块请求，保证compare_captures要求的
+每rank一个session；不要先对同一capture根目录warm40，否则出现多个session。
+
+服务命令模板：
+python recovery/supervise.py --runs <新run根目录> --mode correctness --recv \
+  --manifest <已验证host_manifest.json> -- \
+  vllm serve <model> --omni --deploy-config <该臂config.yaml> --port 7816 \
+  --init-timeout 1800 --stage-init-timeout 1800
+
+用supervisor实际打印的目录调用：
+python recovery/run_smoke.py --run <owned-run目录> --model <model> \
+  --integrity <integrity.json> --image <image> --port 7816 --chunks 80
+
+两臂依次结束并确认remaining_owned_processes=[]后，在非干净计时窗口执行：
+python recovery/compare_captures.py --reference <A capture根目录> \
+  --candidate <B capture根目录> --chunks 80 --output <新paired80.json>
+预期8rank各80 latent块，rank0共957 RGB帧（首块9，其余12），其它rank无RGB。
+已存在历史本轮BSND配对路径：ROOT/captures/reference-bsnd80与
+ROOT/captures/candidate-bsnd-combined80；对应旧host.K0uh0D7x构建，结果见
+recovery/validation/cross-combined-bsnd-paired80-20261013.json，不覆盖未来改动。
+
+Clean timing必须另启全新服务，清空所有capture/profile/observer环境与配置。
+关闭LINGBOT_REAL_FIXTURE_CAPTURE；不要因其变量名不含CAPTURE_DIR就漏掉它。
+run_timing还会拒绝活动LINGBOT_*CAPTURE/PROFILE变量、profiler_config和当前用户
+export_profile.py/msprof.py；此检查不能代替root确认其它CPU/设备分析已停。
+
+同上服务模板但 --mode timing，仍 --recv；新服务不能先收smoke/capture请求。
+python recovery/run_timing.py --run <owned-run目录> --model <model> \
+  --integrity <integrity.json> --image <image> --port 7816 --chunks 161
+它先warm40、再新请求161；写timing-protocol.json、main-window.json与原始rollout。
+--chunks 600用于最终服务，仍内部warm40、主窗口11–598。该脚本单次完成不等于
+六次筛选或三轮final600准入；需要root按既定顺序安排独立服务和整体收据。
+
+迁移后优先读取本文件、FULL_COMBINATION_REPRODUCTION.txt、上述版本化收据，
+而不是将较早RECOVERY/REPRODUCE_FIRST中的“待采192”状态当成最新事实。

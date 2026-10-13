@@ -68,3 +68,13 @@ Full-call screening needs three independent rounds, average improvement>=10%
 and worst-case regression<=5%. Passing this isolated screen still requires the
 paired model/latent/RGB and performance acceptance tests. No isolated-call
 speedup is converted into chunk milliseconds or end-to-end gain here.
+
+Subsequent completed results (after the CPU preparation described above)
+- Actual192 correctness passed on all8 dies; 768 full-wrapper provider calls.
+  Receipt: recovery/validation/cross-real192-correctness-20261013.json.
+- Three independent serial8 timing rounds passed the fixed full-call screen:
+  mean wall improvements38.677%,38.636%,39.474%; no case regressed.
+  Receipt: recovery/validation/cross-real192-three-round-screen-20261013.json.
+- Serial-rank isolated timing does not prove concurrent model performance.
+  Latest model paired80 and performance admission remain required; see
+  recovery/PROGRESS_HANDOFF_REAL192_20261013.txt for the complete handoff.

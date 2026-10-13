@@ -1,0 +1,441 @@
+{
+  "schema": "lingbot_cross_actual192_timing_aggregate_v1",
+  "complete_three_rounds": true,
+  "gate_passed": true,
+  "rounds": [
+    {
+      "round": 1,
+      "actual_cases": 192,
+      "plain_wall_mean_ms": 0.32035406302083336,
+      "combined_wall_mean_ms": 0.1964500845486111,
+      "wall_speedup_percent": 38.67719900407959,
+      "plain_device_mean_ms": 0.29416963196773493,
+      "combined_device_mean_ms": 0.1745318784042158,
+      "worst_case": {
+        "rank": 3,
+        "kv_len": 9360,
+        "probe": 1,
+        "plain": {
+          "wall_ms": 0.32109186666666667,
+          "device_ms": 0.2991126666466395
+        },
+        "combined": {
+          "wall_ms": 0.2854172,
+          "device_ms": 0.18288533240556717
+        },
+        "wall_speedup_fraction": 0.11110423641998202,
+        "wall_regression_fraction": -0.11110423641998202
+      },
+      "worst_case_regression_percent": -11.110423641998201,
+      "average_10percent_passed": true,
+      "worst_case_5percent_passed": true,
+      "gate_passed": true,
+      "worst_case_B_over_A": 0.888895763580018
+    },
+    {
+      "round": 2,
+      "actual_cases": 192,
+      "plain_wall_mean_ms": 0.3158343046875,
+      "combined_wall_mean_ms": 0.19380733819444446,
+      "wall_speedup_percent": 38.63638771405603,
+      "plain_device_mean_ms": 0.2907515174967961,
+      "combined_device_mean_ms": 0.1727941041644145,
+      "worst_case": {
+        "rank": 2,
+        "kv_len": 14040,
+        "probe": 1,
+        "plain": {
+          "wall_ms": 0.3181138,
+          "device_ms": 0.29253133237361906
+        },
+        "combined": {
+          "wall_ms": 0.20424456666666665,
+          "device_ms": 0.17748800019423167
+        },
+        "wall_speedup_fraction": 0.35795125308406406,
+        "wall_regression_fraction": -0.35795125308406406
+      },
+      "worst_case_regression_percent": -35.795125308406405,
+      "average_10percent_passed": true,
+      "worst_case_5percent_passed": true,
+      "gate_passed": true,
+      "worst_case_B_over_A": 0.6420487469159359
+    },
+    {
+      "round": 3,
+      "actual_cases": 192,
+      "plain_wall_mean_ms": 0.31524564930555554,
+      "combined_wall_mean_ms": 0.19080498177083333,
+      "wall_speedup_percent": 39.47419030487765,
+      "plain_device_mean_ms": 0.2884080000855546,
+      "combined_device_mean_ms": 0.16944679859378892,
+      "worst_case": {
+        "rank": 4,
+        "kv_len": 18720,
+        "probe": 0,
+        "plain": {
+          "wall_ms": 0.3127452,
+          "device_ms": 0.28868999977906545
+        },
+        "combined": {
+          "wall_ms": 0.20176923333333333,
+          "device_ms": 0.17522666454315186
+        },
+        "wall_speedup_fraction": 0.3548446680130236,
+        "wall_regression_fraction": -0.3548446680130236
+      },
+      "worst_case_regression_percent": -35.48446680130236,
+      "average_10percent_passed": true,
+      "worst_case_5percent_passed": true,
+      "gate_passed": true,
+      "worst_case_B_over_A": 0.6451553319869764
+    }
+  ],
+  "matrix_sha256": "20f5938922e5d192f982ddf4a2582fd497e1f7097e7eef1281f5f17a3d10e59c",
+  "manifest": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/build/host.qkcombined.8e52a4eb/host_manifest.json",
+    "bytes": 8229,
+    "sha256": "7e3638083b70fbef41c6a3ef80f3a8d0415110a13492cd35971c4912f98ccf67"
+  },
+  "sources": {
+    "harness": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/check_cross_real_matrix.py",
+      "bytes": 25115,
+      "sha256": "78f34d382cb0c8778e1b9990456ae9f2aaf70ee0b264ebd87c8db7b031998dbc"
+    },
+    "loader": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/load_real_fixtures.py",
+      "bytes": 9819,
+      "sha256": "803d63a571446c787f4d4382565d882e2e31d0198f4efd5222a964902e4a4bf0"
+    },
+    "capture_contract": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_real_fixture_capture.py",
+      "bytes": 22079,
+      "sha256": "7f7ccd43367004adb4cc6415f82b8bfd43d37b48332c1bbe1a091c48d736aa36"
+    },
+    "configuration_context": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/config.py",
+      "bytes": 1459,
+      "sha256": "26a558c59721086fd057c8b43dfa096557bba2b7a62d725ed70a5308100b3821"
+    },
+    "forward_context": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/forward_context.py",
+      "bytes": 16561,
+      "sha256": "8480f721ec90b0019c0610e2c1e00eaf5a1c7b6fae729e62c837aceb0549a335"
+    },
+    "model_metadata": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/model_metadata.py",
+      "bytes": 7968,
+      "sha256": "806cc712141d14f45f7d71f138b56d41e845c18f399cf52e30c94027596069a1"
+    },
+    "caller": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/layer.py",
+      "bytes": 29897,
+      "sha256": "bbb1b74e2c39e175d8d225dcf52ee674a18cdfb30be4451f39833721c9793648"
+    },
+    "backend_selector": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/selector.py",
+      "bytes": 5923,
+      "sha256": "ac1576cc81187a001c1e45dd8c8cd6d7fec0b58e655635208b5824efde3fae49"
+    },
+    "backend_dispatch": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/backends/abstract.py",
+      "bytes": 14323,
+      "sha256": "02baeeadb2fb6b9ed14be3afc349551abdc5ed526b37a4e97fa025f4d18f70c5"
+    },
+    "parallel_factory": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/parallel/factory.py",
+      "bytes": 3620,
+      "sha256": "856d284ccf849d21c951f4ec99bf50e3c61baaa6b611133b5e80918e5f85e856"
+    },
+    "local_input_output_handling": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/parallel/base.py",
+      "bytes": 2353,
+      "sha256": "fb16ef62b8fe0d35fb3e2006d23319643368f30d643ac076ab179d2758434ac3"
+    },
+    "backend": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/backends/sdpa.py",
+      "bytes": 6472,
+      "sha256": "ebc76eef4b652b213358275a1000ce60b9c57e0384fb39593d0c8b4aaf2f822a"
+    },
+    "integration": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/attention/backends/cross_combined_integration_v1.py",
+      "bytes": 6304,
+      "sha256": "690cb787e550e5db411255e6cd234fa01b361414061b3431fce9b5d8215334cc"
+    },
+    "provider": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/vllm_omni/diffusion/layers/lingbot_recovery.py",
+      "bytes": 11282,
+      "sha256": "22ca8f9449b6034b8367163b25bddafe03c07a2a59c6fd48bc1109cbbd550bad"
+    }
+  },
+  "correctness_receipts": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank0.json",
+      "bytes": 157628,
+      "sha256": "22b5b7dbd431a8185b4f41ba45f6b67b2288ee4afd720dfd9a6fb156e3db14fa"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank1.json",
+      "bytes": 157628,
+      "sha256": "a6f8281102be4831c972d2498497f177bc2a01af77947375bf4b16fbd6f038f3"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank2.json",
+      "bytes": 157628,
+      "sha256": "d6adb0848158c52bf4c10a5ae66122b4c4d9ea86f50f4f3d209a5d66dc39c722"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank3.json",
+      "bytes": 157628,
+      "sha256": "877eb7b2e25f63882516b71bbb4d44ba67d01509f6bcbe28e76e14e416b8ceaf"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank4.json",
+      "bytes": 157628,
+      "sha256": "8eb358bd4d4084beb37c525c0f64f4dd31e62b10aa4ff76959e7cf26264df5f3"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank5.json",
+      "bytes": 157628,
+      "sha256": "aa498071c99b7fdea9788670997ccc8075b221f367d87e784a4805445160861b"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank6.json",
+      "bytes": 157628,
+      "sha256": "651dc6d2f07d27a2727519e052450a52e3bab24e89eb008d9dd3d99e65b3f05f"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/correctness/rank7.json",
+      "bytes": 157628,
+      "sha256": "e28750c93dd8fa35af45dfe30aac9ab5a807bd7b4e8884895aa99671d4542380"
+    }
+  ],
+  "timing_receipts": [
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank0.json",
+      "bytes": 374522,
+      "sha256": "737c863531707ab1abc70347536c8b988b640244ee08abbc34aaffdaed8004c8"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank1.json",
+      "bytes": 374514,
+      "sha256": "5d8a55ead70716f540eee9cd1e39cf79ee10ba5188a20eac8b0a2c568312e5f0"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank2.json",
+      "bytes": 374461,
+      "sha256": "27f4c31ab2b8dd97c85864975cb3602f9b9f7e5ff5653a51d460222deb4fed44"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank3.json",
+      "bytes": 374414,
+      "sha256": "490b4a958c12d6a733fb28e689dbe9822c892eefa16c2dbca8aeed4b3c382283"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank4.json",
+      "bytes": 374485,
+      "sha256": "4e55fae386f6b9b988faf444b28f00aff42d4378451d7c165b6516d688d30254"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank5.json",
+      "bytes": 374418,
+      "sha256": "f5d7d5104e40f18fd53ad886801de36fb4814d3263c6c76c65867d5d7cdc4b9d"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank6.json",
+      "bytes": 374530,
+      "sha256": "209bf50ce8071ca46054598d23e00b9607c6e8e9c5ff98cfdabdbd03e190d764"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round1/rank7.json",
+      "bytes": 374561,
+      "sha256": "a8235a03014006b9097642ef2f2d479388e68434b7cb98e6b87ad232821159df"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank0.json",
+      "bytes": 374426,
+      "sha256": "1f7ef5878e05136cd93f9a659cc0ba987513cb21190c687cb1310d4583ac2752"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank1.json",
+      "bytes": 374478,
+      "sha256": "1c25ac917f47f6f835a89a14e55df4d4da129b344883b9dac6bd39596db9b24e"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank2.json",
+      "bytes": 374457,
+      "sha256": "ca2060af5a9e775e769396634f5790f1771ede5a07409a033d6926c482be11f1"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank3.json",
+      "bytes": 374510,
+      "sha256": "1d537c94d08fbe78ac4ba226fa7ea3659a8b911b01bb469e2a2085cdd6ae775a"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank4.json",
+      "bytes": 374431,
+      "sha256": "982b2ed10ba5827164775a21568a749ae3422d0b285e1f68b449e44bc1f3bb27"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank5.json",
+      "bytes": 374424,
+      "sha256": "e046b6ee73cee877b97a2205664ea47e10a83c6fb567d2dcc22ab5e97b571540"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank6.json",
+      "bytes": 374412,
+      "sha256": "4b83951798c2f8b638bb42502439611d5478efe254c89ba75eacf69555689093"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round2/rank7.json",
+      "bytes": 374479,
+      "sha256": "2e7dc70e928d403b089ce4cea25eb48a23024105439940c356b5791fbfce92cc"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank0.json",
+      "bytes": 374460,
+      "sha256": "8d15e70033df9b9279cbc3e0f572cc175dbe0e227ef2461e1abba093a78c7885"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank1.json",
+      "bytes": 374431,
+      "sha256": "2ec1350ea83c0e0f407197a95fe4f73790a201bb8e2d35f489d9de6f83476676"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank2.json",
+      "bytes": 374489,
+      "sha256": "7c1bd60b42264663d00f8249fecf5e0c458b3b9514800138783986886ef2e2a9"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank3.json",
+      "bytes": 374482,
+      "sha256": "cd4c2c69a14ef842caf6a385be7d62c315d6a4aeefce9b5c66f95872f72ea274"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank4.json",
+      "bytes": 374453,
+      "sha256": "5f816cf6374c5012a10d3f2d580622fc39d5ab867cb0723568d37a2aa8353587"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank5.json",
+      "bytes": 374433,
+      "sha256": "160a7934eb846658ea42222eb060336895630ad06c4be24432f4503cdd1132f4"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank6.json",
+      "bytes": 374450,
+      "sha256": "5d3fb176b6965ae4d956f24cda31bb5b9e8831df5705031bcb9563ff7274e5b5"
+    },
+    {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-checks/timing-round3/rank7.json",
+      "bytes": 374394,
+      "sha256": "c7ee89efd04b2eb464337bc67ebafab3158fb1a3f1294ccbcf1cb39eafd796f5"
+    }
+  ],
+  "full_call_scope": "Attention.forward: native layout handling, admission, FIA allocation/dispatch and output handling",
+  "real_payload_layers": [
+    0
+  ],
+  "all40_payloads": false,
+  "model_admitted": false,
+  "end_to_end_performance_validated": false,
+  "statistical_significance_claimed": false,
+  "historical_full_combo_reproduced": false,
+  "weighting": "equal weight per actual rank/history/probe case; no sum of cross-rank durations",
+  "method": "20warm +30 synchronized complete-call wall +30 separate device-event samples per arm",
+  "caveats": [
+    "per-call synchronization differs from model submission",
+    "wall and device events use separate sample batches",
+    "no cross-rank phase barrier; do not assume ranks sampled simultaneously",
+    "three independently launched rounds and all8 ranks are required for screening"
+  ],
+  "independent_process_launches_verified": true,
+  "supervisor_results": [
+    {
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-runs/9a1da81cba1fd0cbbbb3b324baf8377c/launch.json",
+        "bytes": 1085,
+        "sha256": "067b0919f5a9c8de3af9e120e786a7a022bd603bdc341a65edf8c7cf29f9a2a9"
+      },
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-runs/9a1da81cba1fd0cbbbb3b324baf8377c/result.json",
+        "bytes": 1138,
+        "sha256": "b25917647cca9b99ed3b171864b2863d8ff18dacd439c94188213d2090baae0c"
+      }
+    },
+    {
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-runs/8b914f4e6cd7ad1ae5a8903c28a3dd66/launch.json",
+        "bytes": 1085,
+        "sha256": "615ddd4eb9288e4b6e93e9417e35d8c09dc019f7974fef5771fc4ca3bf09eced"
+      },
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-runs/8b914f4e6cd7ad1ae5a8903c28a3dd66/result.json",
+        "bytes": 1138,
+        "sha256": "fbd91d1689b312a58ada50c927de160ba26613dbb11acbe77295220d3b69e62c"
+      }
+    },
+    {
+      "launch": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-runs/808deed8113e96b716767c07c28e5faa/launch.json",
+        "bytes": 1085,
+        "sha256": "e967a4e463ed95867c9b5f06cbd59f81dcaf642d4d474330db4f4b521c925339"
+      },
+      "result": {
+        "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/cross-real-matrix-runs/808deed8113e96b716767c07c28e5faa/result.json",
+        "bytes": 1138,
+        "sha256": "a9ca0bd90117cf51f81d9adcea330574691b59537b763453a58428f05c55b49d"
+      }
+    }
+  ],
+  "serial_rank_launcher_verified": true,
+  "rank_execution_scope": "8 serial fresh Python workers per independent round; not concurrent model performance",
+  "full_derived_report": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/cross-real-matrix/three-round-screen-v1.json",
+    "bytes": 274221,
+    "sha256": "d052f183874c00521f8347f7c55bcfb5d4ac6be09f2fe58263d206d39deca613"
+  },
+  "isolated_full_call_gate_passed": true,
+  "eligible_for_model_validation": true,
+  "full_model_startup": false,
+  "baseline": "plain current public-native BSND through Attention.forward",
+  "candidate": "current combined C++ admission with identical native FIA arithmetic through Attention.forward",
+  "correctness_aggregate": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/validation/cross-real192-correctness-20261013.json",
+    "bytes": 9872,
+    "sha256": "6d5b7d6c0cd8be527eef78e50ade97a14832c4d1cae39a8e41d0d9e004c12cf9"
+  },
+  "aggregation_source": {
+    "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/summarize_cross_real_matrix.py",
+    "bytes": 11598,
+    "sha256": "103c019e425c8062655f3fe9206f0b809a84e61d517cf99d7dc2c7d3c057048a"
+  },
+  "cpu_tests": {
+    "admission_and_dispatch_tests": 16,
+    "summary_launcher_tests": 10,
+    "summary_test_source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/test_cross_real_matrix_summary.py",
+      "bytes": 4076,
+      "sha256": "518fbe173966a25932749d726efc19ae488bb5ec671bf5efda0b9f6104273964"
+    },
+    "summary_test_log": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/audits/cross-real-matrix/summary-cpu-tests-v1.log",
+      "bytes": 1379,
+      "sha256": "02dab1064f19c43bdcb8a6b9d8c27a5108c599969b0b5b957e7ff65f9660db47"
+    },
+    "replay_test_source": {
+      "path": "/mnt/sfs_turbo/lingbot-recovery-zhoutaichang-20261012/worktree/recovery/test_cross_real_matrix.py",
+      "bytes": 6240,
+      "sha256": "87c54891ae3a7aa2fb8354fb31ae9be142c3fc2aeb298f22b592a14fb3811e18"
+    }
+  },
+  "gate_definition": {
+    "per_round_equal_case_weight_wall_improvement_at_least": 0.1,
+    "per_round_worst_case_wall_B_over_A_at_most": 1.05,
+    "rounds_required": 3,
+    "all_rounds_required": true,
+    "remove_outliers": false
+  },
+  "device_event_caveat": "Elapsed events enclose queued work and possible host submission gaps; these values do not isolate FIA kernel time."
+}
