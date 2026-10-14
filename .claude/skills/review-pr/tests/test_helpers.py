@@ -60,7 +60,6 @@ else:
             check=False,
         )
 
-
     def test_select_filters_drafts_wip_and_own_prs(self):
         prs = [
             {"number": i, "title": title, "author": {"login": author}, "isDraft": draft}
@@ -113,17 +112,17 @@ else:
                 self.assertNotEqual(result.returncode, 0)
 
     def test_verify_deleted_file_on_left(self):
-        diff = (
-            "diff --git a/gone.py b/gone.py\n--- a/gone.py\n+++ /dev/null\n"
-            "@@ -1 +0,0 @@\n-old\n"
-        )
-        result = self.verify(
-            [{"path": "gone.py", "line": 1, "side": "LEFT", "body": "Check"}], diff
-        )
+        diff = "diff --git a/gone.py b/gone.py\n--- a/gone.py\n+++ /dev/null\n@@ -1 +0,0 @@\n-old\n"
+        result = self.verify([{"path": "gone.py", "line": 1, "side": "LEFT", "body": "Check"}], diff)
         self.assertEqual(result.returncode, 0, result.stderr)
-        result = self.verify(
-            [{"path": "gone.py", "line": 1, "side": "RIGHT", "body": "Check"}], diff
-        )
+        result = self.verify([{"path": "gone.py", "line": 1, "side": "RIGHT", "body": "Check"}], diff)
+        self.assertNotEqual(result.returncode, 0)
+
+    def test_verify_new_file_with_explicit_zero_old_count(self):
+        diff = "diff --git a/new.py b/new.py\n--- /dev/null\n+++ b/new.py\n@@ -0,0 +1,2 @@\n+one\n+two\n"
+        result = self.verify([{"path": "new.py", "line": 2, "side": "RIGHT", "body": "Check"}], diff)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result = self.verify([{"path": "new.py", "line": 1, "side": "LEFT", "body": "Check"}], diff)
         self.assertNotEqual(result.returncode, 0)
 
     def test_verify_checks_multiline_comment_start(self):

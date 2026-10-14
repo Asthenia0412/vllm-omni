@@ -6,11 +6,24 @@
 import argparse
 import ast
 import json
-import re
 import subprocess
 import sys
 
-HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+def parse_hunk(text):
+    """Parse a unified-diff hunk header without a runtime dependency."""
+    parts = text.split(" ", 4)
+    if len(parts) < 4 or parts[0] != "@@" or not parts[3].startswith("@@"):
+        return None
+    bounds = []
+    for value, sign in zip(parts[1:3], ("-", "+")):
+        if not value.startswith(sign):
+            return None
+        numbers = value[1:].split(",")
+        if len(numbers) not in (1, 2) or not all(number.isdecimal() for number in numbers):
+            return None
+        bounds.extend((numbers[0], numbers[1] if len(numbers) == 2 else None))
+    return tuple(bounds)
 
 
 def diff_path(value):
@@ -29,8 +42,8 @@ def diff_lines(diff):
         if text.startswith("diff --git "):
             old_path = new_path = None
             old_remaining = new_remaining = 0
-        elif match := HUNK.match(text):
-            old_line, old_count, new_line, new_count = match.groups()
+        elif hunk := parse_hunk(text):
+            old_line, old_count, new_line, new_count = hunk
             old_line, new_line = int(old_line), int(new_line)
             old_remaining = int(old_count) if old_count is not None else 1
             new_remaining = int(new_count) if new_count is not None else 1
