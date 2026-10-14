@@ -243,7 +243,7 @@ vllm serve jdopensource/JoyAI-VL-Interaction-Preview --omni \
 With `modalities: ["text", "audio"]`, its behavior is:
 
 | JoyAI action | Native output |
-|---|---|
+| --- | --- |
 | `</response> <text>` | action text + speech for `<text>` |
 | `</silence>` | action text + empty audio output (zero samples) |
 | `</response> <note> </delegation> <question>` | action text + speech for `<note>` only |

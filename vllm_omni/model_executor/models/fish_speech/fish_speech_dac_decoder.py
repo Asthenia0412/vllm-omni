@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
+
 """Fish Speech S2 Pro -- DAC Decoder (Stage 1).
 
 Loads the DAC codec from ``codec.pth`` and decodes codebook indices

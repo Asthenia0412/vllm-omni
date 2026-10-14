@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
 """Ephemeral Stage0 bind uses r.stage0-turn{N}, not resumable r.stage0."""
 
 from __future__ import annotations

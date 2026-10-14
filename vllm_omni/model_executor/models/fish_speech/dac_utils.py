@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
+
 """Shared DAC codec construction for Fish Speech S2 Pro.
 
 Used by both the encoder (voice cloning, CPU) and the decoder (Stage 1, GPU).

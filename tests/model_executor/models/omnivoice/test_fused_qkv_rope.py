@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
 """The fused attention prologue must equal the six steps it replaces.
 
 ``fused_qkv_norm_rope`` collapses split, per-head RMSNorm of Q and K, RoPE on
