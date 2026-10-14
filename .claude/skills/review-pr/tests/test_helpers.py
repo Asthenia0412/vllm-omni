@@ -168,6 +168,29 @@ else:
         result = self.verify([{"path": "a\tb.py", "line": 1, "body": "Check"}], diff)
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_verify_real_git_paths_preserve_filename_whitespace(self):
+        old = self.root / "old"
+        new = self.root / "new"
+        old.mkdir()
+        new.mkdir()
+        names = ("a b.txt", "trailing .txt ", "a\tb.txt", "unicode-é\tb.txt")
+        for name in names:
+            (old / name).write_text("old\n")
+            (new / name).write_text("new\n")
+        diff = subprocess.run(
+            ["git", "-c", "core.quotePath=true", "diff", "--no-index", "old", "new"],
+            cwd=self.root,
+            env=self.env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(diff.returncode, 1, diff.stderr)
+        for name in names:
+            with self.subTest(name=name):
+                result = self.verify([{"path": f"new/{name}", "line": 1}], diff.stdout)
+                self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_verify_rejects_malformed_input_and_fetch_failure(self):
         for data in ("not json", '{"comments": null}'):
             result = self.run_script(REVIEW / "verify_line_numbers.sh", "1", data=data)

@@ -30,6 +30,9 @@ def diff_path(value):
     """Decode a git path, including C-quoted UTF-8 bytes."""
     if value.startswith('"'):
         value = ast.literal_eval(value).encode("latin1").decode("utf-8")
+    else:
+        # Git appends a tab separator to unquoted headers containing spaces.
+        value = value.removesuffix("\t")
     return None if value == "/dev/null" else value[2:]
 
 
