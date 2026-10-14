@@ -5,6 +5,13 @@ comments. Commands below run from this skill directory, require `gh`, `jq`,
 Python, and Bash, and only read GitHub. Resolve the connected reviewer's login;
 do not infer it from examples or repository ownership.
 
+This is generic candidate discovery, not a daily eligibility policy. If the
+user's session specifies eligibility labels, a changed head since prior review,
+a daily cap, or another selection rule, build that eligible set from current
+metadata first. Do not let the legacy selector's own-PR/already-reviewed filters
+silently override it: select directly when those filters would discard an
+explicitly eligible re-review. User-selected PRs do not need to pass the helper.
+
 1. Check outstanding replies first when the session includes follow-up:
    `bash scripts/check_replies.sh --reviewer <login> --days 14`.
    Reopen each returned thread and inspect its current resolution before

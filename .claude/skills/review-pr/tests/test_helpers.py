@@ -61,12 +61,6 @@ else:
         )
 
 
-
-
-
-
-
-
     def test_select_filters_drafts_wip_and_own_prs(self):
         prs = [
             {"number": i, "title": title, "author": {"login": author}, "isDraft": draft}
@@ -228,7 +222,6 @@ else:
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("@author replied", result.stdout)
         self.assertNotIn("No unanswered replies found", result.stderr)
-
 
 
 if __name__ == "__main__":
