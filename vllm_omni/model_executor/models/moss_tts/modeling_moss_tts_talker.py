@@ -1321,6 +1321,15 @@ class MossTTSLocalTalkerForGeneration(nn.Module):
         self.audio_assistant_slot_token_id: int = int(self.config.audio_assistant_slot_token_id)
         self.im_end_token_id: int = int(self.config.im_end_token_id)
 
+        if current_omni_platform.is_cuda():
+            from vllm.v1.attention.backends.registry import AttentionBackendEnum, register_backend
+
+            # Use vLLM's backend registration rather than replacing module globals.
+            register_backend(
+                AttentionBackendEnum.TRITON_ATTN,
+                "vllm_omni.attention.triton_decode_attention.HeadGroupedTritonAttentionBackend",
+            )
+
         # Qwen3 backbone. get_text_config() is sufficient for vLLM to size
         # KV cache / heads correctly, as long as AutoConfig resolves to the
         # local MossTTSLocalConfig rather than the HF remote-code class.
@@ -1653,7 +1662,6 @@ class MossTTSLocalTalkerForGeneration(nn.Module):
             device=input_embeds.device,
             dtype=input_embeds.dtype,
         )
-        active_mask = text_step.reshape(bsz, -1)[:, :1] > 0
 
         # Match MOSS-TTS Local v1.5's model-card/SGLang defaults. The generic
         # stage SamplingParams are for the backbone token loop and should not
@@ -1679,6 +1687,25 @@ class MossTTSLocalTalkerForGeneration(nn.Module):
             generators=generators,
         )
         new_codes = new_codes.to(device=input_embeds.device, dtype=torch.long)
+        stacked = getattr(self, "_stacked_audio_emb_w", None)
+        if (
+            getattr(self.local_transformer, "fused_depth", False)
+            and stacked is not None
+            and new_codes.is_cuda
+            and stacked.dtype == input_embeds_out.dtype
+            and stacked.device == new_codes.device
+        ):
+            from vllm_omni.model_executor.models.moss_tts.local_kernels import mtp_epilogue
+
+            return mtp_epilogue(
+                new_codes,
+                should_continue_t.reshape(bsz),
+                text_step.reshape(bsz, -1),
+                input_embeds_out,
+                stacked,
+                self.audio_pad_token_id,
+            )
+        active_mask = text_step.reshape(bsz, -1)[:, :1] > 0
         emit_mask = active_mask & should_continue_t.reshape(bsz, 1)
         audio_embed = self._audio_embed(new_codes).to(dtype=input_embeds_out.dtype)
         input_embeds_out = input_embeds_out + audio_embed * emit_mask.to(dtype=input_embeds_out.dtype)

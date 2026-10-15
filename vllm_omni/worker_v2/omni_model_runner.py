@@ -16,6 +16,7 @@ from vllm.forward_context import (
     set_forward_context,
 )
 from vllm.logger import init_logger
+from vllm.utils.platform_utils import is_uva_available
 from vllm.v1.core.sched.output import SchedulerOutput
 from vllm.v1.worker.gpu.dp_utils import dispatch_cg_and_sync_dp
 from vllm.v1.worker.gpu.input_batch import set_dummy_context
@@ -213,6 +214,32 @@ class OmniGPUModelRunner(GPUModelRunner):
             else None
         )
 
+    def _configure_uva_staging(self) -> None:
+        """Stage MOSS Local uploads in pinned UVA rings (see uva_staging)."""
+        from vllm_omni.model_executor.models.moss_tts.local_model_state import MossLocalModelState
+
+        if not isinstance(self.model_state, MossLocalModelState):
+            return
+        if self.device.type != "cuda" or not is_uva_available():
+            return
+        from vllm.v1.worker.gpu.buffer_utils import StagedWriteTensor
+
+        from vllm_omni.worker_v2.uva_staging import stage_write_contents_in_uva
+
+        tensors = [self.req_states.total_len, self.req_states.num_computed_tokens, *self.block_tables.block_tables]
+        sampler = self.sampler
+        if sampler is not None:
+            states = [
+                sampler.sampling_states,
+                sampler.thinking_budget_state,
+                sampler.logprob_token_ids_state,
+                *sampler.logits_processors,
+            ]
+            tensors += [
+                value for state in states for value in vars(state).values() if isinstance(value, StagedWriteTensor)
+            ]
+        stage_write_contents_in_uva(tensors)
+
     def _validate_parallel_support(self) -> None:
         parallel_config = self.vllm_config.parallel_config
         if parallel_config.pipeline_parallel_size > 1:
@@ -231,7 +258,7 @@ class OmniGPUModelRunner(GPUModelRunner):
         # With no new requests, its UVA snapshots remain valid and immutable.
         # Keep the upstream path for custom/speculative samplers, whose staged
         # writes may have a different lifecycle.
-        sampler = getattr(self, "sampler", None)
+        sampler = self.sampler
         if not scheduler_output.scheduled_new_reqs and (
             type(sampler) is Sampler or getattr(sampler, "omni_static_staged_writes", False)
         ):
@@ -373,6 +400,7 @@ class OmniGPUModelRunner(GPUModelRunner):
         self._last_aux_output = None
         self._last_multimodal_outputs = None
         self._configure_cudagraph_output_contract()
+        self._configure_uva_staging()
 
         # Preprocess models own embedding buffers; encoder_runner sizing would
         # mismatch unless the model builds its preprocess on the encoder output.
