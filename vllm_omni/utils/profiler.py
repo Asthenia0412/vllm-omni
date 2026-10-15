@@ -9,7 +9,19 @@ from typing import Any
 
 
 def parse_json_object(value: str, flag_name: str = "argument") -> dict[str, Any]:
-    """Parse a CLI value as a JSON object, attributing errors to ``flag_name``."""
+    """Parse a CLI value as a JSON object, attributing errors to ``flag_name``.
+
+    Args:
+        value: JSON-encoded command-line value.
+        flag_name: Option name to include in validation errors.
+
+    Returns:
+        The decoded dictionary. Field validation belongs to the engine config.
+
+    Raises:
+        argparse.ArgumentTypeError: If the value is invalid JSON or is not an
+            object (for example, an array, scalar, or null).
+    """
     try:
         config = json.loads(value)
     except json.JSONDecodeError as e:
@@ -20,12 +32,25 @@ def parse_json_object(value: str, flag_name: str = "argument") -> dict[str, Any]
 
 
 def parse_profiler_config(value: str) -> dict[str, Any]:
-    """Parse the JSON object passed to ``--profiler-config``."""
+    """Parse ``--profiler-config`` without validating backend-specific fields.
+
+    Raises:
+        argparse.ArgumentTypeError: If ``value`` is not a JSON object.
+    """
     return parse_json_object(value, flag_name="--profiler-config")
 
 
 def add_profiler_config_arg(parser: argparse.ArgumentParser) -> None:
-    """Add the shared JSON profiler configuration option to ``parser``."""
+    """Register ``--profiler-config`` on an offline example's argument parser.
+
+    The parsed ``profiler_config`` attribute is a dictionary when supplied and
+    ``None`` when omitted, independently of ``VLLM_TORCH_PROFILER_DIR``. Forward
+    it to ``Omni(profiler_config=...)`` and bracket generation with
+    ``start_profile()`` / ``stop_profile()`` when it is not ``None``.
+
+    Args:
+        parser: Argument parser on which to register the option once.
+    """
     parser.add_argument(
         "--profiler-config",
         type=parse_profiler_config,
