@@ -96,6 +96,9 @@ def prepare_request(request: OmniDiffusionRequest, *, height: int = 480, width: 
         raise ValueError("Clip requests start at zero and close automatically")
     if not isinstance(request.prompt, dict) or request.prompt.get("negative_prompt"):
         raise ValueError("Provide a prompt dictionary with multi_modal_data.video; negative prompts are unsupported")
+    text = request.prompt.get("prompt", "")
+    if not isinstance(text, str) or len(text) > 8192 or (text and not text.strip()):
+        raise ValueError("prompt must be empty (retain caption) or a nonempty string of at most 8192 characters")
     media = request.prompt.get("multi_modal_data", {})
     if not isinstance(media, dict) or media.keys() - {"video"}:
         raise ValueError("Matrix-Game accepts only multi_modal_data.video")
@@ -163,9 +166,10 @@ def validate_config(config: OmniDiffusionConfig) -> None:
                 "use TORCH_SDPA for the exact-reference path"
             )
     options = config.model_config
-    if options.keys() - {"prompt", "max_latents", "scene", "cuda_graph", "height", "width"}:
+    if options.keys() - {"prompt", "prompt_mode", "max_latents", "scene", "cuda_graph", "height", "width"}:
         raise ValueError(
-            "Matrix-Game model_config accepts only prompt, max_latents, scene, cuda_graph, height and width; "
+            "Matrix-Game model_config accepts only prompt, prompt_mode, max_latents, scene, "
+            "cuda_graph, height and width; "
             "use quantization_config='fp8' for online FP8"
         )
     _frame_size(config)
@@ -173,6 +177,10 @@ def validate_config(config: OmniDiffusionConfig) -> None:
         raise ValueError("cuda_graph must be boolean")
     if options.get("scene", "castle") not in ("castle", "ancient-egypt", "racing"):
         raise ValueError("scene must be castle, ancient-egypt or racing")
+    if options.get("prompt_mode", "fixed") not in ("fixed", "dynamic"):
+        raise ValueError("prompt_mode must be fixed or dynamic")
+    if options.get("prompt_mode") == "dynamic" and options.get("scene", "castle") != "racing":
+        raise ValueError("Dynamic captions require the Racing scene and frame-aligned game captions")
     limit = options.get("max_latents", 8192)
     if type(limit) is not int or not 1 <= limit <= 8192:
         raise ValueError("max_latents must be an integer in [1,8192]")
@@ -223,6 +231,7 @@ class MatrixGame4Pipeline(nn.Module):
         if any(profile.get(key) != value for key, value in contract.items()):
             raise ValueError("Scene inference.json does not match the released Matrix-Game contract")
         self.prompt_text = od_config.model_config.get("prompt", profile["prompt"])
+        self.prompt_mode = od_config.model_config.get("prompt_mode", "fixed")
         self.sink_mode = "first_frame" if self.scene == "racing" else "kv_only"
         self.sink_rope_mode = "absolute" if self.scene == "racing" else "fixed"
         # vLLM online quantization materializes and processes each loaded linear
@@ -232,7 +241,23 @@ class MatrixGame4Pipeline(nn.Module):
         self.runtime.use_graph = od_config.model_config.get("cuda_graph", False)
         self.transformer = self.runtime.model
         with torch.device("cpu"):
-            self.register_buffer("prompt_embeds", self._encode_prompt(root), persistent=False)
+            from vllm_omni.diffusion.models.wan2_2.text_encoder import load_wan_umt5_encoder
+
+            from .graph import MatrixGraph
+
+            self.tokenizer = AutoTokenizer.from_pretrained(root / "base/google/umt5-xxl", local_files_only=True)
+            self.text_encoder = load_wan_umt5_encoder(str(required[2]), torch.bfloat16)
+            self.text_encoder = self.text_encoder.to(self.device).eval().requires_grad_(False)
+            self.text_graph = (
+                MatrixGraph(self._encode_tokens, num_tokens=512)
+                if self.prompt_mode == "dynamic" and self.runtime.use_graph
+                else None
+            )
+            self.register_buffer("prompt_embeds", self.encode_prompt(self.prompt_text), persistent=False)
+            if self.prompt_mode == "fixed":
+                self.text_encoder = None
+                gc.collect()
+                torch.accelerator.empty_cache()
             self.vae = MatrixCodec(str(required[3])).to(self.device, torch.bfloat16).eval()
             self.vae.use_graph = od_config.model_config.get("cuda_graph", False)
         self.register_buffer("sink_latent", self._encode_sink(required[1]), persistent=False)
@@ -243,26 +268,23 @@ class MatrixGame4Pipeline(nn.Module):
         self._stream: MatrixStream | None = None
         self._session_id: str | None = None
         self._steps: int | None = None
+        self._active_prompt = self.prompt_text
         self.eval().requires_grad_(False)
 
     @torch.no_grad()
-    def _encode_prompt(self, root: Path) -> torch.Tensor:
-        from vllm_omni.diffusion.models.wan2_2.text_encoder import load_wan_umt5_encoder
-
-        tokenizer = AutoTokenizer.from_pretrained(root / "base/google/umt5-xxl", local_files_only=True)
-        text = " ".join(html.unescape(html.unescape(ftfy.fix_text(self.prompt_text))).split())
-        tokens = tokenizer(
+    def encode_prompt(self, prompt: str) -> torch.Tensor:
+        """Use the runner's shared prompt cache when enabled; cached outputs stay read-only."""
+        text = " ".join(html.unescape(html.unescape(ftfy.fix_text(prompt))).split())
+        tokens = self.tokenizer(
             [text], padding="max_length", truncation=True, max_length=512, return_tensors="pt", add_special_tokens=True
         )
-        encoder = load_wan_umt5_encoder(str(root / "base/models_t5_umt5-xxl-enc-bf16.pth"), torch.bfloat16)
-        encoder = encoder.to(self.device, torch.bfloat16).eval().requires_grad_(False)
         ids, mask = tokens.input_ids.to(self.device), tokens.attention_mask.to(self.device)
-        embeddings = encoder(input_ids=ids, attention_mask=mask).last_hidden_state
-        embeddings[0, mask[0].sum() :] = 0
-        del encoder
-        gc.collect()
-        torch.accelerator.empty_cache()
-        return embeddings
+        return self.text_graph(ids, mask) if self.text_graph is not None else self._encode_tokens(ids, mask)
+
+    def _encode_tokens(self, ids: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+        assert self.text_encoder is not None
+        embeddings = self.text_encoder(input_ids=ids, attention_mask=mask).last_hidden_state
+        return embeddings.masked_fill(~mask.bool().unsqueeze(-1), 0)
 
     @torch.no_grad()
     def _encode_sink(self, path: Path) -> torch.Tensor:
@@ -302,6 +324,7 @@ class MatrixGame4Pipeline(nn.Module):
         self._stream = None
         self._session_id = None
         self._steps = None
+        self._active_prompt = self.prompt_text
 
     @torch.no_grad()
     def forward(self, batch: DiffusionRequestBatch) -> list[DiffusionOutput]:
@@ -313,7 +336,7 @@ class MatrixGame4Pipeline(nn.Module):
         prepared = request.prepared_layout
         assert isinstance(prepared, MatrixInput)
         text = request.prompt.get("prompt", "")
-        if text and text != self.prompt_text:
+        if self.prompt_mode == "fixed" and text and text != self.prompt_text:
             raise ValueError("The scene caption is fixed at startup; set model_config.prompt to override it")
         if self._stream is not None and prepared.session_id != self._session_id:
             raise ValueError("Another Matrix-Game session owns this worker; close it before starting a new one")
@@ -326,6 +349,8 @@ class MatrixGame4Pipeline(nn.Module):
         needed = (count + 3) // 4
         if (self._stream.index if self._stream is not None else 0) + needed > self.max_latents:
             raise ValueError("Input exceeds this session's configured latent budget")
+        if self._stream is not None and (prepared.frame_start != self._stream.frame or prepared.steps != self._steps):
+            raise ValueError("Continuation must match the next frame offset and original denoising step count")
         if self._stream is None:
             if prepared.frame_start:
                 raise ValueError("A new Matrix-Game session must begin at frame zero")
@@ -347,11 +372,13 @@ class MatrixGame4Pipeline(nn.Module):
             )
             self._session_id, self._steps = prepared.session_id, prepared.steps
         stream = self._stream
-        if prepared.frame_start != stream.frame or prepared.steps != self._steps:
-            raise ValueError("Continuation must match the next frame offset and original denoising step count")
         outputs: list[torch.Tensor] = []
         succeeded = False
         try:
+            if text and text != self._active_prompt:
+                embeddings = self.prompt_embeds if text == self.prompt_text else self.encode_prompt(text)
+                stream.set_prompt(embeddings)
+                self._active_prompt = text
             offset = 0
             while offset < count:
                 size = 1 if stream.index == 0 else 4

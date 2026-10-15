@@ -87,14 +87,11 @@ class MatrixStream:
     def set_prompt(self, embeddings):
         """Change text conditioning at a chunk boundary without clearing visual history."""
         context = embeddings.to(self.device, self.dtype)
-        if context.ndim != 3 or context.shape[1] != 512:
+        if tuple(context.shape) != (1, 512, 4096):
             raise ValueError("prompt embeddings must be [1, 512, 4096]")
-        # Captured attention references the old text KV buffers. A caption
-        # change rebuilds those buffers and must invalidate the DiT graphs.
-        self.transformer.clear_graphs()
         self.context = context
         for cross in self.xc:
-            cross.key = cross.value = None
+            cross.ready = False
 
     def _encode(self, x, param):
         """Control pixels [1, 3, T, H, W] -> one normalised latent frame [1, 1, 48, h, w], as CastleStream."""

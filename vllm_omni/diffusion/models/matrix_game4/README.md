@@ -24,6 +24,7 @@ to supply low-poly RGB frames, while the application handles controls and media.
 | Attention | Omni `Attention`; `TORCH_SDPA` reference path, opt-in `CUDNN_ATTN` / `FLASH_ATTN` |
 | Projection and FFN parameters | Existing vLLM parallel Linear layers and Wan feed-forward blocks |
 | Text encoder | Shared Wan checkpoint loader and Transformers `UMT5EncoderModel`; also used by ABot-World |
+| Repeated captions | Runner-owned prompt-embedding cache with a configurable bounded LRU |
 | Request execution | Existing `DiffusionEngine` and `DiffusionRequestBatch` |
 | Video presentation | Typed `DiffusionMediaOutput`; runner-owned float-to-uint8 conversion and transport |
 | Matrix-specific behavior | 148-channel conditioning, incremental flow sampling, sink and temporal-cache policy |
@@ -90,3 +91,30 @@ recipe documents the recommended configuration and current measured throughput.
 A bounded 481-frame Racing run with standard online FP8 measured 76.37 generated
 FPS on one PRO 5000 at 864×480, one step, graph replay and SDPA. This is not a
 visual-quality parity claim or an RTX 5090 measurement.
+
+## Dynamic Racing captions
+
+Set `model_config.prompt_mode="dynamic"` for Racing and pass each input chunk's
+engine-generated caption in `prompt["prompt"]`. The upstream game derives this
+text from visible objects and driving state; no language-model or coding-agent
+call is needed during play. Castle and Ancient Egypt retain fixed captions.
+
+Enable the existing `enable_prompt_embed_cache=True` and
+`prompt_embed_cache_size=8` configuration to reuse repeated text. Dynamic mode
+keeps the shared BF16 UMT5 encoder resident; `cuda_graph=True` also captures its
+fixed 512-token encoding. New captions refresh cross-attention KV in place,
+preserving the DiT graph addresses, temporal KV, sink, random generators and
+codec history. Empty request text retains the session's current caption; a new
+session starts from the configured scene caption. Captions are bounded to 8192
+characters and tokenized with the released 512-token truncation policy.
+
+Send one caption with each opening/four-frame chunk. For a complete clip request,
+one caption applies to the entire clip. Rejected ownership, frame-offset and
+step-count requests leave the active session unchanged. Fixed mode remains the
+default and releases T5 after startup. Dynamic mode costs additional memory and
+encoding time; fixed-caption throughput does not describe changing-caption play.
+
+The existing benchmark accepts `--captions captions.jsonl` for either native or
+reference execution. Each row must contain zero-based `frame_start`, inclusive
+`frame_end` and `prompt`, covering frame 0, then frames 1–4, 5–8, and so on.
+Use actual captions aligned with the same geometry recording.

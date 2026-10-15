@@ -226,7 +226,8 @@ Allocator peaks do not establish cold-start or whole-device memory requirements.
   bookkeeping stays outside capture.
 - `TORCH_SDPA` selects the existing shared attention backend.
 - TAEW2 encodes geometry and decodes generated latents. Embeddings, output head
-  and codec remain BF16. The text encoder runs at startup and is then released.
+  and codec remain BF16. The fixed-caption benchmark above releases T5 after
+  startup; live dynamic captions keep it resident.
 
 For an application using `DiffusionEngine`, the corresponding configuration is:
 
@@ -243,7 +244,10 @@ config = OmniDiffusionConfig(
     enforce_eager=True,
     quantization_config="fp8",
     diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
-    model_config={"scene": "racing", "cuda_graph": True, "height": 480, "width": 864},
+    enable_prompt_embed_cache=True,
+    prompt_embed_cache_size=8,
+    model_config={"scene": "racing", "prompt_mode": "dynamic", "cuda_graph": True,
+                  "height": 480, "width": 864},
     video_output_transport=VideoOutputTransportConfig(enable_device_postprocess=True),
 )
 ```
@@ -251,6 +255,7 @@ config = OmniDiffusionConfig(
 | Request field | Contract |
 | --- | --- |
 | `prompt["multi_modal_data"]["video"]` | CPU `torch.uint8` RGB tensor, `[T,480,864,3]` |
+| `prompt["prompt"]` | Engine caption for these exact frames; empty text retains the current caption |
 | First request | One frame; `matrix_frame_start=0` |
 | Continuations | Four frames; offsets `1,5,9,...` |
 | Sampling | Seed 42, one step, guidance scale 1, `output_type="np"` |
@@ -266,6 +271,22 @@ on its last chunk, or send an explicit close request without video in a
 the complete request and cleanup sequence. Racing returns the decoded sink
 image as frame zero, followed by generated four-frame blocks.
 
+For live Racing, forward the caption together with its RGB chunk from
+`CitySampleReferenceServer`. The upstream adapter exposes it as
+`states[-1]["chunk_prompt"]`; it describes visibility-tested entities, driving
+state and events from that chunk. No coding-agent or LLM call is involved.
+Changing the caption updates only text conditioning, preserving visual KV and
+codec history. The shared prompt cache stores up to eight embeddings, and graph
+replay retains the text-KV buffer addresses across updates.
+
+For an offline recording with matching engine captions, add
+`--captions ./captions.jsonl` to the benchmark command. Each JSONL row contains
+`frame_start`, `frame_end` (inclusive) and `prompt`, covering frame 0, then 1–4,
+5–8, etc. Plain recorded RGB does not include these captions; collect them from
+the same engine run. Captions are limited to 8192 characters and use the released
+512-token truncation. Dynamic T5 residency and caption changes add memory and
+latency, so the fixed-caption performance table above is not a dynamic-mode result.
+
 #### Known limitations
 
 - Standard online FP8 changes numerical output. This throughput measurement
@@ -273,6 +294,7 @@ image as frame zero, followed by generated four-frame blocks.
   Other scenes have not been requalified with this FP8 configuration.
 - One resident session and one GPU per worker; multi-GPU execution, concurrent
   sessions and the generic AR-Diffusion paged-KV/session protocol are unsupported.
-- Captions are fixed at startup. Changing scene requires a new worker.
+- Dynamic captions are supported for Racing; Castle and Ancient Egypt use fixed
+  captions. Changing scene requires a new worker.
 - LoRA, offload, serialized/per-component quantization and the full Wan VAE are
   not supported by this pipeline.

@@ -54,7 +54,11 @@ class RecordingStream:
         self.closed = False
         self.fail = False
         self.offsets = []
+        self.prompts = [prompt_embeds]
         self.height, self.width = frame_size
+
+    def set_prompt(self, embeddings):
+        self.prompts.append(embeddings)
 
     def push(self, pixels, *, frame_start):
         if self.fail:
@@ -77,6 +81,8 @@ def pipeline(monkeypatch):
     model = MatrixGame4Pipeline.__new__(MatrixGame4Pipeline)
     nn.Module.__init__(model)
     model.prompt_text = DEFAULT_PROMPT
+    model.prompt_mode = "fixed"
+    model._active_prompt = DEFAULT_PROMPT
     model.sink_mode, model.sink_rope_mode = "kv_only", "fixed"
     model.max_latents = 64
     model.height, model.width = 480, 864
@@ -131,6 +137,115 @@ def test_complete_clip_uses_one_then_four_and_resets(pipeline):
     assert output.media.video.tensor.shape == (1, 3, 9, 480, 864)
     assert output.media.video.tensor[0, 0, :, 0, 0].tolist() == [-1] + [0] * 4 + [1] * 4
     assert output.custom_output["session_closed"]
+
+
+def test_dynamic_caption_preserves_session_and_reuses_shared_cache(pipeline, monkeypatch):
+    from vllm_omni.diffusion.cache.prompt_embed_cache import install_prompt_embed_cache
+
+    pipeline.prompt_mode = "dynamic"
+    encoded = []
+
+    def encode(prompt):
+        encoded.append(prompt)
+        return prompt
+
+    monkeypatch.setattr(pipeline, "encode_prompt", encode)
+    cache = install_prompt_embed_cache(pipeline, max_size=2)
+    run(pipeline, request())
+    stream = pipeline._stream
+    for start, caption in [(1, "car turning"), (5, ""), (9, "car turning"), (13, "car stopped"), (17, "car turning")]:
+        req = request(4, start=start)
+        req.prompt["prompt"] = caption
+        run(pipeline, req)
+        assert pipeline._stream is stream and not stream.closed
+    assert stream.offsets == [0, 1, 5, 9, 13, 17]
+    assert stream.prompts == [None, "car turning", "car stopped", "car turning"]
+    assert encoded == ["car turning", "car stopped"]
+    assert cache.stats()["hits"] == 1
+    run(pipeline, request(None, start=21, end=True))
+    run(pipeline, request(session="two"))
+    assert pipeline._active_prompt == DEFAULT_PROMPT
+    assert pipeline._stream.prompts == [None]
+
+
+def test_rejected_caption_requests_do_not_mutate_history_or_encode(pipeline, monkeypatch):
+    pipeline.prompt_mode = "dynamic"
+    run(pipeline, request())
+    stream = pipeline._stream
+
+    def unexpected_encode(prompt):
+        pytest.fail("Invalid requests must be rejected before encoding or changing text KV")
+
+    monkeypatch.setattr(pipeline, "encode_prompt", unexpected_encode)
+    for req in [request(4, start=5), request(session="foreign"), request(4, start=1)]:
+        req.prompt["prompt"] = "new caption"
+        if req.sampling_params.extra_args[START_KEY] == 1:
+            req.sampling_params.num_inference_steps = 2
+        with pytest.raises(ValueError):
+            run(pipeline, req)
+        assert pipeline._stream is stream and stream.frame == 1 and stream.prompts == [None]
+
+
+@pytest.mark.parametrize("caption", [None, ["text"], " ", "a" * 8193])
+def test_invalid_captions(caption):
+    req = request()
+    req.prompt["prompt"] = caption
+    with pytest.raises(ValueError, match="prompt must"):
+        prepare_request(req)
+
+
+def test_text_refresh_retains_graph_storage_and_visual_state():
+    from vllm_omni.diffusion.models.matrix_game4.stream import MatrixStream
+    from vllm_omni.diffusion.models.matrix_game4.transformer import MatrixRuntime, TextCache
+
+    class Project(nn.Module):
+        def forward(self, text):
+            return text[..., :3072]
+
+    attn = SimpleNamespace(to_k=Project(), to_v=Project(), norm_k=nn.Identity())
+    runtime = MatrixRuntime(
+        SimpleNamespace(
+            condition_embedder=SimpleNamespace(text_embedder=nn.Identity()), blocks=[SimpleNamespace(attn2=attn)]
+        )
+    )
+    stream = MatrixStream.__new__(MatrixStream)
+    stream.device, stream.dtype = torch.device("cpu"), torch.float32
+    stream.transformer, stream.xc = runtime, [TextCache()]
+    stream.kv, stream.vae, stream.index, stream.frame = object(), object(), 26, 101
+    history, codec = stream.kv, stream.vae
+    stream.set_prompt(torch.ones(1, 512, 4096))
+    runtime.refresh_text(stream.context, stream.xc)
+    key, value = stream.xc[0].key, stream.xc[0].value
+    graph = object()
+    runtime.graphs[False] = graph
+    stream.set_prompt(torch.full((1, 512, 4096), 2.0))
+    runtime.refresh_text(stream.context, stream.xc)
+    assert stream.xc[0].key is key and stream.xc[0].value is value
+    assert key.eq(2).all() and value.eq(2).all()
+    assert runtime.graphs[False] is graph
+    assert stream.kv is history and stream.vae is codec and (stream.index, stream.frame) == (26, 101)
+
+
+@pytest.mark.parametrize(
+    "scene,mode,valid",
+    [("racing", "dynamic", True), ("castle", "dynamic", False), ("racing", "typo", False), ("castle", "fixed", True)],
+)
+def test_dynamic_caption_configuration(scene, mode, valid):
+    from vllm_omni.diffusion.data import OmniDiffusionConfig
+    from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
+
+    config = OmniDiffusionConfig(
+        model="resources",
+        enforce_eager=True,
+        max_num_seqs=1,
+        diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
+        model_config={"scene": scene, "prompt_mode": mode},
+    )
+    if valid:
+        validate_config(config)
+    else:
+        with pytest.raises(ValueError):
+            validate_config(config)
 
 
 @pytest.mark.parametrize(

@@ -26,6 +26,7 @@ def arguments() -> argparse.Namespace:
     parser.add_argument(
         "--input", required=True, type=Path, help="uint8 THWC .npy geometry frames at the selected size"
     )
+    parser.add_argument("--captions", type=Path, help="Frame-aligned Racing caption JSONL; enables dynamic prompts")
     parser.add_argument("--height", type=int, default=480)
     parser.add_argument("--width", type=int, default=864)
     parser.add_argument("--output", required=True, type=Path, help="output prefix for .npy frames and .json metrics")
@@ -57,7 +58,33 @@ def arguments() -> argparse.Namespace:
         parser.error("Use 864x480 or experimental 1280x736")
     if args.mode == "reference" and (args.height, args.width) != (480, 864):
         parser.error("The pinned reference runtime only supports 864x480")
+    if args.captions is not None and args.scene != "racing":
+        parser.error("--captions requires --scene racing")
     return args
+
+
+def load_captions(path: Path | None, frames: int) -> dict[int, str]:
+    """Require one native caption per opening/four-frame chunk, without gaps."""
+    if path is None:
+        return {}
+    captions, expected = {}, 0
+    for line in path.read_text().splitlines():
+        row = json.loads(line)
+        size = 1 if expected == 0 else 4
+        prompt = row.get("prompt")
+        if (
+            row.get("frame_start") != expected
+            or row.get("frame_end") != expected + size - 1
+            or not isinstance(prompt, str)
+            or not prompt.strip()
+            or len(prompt) > 8192
+        ):
+            raise ValueError(f"Caption must cover frames {expected} through {expected + size - 1}")
+        captions[expected] = prompt
+        expected += size
+        if expected >= frames:
+            return captions
+    raise ValueError("Caption file does not cover the requested frames")
 
 
 def peak_memory() -> dict[str, float]:
@@ -74,6 +101,7 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
     from vllm_omni.diffusion.request import OmniDiffusionRequest
     from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 
+    captions = load_captions(args.captions, args.frames)
     config = OmniDiffusionConfig(
         model=str(args.resources),
         model_class_name="MatrixGame4Pipeline",
@@ -82,10 +110,13 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
         max_num_seqs=1,
         model_config={
             "scene": args.scene,
+            "prompt_mode": "dynamic" if captions else "fixed",
             "cuda_graph": args.cuda_graph,
             "height": args.height,
             "width": args.width,
         },
+        enable_prompt_embed_cache=bool(captions),
+        prompt_embed_cache_size=8,
         quantization_config="fp8" if args.fp8 else None,
         distributed_executor_backend="uni",
         diffusion_attention_config={"default": {"backend": args.attention_backend}},
@@ -100,7 +131,7 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
             # The input owns writable host storage, independent of the mmap.
             pixels = torch.from_numpy(np.array(video[start : start + size]))
             request = OmniDiffusionRequest(
-                prompt={"prompt": "", "multi_modal_data": {"video": pixels}},
+                prompt={"prompt": captions.get(start, ""), "multi_modal_data": {"video": pixels}},
                 request_id=f"matrix-{start}",
                 sampling_params=OmniDiffusionSamplingParams(
                     seed=args.seed,
@@ -153,6 +184,7 @@ def render_reference(args: argparse.Namespace, video: np.ndarray) -> tuple[np.nd
     from matrix_game.inference.loader import ModelComponents
     from matrix_game.scenes import add_model_arguments, resolve_model_arguments
 
+    captions = load_captions(args.captions, args.frames)
     parser = argparse.ArgumentParser()
     add_model_arguments(parser)
     options = parser.parse_args(
@@ -165,6 +197,8 @@ def render_reference(args: argparse.Namespace, video: np.ndarray) -> tuple[np.nd
             "realtime",
             "--dit-runtime",
             args.reference_runtime,
+            "--prompt-mode",
+            "dynamic" if captions else "fixed",
             "--steps",
             "1000" if args.steps == 1 else "1000,500",
         ]
@@ -173,6 +207,7 @@ def render_reference(args: argparse.Namespace, video: np.ndarray) -> tuple[np.nd
     components = ModelComponents(options)
     components.load()
     stream = components.stream(seed=args.seed)
+    current_prompt = options.prompt
     outputs, timings = [], []
     try:
         for start in [0, *range(1, args.frames, 4)]:
@@ -181,6 +216,10 @@ def render_reference(args: argparse.Namespace, video: np.ndarray) -> tuple[np.nd
             raw = torch.from_numpy(np.array(video[start : start + size]))
             current_omni_platform.synchronize()
             begin = time.perf_counter()
+            prompt = captions.get(start, current_prompt)
+            if prompt != current_prompt:
+                stream.set_prompt(components.caption_encoder(prompt))
+                current_prompt = prompt
             pixels = raw.permute(0, 3, 1, 2).float()
             pixels = pixels * (2.0 / 255.0) - 1.0
             stream.push(pixels, frame_start=start, on_rgb=outputs.append)
@@ -226,6 +265,8 @@ def main() -> None:
         "quantization_config": ("fp8" if args.fp8 else None) if args.mode == "omni" else None,
         "attention_backend": args.attention_backend if args.mode == "omni" else None,
         "input": str(args.input),
+        "captions": str(args.captions) if args.captions else None,
+        "prompt_mode": "dynamic" if args.captions else "fixed",
         "resources": str(args.resources),
         "warmup_chunks": args.warmup_chunks,
         "chunk_seconds": timings,

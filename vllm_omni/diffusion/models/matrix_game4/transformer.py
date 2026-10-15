@@ -94,6 +94,7 @@ class TemporalCache:
 class TextCache:
     key: torch.Tensor | None = None
     value: torch.Tensor | None = None
+    ready: bool = False
 
 
 def checkpoint_name(name: str) -> str | None:
@@ -220,6 +221,25 @@ class MatrixRuntime:
     def init_crossattn_cache(self, batch_size: int, device: torch.device, dtype: torch.dtype):
         return [TextCache() for _ in self.model.blocks]
 
+    def refresh_text(self, context: torch.Tensor, caches: list[TextCache]) -> None:
+        """Refresh outside graph replay, retaining captured text-KV addresses."""
+        if all(cache.ready for cache in caches):
+            return
+        text = self.model.condition_embedder.text_embedder(context)
+        for block, cache in zip(self.model.blocks, caches):
+            if cache.ready:
+                continue
+            attn = block.attn2
+            key = attn.norm_k(attn.to_k(text)).reshape(1, -1, 24, 128)
+            value = attn.to_v(text).reshape(1, -1, 24, 128)
+            if cache.key is None:
+                cache.key, cache.value = key, value
+            else:
+                assert cache.value is not None
+                cache.key.copy_(key)
+                cache.value.copy_(value)
+            cache.ready = True
+
     def _rotation(self, position: int, height: int, width: int) -> torch.Tensor:
         assert self.rotations is not None
         temporal, vertical, horizontal = self.rotations.split((22, 21, 21), dim=-1)
@@ -250,6 +270,7 @@ class MatrixRuntime:
         kv_only: bool = False,
         sink_position: int | None = None,
     ) -> torch.Tensor | None:
+        self.refresh_text(context, crossattn_cache)
         height, width = x.shape[-2] // 2, x.shape[-1] // 2
         position = current_start // (height * width)
         for cache in kv_cache:
@@ -267,7 +288,6 @@ class MatrixRuntime:
             output = self._run(
                 x,
                 t,
-                context,
                 y,
                 kv_cache,
                 crossattn_cache,
@@ -290,7 +310,6 @@ class MatrixRuntime:
         self,
         x: torch.Tensor,
         t: torch.Tensor,
-        context: torch.Tensor,
         y: torch.Tensor,
         kv_cache: list[TemporalCache],
         crossattn_cache: list[TextCache],
@@ -315,7 +334,6 @@ class MatrixRuntime:
         angles = t.flatten().double()[:, None] * frequencies
         time = embedder.time_embedder(torch.cat((angles.cos(), angles.sin()), dim=-1).to(hidden.dtype))
         modulation = embedder.time_proj(embedder.act_fn(time)).reshape(batch, 6, dim)
-        text = None if all(cache.key is not None for cache in crossattn_cache) else embedder.text_embedder(context)
         for index, (block, cache, cross) in enumerate(zip(model.blocks, kv_cache, crossattn_cache)):
             shift, scale, gate, ff_shift, ff_scale, ff_gate = (modulation + block.scale_shift_table).chunk(6, dim=1)
             attn = block.attn1
@@ -367,11 +385,7 @@ class MatrixRuntime:
             query = (
                 attn.norm_q(query) if self.fast_ops is None else self.fast_ops.rms(query, attn.norm_q.weight)
             ).reshape(batch, -1, 24, 128)
-            if cross.key is None:
-                assert text is not None
-                cross.key = attn.norm_k(attn.to_k(text)).reshape(batch, -1, 24, 128)
-                cross.value = attn.to_v(text).reshape(batch, -1, 24, 128)
-            assert cross.value is not None
+            assert cross.key is not None and cross.value is not None
             attended = attn.attn(query, cross.key, cross.value)
             projected = attn.to_out(attended.flatten(2))
             if self.fast_ops is None:
