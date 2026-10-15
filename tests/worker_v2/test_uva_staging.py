@@ -65,3 +65,18 @@ def test_uva_staging_leaves_non_moss_runner_unchanged(monkeypatch):
     monkeypatch.setattr("vllm_omni.worker_v2.omni_model_runner.is_uva_available", lambda: True)
     runner._configure_uva_staging()
     assert upstream_runner.async_tensor_h2d is original
+
+
+def test_uva_staging_runs_after_cache_initialization(monkeypatch):
+    from vllm.v1.kv_cache_interface import KVCacheConfig
+    from vllm.v1.worker.gpu.model_runner import GPUModelRunner
+
+    from vllm_omni.worker_v2.omni_model_runner import OmniGPUModelRunner
+
+    runner = object.__new__(OmniGPUModelRunner)
+    config = KVCacheConfig(num_blocks=0, kv_cache_tensors=[], kv_cache_groups=[])
+    order = []
+    monkeypatch.setattr(GPUModelRunner, "initialize_kv_cache", lambda *args: order.append("cache"))
+    runner._configure_uva_staging = lambda: order.append("uva")
+    runner.initialize_kv_cache(config)
+    assert order == ["cache", "uva"]

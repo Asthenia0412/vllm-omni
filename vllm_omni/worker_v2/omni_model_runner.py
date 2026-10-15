@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import threading
+from contextlib import AbstractContextManager
 from dataclasses import replace
 from typing import TYPE_CHECKING, Any, cast
 
@@ -18,6 +19,7 @@ from vllm.forward_context import (
 from vllm.logger import init_logger
 from vllm.utils.platform_utils import is_uva_available
 from vllm.v1.core.sched.output import SchedulerOutput
+from vllm.v1.kv_cache_interface import KVCacheConfig
 from vllm.v1.worker.gpu.dp_utils import dispatch_cg_and_sync_dp
 from vllm.v1.worker.gpu.input_batch import set_dummy_context
 from vllm.v1.worker.gpu.lora_utils import get_num_active_loras_for_dispatch
@@ -214,6 +216,15 @@ class OmniGPUModelRunner(GPUModelRunner):
             else None
         )
 
+    def initialize_kv_cache(
+        self,
+        kv_cache_config: KVCacheConfig,
+        is_profiling: bool = False,
+        kv_cache_allocation_context: AbstractContextManager | None = None,
+    ) -> None:
+        super().initialize_kv_cache(kv_cache_config, is_profiling, kv_cache_allocation_context)
+        self._configure_uva_staging()
+
     def _configure_uva_staging(self) -> None:
         """Stage MOSS Local uploads in pinned UVA rings (see uva_staging)."""
         from vllm_omni.model_executor.models.moss_tts.local_model_state import MossLocalModelState
@@ -400,7 +411,6 @@ class OmniGPUModelRunner(GPUModelRunner):
         self._last_aux_output = None
         self._last_multimodal_outputs = None
         self._configure_cudagraph_output_contract()
-        self._configure_uva_staging()
 
         # Preprocess models own embedding buffers; encoder_runner sizing would
         # mismatch unless the model builds its preprocess on the encoder output.
