@@ -266,9 +266,9 @@ are unchanged, and no additional packed-codec switches are required.
 
 The CUDA Local profile also fuses depth sampling with the next codebook's
 attention and runs completing prefills in the existing eager-MTP path.
-Its Triton backbone backend specializes grouped decode attention while keeping
-upstream metadata and fallback kernels. Codec v2 CUDA FFNs use cuBLASLt's tanh
-GELU epilogue before BF16 rounding, so waveforms need not be bit-identical.
+The backbone uses vLLM's configured attention backend. Codec v2 CUDA FFNs use
+cuBLASLt's tanh GELU epilogue before BF16 rounding, so waveforms need not be
+bit-identical.
 These paths use the existing model/backend eligibility checks; no additional
 experiment environment variables or model switches are required.
 
