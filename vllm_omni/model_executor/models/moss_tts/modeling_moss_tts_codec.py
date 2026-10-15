@@ -250,7 +250,9 @@ class _MossCodecStreamSession:
         if isinstance(codec, MossAudioTokenizerV2Model):
             scratch_capacity = 1
         packed_frame_sizes = (
-            sorted({b for b in batch_sizes if b > 1} | {b * self._chunk_frames for b in batch_sizes}) if packed else []
+            sorted({frames for b in batch_sizes for frames in (b, b * self._chunk_frames) if frames > 1})
+            if packed
+            else []
         )
         if packed_frame_sizes:
             # Ordinary graphs remain for per-request reference/first-frame priming.

@@ -234,3 +234,40 @@ def test_packed_session_matches_mixed_length_streams_and_slot_reuse():
     torch.testing.assert_close(actual, expected, rtol=0.03, atol=0.01)
     for audio, snapshot in saved:
         torch.testing.assert_close(audio, snapshot, rtol=0, atol=0)
+
+
+@hardware_test(res={"cuda": "L4"}, num_cards=1)
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+@torch.no_grad()
+def test_one_frame_one_batch_retains_ordinary_decode():
+    from vllm.config import CompilationConfig, VllmConfig
+
+    from vllm_omni.model_executor.models.moss_tts.modeling_moss_tts_codec import (
+        MossTTSCodecDecoder,
+        _MossCodecStreamSession,
+    )
+
+    codec = tiny_codec().cuda()
+    codec.decoder.to(torch.bfloat16)
+    codec.quantizer.build_decode_lut(2, dtype=torch.bfloat16)
+    session = _MossCodecStreamSession(
+        codec,
+        state_capacity=1,
+        n_vq=2,
+        chunk_frames=1,
+        packed=True,
+        graph_batch_sizes=[1],
+        graph_frame_sizes=[1],
+        gpu_output=True,
+        vllm_config=VllmConfig(compilation_config=CompilationConfig(mode=0)),
+    )
+    decoder = object.__new__(MossTTSCodecDecoder)
+    torch.nn.Module.__init__(decoder)
+    decoder._codec = codec
+    decoder._stream_session = session
+    decoder._stream_req_slots = {}
+    decoder._stream_state_capacity = 1
+    decoder._stream_max_step_frames = 1
+    codes = torch.randint(0, 16, (2, 1), device="cuda")
+    output = decoder._decode_streaming_batch([(0, "request", codes, False)])[0]
+    assert output.shape == (1, 4) and torch.isfinite(output).all()
