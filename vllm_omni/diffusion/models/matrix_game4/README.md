@@ -18,7 +18,7 @@ for Omni inference; the separate reference command uses it only as a test oracle
 | Component | Implementation |
 | --- | --- |
 | DiT weights and modules | Existing `WanTransformer3DModel`, with strict native-name mapping |
-| Attention | Omni `Attention`, qualified through its `TORCH_SDPA` backend |
+| Attention | Omni `Attention`; `TORCH_SDPA` reference path, opt-in `CUDNN_ATTN` / `FLASH_ATTN` |
 | Projection and FFN parameters | Existing vLLM parallel Linear layers and Wan feed-forward blocks |
 | Text encoder | Shared Wan checkpoint loader and Transformers `UMT5EncoderModel`; also used by ABot-World |
 | Request execution | Existing `DiffusionEngine` and `DiffusionRequestBatch` |
@@ -70,3 +70,23 @@ runtime. Small fused-reduction differences can lead to different long-sequence
 effects. Throughput alignment does not qualify its visual quality; retain the
 default BF16 path where exact reference reproduction is required. See the
 recipe for paired FPS measurements, reproducible commands and their scope.
+
+## Attention selection
+
+Select the existing framework backend explicitly for both self and cross
+attention, or use the shared `per_role` configuration for separate choices:
+
+```python
+diffusion_attention_config={"default": {"backend": "CUDNN_ATTN"}}
+```
+
+`TORCH_SDPA` remains the exact-reference configuration and benchmark default.
+`CUDNN_ATTN` and `FLASH_ATTN` are experimental alternatives; they reuse the
+framework implementations without model-specific kernels or fallback logic.
+On SM120, `FLASH_ATTN` selects FA4 and requires the optional `flash-attn-4`
+package. Missing or incompatible kernels are rejected by the platform selector.
+FP8 linears, graph replay and temporal/text KV reuse remain independent options.
+
+Changing the attention kernel changes floating-point reductions and can change
+autoregressive output. The alternative backends are not pixel-identical to the
+reference. See the recipe for paired end-to-end timings and installation.

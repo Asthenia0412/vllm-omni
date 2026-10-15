@@ -273,8 +273,8 @@ def test_optimization_options_require_booleans(option):
         validate_config(config)
 
 
-@pytest.mark.parametrize("backend", [None, "TORCH_SDPA", "CUDNN_ATTN"])
-def test_quality_path_requires_qualified_attention_backend(backend):
+@pytest.mark.parametrize("backend", [None, "TORCH_SDPA", "CUDNN_ATTN", "FLASH_ATTN", "SAGE_ATTN"])
+def test_explicit_attention_backends(backend):
     from vllm_omni.diffusion.data import OmniDiffusionConfig
     from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
 
@@ -286,8 +286,31 @@ def test_quality_path_requires_qualified_attention_backend(backend):
         max_num_seqs=1,
         diffusion_attention_config=attention,
     )
-    if backend == "TORCH_SDPA":
+    if backend in {"TORCH_SDPA", "CUDNN_ATTN", "FLASH_ATTN"}:
         validate_config(config)
     else:
-        with pytest.raises(ValueError, match="quality qualification"):
+        with pytest.raises(ValueError, match="requires explicit"):
             validate_config(config)
+
+
+@pytest.mark.parametrize("role", ["self", "cross"])
+@pytest.mark.parametrize("backend", ["CUDNN_ATTN", "FLASH_ATTN", "SAGE_ATTN"])
+def test_attention_role_override_validation(role, backend):
+    from vllm_omni.diffusion.data import OmniDiffusionConfig
+    from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
+
+    config = OmniDiffusionConfig(
+        model="matrix-resources",
+        model_class_name="MatrixGame4Pipeline",
+        enforce_eager=True,
+        max_num_seqs=1,
+        diffusion_attention_config={
+            "default": {"backend": "TORCH_SDPA"},
+            "per_role": {role: {"backend": backend}},
+        },
+    )
+    if backend == "SAGE_ATTN":
+        with pytest.raises(ValueError, match="requires explicit"):
+            validate_config(config)
+    else:
+        validate_config(config)

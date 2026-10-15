@@ -146,9 +146,10 @@ def validate_config(config: OmniDiffusionConfig) -> None:
         raise ValueError("Matrix-Game owns its temporal KV cache; generic cache acceleration is unsupported")
     for role in ("self", "cross"):
         spec, _ = config.diffusion_attention_config.resolve_with_source(role)
-        if spec is None or spec.backend.upper() != "TORCH_SDPA":
+        if spec is None or spec.backend.upper() not in {"TORCH_SDPA", "CUDNN_ATTN", "FLASH_ATTN"}:
             raise ValueError(
-                "Matrix-Game quality qualification requires diffusion_attention_config.default.backend=TORCH_SDPA"
+                "Matrix-Game requires explicit TORCH_SDPA, CUDNN_ATTN or FLASH_ATTN attention for self and cross; "
+                "use TORCH_SDPA for the exact-reference path"
             )
     options = config.model_config
     if options.keys() - {"prompt", "max_latents", "scene", "cuda_graph", "fp8"}:

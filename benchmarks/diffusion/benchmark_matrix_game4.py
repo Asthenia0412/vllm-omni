@@ -33,6 +33,12 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--cuda-graph", action="store_true", help="Use native Omni steady-state graph replay")
     parser.add_argument("--fp8", action="store_true", help="Use native Omni per-tensor FP8 block linears")
+    parser.add_argument(
+        "--attention-backend",
+        choices=("TORCH_SDPA", "CUDNN_ATTN", "FLASH_ATTN"),
+        default="TORCH_SDPA",
+        help="Omni attention backend; FLASH_ATTN uses FA4 on SM120 when installed",
+    )
     parser.add_argument("--warmup-chunks", type=int, default=25)
     parser.add_argument("--compare", type=Path, help="reference output .npy to compare against")
     parser.add_argument("--require-exact", action="store_true", help="Fail if compared RGB frames are not identical")
@@ -41,6 +47,8 @@ def arguments() -> argparse.Namespace:
         parser.error("--frames must be 1+4k and --warmup-chunks must be nonnegative")
     if args.require_exact and args.compare is None:
         parser.error("--require-exact needs --compare")
+    if args.mode == "reference" and args.attention_backend != "TORCH_SDPA":
+        parser.error("--attention-backend selects the Omni backend, not the reference runtime")
     return args
 
 
@@ -66,7 +74,7 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
         max_num_seqs=1,
         model_config={"scene": args.scene, "cuda_graph": args.cuda_graph, "fp8": args.fp8},
         distributed_executor_backend="uni",
-        diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
+        diffusion_attention_config={"default": {"backend": args.attention_backend}},
         video_output_transport=VideoOutputTransportConfig(enable_device_postprocess=True),
     )
     engine = DiffusionEngine(config)
@@ -192,6 +200,7 @@ def main() -> None:
         "steps": args.steps,
         "seed": args.seed,
         "cuda_graph": args.cuda_graph if args.mode == "omni" else None,
+        "attention_backend": args.attention_backend if args.mode == "omni" else None,
         "input": str(args.input),
         "resources": str(args.resources),
         "warmup_chunks": args.warmup_chunks,

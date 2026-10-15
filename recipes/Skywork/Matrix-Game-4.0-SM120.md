@@ -281,6 +281,83 @@ reference RGB byte for all three 241-frame two-step scene tests (MAE/max error
 zero, including KV eviction), at 26.36–26.71 generated FPS. The FP8 throughput
 table above must not be attributed to this exact-output path.
 
+## Alternative attention backends
+
+The benchmark defaults to `--attention-backend TORCH_SDPA`. Its PyTorch
+dispatcher used the built-in FlashAttention kernel on the tested SM120 stack.
+Explicit `CUDNN_ATTN` and `FLASH_ATTN` reuse Omni's shared attention backends;
+they do not change the model's projection precision or KV policy. Both self
+and cross attention must resolve to an explicit supported backend. The
+platform selector owns hardware and package checks and rejects unavailable
+explicit backends.
+
+For cuDNN, use the cuDNN installation supplied with the PyTorch environment:
+
+```python
+diffusion_attention_config={"default": {"backend": "CUDNN_ATTN"}}
+```
+
+For FA4 on SM120, install the optional package and select `FLASH_ATTN`. The
+CUDA 13 qualification used FA4 `4.0.0b35`, CUTLASS DSL `4.7.1` and cuDNN `9.20`:
+
+```bash
+uv pip install 'flash-attn-4[cu13]==4.0.0b35'
+```
+
+```python
+diffusion_attention_config={"default": {"backend": "FLASH_ATTN"}}
+```
+
+Compare the same racing capture, seed, precision and graph settings in separate
+processes on the same GPU. Replace the backend flag to test cuDNN or FA4:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 \
+  python benchmarks/diffusion/benchmark_matrix_game4.py \
+  --scene racing --resources ./matrix-resources --input ./racing-geometry.npy \
+  --output ./qualification/racing-sdpa --frames 481 --steps 1 \
+  --cuda-graph --fp8 --attention-backend TORCH_SDPA
+
+CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 \
+  python benchmarks/diffusion/benchmark_matrix_game4.py \
+  --scene racing --resources ./matrix-resources --input ./racing-geometry.npy \
+  --output ./qualification/racing-cudnn --frames 481 --steps 1 \
+  --cuda-graph --fp8 --attention-backend CUDNN_ATTN \
+  --compare ./qualification/racing-sdpa.npy
+```
+
+The JSON records the selected backend. This flag configures Omni only; it
+cannot switch the separate reference runtime's kernel. Compare generated
+outputs as well as timings: different reduction orders propagate through
+autoregressive history, so neither alternative is an exact-reference path.
+Retain `TORCH_SDPA` when pixel-identical reference reproduction is required.
+
+On the same PRO 5000 and software stack above, three interleaved runs per
+backend produced the following results. Each run uses Racing, seed 42, FP8
+linears, CUDA Graph, one denoising step and 481 frames; 25 warmup chunks are
+excluded, leaving 384 measured frames. Timings use the CPU-uint8-to-CPU-uint8
+boundary described above, including the codec and clean-KV update.
+
+| Backend | Mean generated FPS | FPS range across 3 runs | Mean chunk p50 (ms) |
+| --- | --- | --- | --- |
+| `TORCH_SDPA` | 61.12 | 60.95–61.39 | 65.39 |
+| `CUDNN_ATTN` | 62.07 | 61.97–62.26 | 64.41 |
+| `FLASH_ATTN` (FA4) | 61.93 | 61.84–62.07 | 64.55 |
+
+cuDNN and FA4 improve mean end-to-end throughput by approximately 1.6% and
+1.3%, respectively, in this bounded test. Their ranges overlap; this does not
+establish a universal ranking. A separate racing-shaped Attention microbenchmark
+showed approximately 6–7% lower full-window kernel latency, which must not be
+reported as an end-to-end FPS gain.
+
+Each backend reproduced identical output bytes across its three runs. Relative
+to the SDPA run, cuDNN and FA4 RGB MAE was 13.73 and 13.53 on the 0–255 scale;
+this measures pixel disagreement, not perceived quality. Matched-frame inspection
+showed different textures and scene details. Neither alternative has passed an
+exact-reference or perceptual-quality equivalence gate. The default and existing
+BF16 qualification remain unchanged. These additional backend measurements cover
+Racing at one step, not other scenes, two-step sampling or arbitrary long clips.
+
 ## Framework reuse and limits
 
 The DiT reuses Omni's Wan modules, unified Attention, Linear weight loaders and
@@ -291,8 +368,9 @@ encoder/decoder states are shared Wan codec components.
 
 Unsupported: multi-GPU TP/SP/PP/CFG/HSDP, generic FP8/FP4 or LoRA, offload/sleep,
 TeaCache/Cache-DiT/prefix caching, concurrent sessions, step execution, dynamic
-captions and generic streaming-output APIs. Full Wan VAE, other devices and
-attention backends are not qualified.
+captions and generic streaming-output APIs. Full Wan VAE and other devices are
+not qualified. Attention choices are limited to the three explicit backends
+above; their SM120 measurements do not qualify other hardware or kernels.
 
 ```bash
 python -m pytest tests/diffusion/models/matrix_game4 \
