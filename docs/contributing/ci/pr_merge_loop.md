@@ -94,9 +94,11 @@ Keep responsibilities explicit: contributors diagnose and fix their code and
 supply the failed-job/root-cause/fix-SHA record plus local command, environment,
 results, and redacted screenshots. The reviewer verifies the failure, sends an
 actionable request, checks that evidence, and assesses retest readiness. The
-maintainer authorizes and triggers project CI through the permitted process,
+maintainer normally authorizes and triggers project CI; the loop may use only
+the verified CUDA fallback below when no maintainer has handled the retest,
 then verifies current-head checks and unresolved review concerns. Final merge
-confirmation remains with `hsliuustc0106`; the loop never merges automatically.
+confirmation and execution of squash-and-merge remain with `hsliuustc0106`;
+the loop prepares the handoff and never merges automatically.
 
 For example (replace placeholders with verified facts before sending):
 
@@ -120,8 +122,9 @@ contributor TODOs:
   linked current-head evidence and no unresolved merge blocker. Status: awaiting
   evidence verification or checks; use the actual observed state.
 - [ ] **Final merge confirmation — `hsliuustc0106`:** inspect the verified
-  merge-ready handoff and confirm the merge. Acceptance: explicit confirmation;
-  record an actual merge separately only after observing it. Status: waiting for
+  merge-ready handoff and personally execute squash-and-merge when satisfied. Acceptance: explicit
+  confirmation and an observed squash merge by hs;
+  record an actual merge only after observing it. Status: waiting for
   hs's final confirmation once the preceding gates are met.
 
 ### Bounded contributor feedback
@@ -138,7 +141,8 @@ Never ask contributors to provide the project's CUDA L2/Buildkite result.
 Maintainers handle admission and inspect matching-head results; record actual
 labels and run state in the review record. Do not require an untriggered result
 before `ready` admission. Justified local evidence and the existing approval/merge
-gates remain intact; this grants no additional label or CI-triggering authority.
+gates remain intact; only the bounded CUDA retest fallback below grants
+CI-triggering authority.
 
 This documented feedback scope is limited to conflict fixes, verified CI code-failure repairs, and missing evidence. Other outreach, including generic reminders and stale-approval nudges, remains proposed pending separate authorization. Documenting these operating settings or opening this documentation PR does not establish repository-wide adoption.
 
@@ -181,6 +185,18 @@ feedback is not a completed substantive review or an approval.
    validation scope that still satisfies the gate. Do not promise per-test
    retry support without checking the actual pipeline. An absent status is
    unknown: verify whether a build exists rather than assuming none is running.
+   **Bounded loop fallback:** if no other maintainer has handled the retest,
+   the loop may trigger the necessary CUDA retest after verifying the repair
+   commit and local evidence. Immediately re-fetch the open/non-draft state,
+   exact head, latest discussion, and queued/running/completed builds. Proceed
+   only when the evidence applies to that head and no equivalent PR/head/pipeline
+   run or maintainer action already covers the request. Use the supported,
+   smallest necessary trigger; never blindly toggle labels or duplicate runs.
+   Record the trigger identity and verify the returned run URL, head, and state.
+   If sending is uncertain, read back before retrying. If head/evidence changes,
+   access is denied, or duplicate-run status cannot be established, stop and
+   leave the retest pending. This exception covers a necessary CUDA retest only,
+   not additional platform runs, discretionary paid compute, or broader retries.
 5. **Close the loop on matching-head evidence.** Record the new run and result,
    or the applicable documented docs-only skip. A screenshot, an old-head pass,
    or an infrastructure classification cannot replace the current-tip CUDA
@@ -198,14 +214,15 @@ resubmit evidence while the same run is still executing.
 [Diff-aware CI](./ci_settings.md#diff-aware-ci) selects work after a build is
 scheduled; repository-side pipeline selection does not by itself create a
 Buildkite build. Diagnose missing-build admission separately and verify the
-actual trigger configuration. This guide adds no automatic label toggling,
-workflow reruns, webhook handler, or paid compute. A deployed loop must have
-explicit permission for the feedback it sends; documenting this process does
-not update an existing automation or grant new runtime permissions.
+actual trigger configuration. This guide documents the bounded retest permission;
+it does not implement a trigger, automatic label toggling, webhook handler, or
+paid-compute expansion. A deployed loop must have the corresponding explicit
+permission in its configuration; this documentation PR does not update an
+existing automation.
 
 ### Action boundaries
 
-The readiness loop does not approve its own PRs or merge ordinary PRs. Maintainers retain the merge decision. Do not trigger or rerun workflows, apply CI-triggering labels, or launch paid compute without separate authorization. Observe existing results and propose the next action instead. The only standing revert exception is the confirmed, causally attributed CUDA merge-test regression described below; it does not authorize speculative reverts or unrelated merges.
+The readiness loop does not approve its own PRs or merge ordinary PRs. Maintainers retain the merge decision. Apart from the bounded, verified CUDA retest fallback above, do not trigger or rerun workflows, apply CI-triggering labels, or launch paid compute without separate authorization. Observe existing results and propose the next action otherwise. The only standing revert exception is the confirmed, causally attributed CUDA merge-test regression described below; it does not authorize speculative reverts or unrelated merges.
 
 ## Quality watch (first-class)
 
