@@ -37,6 +37,7 @@ from vllm_omni.diffusion.media import (
 from vllm_omni.diffusion.request import OmniDiffusionRequest
 from vllm_omni.diffusion.worker.request_batch import DiffusionRequestBatch
 from vllm_omni.platforms import current_omni_platform
+from vllm_omni.quantization.fp8_config import DiffusionFp8Config
 
 if TYPE_CHECKING:
     from .stream import MatrixStream
@@ -148,10 +149,10 @@ def validate_config(config: OmniDiffusionConfig) -> None:
         raise ValueError("Matrix-Game currently requires resident weights; offload and sleep are unsupported")
     if config.step_execution or config.streaming_output:
         raise ValueError("Submit consecutive chunk requests; diffusion step execution is unsupported")
-    if config.quantization_config is not None or config.lora_path:
-        raise ValueError(
-            "Generic quantization and LoRA are unsupported; use model_config.fp8 for the experimental FP8 path"
-        )
+    if config.lora_path:
+        raise ValueError("Matrix-Game does not support LoRA")
+    if config.quantization_config is not None and not isinstance(config.quantization_config, DiffusionFp8Config):
+        raise ValueError("Matrix-Game supports only online quantization_config='fp8' or None")
     if config.cache_backend not in (None, "none") or config.enable_prefix_caching:
         raise ValueError("Matrix-Game owns its temporal KV cache; generic cache acceleration is unsupported")
     for role in ("self", "cross"):
@@ -162,15 +163,14 @@ def validate_config(config: OmniDiffusionConfig) -> None:
                 "use TORCH_SDPA for the exact-reference path"
             )
     options = config.model_config
-    if options.keys() - {"prompt", "max_latents", "scene", "cuda_graph", "fp8", "height", "width"}:
+    if options.keys() - {"prompt", "max_latents", "scene", "cuda_graph", "height", "width"}:
         raise ValueError(
-            "Matrix-Game model_config accepts only prompt, max_latents, scene, cuda_graph, fp8, height and width"
+            "Matrix-Game model_config accepts only prompt, max_latents, scene, cuda_graph, height and width; "
+            "use quantization_config='fp8' for online FP8"
         )
     _frame_size(config)
     if type(options.get("cuda_graph", False)) is not bool:
         raise ValueError("cuda_graph must be boolean")
-    if type(options.get("fp8", False)) is not bool:
-        raise ValueError("fp8 must be boolean")
     if options.get("scene", "castle") not in ("castle", "ancient-egypt", "racing"):
         raise ValueError("scene must be castle, ancient-egypt or racing")
     limit = options.get("max_latents", 8192)
@@ -225,20 +225,20 @@ class MatrixGame4Pipeline(nn.Module):
         self.prompt_text = od_config.model_config.get("prompt", profile["prompt"])
         self.sink_mode = "first_frame" if self.scene == "racing" else "kv_only"
         self.sink_rope_mode = "absolute" if self.scene == "racing" else "fixed"
-        # Loader's default-device context must not put checkpoint construction on GPU.
+        # vLLM online quantization materializes and processes each loaded linear
+        # on its construction device. Keep unquantized construction on the CPU.
+        with torch.device(self.device if od_config.quantization_config is not None else "cpu"):
+            self.runtime = load_transformer(required[0], device=self.device, quant_config=od_config.quantization_config)
+        self.runtime.use_graph = od_config.model_config.get("cuda_graph", False)
+        self.transformer = self.runtime.model
         with torch.device("cpu"):
-            self.runtime = load_transformer(required[0], device=self.device)
-            self.runtime.use_graph = od_config.model_config.get("cuda_graph", False)
-            self.transformer = self.runtime.model
             self.register_buffer("prompt_embeds", self._encode_prompt(root), persistent=False)
             self.vae = MatrixCodec(str(required[3])).to(self.device, torch.bfloat16).eval()
             self.vae.use_graph = od_config.model_config.get("cuda_graph", False)
         self.register_buffer("sink_latent", self._encode_sink(required[1]), persistent=False)
-        if od_config.model_config.get("fp8", False):
+        if od_config.quantization_config is not None:
             from .pointwise import compiled_ops
-            from .quantization import quantize_blocks
 
-            quantize_blocks(self.transformer)
             self.runtime.fast_ops = compiled_ops()
         self._stream: MatrixStream | None = None
         self._session_id: str | None = None

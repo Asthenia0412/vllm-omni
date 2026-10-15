@@ -14,8 +14,8 @@ Maintainer: @lishunyang12. Model:
 Status: experimental Python integration; default BF16 quality path and opt-in acceleration.
 
 Hardware names below identify measured environments, not a layer support list.
-The optional partitioned FP8 method delegates capability checking, activation
-quantization and scaled-MM execution to vLLM/PyTorch. The existing attention
+Optional `quantization_config="fp8"` uses the existing online FP8 configuration,
+weight loader and platform-selected vLLM linear backend. The existing attention
 selector chooses compatible kernels. Other devices and backends still need
 their own output and throughput qualification.
 
@@ -140,7 +140,7 @@ Use the shared SDPA backend for the qualified BF16 path. `enforce_eager=True`
 disables generic whole-pipeline graph wrapping. Keep it enabled even when using
 the model-owned graph switch below; session bookkeeping must stay outside capture.
 The text encoder runs once during startup and is released before gameplay.
-No CPU inference offload or generic quantization is enabled.
+No CPU inference offload is enabled. Quantization defaults to `None`.
 
 ## Experimental 1280×736 resolution
 
@@ -174,8 +174,10 @@ better texture fidelity or temporal stability. The pinned reference runtime
 only accepts 864×480, so `--mode reference` rejects the larger size. Multi-GPU
 execution is still unsupported.
 
-Bounded Racing evaluation on one RTX PRO 5000 72GB Blackwell, same software stack
-as above, seed 42, SDPA, graph replay, TAEW2, one 1,201-frame run per configuration:
+Historical Racing evaluation with the removed custom FP8 adapter on one
+RTX PRO 5000 72GB Blackwell, same software stack
+as above, seed 42, SDPA, graph replay, TAEW2, one 1,201-frame run per configuration.
+These FP8 numbers do not qualify the current standard online FP8 implementation:
 
 | Native resolution | Precision / steps | Generated FPS | Chunk p50 / p95 (ms) |
 | --- | --- | --- | --- |
@@ -272,26 +274,44 @@ steady DiT window after fill and continued codec chunks using vLLM's existing
 platform graph wrapper. Graph warmup preserves codec history, replay returns
 owned output buffers, and closing a session releases its graphs and caches.
 
-Add `model_config.fp8=True` or `--fp8` for the experimental throughput path:
+Use `quantization_config="fp8"` or the benchmark's `--fp8` for online FP8:
 
 ```python
-model_config={"scene": "castle", "cuda_graph": True, "fp8": True}
+model_config={"scene": "castle", "cuda_graph": True},
+quantization_config="fp8",
 ```
 
-It uses vLLM's per-tensor E4M3 quantizer/scaled GEMM with separate Q/K/V weight
-scales and one shared input quantization. PyTorch compiles the tensor-only
-normalization/residual operations; temporal KV uses a ring instead of shifting
-the whole window. Text KV is computed once. Embeddings, output head and the
-shared TAEW2 codec remain BF16. The first run includes compilation and graph
-warmup; neither is included in the reported steady FPS.
+This is the framework's existing `DiffusionFp8Config` and vLLM online FP8
+linear method. The standard weight loader converts loaded BF16 weights, and
+vLLM selects the linear backend for the device. Packed QKV follows that backend's
+scaling and GEMM policy; there is no separate partitioned FP8 method or forced
+Torch kernel. Matrix passes the config into its existing Wan block linears.
+To exclude a layer, use a flat config with `ignored_layers`, for example
+`{"method": "fp8", "ignored_layers": ["blocks.0.attn1.to_qkv"]}`. These are runtime
+Wan names, after checkpoint translation. Serialized FP8, per-component maps and
+other quantization methods are not supported by this initial integration.
+`model_config.fp8` is rejected instead of maintaining a second quantization entry.
 
-FP8 output is **not pixel-identical** to the original optimized FP8 runtime.
-Fused reductions differ numerically, and long autoregressive clips exhibit
-different effects even with identical inputs and seed. This is a throughput
-comparison, not a passed visual-quality gate. Both switches are off by default;
-use BF16 for exact-reference work. Do not pass `--require-exact` for FP8 expecting
-it to succeed. The tested PyTorch/vLLM versions are listed above; other compiler
-versions and GPUs need requalification.
+The accelerated path retains compiled tensor-only normalization/residual
+operations, ring temporal KV and cached text KV. Embeddings, output head and
+TAEW2 remain BF16. Loading, compilation and graph warmup are excluded from
+steady FPS. The default remains unquantized BF16.
+
+Standard online FP8 changes quantization and GEMM arithmetic relative to the
+removed custom adapter. It is not pixel-identical to BF16 or the reference FP8
+runtime. Use BF16 for exact reference work. Historical custom-FP8 measurements
+below are retained with their scope and do not qualify this replacement.
+
+Current standard online FP8 validation: one 481-frame Racing run at 864×480,
+one step, SDPA, graph replay, TAEW2 and seed 42 on the PRO 5000 measured
+**76.37 generated FPS**, chunk p50 **52.36 ms**, p95 **52.91 ms**. The first
+25 chunks were excluded (384 measured generated frames). Observed allocator
+peaks were 8.22 GiB allocated / 8.54 GiB reserved; these are not whole-device or
+cold-start capacity measurements. RGB MAE against the previous custom-FP8
+revision was 13.72 on the 0–255 scale, confirming non-identical output rather
+than measuring perceived quality. This single run does not establish a
+statistically significant speedup, original-FP8 quality parity or RTX 5090
+performance. Other scenes have not been requalified for standard online FP8.
 
 Run the paired throughput comparison on the same idle GPU, in separate
 processes, with matching scene/geometry, 481 frames and 25 warmup chunks:
@@ -319,8 +339,8 @@ session close are excluded from both sides. At 481 frames this measures 96
 steady four-frame chunks (384 generated frames). This is generated throughput,
 not a display frame rate or browser response-time measurement.
 
-One RTX PRO 5000 72GB Blackwell, 864×480, seed 42, same scene checkpoints and
-actual geometry capture; software versions as listed above. Each row is one
+Historical results with the removed custom FP8 adapter: one RTX PRO 5000 72GB
+Blackwell, 864×480, seed 42, same scene checkpoints and actual geometry capture; software versions as listed above. Each row is one
 paired 481-frame run (not an average across repeated runs):
 
 | Scene | Steps | Original FP8 FPS | Omni FP8 FPS | Original / Omni p95 (ms) |
@@ -394,7 +414,8 @@ autoregressive history, so neither alternative is an exact-reference path.
 Retain `TORCH_SDPA` when pixel-identical reference reproduction is required.
 
 On the same PRO 5000 and software stack above, three interleaved runs per
-backend produced the following results. Each run uses Racing, seed 42, FP8
+backend produced the following historical results with the removed custom FP8
+adapter. These do not qualify the new standard FP8 path. Each run uses Racing, seed 42, FP8
 linears, CUDA Graph, one denoising step and 481 frames; 25 warmup chunks are
 excluded, leaving 384 measured frames. Timings use the CPU-uint8-to-CPU-uint8
 boundary described above, including the codec and clean-KV update.
@@ -427,7 +448,7 @@ video media and output conversion use existing engine interfaces. Matrix owns
 conditioning, the incremental flow schedule and its sink policy. The TAEW2 decoder is shared with ABot-World; its matching encoder and independent
 encoder/decoder states are shared Wan codec components.
 
-Unsupported: multi-GPU TP/SP/PP/CFG/HSDP, generic FP8/FP4 or LoRA, offload/sleep,
+Unsupported: multi-GPU TP/SP/PP/CFG/HSDP, serialized FP8/FP4, per-component quantization maps or LoRA, offload/sleep,
 TeaCache/Cache-DiT/prefix caching, concurrent sessions, step execution, dynamic
 captions and generic streaming-output APIs. Full Wan VAE and other devices are
 not qualified. Attention choices are limited to the three explicit backends
@@ -435,13 +456,11 @@ above; their SM120 measurements do not qualify other hardware or kernels.
 
 ```bash
 python -m pytest tests/diffusion/models/matrix_game4 \
-  tests/diffusion/test_partitioned_fp8.py \
   tests/diffusion/models/abot_world/test_offline_check.py \
   tests/diffusion/models/abot_world/test_pipeline_ci.py -q
 
-# CI-like GPU subset: graph lifetime and independent FP8 QKV scales.
+# CI-like GPU subset: graph lifetime and standard online FP8 checkpoint loading.
 python -m pytest tests/diffusion/models/matrix_game4 \
-  tests/diffusion/test_partitioned_fp8.py \
   -m 'core_model and cuda' --run-level core_model -q
 ```
 

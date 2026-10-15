@@ -27,18 +27,19 @@ for Omni inference; the separate reference command uses it only as a test oracle
 | Matrix-specific behavior | 148-channel conditioning, incremental flow sampling, sink and temporal-cache policy |
 | Codec | Shared Wan TAEW2 encoder/decoder; explicit encoder/decoder state per session |
 | Graph replay | Platform-selected vLLM graph wrapper, with session-owned stable inputs and codec history |
-| Experimental FP8 | Shared `PartitionedFP8LinearMethod`; vLLM per-tensor quantization and device-dispatched Torch scaled-MM |
+| Experimental FP8 | Existing `quantization_config="fp8"`, online weight loading and vLLM kernel selection |
 
 Reusing a component does not automatically qualify every backend or optimization
-it offers. Multi-GPU execution, generic FP8, paged KV and concurrent sessions are
-not enabled by this adapter.
+it offers. Multi-GPU execution, paged KV and concurrent sessions are not enabled.
 
-The shared FP8 method accepts BF16/FP16 weights and arbitrary aligned output
-partitions, including unequal Q/K/V widths. It checks upstream kernel support,
-uses the platform's FP8 format, and retains separate weight scales while
-quantizing the common input once. Matrix only selects the block projections and
-its scale floor. The Torch backend preserves the already-qualified numerical
-path; this change does not switch to a different GEMM or quantization scheme.
+FP8 uses the existing `DiffusionFp8Config` and vLLM online linear method through
+the standard `quantization_config` entry point. vLLM owns weight conversion,
+activation scaling and kernel selection. No Matrix-specific quantizer, scale
+floor, partitioned linear method or GPU architecture check is added. The packed
+QKV projection follows the standard backend's scaling and GEMM policy. Optional
+`ignored_layers` names use Wan runtime prefixes such as `blocks.0.attn1.to_qkv`.
+Only the plain online FP8 config is qualified here; serialized checkpoints,
+per-component maps and other methods are rejected before loading.
 
 The remaining model-specific normalization, RoPE and session code preserves the
 released checkpoint's rounding and causal state. Existing per-head fused RoPE
@@ -64,24 +65,28 @@ also matched exactly. See the recipe for the complete qualification matrix.
 
 ## Acceleration switches
 
-Both switches default to `False`. Keep `enforce_eager=True` for the outer engine;
-the model controls capture of its stateful, fixed-shape operations.
+Graph replay defaults to `False` and `quantization_config` defaults to `None`.
+Keep `enforce_eager=True` for the outer engine; the model controls capture of its
+stateful, fixed-shape operations.
 
 ```python
-model_config={"scene": "castle", "cuda_graph": True, "fp8": True}
+model_config={"scene": "castle", "cuda_graph": True},
+quantization_config="fp8",
 ```
 
 `cuda_graph` captures the steady DiT window and continued TAEW2 chunks using the
-existing platform graph wrapper. `fp8` additionally converts block projections
-to per-tensor E4M3, compiles normalization/residual chains with PyTorch, and uses
-a ring history buffer. Embeddings, the output head and codec remain BF16. These
-switches reuse framework components and do not import the reference runtime.
+existing platform graph wrapper. Online FP8 quantizes supported block linears;
+this acceleration path also compiles normalization/residual chains with PyTorch
+and uses a ring history buffer. Embeddings, output head and codec remain BF16.
+`model_config.fp8` is rejected; quantization has one configuration entry point.
 
-The FP8 path is experimental and **not pixel-identical** to the reference FP8
-runtime. Small fused-reduction differences can lead to different long-sequence
-effects. Throughput alignment does not qualify its visual quality; retain the
-default BF16 path where exact reference reproduction is required. See the
-recipe for paired FPS measurements, reproducible commands and their scope.
+The FP8 path changes scaling and GEMM policy compared with the former custom
+adapter. It is **not pixel-identical** to BF16 or the reference optimized FP8
+runtime. Retain the default BF16 path for exact reference reproduction. The
+recipe distinguishes current validation from historical throughput results.
+A bounded 481-frame Racing run with standard online FP8 measured 76.37 generated
+FPS on one PRO 5000 at 864×480, one step, graph replay and SDPA. This is not a
+visual-quality parity claim or an RTX 5090 measurement.
 
 ## Experimental 1280×736 rendering
 
@@ -97,11 +102,12 @@ no reference-quality qualification at that size. The codec and patch embedding
 require multiples of 32; 1280×720 is rejected. Resolution cannot change within a
 worker. Multi-GPU execution remains unsupported.
 
-One 1,201-frame Racing run per configuration on the PRO 5000 measured 27.52 FPS
+Historical runs with the removed custom FP8 path on the PRO 5000 measured 27.52 FPS
 at 1280×736 with FP8 / one step, 11.24 FPS with BF16 / two steps, and 61.38 FPS
 at 864×480 with FP8 / one step. All use TAEW2, SDPA and graph replay. These are
 generated FPS after warmup, not video playback FPS or interaction latency.
-The recipe documents the inputs, timing scope and limitations.
+These historical FP8 numbers do not describe the current standard online FP8 path.
+The recipe documents current measurements and their limits.
 
 ## Attention selection
 

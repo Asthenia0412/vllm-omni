@@ -15,7 +15,10 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 from safetensors import safe_open
+from vllm.config import get_current_vllm_config
 from vllm.model_executor.layers.linear import QKVParallelLinear, UnquantizedLinearMethod
+from vllm.model_executor.layers.quantization.base_config import QuantizationConfig
+from vllm.model_executor.model_loader.reload.layerwise import finalize_layerwise_processing
 
 from vllm_omni.diffusion.layers.norm import RMSNorm
 from vllm_omni.diffusion.models.wan2_2.wan2_2_transformer import WanTransformer3DModel
@@ -123,7 +126,9 @@ def checkpoint_name(name: str) -> str | None:
     return name
 
 
-def load_transformer(checkpoint: Path, *, device: torch.device) -> MatrixRuntime:
+def load_transformer(
+    checkpoint: Path, *, device: torch.device, quant_config: QuantizationConfig | None = None
+) -> MatrixRuntime:
     model = WanTransformer3DModel(
         num_attention_heads=24,
         attention_head_dim=128,
@@ -133,6 +138,7 @@ def load_transformer(checkpoint: Path, *, device: torch.device) -> MatrixRuntime
         num_layers=30,
         cross_attn_norm=True,
         rope_max_seq_len=8193,
+        quant_config=quant_config,
     ).to(dtype=torch.bfloat16)
     # The shared Conv3d GEMM fast path changes the reduction order. Use its
     # existing convolution path for reference qualification.
@@ -144,6 +150,7 @@ def load_transformer(checkpoint: Path, *, device: torch.device) -> MatrixRuntime
             total_num_heads=24,
             bias=True,
             params_dtype=torch.bfloat16,
+            quant_config=quant_config,
             prefix=f"blocks.{index}.attn1.to_qkv",
         )
         for attention in (block.attn1, block.attn2):
@@ -165,6 +172,8 @@ def load_transformer(checkpoint: Path, *, device: torch.device) -> MatrixRuntime
         )
     if missing := expected - loaded:
         raise ValueError(f"Incomplete Matrix checkpoint: {sorted(missing)}")
+    if quant_config is not None:
+        finalize_layerwise_processing(model, get_current_vllm_config().model_config)
     model.to(device=device).eval().requires_grad_(False)
     return MatrixRuntime(model)
 

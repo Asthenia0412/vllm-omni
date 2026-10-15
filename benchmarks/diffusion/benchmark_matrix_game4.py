@@ -36,7 +36,7 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--steps", type=int, choices=(1, 2), default=1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--cuda-graph", action="store_true", help="Use native Omni steady-state graph replay")
-    parser.add_argument("--fp8", action="store_true", help="Use native Omni per-tensor FP8 block linears")
+    parser.add_argument("--fp8", action="store_true", help="Set the shared quantization_config='fp8' for online FP8")
     parser.add_argument(
         "--attention-backend",
         choices=("TORCH_SDPA", "CUDNN_ATTN", "FLASH_ATTN"),
@@ -83,10 +83,10 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
         model_config={
             "scene": args.scene,
             "cuda_graph": args.cuda_graph,
-            "fp8": args.fp8,
             "height": args.height,
             "width": args.width,
         },
+        quantization_config="fp8" if args.fp8 else None,
         distributed_executor_backend="uni",
         diffusion_attention_config={"default": {"backend": args.attention_backend}},
         video_output_transport=VideoOutputTransportConfig(enable_device_postprocess=True),
@@ -223,6 +223,7 @@ def main() -> None:
         "steps": args.steps,
         "seed": args.seed,
         "cuda_graph": args.cuda_graph if args.mode == "omni" else None,
+        "quantization_config": ("fp8" if args.fp8 else None) if args.mode == "omni" else None,
         "attention_backend": args.attention_backend if args.mode == "omni" else None,
         "input": str(args.input),
         "resources": str(args.resources),

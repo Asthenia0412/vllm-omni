@@ -259,8 +259,7 @@ def test_ring_cache_moves_previous_current_once_and_preserves_sink():
     assert cache.value.flatten().tolist() == [0, -4, -55, -3, -55]
 
 
-@pytest.mark.parametrize("option", ["cuda_graph", "fp8"])
-def test_optimization_options_require_booleans(option):
+def test_graph_option_requires_boolean():
     from vllm_omni.diffusion.data import OmniDiffusionConfig
     from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
 
@@ -270,9 +269,48 @@ def test_optimization_options_require_booleans(option):
         enforce_eager=True,
         max_num_seqs=1,
         diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
-        model_config={option: "false"},
+        model_config={"cuda_graph": "false"},
     )
     with pytest.raises(ValueError, match="boolean"):
+        validate_config(config)
+
+
+@pytest.mark.parametrize("quantization", [None, "fp8", {"method": "fp8", "ignored_layers": ["blocks.0.attn1.to_qkv"]}])
+def test_standard_online_fp8_config(quantization):
+    from vllm_omni.diffusion.data import OmniDiffusionConfig
+    from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
+
+    config = OmniDiffusionConfig(
+        model="matrix-resources",
+        model_class_name="MatrixGame4Pipeline",
+        enforce_eager=True,
+        max_num_seqs=1,
+        diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
+        quantization_config=quantization,
+    )
+    validate_config(config)
+    config.model_config["fp8"] = True
+    with pytest.raises(ValueError, match="use quantization_config"):
+        validate_config(config)
+
+
+@pytest.mark.parametrize(
+    "quantization",
+    [{"method": "fp8", "is_checkpoint_fp8_serialized": True}, {"transformer": {"method": "fp8"}}],
+)
+def test_unsupported_quantization_rejected(quantization):
+    from vllm_omni.diffusion.data import OmniDiffusionConfig
+    from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
+
+    config = OmniDiffusionConfig(
+        model="matrix-resources",
+        model_class_name="MatrixGame4Pipeline",
+        enforce_eager=True,
+        max_num_seqs=1,
+        diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
+        quantization_config=quantization,
+    )
+    with pytest.raises(ValueError, match="only online"):
         validate_config(config)
 
 
