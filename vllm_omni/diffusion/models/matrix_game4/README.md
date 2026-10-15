@@ -10,9 +10,11 @@ The game engine supplies low-poly RGB frames; no GPT-6 or other coding-agent API
 is required while playing. A coding agent can help author the external game.
 
 See the [deployment recipe](../../../../recipes/Skywork/Matrix-Game-4.0.md)
-for installation, pinned asset downloads, scene selection, request configuration,
-and reference comparisons. No Matrix-Game source checkout or package is needed
-for Omni inference; the separate reference command uses it only as a test oracle.
+for the recommended deployment configuration, pinned resources, native game
+input generation, request configuration and measured throughput. Omni model
+inference does not depend on the external Matrix-Game package. Interactive
+gameplay still needs an input producer: the upstream C++ game uses OpenGL/EGL
+to supply low-poly RGB frames, while the application handles controls and media.
 
 ## Framework reuse
 
@@ -61,7 +63,8 @@ A 241-frame castle comparison through the actual Omni engine matched all decoded
 RGB bytes exactly at one step with TAEHV. This does not establish parity for a
 full Wan VAE, other attention backends, quantization, hardware or arbitrary long
 sessions. All six 121-frame scene/step pairs and three 1,201-frame two-step gameplay clips
-also matched exactly. See the recipe for the complete qualification matrix.
+also matched exactly. These correctness measurements use BF16 and do not
+qualify the recommended FP8 deployment configuration.
 
 ## Acceleration switches
 
@@ -83,48 +86,7 @@ and uses a ring history buffer. Embeddings, output head and codec remain BF16.
 The FP8 path changes scaling and GEMM policy compared with the former custom
 adapter. It is **not pixel-identical** to BF16 or the reference optimized FP8
 runtime. Retain the default BF16 path for exact reference reproduction. The
-recipe distinguishes current validation from historical throughput results.
+recipe documents the recommended configuration and current measured throughput.
 A bounded 481-frame Racing run with standard online FP8 measured 76.37 generated
 FPS on one PRO 5000 at 864×480, one step, graph replay and SDPA. This is not a
 visual-quality parity claim or an RTX 5090 measurement.
-
-## Experimental 1280×736 rendering
-
-The default remains 864×480. Configure a new worker with
-`model_config={"scene": "racing", "height": 736, "width": 1280}` and supply
-CPU uint8 geometry frames of shape `[T,736,1280,3]`. Request dimensions must
-match the worker (or be omitted). The benchmark accepts `--height 736 --width 1280`;
-precision, step count and graph replay remain independent options.
-
-This runs the released checkpoint at a larger latent grid; it does not upscale
-the generated 480p output. It is an experimental resolution extrapolation, with
-no reference-quality qualification at that size. The codec and patch embedding
-require multiples of 32; 1280×720 is rejected. Resolution cannot change within a
-worker. Multi-GPU execution remains unsupported.
-
-Historical runs with the removed custom FP8 path on the PRO 5000 measured 27.52 FPS
-at 1280×736 with FP8 / one step, 11.24 FPS with BF16 / two steps, and 61.38 FPS
-at 864×480 with FP8 / one step. All use TAEW2, SDPA and graph replay. These are
-generated FPS after warmup, not video playback FPS or interaction latency.
-These historical FP8 numbers do not describe the current standard online FP8 path.
-The recipe documents current measurements and their limits.
-
-## Attention selection
-
-Select the existing framework backend explicitly for both self and cross
-attention, or use the shared `per_role` configuration for separate choices:
-
-```python
-diffusion_attention_config={"default": {"backend": "CUDNN_ATTN"}}
-```
-
-`TORCH_SDPA` remains the exact-reference configuration and benchmark default.
-`CUDNN_ATTN` and `FLASH_ATTN` are experimental alternatives; they reuse the
-framework implementations without model-specific kernels or fallback logic.
-On SM120, `FLASH_ATTN` selects FA4 and requires the optional `flash-attn-4`
-package. Missing or incompatible kernels are rejected by the platform selector.
-FP8 linears, graph replay and temporal/text KV reuse remain independent options.
-
-Changing the attention kernel changes floating-point reductions and can change
-autoregressive output. The alternative backends are not pixel-identical to the
-reference. See the recipe for paired end-to-end timings and installation.
