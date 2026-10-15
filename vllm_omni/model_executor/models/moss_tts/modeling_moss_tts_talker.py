@@ -1321,15 +1321,6 @@ class MossTTSLocalTalkerForGeneration(nn.Module):
         self.audio_assistant_slot_token_id: int = int(self.config.audio_assistant_slot_token_id)
         self.im_end_token_id: int = int(self.config.im_end_token_id)
 
-        if current_omni_platform.is_cuda():
-            from vllm.v1.attention.backends.registry import AttentionBackendEnum, register_backend
-
-            # Use vLLM's backend registration rather than replacing module globals.
-            register_backend(
-                AttentionBackendEnum.TRITON_ATTN,
-                "vllm_omni.attention.triton_decode_attention.HeadGroupedTritonAttentionBackend",
-            )
-
         # Qwen3 backbone. get_text_config() is sufficient for vLLM to size
         # KV cache / heads correctly, as long as AutoConfig resolves to the
         # local MossTTSLocalConfig rather than the HF remote-code class.
