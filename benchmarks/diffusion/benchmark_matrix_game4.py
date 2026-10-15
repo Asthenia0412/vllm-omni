@@ -3,7 +3,7 @@
 """Bounded Matrix-Game qualification with real geometry frames and optional oracle.
 
 Run the reference and Omni modes in separate processes on the same GPU/software
-stack. See recipes/Skywork/Matrix-Game-4.0-SM120.md for the pinned reference.
+stack. See recipes/Skywork/Matrix-Game-4.0.md for the pinned reference.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ def arguments() -> argparse.Namespace:
         "--attention-backend",
         choices=("TORCH_SDPA", "CUDNN_ATTN", "FLASH_ATTN"),
         default="TORCH_SDPA",
-        help="Omni attention backend; FLASH_ATTN uses FA4 on SM120 when installed",
+        help="Omni attention backend; the platform selector checks device and installed-kernel support",
     )
     parser.add_argument("--warmup-chunks", type=int, default=25)
     parser.add_argument("--compare", type=Path, help="reference output .npy to compare against")

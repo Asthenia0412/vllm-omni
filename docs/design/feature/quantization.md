@@ -59,6 +59,14 @@ OmniDiffusionConfig.quantization_config
 The model layer receives either a method implementation or `None`. Returning
 `None` leaves that layer unquantized.
 
+`PartitionedFP8LinearMethod` is a shared post-load adapter for callers that
+must retain independent per-tensor scales and GEMMs for logical output
+partitions while quantizing their common input once. It delegates activation
+quantization, capability checks and device-specific scaled-MM to vLLM's Torch
+FP8 kernel. Matrix-Game uses it to preserve the released projection semantics;
+the ordinary online FP8 config uses a different scaling policy. This adapter
+does not introduce a quantization-config name or a GPU-architecture gate.
+
 ## Configuration resolution
 
 `build_quant_config()` accepts the following forms:

@@ -1,14 +1,15 @@
 # Matrix-Game 4.0 in vLLM-Omni
 
-A native geometry-to-video integration targeting **one RTX 5090 (32 GB)** at
-864×480. The current qualification device is one **RTX PRO 5000 72GB Blackwell**;
-RTX 5090 capacity and speed have not been measured for this implementation.
+A native geometry-to-video integration for **one CUDA GPU** at 864×480. It has
+no SM120-only model layers or architecture gate. The current qualification
+device is one **RTX PRO 5000 72GB Blackwell**; other GPUs, including the RTX 5090
+deployment target, require their own capacity, quality and speed measurements.
 
 This is an experimental Python chunk API. It is not a released HTTP game server.
 The game engine supplies low-poly RGB frames; no GPT-6 or other coding-agent API
 is required while playing. A coding agent can help author the external game.
 
-See the [deployment recipe](../../../../recipes/Skywork/Matrix-Game-4.0-SM120.md)
+See the [deployment recipe](../../../../recipes/Skywork/Matrix-Game-4.0.md)
 for installation, pinned asset downloads, scene selection, request configuration,
 and reference comparisons. No Matrix-Game source checkout or package is needed
 for Omni inference; the separate reference command uses it only as a test oracle.
@@ -26,11 +27,22 @@ for Omni inference; the separate reference command uses it only as a test oracle
 | Matrix-specific behavior | 148-channel conditioning, incremental flow sampling, sink and temporal-cache policy |
 | Codec | Shared Wan TAEW2 encoder/decoder; explicit encoder/decoder state per session |
 | Graph replay | Platform-selected vLLM graph wrapper, with session-owned stable inputs and codec history |
-| Experimental FP8 | vLLM per-tensor quantization/scaled GEMM; shared QKV input quantization |
+| Experimental FP8 | Shared `PartitionedFP8LinearMethod`; vLLM per-tensor quantization and device-dispatched Torch scaled-MM |
 
 Reusing a component does not automatically qualify every backend or optimization
 it offers. Multi-GPU execution, generic FP8, paged KV and concurrent sessions are
 not enabled by this adapter.
+
+The shared FP8 method accepts BF16/FP16 weights and arbitrary aligned output
+partitions, including unequal Q/K/V widths. It checks upstream kernel support,
+uses the platform's FP8 format, and retains separate weight scales while
+quantizing the common input once. Matrix only selects the block projections and
+its scale floor. The Torch backend preserves the already-qualified numerical
+path; this change does not switch to a different GEMM or quantization scheme.
+
+The remaining model-specific normalization, RoPE and session code preserves the
+released checkpoint's rounding and causal state. Existing per-head fused RoPE
+and generic diffusion caching have different semantics and are not substitutes.
 
 ## Quality contract
 

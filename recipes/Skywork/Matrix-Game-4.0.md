@@ -1,7 +1,9 @@
-# Matrix-Game 4.0 — single RTX 5090 deployment target
+# Matrix-Game 4.0 — single-GPU deployment
 
 Native geometry-to-video inference through vLLM-Omni's experimental Python
-`DiffusionEngine`. The deployment target is **one RTX 5090 with 32 GB VRAM**.
+`DiffusionEngine`. The integration uses shared device-dispatched layers on
+**one CUDA GPU**, without an SM120-only implementation or architecture gate.
+An RTX 5090 with 32 GB VRAM remains a deployment target.
 Local validation uses **one RTX PRO 5000 72GB Blackwell** (PCI ID
 `2BB3:10DE:227A`, 73,415 MiB reported). RTX 5090 fit and performance are not yet
 qualified. A separate whole-device NVML sample at 100 ms intervals observed
@@ -10,6 +12,12 @@ qualified. A separate whole-device NVML sample at 100 ms intervals observed
 Maintainer: @lishunyang12. Model:
 [Skywork/Matrix-Game-4.0](https://huggingface.co/Skywork/Matrix-Game-4.0).
 Status: experimental Python integration; default BF16 quality path and opt-in acceleration.
+
+Hardware names below identify measured environments, not a layer support list.
+The optional partitioned FP8 method delegates capability checking, activation
+quantization and scaled-MM execution to vLLM/PyTorch. The existing attention
+selector chooses compatible kernels. Other devices and backends still need
+their own output and throughput qualification.
 
 ## What this runs
 
@@ -427,11 +435,13 @@ above; their SM120 measurements do not qualify other hardware or kernels.
 
 ```bash
 python -m pytest tests/diffusion/models/matrix_game4 \
+  tests/diffusion/test_partitioned_fp8.py \
   tests/diffusion/models/abot_world/test_offline_check.py \
   tests/diffusion/models/abot_world/test_pipeline_ci.py -q
 
 # CI-like GPU subset: graph lifetime and independent FP8 QKV scales.
 python -m pytest tests/diffusion/models/matrix_game4 \
+  tests/diffusion/test_partitioned_fp8.py \
   -m 'core_model and cuda' --run-level core_model -q
 ```
 

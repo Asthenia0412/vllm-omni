@@ -14,7 +14,7 @@ KV allocation. A model adapter owns model-specific controls and conditioning.
 LingBot World v2 is the first single-KV-branch integration. DreamZero uses the
 same runner capability with two logical CFG branches.
 
-The initial [Matrix-Game 4.0 pipeline](https://github.com/vllm-project/vllm-omni/blob/main/recipes/Skywork/Matrix-Game-4.0-SM120.md)
+The initial [Matrix-Game 4.0 pipeline](https://github.com/vllm-project/vllm-omni/blob/main/recipes/Skywork/Matrix-Game-4.0.md)
 uses serial ordinary `DiffusionEngine` requests with a single model-owned temporal
 cache. It does not implement this protocol, session manager or runner-owned paged
 KV. Its `matrix_session_id` request option must not be interpreted as support for

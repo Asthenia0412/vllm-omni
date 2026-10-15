@@ -15,7 +15,7 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 from safetensors import safe_open
-from vllm.model_executor.layers.linear import QKVParallelLinear
+from vllm.model_executor.layers.linear import QKVParallelLinear, UnquantizedLinearMethod
 
 from vllm_omni.diffusion.layers.norm import RMSNorm
 from vllm_omni.diffusion.models.wan2_2.wan2_2_transformer import WanTransformer3DModel
@@ -38,14 +38,12 @@ class MatrixRMSNorm(RMSNorm):
 class MatrixQKV(QKVParallelLinear):
     """Reuse packed weight loading, preserving the reference's three BF16 GEMMs.
 
-    Packing Q/K/V into one GEMM changes accumulation/rounding on SM120. The
-    resident single-rank correctness path therefore evaluates the three slices.
+    Packing Q/K/V into one GEMM can change accumulation/rounding. The resident
+    single-rank correctness path therefore evaluates the three slices.
     """
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, None]:
-        from .quantization import MatrixFP8Method
-
-        if isinstance(self.quant_method, MatrixFP8Method):
+        if not isinstance(self.quant_method, UnquantizedLinearMethod):
             return self.quant_method.apply(self, x, self.bias), None
         assert self.bias is not None
         output = [F.linear(x, weight, bias) for weight, bias in zip(self.weight.chunk(3), self.bias.chunk(3))]
