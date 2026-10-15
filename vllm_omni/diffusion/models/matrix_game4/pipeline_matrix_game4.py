@@ -1,0 +1,321 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
+"""Native Matrix-Game 4.0 castle rendering, one resident session per worker.
+
+The engine schedules ordinary requests. A request can render a complete clip or
+advance a named session by one chunk; session KV and codec state are model-owned.
+There is no dependency on the reference repository at inference time.
+"""
+
+from __future__ import annotations
+
+import gc
+import html
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING, ClassVar
+
+import ftfy
+import numpy as np
+import torch
+from PIL import Image, ImageOps
+from torch import nn
+from transformers import AutoTokenizer
+
+from vllm_omni.diffusion.data import DiffusionOutput, OmniDiffusionConfig
+from vllm_omni.diffusion.media import (
+    DiffusionMediaOutput,
+    VideoMediaOutput,
+    VideoTensorEncoding,
+    VideoTensorLayout,
+    VideoTensorSpec,
+    VideoValueRange,
+)
+from vllm_omni.diffusion.request import OmniDiffusionRequest
+from vllm_omni.diffusion.worker.request_batch import DiffusionRequestBatch
+from vllm_omni.platforms import current_omni_platform
+
+if TYPE_CHECKING:
+    from .stream import FastStream
+
+DEFAULT_PROMPT = (
+    "a third-person shooter game in a medieval castle with stone walls, towers and courtyards, "
+    "stylized cartoon characters firing glowing projectiles, trees and grass, snowy mountains "
+    "in the distance, realistic AAA game rendering, physically based materials, natural daylight, "
+    "detailed vegetation and terrain"
+)
+SESSION_KEY = "matrix_session_id"
+START_KEY = "matrix_frame_start"
+END_KEY = "matrix_end_session"
+_REQUEST_KEYS = {SESSION_KEY, START_KEY, END_KEY}
+_VIDEO_SPEC = VideoTensorSpec(
+    VideoTensorLayout.BCTHW, VideoTensorEncoding.NORMALIZED_FLOAT, VideoValueRange.NEGATIVE_ONE_TO_ONE
+)
+
+
+@dataclass(frozen=True)
+class MatrixInput:
+    frames: torch.Tensor | None
+    session_id: str | None
+    frame_start: int
+    end_session: bool
+    steps: int
+
+
+def prepare_request(request: OmniDiffusionRequest) -> OmniDiffusionRequest:
+    params = request.sampling_params
+    if params.height not in (None, 480) or params.width not in (None, 864):
+        raise ValueError("Matrix-Game 4.0 requires height=480, width=864")
+    if params.num_outputs_per_prompt != 1 or params.guidance_scale not in (None, 1.0):
+        raise ValueError("Matrix-Game 4.0 supports one output and guidance_scale=1")
+    if params.generator is not None:
+        raise ValueError("Use seed for Matrix-Game's separate CPU and device generators")
+    steps = 1 if params.num_inference_steps is None else params.num_inference_steps
+    if type(steps) is not int or steps not in (1, 2):
+        raise ValueError("Matrix-Game 4.0 supports one or two denoising steps")
+    if params.seed is None:
+        params.seed = 0
+    if params.output_type not in (None, "np"):
+        raise ValueError("Matrix-Game 4.0 supports decoded RGB output (output_type='np')")
+    unknown = params.extra_args.keys() - _REQUEST_KEYS
+    if unknown:
+        raise ValueError(f"Unknown Matrix-Game request options: {sorted(unknown)}")
+    session_id = params.extra_args.get(SESSION_KEY)
+    frame_start = params.extra_args.get(START_KEY, 0)
+    end_session = params.extra_args.get(END_KEY, session_id is None)
+    if session_id is not None and (not isinstance(session_id, str) or not 1 <= len(session_id) <= 128):
+        raise ValueError("matrix_session_id must be a nonempty string of at most 128 characters")
+    if type(frame_start) is not int or frame_start < 0 or type(end_session) is not bool:
+        raise ValueError("matrix_frame_start must be a nonnegative integer; matrix_end_session must be boolean")
+    if session_id is None and (frame_start or not end_session):
+        raise ValueError("Clip requests start at zero and close automatically")
+    if not isinstance(request.prompt, dict) or request.prompt.get("negative_prompt"):
+        raise ValueError("Provide a prompt dictionary with multi_modal_data.video; negative prompts are unsupported")
+    media = request.prompt.get("multi_modal_data", {})
+    if not isinstance(media, dict) or media.keys() - {"video"}:
+        raise ValueError("Matrix-Game accepts only multi_modal_data.video")
+    frames = media.get("video")
+    if frames is None:
+        if session_id is None or not end_session:
+            raise ValueError("Missing RGB frames; omit video only to close a named session")
+    else:
+        if not isinstance(frames, torch.Tensor) or frames.device.type != "cpu" or frames.dtype != torch.uint8:
+            raise ValueError("video must be a CPU uint8 RGB tensor with shape [T,480,864,3]")
+        if frames.ndim != 4 or tuple(frames.shape[1:]) != (480, 864, 3):
+            raise ValueError("video must have shape [T,480,864,3]")
+        count = frames.shape[0]
+        if session_id is None:
+            if count < 1 or (count - 1) % 4:
+                raise ValueError("A complete clip must contain 1+4k frames")
+        elif count != (1 if frame_start == 0 else 4):
+            raise ValueError("A session starts with one frame, then accepts four frames per request")
+    request.prepared_layout = MatrixInput(frames, session_id, frame_start, end_session, steps)
+    params.height, params.width = 480, 864
+    params.fps = params.fps or 60
+    return request
+
+
+def get_matrix_game4_pre_process_func(od_config: OmniDiffusionConfig) -> Callable:
+    return prepare_request
+
+
+def validate_config(config: OmniDiffusionConfig) -> None:
+    if config.num_gpus != 1 or config.parallel_config.world_size != 1 or config.max_num_seqs != 1:
+        raise ValueError("Matrix-Game 4.0 requires one GPU and max_num_seqs=1")
+    if config.dtype != torch.bfloat16 or not config.enforce_eager:
+        raise ValueError("Use dtype=bfloat16 and enforce_eager=True; Matrix owns its CUDA graphs")
+    if any(
+        (
+            config.enable_cpu_offload,
+            config.enable_layerwise_offload,
+            config.enable_distributed_layerwise_offload,
+            config.enable_sleep_mode,
+            config.diffusion_offload_config is not None,
+        )
+    ):
+        raise ValueError("Matrix-Game CUDA graphs require resident weights; offload and sleep are unsupported")
+    if config.step_execution or config.streaming_output:
+        raise ValueError("Submit consecutive chunk requests; diffusion step execution is unsupported")
+    if config.quantization_config is not None or config.lora_path:
+        raise ValueError("Matrix-Game uses its native FP8 linears; generic quantization and LoRA are unsupported")
+    if config.cache_backend not in (None, "none") or config.enable_prefix_caching:
+        raise ValueError("Matrix-Game owns its temporal KV cache; generic cache acceleration is unsupported")
+    options = config.model_config
+    if options.keys() - {"prompt", "max_latents"}:
+        raise ValueError("Matrix-Game model_config accepts only prompt and max_latents")
+    limit = options.get("max_latents", 8192)
+    if type(limit) is not int or not 1 <= limit <= 8192:
+        raise ValueError("max_latents must be an integer in [1,8192]")
+    if not isinstance(options.get("prompt", DEFAULT_PROMPT), str) or not options.get("prompt", DEFAULT_PROMPT).strip():
+        raise ValueError("prompt must be a nonempty string")
+
+
+class MatrixGame4Pipeline(nn.Module):
+    _dit_modules: ClassVar[list[str]] = ["transformer"]
+    _vae_modules: ClassVar[list[str]] = ["vae"]
+    _encoder_modules: ClassVar[list[str]] = []
+    supports_request_batch = True
+
+    def __init__(self, *, od_config: OmniDiffusionConfig, prefix: str = "") -> None:
+        super().__init__()
+        validate_config(od_config)
+        if not current_omni_platform.is_cuda():
+            raise ValueError("Matrix-Game's FP8 runtime requires an NVIDIA CUDA GPU")
+        from .stream import load_transformer, warm_up
+        from .taehv import TAEHV
+        from .vae_graph import StreamingVAEGraph
+
+        self.device = current_omni_platform.get_torch_device()
+        self.prompt_text = od_config.model_config.get("prompt", DEFAULT_PROMPT)
+        self.max_latents = od_config.model_config.get("max_latents", 8192)
+        root = Path(od_config.model)
+        required = [
+            root / "models/castle/model.safetensors",
+            root / "models/castle/sink.png",
+            root / "base/models_t5_umt5-xxl-enc-bf16.pth",
+            root / "base/taew2_2.pth",
+        ]
+        missing = [str(path) for path in required if not path.is_file()]
+        if not (root / "base/google/umt5-xxl").is_dir():
+            missing.append(str(root / "base/google/umt5-xxl"))
+        if missing:
+            raise FileNotFoundError(f"Incomplete local Matrix-Game resources: {missing}")
+        # Loader's default-device context must not put checkpoint construction on GPU.
+        with torch.device("cpu"):
+            self.runtime = load_transformer(required[0], device=self.device)
+            self.transformer = self.runtime.model
+            self.register_buffer("prompt_embeds", self._encode_prompt(root), persistent=False)
+            self.vae = StreamingVAEGraph(TAEHV(str(required[3])).to(self.device, torch.bfloat16).eval())
+        self.register_buffer("sink_latent", self._encode_sink(required[1]), persistent=False)
+        self._stream: FastStream | None = None
+        self._session_id: str | None = None
+        self._steps: int | None = None
+        self.eval().requires_grad_(False)
+        warm_up(self.runtime, self.vae, self.prompt_embeds, self.sink_latent, "kv_only", "fixed", "taehv")
+
+    @torch.no_grad()
+    def _encode_prompt(self, root: Path) -> torch.Tensor:
+        from .text_encoder import T5Encoder
+
+        tokenizer = AutoTokenizer.from_pretrained(root / "base/google/umt5-xxl", local_files_only=True)
+        text = " ".join(html.unescape(html.unescape(ftfy.fix_text(self.prompt_text))).split())
+        tokens = tokenizer(
+            [text], padding="max_length", truncation=True, max_length=512, return_tensors="pt", add_special_tokens=True
+        )
+        with torch.device("meta"):
+            encoder = T5Encoder(256384, 4096, 4096, 10240, 64, 24, 32, shared_pos=False)
+        state = torch.load(root / "base/models_t5_umt5-xxl-enc-bf16.pth", map_location="cpu", weights_only=True)
+        encoder.load_state_dict(state, strict=True, assign=True)
+        del state
+        encoder = encoder.to(self.device, torch.bfloat16).eval().requires_grad_(False)
+        ids, mask = tokens.input_ids.to(self.device), tokens.attention_mask.to(self.device)
+        embeddings = encoder(ids, mask)
+        embeddings[0, mask[0].sum() :] = 0
+        del encoder
+        gc.collect()
+        torch.accelerator.empty_cache()
+        return embeddings
+
+    @torch.no_grad()
+    def _encode_sink(self, path: Path) -> torch.Tensor:
+        with Image.open(path) as image:
+            image = ImageOps.exif_transpose(image).convert("RGB")
+            width, height = image.size
+            scale = max(864 / width, 480 / height)
+            size = (round(width * scale), round(height * scale))
+            image = image.resize(size, Image.Resampling.BILINEAR)
+            left, top = round((size[0] - 864) / 2), round((size[1] - 480) / 2)
+            pixels = torch.from_numpy(np.array(image.crop((left, top, left + 864, top + 480))))
+        pixels = (pixels.permute(2, 0, 1).float() * (2.0 / 255.0) - 1.0)[None, :, None]
+        self.vae.clear_cache()
+        try:
+            latent = self.vae.encode(pixels.to(self.device, torch.bfloat16)).latent_dist.mode().permute(0, 2, 1, 3, 4)
+        finally:
+            self.vae.clear_cache()
+        if tuple(latent.shape) != (1, 1, 48, 30, 54) or not torch.isfinite(latent).all():
+            raise ValueError("Sink image did not encode to a finite [1,1,48,30,54] latent")
+        return latent
+
+    def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
+        # The three native checkpoint formats are loaded strictly during construction.
+        # No ComponentSource is exposed, so generic loading must supply no tensors.
+        if next(iter(weights), None) is not None:
+            raise ValueError("Matrix-Game loads its native checkpoints during construction")
+        return set(dict(self.named_parameters()))
+
+    def close_session(self) -> None:
+        if self._stream is not None:
+            self._stream.close()
+        self._stream = None
+        self._session_id = None
+        self._steps = None
+
+    @torch.no_grad()
+    def forward(self, batch: DiffusionRequestBatch) -> list[DiffusionOutput]:
+        if batch.num_reqs != 1:
+            raise ValueError("Matrix-Game only supports one request per worker")
+        request = batch.requests[0]
+        if not isinstance(request.prepared_layout, MatrixInput):
+            prepare_request(request)
+        prepared = request.prepared_layout
+        assert isinstance(prepared, MatrixInput)
+        text = request.prompt.get("prompt", "")
+        if text and text != self.prompt_text:
+            raise ValueError("The scene caption is fixed at startup; set model_config.prompt to override it")
+        if self._stream is not None and prepared.session_id != self._session_id:
+            raise ValueError("Another Matrix-Game session owns this worker; close it before starting a new one")
+        if prepared.frames is None:
+            self.close_session()
+            return [DiffusionOutput(custom_output={"session_closed": True})]
+        count = prepared.frames.shape[0]
+        needed = (count + 3) // 4
+        if (self._stream.index if self._stream is not None else 0) + needed > self.max_latents:
+            raise ValueError("Input exceeds this session's configured latent budget")
+        if self._stream is None:
+            if prepared.frame_start:
+                raise ValueError("A new Matrix-Game session must begin at frame zero")
+            from .stream import FastStream
+
+            steps = (1000,) if prepared.steps == 1 else (1000, 500)
+            self._stream = FastStream(
+                self.runtime,
+                self.vae,
+                self.prompt_embeds,
+                seed=request.sampling_params.seed,
+                max_latents=self.max_latents,
+                steps=steps,
+                first_steps=steps,
+                sink_latent=self.sink_latent,
+                sink_mode="kv_only",
+                sink_rope_mode="fixed",
+            )
+            self._session_id, self._steps = prepared.session_id, prepared.steps
+        stream = self._stream
+        if prepared.frame_start != stream.frame or prepared.steps != self._steps:
+            raise ValueError("Continuation must match the next frame offset and original denoising step count")
+        outputs: list[torch.Tensor] = []
+        succeeded = False
+        try:
+            offset = 0
+            while offset < count:
+                size = 1 if stream.index == 0 else 4
+                pixels = prepared.frames[offset : offset + size].permute(0, 3, 1, 2).float() * (2.0 / 255.0) - 1.0
+                outputs.append(stream.push(pixels, frame_start=stream.frame).pixels)
+                offset += size
+            # Emit normalized device pixels; the runner owns dtype conversion and D2H.
+            frames = outputs[0] if len(outputs) == 1 else torch.cat(outputs)
+            media = DiffusionMediaOutput(VideoMediaOutput(frames.permute(1, 0, 2, 3).unsqueeze(0), _VIDEO_SPEC))
+            result = DiffusionOutput(
+                media=media,
+                custom_output={
+                    "frame_start": prepared.frame_start,
+                    "frame_count": count,
+                    "session_closed": prepared.end_session,
+                },
+            )
+            succeeded = True
+            return [result]
+        finally:
+            if prepared.end_session or not succeeded:
+                self.close_session()
