@@ -74,3 +74,10 @@ because it can run a tensor-parallel collective.
 
 Test request lifecycle, abort, cache state, and every affected worker execution
 mode against the supported upstream vLLM contract.
+
+## Model-owned host-buffer initialization
+
+After MRV2 KV initialization creates block tables, the runner calls the optional
+model-state `initialize_host_buffers(req_states, block_tables, sampler)` hook.
+A model can configure its native staged-write buffers there, without changing
+upstream upload functions or placing model selection in the shared runner.

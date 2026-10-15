@@ -53,7 +53,7 @@ def test_staged_writes_through_uva_match_the_upload_path(dtype):
     assert torch.equal(reference.gpu, candidate.gpu)
 
 
-def test_uva_staging_leaves_non_moss_runner_unchanged(monkeypatch):
+def test_host_buffers_leave_models_without_a_hook_unchanged(monkeypatch):
     from vllm.v1.worker.gpu import model_runner as upstream_runner
 
     from vllm_omni.worker_v2.omni_model_runner import OmniGPUModelRunner
@@ -62,8 +62,11 @@ def test_uva_staging_leaves_non_moss_runner_unchanged(monkeypatch):
     runner.model_state = object()
     runner.device = torch.device("cuda")
     original = upstream_runner.async_tensor_h2d
-    monkeypatch.setattr("vllm_omni.worker_v2.omni_model_runner.is_uva_available", lambda: True)
-    runner._configure_uva_staging()
+    from vllm.v1.kv_cache_interface import KVCacheConfig
+    from vllm.v1.worker.gpu.model_runner import GPUModelRunner
+
+    monkeypatch.setattr(GPUModelRunner, "initialize_kv_cache", lambda *args: None)
+    runner.initialize_kv_cache(KVCacheConfig(num_blocks=0, kv_cache_tensors=[], kv_cache_groups=[]))
     assert upstream_runner.async_tensor_h2d is original
 
 
@@ -77,6 +80,15 @@ def test_uva_staging_runs_after_cache_initialization(monkeypatch):
     config = KVCacheConfig(num_blocks=0, kv_cache_tensors=[], kv_cache_groups=[])
     order = []
     monkeypatch.setattr(GPUModelRunner, "initialize_kv_cache", lambda *args: order.append("cache"))
-    runner._configure_uva_staging = lambda: order.append("uva")
+    from unittest.mock import Mock
+
+    runner.req_states = object()
+    runner.block_tables = object()
+    runner.sampler = None
+    runner.model_state = Mock(spec=["initialize_host_buffers"])
+    runner.model_state.initialize_host_buffers.side_effect = lambda *args: order.append("uva")
     runner.initialize_kv_cache(config)
     assert order == ["cache", "uva"]
+    runner.model_state.initialize_host_buffers.assert_called_once_with(
+        runner.req_states, runner.block_tables, runner.sampler
+    )
