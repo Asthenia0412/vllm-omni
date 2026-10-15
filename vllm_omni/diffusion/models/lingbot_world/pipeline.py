@@ -106,6 +106,7 @@ _VAE_SHARD_SPLIT_DIM = "width"
 if TYPE_CHECKING:
     from tqdm.std import tqdm as TqdmProgressBar
 
+    from vllm_omni.diffusion.layers.lingbot_pixel_output import PixelOutputPolicy
     from vllm_omni.diffusion.worker.input_batch import InputBatch
     from vllm_omni.diffusion.worker.utils import StepRequestState
     from vllm_omni.experimental.ar_diffusion.kv_cache.state import (
@@ -1886,7 +1887,7 @@ class LingBotWorldCausalDMDPipeline(
         vae_latents: torch.Tensor,
         session_id: str,
         *,
-        pixel_policy=None,
+        pixel_policy: PixelOutputPolicy | None = None,
     ) -> torch.Tensor:
         """Decode one chunk through ``session_id``'s temporal cache.
 

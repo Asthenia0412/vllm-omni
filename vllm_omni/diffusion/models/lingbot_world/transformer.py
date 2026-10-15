@@ -41,6 +41,8 @@ from vllm_omni.experimental.ar_diffusion.kv_cache.paged_attention import (
 if TYPE_CHECKING:
     from vllm.model_executor.layers.quantization.base_config import QuantizationConfig
 
+    from vllm_omni.diffusion.layers.lingbot_leased_post_attention import Lease
+
 
 @dataclass
 class LingBotAttentionCache:
@@ -320,7 +322,7 @@ class LingBotSelfAttention(nn.Module):
         rotary_emb: tuple[torch.Tensor, torch.Tensor] | None = None,
         sink_tokens: int,
         update_cache: bool = True,
-        _projection_lease=None,
+        _projection_lease: Lease | None = None,
     ) -> torch.Tensor:
         # Project logical [B, S, D] tokens into TP-local
         # [B, S, num_local_heads, head_dim].
