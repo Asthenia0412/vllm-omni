@@ -1308,7 +1308,7 @@ class MossAudioTokenizerTransformerLayer(StreamingModule):
             assert self.linear2 is not None
             gelu_bias = getattr(self, "_gelu_epilogue_bias", None)
             if gelu_bias is not None:
-                # Opt-in (codec_gelu_epilogue): GELU in the up-projection GEMM
+                # GELU in the up-projection GEMM
                 # epilogue (cuBLASLt, tanh form, applied before bf16 rounding)
                 # instead of a separate pass over the FFN activations. Under
                 # the decoder's bf16 autocast the norm output is FP32; round it
@@ -1373,7 +1373,7 @@ def _(x: torch.Tensor, weight: torch.Tensor, zero_bias: torch.Tensor) -> torch.T
 
 
 def enable_gelu_epilogue(model: nn.Module) -> int:
-    """Opt-in: fuse each eligible FFN GELU into its up-projection GEMM.
+    """Fuse each eligible CUDA FFN GELU into its up-projection GEMM.
 
     Eligible layers use the plain GELU FFN with a bias-free half-precision
     CUDA ``linear1``. cuBLASLt's GELU epilogue uses the tanh form on the FP32
