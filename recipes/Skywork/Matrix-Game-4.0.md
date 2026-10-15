@@ -5,8 +5,7 @@
 - Vendor: Skywork
 - Model: `Skywork/Matrix-Game-4.0`
 - Task: Low-poly geometry-to-video rendering
-- Mode: Single-GPU inference through the experimental Python `DiffusionEngine`
-- Maintainer: @lishunyang12
+- Mode: Single-GPU inference through the Python `DiffusionEngine`
 
 ## When to use this recipe
 
