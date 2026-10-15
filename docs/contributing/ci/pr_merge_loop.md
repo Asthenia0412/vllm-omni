@@ -79,11 +79,41 @@ Keep one record per PR with the fields below. Use timestamps with a timezone; pr
 | --- | --- | --- | --- | --- | --- | --- |
 | PR link / SHA | Current category | Linked facts; clearly marked proposal | Specific gap or none verified | Concrete next step; verified owner or proposed recipient | Timestamp or unknown | Observable change |
 
+### Actionable review TODOs
+
+Present actionable findings in every PR review as a TODO checklist, including
+single-action reviews. Each item records severity/problem, exact-head evidence,
+a concrete next action, a verified or suggested responsible party, acceptance
+criteria, and status. Keep completed items separate from outstanding work; mark
+an item complete only after checking its acceptance evidence at the relevant
+head. An author saying "fixed" is a recheck trigger, not verified completion.
+Do not invent TODOs when no actionable finding remains: state the review scope,
+testing limits, and that no actionable finding was identified.
+
+Keep responsibilities explicit: contributors diagnose and fix their code and
+supply the failed-job/root-cause/fix-SHA record plus local command, environment,
+results, and redacted screenshots. The reviewer verifies the failure, sends an
+actionable request, checks that evidence, and assesses retest readiness. The
+maintainer authorizes and triggers project CI through the permitted process.
+
+For example (replace placeholders with verified facts before sending):
+
+- [ ] **P1: <failure scenario>**. Evidence: <head SHA and file/line or failed job>.
+  Action: <specific repair and named regression>. Owner: <author, verified;
+  subsystem reviewer, suggested if needed>. Acceptance: <observable passing
+  regression and required local repair record>. Status: awaiting author repair.
+
+Completed items belong under a separate "Verified complete" list with the fix
+SHA and acceptance evidence. Keep maintainer-only retest decisions and routine
+CI monitoring in the coordination record rather than assigning them to the
+contributor. A checklist changes presentation, not permission to publish a
+review, comment, or request.
+
 ### Bounded contributor feedback
 
 For a PR that needs a conflict fix, a verified CI code-failure repair, or missing evidence, the configured loop may send one consolidated, actionable GitHub comment to its author or relevant maintainer. Before commenting, inspect existing comments, reviews, and replies; reuse the existing discussion and avoid duplicate requests or unchanged nudges. State the head, verified blocker, exact missing evidence or next step, and what will trigger recheck. An unchanged head/blocker is not by itself a reason to comment again.
 
-For replies with multiple actions, follow the canonical review skill's
+For contributor-facing action lists, follow the canonical review skill's
 [consolidated-reply format](https://github.com/vllm-project/vllm-omni/blob/main/.claude/skills/review-pr/references/delivery/maintainer-style-study.md#consolidated-replies-with-multiple-actions):
 a few contributor-owned checkboxes with concrete deliverables and only necessary
 context. Omit routine maintainer/CI status sections and process explanations.
