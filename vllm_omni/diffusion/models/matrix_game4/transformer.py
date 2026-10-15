@@ -20,6 +20,9 @@ from vllm.model_executor.layers.linear import QKVParallelLinear
 from vllm_omni.diffusion.layers.norm import RMSNorm
 from vllm_omni.diffusion.models.wan2_2.wan2_2_transformer import WanTransformer3DModel
 
+from .graph import MatrixGraph
+from .pointwise import MatrixOps
+
 
 class MatrixRMSNorm(RMSNorm):
     """Wan checkpoint semantics round to BF16 before multiplying the weight."""
@@ -40,6 +43,10 @@ class MatrixQKV(QKVParallelLinear):
     """
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, None]:
+        from .quantization import MatrixFP8Method
+
+        if isinstance(self.quant_method, MatrixFP8Method):
+            return self.quant_method.apply(self, x, self.bias), None
         assert self.bias is not None
         output = [F.linear(x, weight, bias) for weight, bias in zip(self.weight.chunk(3), self.bias.chunk(3))]
         return torch.cat(output, dim=-1), None
@@ -53,22 +60,30 @@ class TemporalCache:
     position: int = -1
     slot: int = 0
     length: int = 0
+    ring: bool = False
 
-    def write(self, key: torch.Tensor, value: torch.Tensor, position: int) -> None:
-        """Keep slot zero as sink; rewrite the current block during denoising."""
-        tokens = key.shape[1]
+    def prepare(self, position: int, tokens: int) -> None:
+        """Advance history once per block, outside captured denoising calls."""
         capacity = self.key.shape[1] // tokens
         if position != self.position:
             if position != self.position + 1:
                 raise ValueError("Temporal KV writes must be consecutive or overwrite the current block")
             if self.length == capacity:
-                # Preserve the reference's chronological attention reduction
-                # order. A ring/permuted layout needs separate qualification.
                 for buffer in (self.key, self.value):
-                    buffer[:, tokens:-tokens].copy_(buffer[:, 2 * tokens :].clone())
+                    if self.ring:
+                        target = (1 + (position - capacity) % (capacity - 2)) * tokens
+                        buffer[:, target : target + tokens].copy_(buffer[:, -tokens:])
+                    else:
+                        # The exact BF16 path preserves chronological reduction.
+                        buffer[:, tokens:-tokens].copy_(buffer[:, 2 * tokens :].clone())
             self.slot = min(position, capacity - 1)
             self.position = position
             self.length = min(capacity, self.length + 1)
+
+    def write(self, key: torch.Tensor, value: torch.Tensor, position: int) -> None:
+        """Keep slot zero as sink; rewrite the current block during denoising."""
+        tokens = key.shape[1]
+        self.prepare(position, tokens)
         start = self.slot * tokens
         self.key[:, start : start + tokens].copy_(key)
         self.value[:, start : start + tokens].copy_(value)
@@ -162,6 +177,14 @@ class MatrixRuntime:
     def __init__(self, model: WanTransformer3DModel):
         self.model = model
         self.rotations: torch.Tensor | None = None
+        self.use_graph = False
+        self.fast_ops: MatrixOps | None = None
+        self.graphs: dict[bool, MatrixGraph] = {}
+
+    def clear_graphs(self) -> None:
+        for graph in self.graphs.values():
+            graph.close()
+        self.graphs.clear()
 
     def ensure_rope_positions(self, positions: int) -> None:
         if self.rotations is not None and self.rotations.shape[0] >= positions:
@@ -176,10 +199,13 @@ class MatrixRuntime:
         self.rotations = torch.cat(axes, dim=-1)
 
     def init_kv_cache(self, batch_size: int, frame_tokens: int, device: torch.device, dtype: torch.dtype):
+        self.clear_graphs()
         shape = (batch_size, 21 * frame_tokens, 24, 128)
         return [
             TemporalCache(
-                torch.empty(shape, device=device, dtype=dtype), torch.empty(shape, device=device, dtype=dtype)
+                torch.empty(shape, device=device, dtype=dtype),
+                torch.empty(shape, device=device, dtype=dtype),
+                ring=self.fast_ops is not None,
             )
             for _ in self.model.blocks
         ]
@@ -187,10 +213,10 @@ class MatrixRuntime:
     def init_crossattn_cache(self, batch_size: int, device: torch.device, dtype: torch.dtype):
         return [TextCache() for _ in self.model.blocks]
 
-    def _rotate(self, value: torch.Tensor, position: int, height: int, width: int) -> torch.Tensor:
+    def _rotation(self, position: int, height: int, width: int) -> torch.Tensor:
         assert self.rotations is not None
         temporal, vertical, horizontal = self.rotations.split((22, 21, 21), dim=-1)
-        rotation = torch.cat(
+        return torch.cat(
             (
                 temporal[position].expand(height, width, -1),
                 vertical[:height, None].expand(height, width, -1),
@@ -198,6 +224,9 @@ class MatrixRuntime:
             ),
             dim=-1,
         ).reshape(1, height * width, 1, 64)
+
+    @staticmethod
+    def _rotate(value: torch.Tensor, rotation: torch.Tensor) -> torch.Tensor:
         pairs = torch.view_as_complex(value.double().reshape(*value.shape[:-1], 64, 2))
         return torch.view_as_real(pairs * rotation).flatten(-2).to(value.dtype)
 
@@ -214,13 +243,66 @@ class MatrixRuntime:
         kv_only: bool = False,
         sink_position: int | None = None,
     ) -> torch.Tensor | None:
+        height, width = x.shape[-2] // 2, x.shape[-1] // 2
+        position = current_start // (height * width)
+        for cache in kv_cache:
+            cache.prepare(position, height * width)
+        rotation = self._rotation(position, height, width)
+        sink_rotation = self._rotation(sink_position, height, width) if sink_position is not None else None
+
+        def run(
+            x: torch.Tensor,
+            t: torch.Tensor,
+            y: torch.Tensor,
+            rotation: torch.Tensor,
+            sink_rotation: torch.Tensor | None,
+        ) -> torch.Tensor:
+            output = self._run(
+                x,
+                t,
+                context,
+                y,
+                kv_cache,
+                crossattn_cache,
+                rotation,
+                sink_rotation,
+                store_sink=position == 0,
+                kv_only=kv_only,
+            )
+            return x if output is None else output
+
+        if self.use_graph and position > 21:
+            if kv_only not in self.graphs:
+                self.graphs[kv_only] = MatrixGraph(run)
+            output = self.graphs[kv_only](x, t, y, rotation, sink_rotation)
+        else:
+            output = run(x, t, y, rotation, sink_rotation)
+        return None if kv_only else output
+
+    def _run(
+        self,
+        x: torch.Tensor,
+        t: torch.Tensor,
+        context: torch.Tensor,
+        y: torch.Tensor,
+        kv_cache: list[TemporalCache],
+        crossattn_cache: list[TextCache],
+        rotation: torch.Tensor,
+        sink_rotation: torch.Tensor | None,
+        *,
+        store_sink: bool,
+        kv_only: bool,
+    ) -> torch.Tensor | None:
         model = self.model
         hidden = model.patch_embedding(torch.cat((x, y), dim=1))
         batch, dim, frames, height, width = hidden.shape
         if frames != 1:
             raise ValueError("Matrix causal execution accepts one latent frame per call")
-        position = current_start // (height * width)
         hidden = hidden.flatten(2).transpose(1, 2)
+        if self.fast_ops is not None:
+            # The reference fast block stack consumes contiguous token rows.
+            # Preserve that layout through fused residuals and normalization.
+            hidden = hidden.contiguous()
         embedder = model.condition_embedder
         frequencies = 10000 ** (-torch.arange(128, dtype=torch.float64, device=x.device) / 128)
         angles = t.flatten().double()[:, None] * frequencies
@@ -230,34 +312,67 @@ class MatrixRuntime:
         for index, (block, cache, cross) in enumerate(zip(model.blocks, kv_cache, crossattn_cache)):
             shift, scale, gate, ff_shift, ff_scale, ff_gate = (modulation + block.scale_shift_table).chunk(6, dim=1)
             attn = block.attn1
-            normalized = block.norm1.forward_native(hidden, scale, shift)
+            normalized = (
+                block.norm1.forward_native(hidden, scale, shift)
+                if self.fast_ops is None
+                else self.fast_ops.modulate(hidden, scale, shift)
+            )
             qkv, _ = attn.to_qkv(normalized)
             query, key, value = qkv.chunk(3, dim=-1)
-            query = attn.norm_q(query).reshape(batch, -1, 24, 128)
-            key = attn.norm_k(key).reshape(batch, -1, 24, 128)
             value = value.reshape(batch, -1, 24, 128)
-            if position == 0:
-                cache.sink_key = key
-            query = self._rotate(query, position, height, width)
-            cache.write(self._rotate(key, position, height, width), value, position)
-            if sink_position is not None:
+            if self.fast_ops is None:
+                query = attn.norm_q(query).reshape(batch, -1, 24, 128)
+                key = attn.norm_k(key).reshape(batch, -1, 24, 128)
+                if store_sink:
+                    cache.sink_key = key
+                query = self._rotate(query, rotation)
+                key = self._rotate(key, rotation)
+            else:
+                if store_sink:
+                    cache.sink_key = key.clone()
+                query = self.fast_ops.rms_rope(query, attn.norm_q.weight, rotation)
+                key = self.fast_ops.rms_rope(key, attn.norm_k.weight, rotation)
+            start = cache.slot * height * width
+            cache.key[:, start : start + height * width].copy_(key)
+            cache.value[:, start : start + height * width].copy_(value)
+            if sink_rotation is not None:
                 assert cache.sink_key is not None
-                cache.key[:, : height * width].copy_(self._rotate(cache.sink_key, sink_position, height, width))
+                sink_key = (
+                    self._rotate(cache.sink_key, sink_rotation)
+                    if self.fast_ops is None
+                    else self.fast_ops.rms_rope(cache.sink_key, attn.norm_k.weight, sink_rotation)
+                )
+                cache.key[:, : height * width].copy_(sink_key)
             if kv_only and index + 1 == len(model.blocks):
                 return None
             length = cache.length * height * width
             attended = attn.attn(query, cache.key[:, :length], cache.value[:, :length])
-            hidden = hidden + attn.to_out(attended.flatten(2)) * gate
+            projected = attn.to_out(attended.flatten(2))
+            if self.fast_ops is None:
+                hidden = hidden + projected * gate
+                normalized = block.norm2(hidden)
+            else:
+                normalized, hidden = self.fast_ops.residual_norm(
+                    hidden, projected, gate, block.norm2.weight, block.norm2.bias
+                )
             attn = block.attn2
-            query = attn.norm_q(attn.to_q(block.norm2(hidden))).reshape(batch, -1, 24, 128)
+            query = attn.to_q(normalized)
+            query = (
+                attn.norm_q(query) if self.fast_ops is None else self.fast_ops.rms(query, attn.norm_q.weight)
+            ).reshape(batch, -1, 24, 128)
             if cross.key is None:
                 assert text is not None
                 cross.key = attn.norm_k(attn.to_k(text)).reshape(batch, -1, 24, 128)
                 cross.value = attn.to_v(text).reshape(batch, -1, 24, 128)
             assert cross.value is not None
             attended = attn.attn(query, cross.key, cross.value)
-            hidden = hidden + attn.to_out(attended.flatten(2))
-            hidden = hidden + block.ffn(block.norm3.forward_native(hidden, ff_scale, ff_shift)) * ff_gate
+            projected = attn.to_out(attended.flatten(2))
+            if self.fast_ops is None:
+                hidden = hidden + projected
+                hidden = hidden + block.ffn(block.norm3.forward_native(hidden, ff_scale, ff_shift)) * ff_gate
+            else:
+                normalized, hidden = self.fast_ops.residual_modulate(hidden, projected, ff_scale, ff_shift)
+                hidden = self.fast_ops.gated_residual(hidden, block.ffn(normalized), ff_gate)
         shift, scale = (model.output_scale_shift_prepare.scale_shift_table + time[:, None]).chunk(2, dim=1)
         output = model.proj_out(model.norm_out.forward_native(hidden, scale, shift))
         return (

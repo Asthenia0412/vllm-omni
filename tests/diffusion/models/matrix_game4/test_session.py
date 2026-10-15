@@ -241,6 +241,38 @@ def test_temporal_cache_rewrite_and_eviction_preserve_sink():
     assert torch.equal(cache.key, before) and cache.position == 3
 
 
+def test_ring_cache_moves_previous_current_once_and_preserves_sink():
+    from vllm_omni.diffusion.models.matrix_game4.transformer import TemporalCache
+
+    cache = TemporalCache(torch.empty(1, 5, 1, 1), torch.empty(1, 5, 1, 1), ring=True)
+    for position in range(6):
+        tensor = torch.full((1, 1, 1, 1), float(position))
+        cache.write(tensor, -tensor, position)
+    assert cache.key.flatten().tolist() == [0, 4, 2, 3, 5]
+    cache.write(torch.full((1, 1, 1, 1), 55.0), torch.full((1, 1, 1, 1), -55.0), 5)
+    cache.prepare(6, 1)
+    cache.prepare(6, 1)  # Denoise and clean passes must not advance the ring again.
+    assert cache.key.flatten().tolist() == [0, 4, 55, 3, 55]
+    assert cache.value.flatten().tolist() == [0, -4, -55, -3, -55]
+
+
+@pytest.mark.parametrize("option", ["cuda_graph", "fp8"])
+def test_optimization_options_require_booleans(option):
+    from vllm_omni.diffusion.data import OmniDiffusionConfig
+    from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
+
+    config = OmniDiffusionConfig(
+        model="matrix-resources",
+        model_class_name="MatrixGame4Pipeline",
+        enforce_eager=True,
+        max_num_seqs=1,
+        diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
+        model_config={option: "false"},
+    )
+    with pytest.raises(ValueError, match="boolean"):
+        validate_config(config)
+
+
 @pytest.mark.parametrize("backend", [None, "TORCH_SDPA", "CUDNN_ATTN"])
 def test_quality_path_requires_qualified_attention_backend(backend):
     from vllm_omni.diffusion.data import OmniDiffusionConfig

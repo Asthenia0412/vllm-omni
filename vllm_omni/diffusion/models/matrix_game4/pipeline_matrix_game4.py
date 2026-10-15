@@ -139,7 +139,9 @@ def validate_config(config: OmniDiffusionConfig) -> None:
     if config.step_execution or config.streaming_output:
         raise ValueError("Submit consecutive chunk requests; diffusion step execution is unsupported")
     if config.quantization_config is not None or config.lora_path:
-        raise ValueError("Matrix-Game currently qualifies BF16 only; quantization and LoRA are unsupported")
+        raise ValueError(
+            "Generic quantization and LoRA are unsupported; use model_config.fp8 for the experimental FP8 path"
+        )
     if config.cache_backend not in (None, "none") or config.enable_prefix_caching:
         raise ValueError("Matrix-Game owns its temporal KV cache; generic cache acceleration is unsupported")
     for role in ("self", "cross"):
@@ -149,8 +151,12 @@ def validate_config(config: OmniDiffusionConfig) -> None:
                 "Matrix-Game quality qualification requires diffusion_attention_config.default.backend=TORCH_SDPA"
             )
     options = config.model_config
-    if options.keys() - {"prompt", "max_latents", "scene"}:
-        raise ValueError("Matrix-Game model_config accepts only prompt, max_latents and scene")
+    if options.keys() - {"prompt", "max_latents", "scene", "cuda_graph", "fp8"}:
+        raise ValueError("Matrix-Game model_config accepts only prompt, max_latents, scene, cuda_graph and fp8")
+    if type(options.get("cuda_graph", False)) is not bool:
+        raise ValueError("cuda_graph must be boolean")
+    if type(options.get("fp8", False)) is not bool:
+        raise ValueError("fp8 must be boolean")
     if options.get("scene", "castle") not in ("castle", "ancient-egypt", "racing"):
         raise ValueError("scene must be castle, ancient-egypt or racing")
     limit = options.get("max_latents", 8192)
@@ -207,10 +213,18 @@ class MatrixGame4Pipeline(nn.Module):
         # Loader's default-device context must not put checkpoint construction on GPU.
         with torch.device("cpu"):
             self.runtime = load_transformer(required[0], device=self.device)
+            self.runtime.use_graph = od_config.model_config.get("cuda_graph", False)
             self.transformer = self.runtime.model
             self.register_buffer("prompt_embeds", self._encode_prompt(root), persistent=False)
             self.vae = MatrixCodec(str(required[3])).to(self.device, torch.bfloat16).eval()
+            self.vae.use_graph = od_config.model_config.get("cuda_graph", False)
         self.register_buffer("sink_latent", self._encode_sink(required[1]), persistent=False)
+        if od_config.model_config.get("fp8", False):
+            from .pointwise import compiled_ops
+            from .quantization import quantize_blocks
+
+            quantize_blocks(self.transformer)
+            self.runtime.fast_ops = compiled_ops()
         self._stream: MatrixStream | None = None
         self._session_id: str | None = None
         self._steps: int | None = None
@@ -322,7 +336,7 @@ class MatrixGame4Pipeline(nn.Module):
             offset = 0
             while offset < count:
                 size = 1 if stream.index == 0 else 4
-                pixels = prepared.frames[offset : offset + size].permute(0, 3, 1, 2).float() * (2.0 / 255.0) - 1.0
+                pixels = prepared.frames[offset : offset + size]
                 outputs.append(stream.push(pixels, frame_start=stream.frame).pixels)
                 offset += size
             # Emit normalized device pixels; the runner owns dtype conversion and D2H.

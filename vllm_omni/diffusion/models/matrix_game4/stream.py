@@ -13,6 +13,7 @@ owns presentation conversion and transport after the clean-KV pass is queued.
 import torch
 
 from vllm_omni.platforms import current_omni_platform
+from vllm_omni.utils.device_copy import to_device_nonblocking
 
 from .sampling import Chunk, FlowMatchScheduler, warp_steps
 
@@ -24,7 +25,7 @@ WINDOW = 21  # attention window in latent frames, sink included
 
 
 class MatrixStream:
-    """Accept [-1, 1] RGB [T, 3, 480, 864]: 1 frame first, then 4 per chunk.
+    """Accept CPU uint8 RGB [T, 480, 864, 3]: 1 frame first, then 4 per chunk.
 
     Racing: the sink is frame zero (absolute RoPE). Shooters: the sink is a KV-only prefix at position
     zero whose keys follow the current block at a fixed distance once the window is full.
@@ -83,6 +84,9 @@ class MatrixStream:
         context = embeddings.to(self.device, self.dtype)
         if context.ndim != 3 or context.shape[1] != 512:
             raise ValueError("prompt embeddings must be [1, 512, 4096]")
+        # Captured attention references the old text KV buffers. A caption
+        # change rebuilds those buffers and must invalidate the DiT graphs.
+        self.transformer.clear_graphs()
         self.context = context
         for cross in self.xc:
             cross.key = cross.value = None
@@ -126,12 +130,12 @@ class MatrixStream:
         if self.closed or self.failed:
             raise RuntimeError("Session is closed or failed; create a fresh session")
         count = 1 if self.index == 0 else 4
-        if frame_start != self.frame or tuple(pixels.shape) != (count, 3, 480, 864):
+        if frame_start != self.frame or tuple(pixels.shape) != (count, 480, 864, 3):
             raise ValueError("Expected consecutive RGB frames: 1 initially, then 4 per chunk")
         if self.index >= self.max_latents:
             raise ValueError("Session reached its configured RoPE/frame budget")
-        if not pixels.is_floating_point() or not torch.isfinite(pixels).all() or pixels.min() < -1 or pixels.max() > 1:
-            raise ValueError("RGB input must be finite floating point in [-1,1]")
+        if pixels.dtype != torch.uint8 or pixels.device.type != "cpu":
+            raise ValueError("RGB input must be CPU uint8")
         if initial_noise is not None and (
             tuple(initial_noise.shape) != self.shape or not torch.isfinite(initial_noise).all()
         ):
@@ -146,7 +150,11 @@ class MatrixStream:
 
             mark()
             param = next(self.vae.parameters())
-            x = pixels.permute(1, 0, 2, 3).unsqueeze(0).to(param.device, param.dtype)
+            # uint8 proves range/finiteness without scanning a float video on
+            # the CPU. Reuse pinned staging and preserve the FP32 normalization
+            # before the BF16 cast used by the reference.
+            x = to_device_nonblocking(pixels, param.device).permute(3, 0, 1, 2).unsqueeze(0)
+            x = (x.float() * (2.0 / 255.0) - 1.0).to(param.dtype)
             control = self._encode(x, param)
             mark()
             if tuple(control.shape) != self.shape:
@@ -207,6 +215,7 @@ class MatrixStream:
         if self.closed:
             return
         current_omni_platform.synchronize()
+        self.transformer.clear_graphs()
         self.kv, self.xc = [], []
         if self.vae_backend == "taehv":
             self.vae.clear_cache()

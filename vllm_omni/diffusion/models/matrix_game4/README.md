@@ -25,6 +25,8 @@ for Omni inference; the separate reference command uses it only as a test oracle
 | Video presentation | Typed `DiffusionMediaOutput`; runner-owned float-to-uint8 conversion and transport |
 | Matrix-specific behavior | 148-channel conditioning, incremental flow sampling, sink and temporal-cache policy |
 | Codec | Shared Wan TAEW2 encoder/decoder; explicit encoder/decoder state per session |
+| Graph replay | Platform-selected vLLM graph wrapper, with session-owned stable inputs and codec history |
+| Experimental FP8 | vLLM per-tensor quantization/scaled GEMM; shared QKV input quantization |
 
 Reusing a component does not automatically qualify every backend or optimization
 it offers. Multi-GPU execution, generic FP8, paged KV and concurrent sessions are
@@ -47,3 +49,24 @@ RGB bytes exactly at one step with TAEHV. This does not establish parity for a
 full Wan VAE, other attention backends, quantization, hardware or arbitrary long
 sessions. All six 121-frame scene/step pairs and three 1,201-frame two-step gameplay clips
 also matched exactly. See the recipe for the complete qualification matrix.
+
+## Acceleration switches
+
+Both switches default to `False`. Keep `enforce_eager=True` for the outer engine;
+the model controls capture of its stateful, fixed-shape operations.
+
+```python
+model_config={"scene": "castle", "cuda_graph": True, "fp8": True}
+```
+
+`cuda_graph` captures the steady DiT window and continued TAEW2 chunks using the
+existing platform graph wrapper. `fp8` additionally converts block projections
+to per-tensor E4M3, compiles normalization/residual chains with PyTorch, and uses
+a ring history buffer. Embeddings, the output head and codec remain BF16. These
+switches reuse framework components and do not import the reference runtime.
+
+The FP8 path is experimental and **not pixel-identical** to the reference FP8
+runtime. Small fused-reduction differences can lead to different long-sequence
+effects. Throughput alignment does not qualify its visual quality; retain the
+default BF16 path where exact reference reproduction is required. See the
+recipe for paired FPS measurements, reproducible commands and their scope.

@@ -9,7 +9,7 @@ qualified. A separate whole-device NVML sample at 100 ms intervals observed
 
 Maintainer: @lishunyang12. Model:
 [Skywork/Matrix-Game-4.0](https://huggingface.co/Skywork/Matrix-Game-4.0).
-Status: experimental integration; quality qualification precedes optimization.
+Status: experimental Python integration; default BF16 quality path and opt-in acceleration.
 
 ## What this runs
 
@@ -129,7 +129,8 @@ config = OmniDiffusionConfig(
 ```
 
 Use the shared SDPA backend for the qualified BF16 path. `enforce_eager=True`
-disables generic graph wrapping for the reference-correctness path.
+disables generic whole-pipeline graph wrapping. Keep it enabled even when using
+the model-owned graph switch below; session bookkeeping must stay outside capture.
 The text encoder runs once during startup and is released before gameplay.
 No CPU inference offload or generic quantization is enabled.
 
@@ -202,6 +203,84 @@ shared patch embedding. Packed QKV and convolution-to-GEMM were measured to
 change results on SM120. Optimizations need their own quality comparison before
 being enabled. Do not mix FP8 runtime results with BF16 results.
 
+## Opt-in acceleration
+
+The default remains BF16 eager execution. Enable fixed-shape graph replay with
+`model_config.cuda_graph=True` or the benchmark's `--cuda-graph`. It captures the
+steady DiT window after fill and continued codec chunks using vLLM's existing
+platform graph wrapper. Graph warmup preserves codec history, replay returns
+owned output buffers, and closing a session releases its graphs and caches.
+
+Add `model_config.fp8=True` or `--fp8` for the experimental throughput path:
+
+```python
+model_config={"scene": "castle", "cuda_graph": True, "fp8": True}
+```
+
+It uses vLLM's per-tensor E4M3 quantizer/scaled GEMM with separate Q/K/V weight
+scales and one shared input quantization. PyTorch compiles the tensor-only
+normalization/residual operations; temporal KV uses a ring instead of shifting
+the whole window. Text KV is computed once. Embeddings, output head and the
+shared TAEW2 codec remain BF16. The first run includes compilation and graph
+warmup; neither is included in the reported steady FPS.
+
+FP8 output is **not pixel-identical** to the original optimized FP8 runtime.
+Fused reductions differ numerically, and long autoregressive clips exhibit
+different effects even with identical inputs and seed. This is a throughput
+comparison, not a passed visual-quality gate. Both switches are off by default;
+use BF16 for exact-reference work. Do not pass `--require-exact` for FP8 expecting
+it to succeed. The tested PyTorch/vLLM versions are listed above; other compiler
+versions and GPUs need requalification.
+
+Run the paired throughput comparison on the same idle GPU, in separate
+processes, with matching scene/geometry, 481 frames and 25 warmup chunks:
+
+```bash
+PYTHONPATH=./matrix-reference/Matrix-Game-4 \
+  CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 \
+  python benchmarks/diffusion/benchmark_matrix_game4.py \
+  --mode reference --reference-runtime rtx5090 --scene castle \
+  --resources ./matrix-resources --input ./geometry.npy \
+  --output ./qualification/reference-fp8 --frames 481 --steps 1
+
+CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 \
+  python benchmarks/diffusion/benchmark_matrix_game4.py \
+  --scene castle --resources ./matrix-resources --input ./geometry.npy \
+  --output ./qualification/omni-fp8 --frames 481 --steps 1 \
+  --cuda-graph --fp8 --compare ./qualification/reference-fp8.npy
+```
+
+Repeat with `--steps 2` for two-step denoising. The timer starts with owned CPU
+uint8 RGB input and ends after CPU uint8 RGB output. It includes normalization,
+encoding, denoising, decoding and clean-KV update; Omni includes engine scheduling
+and output postprocessing as well. Loading, the first 25 chunks and explicit
+session close are excluded from both sides. At 481 frames this measures 96
+steady four-frame chunks (384 generated frames). This is generated throughput,
+not a display frame rate or browser response-time measurement.
+
+One RTX PRO 5000 72GB Blackwell, 864×480, seed 42, same scene checkpoints and
+actual geometry capture; software versions as listed above. Each row is one
+paired 481-frame run (not an average across repeated runs):
+
+| Scene | Steps | Original FP8 FPS | Omni FP8 FPS | Original / Omni p95 (ms) |
+| --- | --- | --- | --- | --- |
+| castle | 1 | 59.72 | 60.50 | 69.27 / 66.91 |
+| castle | 2 | 41.71 | 41.14 | 101.28 / 98.12 |
+| ancient-egypt | 1 | 57.18 | 60.03 | 77.16 / 67.09 |
+| ancient-egypt | 2 | 41.34 | 40.94 | 100.92 / 98.68 |
+| racing | 1 | 59.52 | 61.37 | 71.00 / 65.72 |
+| racing | 2 | 42.04 | 41.50 | 100.12 / 96.77 |
+
+All six FP8 pairs are non-exact. RGB MAE ranges from 13.28 to 27.59 on the 0–255
+scale; this measures pixel disagreement, not perceived quality. Throughput is
+within 1.4% of the original in the slower cases; faster cases are not a claim of
+a statistically significant speedup. RTX 5090 performance has not been measured.
+
+Separately, BF16 with `--cuda-graph` and GPU input normalization matched every
+reference RGB byte for all three 241-frame two-step scene tests (MAE/max error
+zero, including KV eviction), at 26.36–26.71 generated FPS. The FP8 throughput
+table above must not be attributed to this exact-output path.
+
 ## Framework reuse and limits
 
 The DiT reuses Omni's Wan modules, unified Attention, Linear weight loaders and
@@ -216,9 +295,18 @@ captions and generic streaming-output APIs. Full Wan VAE, other devices and
 attention backends are not qualified.
 
 ```bash
-python -m pytest tests/diffusion/models/matrix_game4/test_session.py \
-  tests/diffusion/models/abot_world/test_offline_check.py -q
+python -m pytest tests/diffusion/models/matrix_game4 \
+  tests/diffusion/models/abot_world/test_offline_check.py \
+  tests/diffusion/models/abot_world/test_pipeline_ci.py -q
+
+# CI-like GPU subset: graph lifetime and independent FP8 QKV scales.
+python -m pytest tests/diffusion/models/matrix_game4 \
+  -m 'core_model and cuda' --run-level core_model -q
 ```
+
+These regressions require the installed vLLM/Omni environment and a CUDA GPU
+with FP8 support, but no downloaded model weights. The existing L2 diffusion
+model sweep collects the GPU tests; the CPU sweep collects the session tests.
 
 Timings synchronize each chunk and include clean KV; Omni additionally includes
 engine scheduling and output postprocessing. The first 25 chunks are excluded.

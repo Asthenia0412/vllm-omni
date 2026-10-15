@@ -31,6 +31,8 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--frames", type=int, default=241)
     parser.add_argument("--steps", type=int, choices=(1, 2), default=1)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--cuda-graph", action="store_true", help="Use native Omni steady-state graph replay")
+    parser.add_argument("--fp8", action="store_true", help="Use native Omni per-tensor FP8 block linears")
     parser.add_argument("--warmup-chunks", type=int, default=25)
     parser.add_argument("--compare", type=Path, help="reference output .npy to compare against")
     parser.add_argument("--require-exact", action="store_true", help="Fail if compared RGB frames are not identical")
@@ -62,7 +64,7 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
         enforce_eager=True,
         num_gpus=1,
         max_num_seqs=1,
-        model_config={"scene": args.scene},
+        model_config={"scene": args.scene, "cuda_graph": args.cuda_graph, "fp8": args.fp8},
         distributed_executor_backend="uni",
         diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
         video_output_transport=VideoOutputTransportConfig(enable_device_postprocess=True),
@@ -82,7 +84,7 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
                     seed=args.seed,
                     num_inference_steps=args.steps,
                     output_type="np",
-                    extra_args={SESSION_KEY: "qualification", START_KEY: start, END_KEY: start + size == args.frames},
+                    extra_args={SESSION_KEY: "qualification", START_KEY: start, END_KEY: False},
                 ),
             )
             current_omni_platform.synchronize()
@@ -105,6 +107,18 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
                     f"dtype={getattr(chunk, 'dtype', None)}"
                 )
             outputs.append(chunk[0])
+        close_request = OmniDiffusionRequest(
+            prompt={"prompt": ""},
+            request_id="matrix-close",
+            sampling_params=OmniDiffusionSamplingParams(
+                seed=args.seed,
+                num_inference_steps=args.steps,
+                output_type="np",
+                extra_args={SESSION_KEY: "qualification", START_KEY: args.frames, END_KEY: True},
+            ),
+        )
+        async for _ in engine.step_streaming(close_request):
+            pass
     finally:
         engine.close()
     return np.concatenate(outputs), timings, memory
@@ -139,10 +153,12 @@ def render_reference(args: argparse.Namespace, video: np.ndarray) -> tuple[np.nd
     try:
         for start in [0, *range(1, args.frames, 4)]:
             size = 1 if start == 0 else 4
-            pixels = torch.from_numpy(np.array(video[start : start + size])).permute(0, 3, 1, 2).float()
-            pixels = pixels * (2.0 / 255.0) - 1.0
+            # Match Omni's timed boundary: owned uint8 input through RGB output.
+            raw = torch.from_numpy(np.array(video[start : start + size]))
             current_omni_platform.synchronize()
             begin = time.perf_counter()
+            pixels = raw.permute(0, 3, 1, 2).float()
+            pixels = pixels * (2.0 / 255.0) - 1.0
             stream.push(pixels, frame_start=start, on_rgb=outputs.append)
             current_omni_platform.synchronize()
             timings.append(time.perf_counter() - begin)
@@ -175,18 +191,21 @@ def main() -> None:
         "frames": len(frames),
         "steps": args.steps,
         "seed": args.seed,
+        "cuda_graph": args.cuda_graph if args.mode == "omni" else None,
         "input": str(args.input),
         "resources": str(args.resources),
         "warmup_chunks": args.warmup_chunks,
         "chunk_seconds": timings,
         "torch": torch.__version__,
         "vllm": vllm.__version__,
+        "device": current_omni_platform.get_device_name(),
         "cuda_runtime": torch.version.cuda,
         **memory,
         "memory_scope": "allocator peaks observed after initialization and requests; internal resets may hide startup",
         "codec": "taew2_2",
-        "precision": "bf16" if args.mode == "omni" or args.reference_runtime == "native" else "native_fp8",
-        "timing_scope": "synchronized chunk execution; includes clean KV; Omni includes engine and postprocess",
+        "precision": "fp8" if (args.fp8 if args.mode == "omni" else args.reference_runtime == "rtx5090") else "bf16",
+        "timing_scope": "uint8 RGB input through RGB output; includes normalization/codec/clean KV and Omni engine; "
+        "excludes loading, session close and the reported warmup chunks",
     }
     if measured:
         report.update(
@@ -198,11 +217,18 @@ def main() -> None:
         reference = np.load(args.compare, mmap_mode="r")
         if reference.shape != frames.shape or reference.dtype != frames.dtype:
             raise ValueError("Reference output geometry/dtype differs")
-        absolute = np.abs(frames.astype(np.float32) - reference.astype(np.float32))
+        # Accumulate per frame so long comparisons do not materialize several
+        # full FP32 copies of an already large RGB video on the host.
+        error_sum, error_max, exact = 0.0, 0.0, True
+        for actual, expected in zip(frames, reference):
+            absolute = np.abs(actual.astype(np.float32) - expected.astype(np.float32))
+            error_sum += absolute.sum(dtype=np.float64)
+            error_max = max(error_max, float(absolute.max()))
+            exact = exact and np.array_equal(actual, expected)
         report.update(
-            pixel_mae=float(absolute.mean()),
-            pixel_max_error=float(absolute.max()),
-            exact_match=bool(np.array_equal(frames, reference)),
+            pixel_mae=float(error_sum / frames.size),
+            pixel_max_error=error_max,
+            exact_match=exact,
         )
     args.output.with_suffix(".json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({key: value for key, value in report.items() if key != "chunk_seconds"}, indent=2))
