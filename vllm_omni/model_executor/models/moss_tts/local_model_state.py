@@ -15,12 +15,14 @@ from vllm.logger import init_logger
 from vllm.utils.platform_utils import is_uva_available
 from vllm.utils.torch_utils import async_tensor_h2d
 from vllm.v1.worker.gpu import buffer_utils
+from vllm.v1.worker.gpu.block_table import BlockTables
 from vllm.v1.worker.gpu.input_batch import get_num_sampled_and_rejected
 from vllm.v1.worker.gpu.sample.bad_words import BadWordsState
 from vllm.v1.worker.gpu.sample.logit_bias import LogitBiasState
 from vllm.v1.worker.gpu.sample.output import SamplerOutput
 from vllm.v1.worker.gpu.sample.penalties import PenaltiesState
 from vllm.v1.worker.gpu.sample.sampler import Sampler
+from vllm.v1.worker.gpu.states import RequestState
 
 from vllm_omni.model_executor.output_snapshot import PackedOutputSnapshot, RequestOutputSnapshot
 from vllm_omni.worker_v2.model_states.omni_model_state import OmniModelState
@@ -146,6 +148,29 @@ class MossLocalModelState(OmniModelState):
 
             self._early_first_audio = MossEarlyFirstAudioState(self, decoder)
             logger.info("MOSS Local first PCM uses the Stage0 decoder after normal batched MTP")
+
+    def initialize_host_buffers(
+        self, req_states: RequestState, block_tables: BlockTables, sampler: Sampler | None
+    ) -> None:
+        """Stage MOSS Local uploads in pinned UVA rings (see uva_staging)."""
+        if self.device.type != "cuda" or not is_uva_available():
+            return
+        from vllm.v1.worker.gpu.buffer_utils import StagedWriteTensor
+
+        from vllm_omni.worker_v2.uva_staging import stage_write_contents_in_uva
+
+        tensors = [req_states.total_len, req_states.num_computed_tokens, *block_tables.block_tables]
+        if sampler is not None:
+            states = [
+                sampler.sampling_states,
+                sampler.thinking_budget_state,
+                sampler.logprob_token_ids_state,
+                *sampler.logits_processors,
+            ]
+            tensors += [
+                value for state in states for value in vars(state).values() if isinstance(value, StagedWriteTensor)
+            ]
+        stage_write_contents_in_uva(tensors)
 
     def set_first_audio_sink(self, sink):
         if self._early_first_audio is not None:

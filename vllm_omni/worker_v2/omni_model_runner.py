@@ -17,7 +17,6 @@ from vllm.forward_context import (
     set_forward_context,
 )
 from vllm.logger import init_logger
-from vllm.utils.platform_utils import is_uva_available
 from vllm.v1.core.sched.output import SchedulerOutput
 from vllm.v1.kv_cache_interface import KVCacheConfig
 from vllm.v1.worker.gpu.dp_utils import dispatch_cg_and_sync_dp
@@ -223,33 +222,9 @@ class OmniGPUModelRunner(GPUModelRunner):
         kv_cache_allocation_context: AbstractContextManager | None = None,
     ) -> None:
         super().initialize_kv_cache(kv_cache_config, is_profiling, kv_cache_allocation_context)
-        self._configure_uva_staging()
-
-    def _configure_uva_staging(self) -> None:
-        """Stage MOSS Local uploads in pinned UVA rings (see uva_staging)."""
-        from vllm_omni.model_executor.models.moss_tts.local_model_state import MossLocalModelState
-
-        if not isinstance(self.model_state, MossLocalModelState):
-            return
-        if self.device.type != "cuda" or not is_uva_available():
-            return
-        from vllm.v1.worker.gpu.buffer_utils import StagedWriteTensor
-
-        from vllm_omni.worker_v2.uva_staging import stage_write_contents_in_uva
-
-        tensors = [self.req_states.total_len, self.req_states.num_computed_tokens, *self.block_tables.block_tables]
-        sampler = self.sampler
-        if sampler is not None:
-            states = [
-                sampler.sampling_states,
-                sampler.thinking_budget_state,
-                sampler.logprob_token_ids_state,
-                *sampler.logits_processors,
-            ]
-            tensors += [
-                value for state in states for value in vars(state).values() if isinstance(value, StagedWriteTensor)
-            ]
-        stage_write_contents_in_uva(tensors)
+        initialize_host_buffers = getattr(self.model_state, "initialize_host_buffers", None)
+        if callable(initialize_host_buffers):
+            initialize_host_buffers(self.req_states, self.block_tables, self.sampler)
 
     def _validate_parallel_support(self) -> None:
         parallel_config = self.vllm_config.parallel_config
