@@ -256,6 +256,14 @@ retaining the final cache-capacity tokens when a chunk exceeds the ring.
 It does not introduce another cache owner or change request-slot lifetime.
 Zero-length padding rows skip the attention computation and emit zeros.
 
+CUDA codec v2 with `triton_slot` and streaming graphs packs supported chunks
+along time, so different chunk lengths can share one graph replay without
+padding each stream to the longest chunk. Packed frame buckets are derived
+from the existing codec batch buckets and maximum chunk length; per-request
+reference priming retains the smallest ordinary batch bucket. Padding segments
+use distinct scratch slots. The two engines, connector, MPS and stream lifetime
+are unchanged, and no additional packed-codec switches are required.
+
 The CUDA Local profile also fuses depth sampling with the next codebook's
 attention and runs completing prefills in the existing eager-MTP path.
 Its Triton backbone backend specializes grouped decode attention while keeping
