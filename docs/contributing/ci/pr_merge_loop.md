@@ -94,7 +94,9 @@ Keep responsibilities explicit: contributors diagnose and fix their code and
 supply the failed-job/root-cause/fix-SHA record plus local command, environment,
 results, and redacted screenshots. The reviewer verifies the failure, sends an
 actionable request, checks that evidence, and assesses retest readiness. The
-maintainer authorizes and triggers project CI through the permitted process.
+maintainer authorizes and triggers project CI through the permitted process,
+then verifies current-head checks and unresolved review concerns. Final merge
+confirmation remains with `hsliuustc0106`; the loop never merges automatically.
 
 For example (replace placeholders with verified facts before sending):
 
@@ -108,6 +110,19 @@ SHA and acceptance evidence. Keep maintainer-only retest decisions and routine
 CI monitoring in the coordination record rather than assigning them to the
 contributor. A checklist changes presentation, not permission to publish a
 review, comment, or request.
+
+In the internal coordination checklist, keep these later steps separate from
+contributor TODOs:
+
+- [ ] **Reviewer/maintainer:** verify the repair record, decide and authorize a
+  necessary current-head CUDA retest, and check its result (or documented skip)
+  alongside applicable GitHub checks and unresolved review concerns. Acceptance:
+  linked current-head evidence and no unresolved merge blocker. Status: awaiting
+  evidence verification or checks; use the actual observed state.
+- [ ] **Final merge confirmation — `hsliuustc0106`:** inspect the verified
+  merge-ready handoff and confirm the merge. Acceptance: explicit confirmation;
+  record an actual merge separately only after observing it. Status: waiting for
+  hs's final confirmation once the preceding gates are met.
 
 ### Bounded contributor feedback
 
