@@ -53,7 +53,7 @@ Automated merge-readiness refresh runs every 6 hours, around **03:12 / 09:12 / 1
 2. **~09:12** — Merge-ready list: tip SHA + applicable GitHub checks + current-tip CUDA L2 green (or documented docs-only skip) + tip approval; **Day-1 health** (main L3/L4 same-class reds)
 3. **~10:11** — Squash-and-merge list for maintainer merge flip
 4. Maintainer-controlled labels (`ready` + applicable platform admission labels), checklist, and deep reviews within the current run's allowance; approve only another author's PR at the reviewed tip
-5. Maintainer squash/merge
+5. `hsliuustc0106` confirms and personally executes squash-and-merge
 6. Post-merge L3 → same-day LESSONS if red; overnight L4 → deep LESSONS
 
 ## Community coordination
@@ -67,7 +67,7 @@ Classify the current head before spending a substantive deep review. Keep verifi
 | CI pending | Monitor the current-head run; do not ask the author to fix a queued or running check. | CI/platform maintainer if scheduling needs investigation | Run completion or scheduling evidence |
 | CI code failure | Link the failed job and verified cause; promptly request the concrete repair and local evidence below. | PR author | Repair evidence and new head |
 | CI infrastructure / unknown | Preserve logs and classify the cause; an infrastructure diagnosis is not a passing gate. Do not demand a speculative code change. | CI/platform maintainer; unknown if not established | Diagnostic evidence or authorized retry result |
-| Repaired, current-head CI missing | Verify the repair evidence, then hand off the exact head for maintainer-controlled retesting. Old failures are not proof the new head still fails. | Author supplies local proof; maintainer controls project CI | Matching-head run or documented skip |
+| Repaired, current-head CI missing | Verify the repair evidence, then hand off the exact head for maintainer-controlled retesting or the bounded fallback below. Old failures are not proof the new head still fails. | Author supplies local proof; maintainer controls project CI | Matching-head run or documented skip |
 | Performance / reproduction hold | Keep the hold until the named model/path has the required reproduction or matched A/B evidence; do not infer a pass from unrelated tests. | PR author with relevant model/platform reviewer | Required evidence or claim/scope change |
 | Changes requested | Read unresolved review findings and author replies; identify the remaining action without duplicating the review. | Author, then the requesting reviewer | Author response or updated head |
 | Ready / approved | Revalidate tip approval, applicable GitHub checks, current-tip CUDA L2 (or recorded docs-only skip), and unresolved blockers; hand off to a maintainer. | Independent reviewer, then maintainer | Head, review, gate, or merge-state change |
@@ -95,8 +95,8 @@ supply the failed-job/root-cause/fix-SHA record plus local command, environment,
 results, and redacted screenshots. The reviewer verifies the failure, sends an
 actionable request, checks that evidence, and assesses retest readiness. The
 maintainer normally authorizes and triggers project CI; the loop may use only
-the verified CUDA fallback below when no maintainer has handled the retest,
-then verifies current-head checks and unresolved review concerns. Final merge
+the verified CUDA fallback below when no maintainer has handled the retest.
+The reviewer/maintainer then verifies current-head checks and unresolved concerns. Final merge
 confirmation and execution of squash-and-merge remain with `hsliuustc0106`;
 the loop prepares the handoff and never merges automatically.
 
@@ -222,7 +222,7 @@ existing automation.
 
 ### Action boundaries
 
-The readiness loop does not approve its own PRs or merge ordinary PRs. Maintainers retain the merge decision. Apart from the bounded, verified CUDA retest fallback above, do not trigger or rerun workflows, apply CI-triggering labels, or launch paid compute without separate authorization. Observe existing results and propose the next action otherwise. The only standing revert exception is the confirmed, causally attributed CUDA merge-test regression described below; it does not authorize speculative reverts or unrelated merges.
+The readiness loop does not approve its own PRs or merge ordinary PRs. `hsliuustc0106` retains final confirmation and personally executes squash-and-merge. Apart from the bounded, verified CUDA retest fallback above, do not trigger or rerun workflows, apply CI-triggering labels, or launch paid compute without separate authorization. Observe existing results and propose the next action otherwise. The only standing revert exception is the confirmed, causally attributed CUDA merge-test regression described below; it does not authorize speculative reverts or unrelated merges.
 
 ## Quality watch (first-class)
 
