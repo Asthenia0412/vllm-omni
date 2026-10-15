@@ -14,6 +14,7 @@ import html
 import json
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
@@ -50,6 +51,7 @@ SESSION_KEY = "matrix_session_id"
 START_KEY = "matrix_frame_start"
 END_KEY = "matrix_end_session"
 _REQUEST_KEYS = {SESSION_KEY, START_KEY, END_KEY}
+_FRAME_SIZES = {(480, 864), (736, 1280)}
 _VIDEO_SPEC = VideoTensorSpec(
     VideoTensorLayout.BCTHW, VideoTensorEncoding.NORMALIZED_FLOAT, VideoValueRange.NEGATIVE_ONE_TO_ONE
 )
@@ -64,10 +66,10 @@ class MatrixInput:
     steps: int
 
 
-def prepare_request(request: OmniDiffusionRequest) -> OmniDiffusionRequest:
+def prepare_request(request: OmniDiffusionRequest, *, height: int = 480, width: int = 864) -> OmniDiffusionRequest:
     params = request.sampling_params
-    if params.height not in (None, 480) or params.width not in (None, 864):
-        raise ValueError("Matrix-Game 4.0 requires height=480, width=864")
+    if params.height not in (None, height) or params.width not in (None, width):
+        raise ValueError(f"Matrix-Game worker requires height={height}, width={width}")
     if params.num_outputs_per_prompt != 1 or params.guidance_scale not in (None, 1.0):
         raise ValueError("Matrix-Game 4.0 supports one output and guidance_scale=1")
     if params.generator is not None:
@@ -102,9 +104,9 @@ def prepare_request(request: OmniDiffusionRequest) -> OmniDiffusionRequest:
             raise ValueError("Missing RGB frames; omit video only to close a named session")
     else:
         if not isinstance(frames, torch.Tensor) or frames.device.type != "cpu" or frames.dtype != torch.uint8:
-            raise ValueError("video must be a CPU uint8 RGB tensor with shape [T,480,864,3]")
-        if frames.ndim != 4 or tuple(frames.shape[1:]) != (480, 864, 3):
-            raise ValueError("video must have shape [T,480,864,3]")
+            raise ValueError(f"video must be a CPU uint8 RGB tensor with shape [T,{height},{width},3]")
+        if frames.ndim != 4 or tuple(frames.shape[1:]) != (height, width, 3):
+            raise ValueError(f"video must have shape [T,{height},{width},3]")
         count = frames.shape[0]
         if session_id is None:
             if count < 1 or (count - 1) % 4:
@@ -112,13 +114,21 @@ def prepare_request(request: OmniDiffusionRequest) -> OmniDiffusionRequest:
         elif count != (1 if frame_start == 0 else 4):
             raise ValueError("A session starts with one frame, then accepts four frames per request")
     request.prepared_layout = MatrixInput(frames, session_id, frame_start, end_session, steps)
-    params.height, params.width = 480, 864
+    params.height, params.width = height, width
     params.fps = params.fps or 60
     return request
 
 
 def get_matrix_game4_pre_process_func(od_config: OmniDiffusionConfig) -> Callable:
-    return prepare_request
+    height, width = _frame_size(od_config)
+    return partial(prepare_request, height=height, width=width)
+
+
+def _frame_size(config: OmniDiffusionConfig) -> tuple[int, int]:
+    height, width = config.model_config.get("height", 480), config.model_config.get("width", 864)
+    if type(height) is not int or type(width) is not int or (height, width) not in _FRAME_SIZES:
+        raise ValueError("Matrix-Game frame size must be 864x480 or experimental 1280x736")
+    return height, width
 
 
 def validate_config(config: OmniDiffusionConfig) -> None:
@@ -152,8 +162,11 @@ def validate_config(config: OmniDiffusionConfig) -> None:
                 "use TORCH_SDPA for the exact-reference path"
             )
     options = config.model_config
-    if options.keys() - {"prompt", "max_latents", "scene", "cuda_graph", "fp8"}:
-        raise ValueError("Matrix-Game model_config accepts only prompt, max_latents, scene, cuda_graph and fp8")
+    if options.keys() - {"prompt", "max_latents", "scene", "cuda_graph", "fp8", "height", "width"}:
+        raise ValueError(
+            "Matrix-Game model_config accepts only prompt, max_latents, scene, cuda_graph, fp8, height and width"
+        )
+    _frame_size(config)
     if type(options.get("cuda_graph", False)) is not bool:
         raise ValueError("cuda_graph must be boolean")
     if type(options.get("fp8", False)) is not bool:
@@ -182,6 +195,7 @@ class MatrixGame4Pipeline(nn.Module):
         from .transformer import load_transformer
 
         self.device = current_omni_platform.get_torch_device()
+        self.height, self.width = _frame_size(od_config)
         self.max_latents = od_config.model_config.get("max_latents", 8192)
         root = Path(od_config.model)
         self.scene = od_config.model_config.get("scene", "castle")
@@ -255,14 +269,14 @@ class MatrixGame4Pipeline(nn.Module):
         with Image.open(path) as image:
             image = ImageOps.exif_transpose(image).convert("RGB")
             if self.sink_mode == "first_frame":
-                image = ImageOps.fit(image, (864, 480), method=Image.Resampling.LANCZOS)
+                image = ImageOps.fit(image, (self.width, self.height), method=Image.Resampling.LANCZOS)
             else:
                 width, height = image.size
-                scale = max(864 / width, 480 / height)
+                scale = max(self.width / width, self.height / height)
                 size = (round(width * scale), round(height * scale))
                 image = image.resize(size, Image.Resampling.BILINEAR)
-                left, top = round((size[0] - 864) / 2), round((size[1] - 480) / 2)
-                image = image.crop((left, top, left + 864, top + 480))
+                left, top = round((size[0] - self.width) / 2), round((size[1] - self.height) / 2)
+                image = image.crop((left, top, left + self.width, top + self.height))
             pixels = torch.from_numpy(np.array(image))
         pixels = (pixels.permute(2, 0, 1).float() * (2.0 / 255.0) - 1.0)[None, :, None]
         self.vae.clear_cache()
@@ -270,8 +284,9 @@ class MatrixGame4Pipeline(nn.Module):
             latent = self.vae.encode(pixels.to(self.device, torch.bfloat16)).permute(0, 2, 1, 3, 4)
         finally:
             self.vae.clear_cache()
-        if tuple(latent.shape) != (1, 1, 48, 30, 54) or not torch.isfinite(latent).all():
-            raise ValueError("Sink image did not encode to a finite [1,1,48,30,54] latent")
+        shape = (1, 1, 48, self.height // 16, self.width // 16)
+        if tuple(latent.shape) != shape or not torch.isfinite(latent).all():
+            raise ValueError(f"Sink image did not encode to a finite {shape} latent")
         return latent
 
     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
@@ -294,7 +309,7 @@ class MatrixGame4Pipeline(nn.Module):
             raise ValueError("Matrix-Game only supports one request per worker")
         request = batch.requests[0]
         if not isinstance(request.prepared_layout, MatrixInput):
-            prepare_request(request)
+            prepare_request(request, height=self.height, width=self.width)
         prepared = request.prepared_layout
         assert isinstance(prepared, MatrixInput)
         text = request.prompt.get("prompt", "")
@@ -305,6 +320,8 @@ class MatrixGame4Pipeline(nn.Module):
         if prepared.frames is None:
             self.close_session()
             return [DiffusionOutput(custom_output={"session_closed": True})]
+        if tuple(prepared.frames.shape[1:]) != (self.height, self.width, 3):
+            raise ValueError("Prepared video resolution does not match this worker")
         count = prepared.frames.shape[0]
         needed = (count + 3) // 4
         if (self._stream.index if self._stream is not None else 0) + needed > self.max_latents:
@@ -326,6 +343,7 @@ class MatrixGame4Pipeline(nn.Module):
                 sink_latent=self.sink_latent,
                 sink_mode=self.sink_mode,
                 sink_rope_mode=self.sink_rope_mode,
+                frame_size=(self.height, self.width),
             )
             self._session_id, self._steps = prepared.session_id, prepared.steps
         stream = self._stream

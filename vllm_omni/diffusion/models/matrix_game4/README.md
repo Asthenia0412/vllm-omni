@@ -71,6 +71,26 @@ effects. Throughput alignment does not qualify its visual quality; retain the
 default BF16 path where exact reference reproduction is required. See the
 recipe for paired FPS measurements, reproducible commands and their scope.
 
+## Experimental 1280×736 rendering
+
+The default remains 864×480. Configure a new worker with
+`model_config={"scene": "racing", "height": 736, "width": 1280}` and supply
+CPU uint8 geometry frames of shape `[T,736,1280,3]`. Request dimensions must
+match the worker (or be omitted). The benchmark accepts `--height 736 --width 1280`;
+precision, step count and graph replay remain independent options.
+
+This runs the released checkpoint at a larger latent grid; it does not upscale
+the generated 480p output. It is an experimental resolution extrapolation, with
+no reference-quality qualification at that size. The codec and patch embedding
+require multiples of 32; 1280×720 is rejected. Resolution cannot change within a
+worker. Multi-GPU execution remains unsupported.
+
+One 1,201-frame Racing run per configuration on the PRO 5000 measured 27.52 FPS
+at 1280×736 with FP8 / one step, 11.24 FPS with BF16 / two steps, and 61.38 FPS
+at 864×480 with FP8 / one step. All use TAEW2, SDPA and graph replay. These are
+generated FPS after warmup, not video playback FPS or interaction latency.
+The recipe documents the inputs, timing scope and limitations.
+
 ## Attention selection
 
 Select the existing framework backend explicitly for both self and cross

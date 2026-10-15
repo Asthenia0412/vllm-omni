@@ -17,15 +17,13 @@ from vllm_omni.utils.device_copy import to_device_nonblocking
 
 from .sampling import Chunk, FlowMatchScheduler, warp_steps
 
-LATENT_SHAPE = (1, 1, 48, 30, 54)  # one latent frame [B, F, C, h, w]
 CONTROL_PAD_CHANNELS = 52  # zero channels after the 48 control channels
-FRAME_TOKENS = 15 * 27  # tokens per latent frame at 480x864
 TIMESTEP_SHIFT = 5.0
 WINDOW = 21  # attention window in latent frames, sink included
 
 
 class MatrixStream:
-    """Accept CPU uint8 RGB [T, 480, 864, 3]: 1 frame first, then 4 per chunk.
+    """Accept CPU uint8 RGB [T, H, W, 3]: 1 frame first, then 4 per chunk.
 
     Racing: the sink is frame zero (absolute RoPE). Shooters: the sink is a KV-only prefix at position
     zero whose keys follow the current block at a fixed distance once the window is full.
@@ -46,6 +44,7 @@ class MatrixStream:
         sink_latent=None,
         sink_mode="first_frame",
         sink_rope_mode="absolute",
+        frame_size=(480, 864),
     ):
         if vae_backend != "taehv":
             raise ValueError("Only the TAEHV backend is supported")
@@ -56,7 +55,13 @@ class MatrixStream:
         self.transformer, self.vae, self.profile, self.vae_backend = transformer, vae, profile, vae_backend
         self.device, self.dtype = torch.device("cuda"), torch.bfloat16
         self.max_latents = max_latents
-        self.shape = LATENT_SHAPE
+        self.height, self.width = frame_size
+        if any(type(size) is not int or size <= 0 or size % 32 for size in frame_size):
+            raise ValueError("Frame height and width must be positive multiples of 32")
+        self.shape = (1, 1, 48, self.height // 16, self.width // 16)
+        self.frame_tokens = (self.height // 32) * (self.width // 32)
+        if sink_latent is not None and tuple(sink_latent.shape) != self.shape:
+            raise ValueError("Sink latent must match the configured frame size")
         self.sink_mode, self.sink_rope_mode = sink_mode, sink_rope_mode
         self.first_frame_latent = sink_latent if sink_mode == "first_frame" else None
         self.sink_offset = int(sink_latent is not None and sink_mode == "kv_only")
@@ -68,7 +73,7 @@ class MatrixStream:
         self.initial_rng = torch.Generator("cpu").manual_seed(seed + 1)
         self.racing_rng = torch.Generator("cpu").manual_seed(seed)
         self.renoise_rng = torch.Generator(self.device).manual_seed(seed)
-        self.kv = transformer.init_kv_cache(1, FRAME_TOKENS, self.device, self.dtype)
+        self.kv = transformer.init_kv_cache(1, self.frame_tokens, self.device, self.dtype)
         self.xc = transformer.init_crossattn_cache(1, self.device, self.dtype)
         self.set_prompt(prompt_embeds)
         self.index = self.frame = 0
@@ -118,7 +123,7 @@ class MatrixStream:
                 y,
                 self.kv,
                 self.xc,
-                position * FRAME_TOKENS,
+                position * self.frame_tokens,
                 kv_only=kv_only,
                 sink_position=position - WINDOW if fixed else None,
             )
@@ -130,7 +135,7 @@ class MatrixStream:
         if self.closed or self.failed:
             raise RuntimeError("Session is closed or failed; create a fresh session")
         count = 1 if self.index == 0 else 4
-        if frame_start != self.frame or tuple(pixels.shape) != (count, 480, 864, 3):
+        if frame_start != self.frame or tuple(pixels.shape) != (count, self.height, self.width, 3):
             raise ValueError("Expected consecutive RGB frames: 1 initially, then 4 per chunk")
         if self.index >= self.max_latents:
             raise ValueError("Session reached its configured RoPE/frame budget")
@@ -189,7 +194,7 @@ class MatrixStream:
             mark()
 
             decoded = self.vae.decode_stream(pred.permute(0, 2, 1, 3, 4))[0].permute(1, 0, 2, 3)
-            if tuple(decoded.shape) != (count, 3, 480, 864):
+            if tuple(decoded.shape) != (count, 3, self.height, self.width):
                 raise RuntimeError("VAE decoder output cadence changed")
             mark()
             # The caller owns its output independently of the next codec invocation.

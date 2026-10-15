@@ -13,7 +13,7 @@ Status: experimental Python integration; default BF16 quality path and opt-in ac
 
 ## What this runs
 
-A game engine produces low-poly RGB frames. The pipeline renders them at 864×480,
+A game engine produces low-poly RGB frames. The pipeline defaults to 864×480,
 accepting one opening frame followed by four frames per chunk. The first latent
 is followed by one new latent per chunk, with 21 latent frames of temporal KV.
 Castle and Egypt use a KV-only sink with relative positioning; Racing uses its
@@ -134,16 +134,69 @@ the model-owned graph switch below; session bookkeeping must stay outside captur
 The text encoder runs once during startup and is released before gameplay.
 No CPU inference offload or generic quantization is enabled.
 
+## Experimental 1280×736 resolution
+
+Use a new worker with `model_config.height=736` and `model_config.width=1280`.
+Only 864×480 (default) and 1280×736 are currently accepted. Geometry input and
+output use the selected dimensions, including the opening frame and every
+continuation chunk. Request dimensions must match the worker or be omitted.
+Changing resolution requires a new worker; 1280×720 is not accepted because the
+codec and patch embedding require spatial multiples of 32.
+
+Capture actual engine geometry at 1280×736, saved as uint8 `[T,736,1280,3]`:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 \
+  python benchmarks/diffusion/benchmark_matrix_game4.py \
+  --scene racing --resources ./matrix-resources --input ./geometry-736.npy \
+  --height 736 --width 1280 --frames 1201 --steps 1 --cuda-graph --fp8 \
+  --output ./qualification/racing-736-fp8-1
+```
+
+For a BF16 two-step comparison, omit `--fp8` and use `--steps 2`. Both use the
+tiny TAEW2 codec; neither is the upstream full-Wan-VAE quality preset. Changing
+both precision and steps does not isolate either factor's quality contribution.
+
+The released checkpoint and profile remain unchanged. Sink resizing, latent
+shape, KV capacity, spatial RoPE and graph descriptors follow the worker size:
+405 tokens per latent frame at 864×480, 920 at 1280×736. This is native generation
+at a larger latent grid, but it is **resolution extrapolation**, not a model
+trained or reference-qualified at the larger size. More pixels do not establish
+better texture fidelity or temporal stability. The pinned reference runtime
+only accepts 864×480, so `--mode reference` rejects the larger size. Multi-GPU
+execution is still unsupported.
+
+Bounded Racing evaluation on one RTX PRO 5000 72GB Blackwell, same software stack
+as above, seed 42, SDPA, graph replay, TAEW2, one 1,201-frame run per configuration:
+
+| Native resolution | Precision / steps | Generated FPS | Chunk p50 / p95 (ms) |
+| --- | --- | --- | --- |
+| 864×480 | FP8 / 1 | 61.38 | 65.13 / 65.59 |
+| 1280×736 | FP8 / 1 | 27.52 | 145.55 / 146.49 |
+| 1280×736 | BF16 / 2 | 11.24 | 356.16 / 356.98 |
+
+The game rendered 1920×1104 geometry, downsampled to 1280×736. The 480p control
+was center-cropped and downsampled from that same capture, preserving the control
+sequence but with a slightly different aspect ratio. The first 25 chunks are
+excluded, leaving 276 measured four-frame chunks (1,104 generated frames).
+Timing covers CPU RGB input through CPU RGB output, including the Omni engine,
+codec and clean-KV update; it excludes loading, session close, game rendering,
+video encoding and network transport. Saved clips play at the simulation's
+60 FPS and last 20.02 seconds; that is not the generation rate. These single-run
+measurements do not establish eight-GPU scaling, live response latency, RTX 5090
+performance, or superior visual quality. A separate 481-frame 480p FP8 regression
+remained byte-identical to the previous implementation's output.
+
 ## Input, output and session lifetime
 
 | Item | Contract |
 | --- | --- |
 | Input field | `prompt["multi_modal_data"]["video"]` |
-| Input tensor | CPU `torch.uint8`, RGB `[T,480,864,3]` |
+| Input tensor | CPU `torch.uint8`, RGB `[T,H,W,3]`; defaults to 480×864 |
 | First chunk | One frame with `matrix_frame_start=0` |
 | Continuation | Four frames with offsets `1,5,9,...` |
 | Complete clip | Omit the session ID, supply `1+4k` frames; closes automatically |
-| Output | `result.images[0]`: uint8 `[1,T,480,864,3]`, same frame count |
+| Output | `result.images[0]`: uint8 `[1,T,H,W,3]`, same frame count and worker dimensions |
 | Sampling | Seed, one or two steps, guidance scale 1, `output_type="np"` |
 | Caption | Fixed at startup; optionally override `model_config.prompt` |
 | Budget | At most 8,192 generated latents, configurable downward |

@@ -23,8 +23,8 @@ from vllm_omni.inputs.data import OmniDiffusionSamplingParams
 pytestmark = [pytest.mark.core_model, pytest.mark.cpu]
 
 
-def request(frames=1, session="one", start=0, end=False):
-    media = {} if frames is None else {"video": torch.zeros(frames, 480, 864, 3, dtype=torch.uint8)}
+def request(frames=1, session="one", start=0, end=False, height=480, width=864):
+    media = {} if frames is None else {"video": torch.zeros(frames, height, width, 3, dtype=torch.uint8)}
     return OmniDiffusionRequest(
         prompt={"prompt": "", "multi_modal_data": media},
         request_id=f"{session}-{start}",
@@ -48,11 +48,13 @@ class RecordingStream:
         sink_latent,
         sink_mode,
         sink_rope_mode,
+        frame_size,
     ):
         self.frame = self.index = 0
         self.closed = False
         self.fail = False
         self.offsets = []
+        self.height, self.width = frame_size
 
     def push(self, pixels, *, frame_start):
         if self.fail:
@@ -60,7 +62,7 @@ class RecordingStream:
         assert frame_start == self.frame
         self.offsets.append(frame_start)
         # Different chunks carry distinct values, exposing accidental storage reuse.
-        output = torch.full((pixels.shape[0], 3, 480, 864), self.index - 1, dtype=torch.float32)
+        output = torch.full((pixels.shape[0], 3, self.height, self.width), self.index - 1, dtype=torch.float32)
         self.frame += pixels.shape[0]
         self.index += 1
         return SimpleNamespace(pixels=output)
@@ -77,6 +79,7 @@ def pipeline(monkeypatch):
     model.prompt_text = DEFAULT_PROMPT
     model.sink_mode, model.sink_rope_mode = "kv_only", "fixed"
     model.max_latents = 64
+    model.height, model.width = 480, 864
     model.runtime = model.vae = model.prompt_embeds = model.sink_latent = None
     model._stream = model._session_id = model._steps = None
     return model
@@ -314,3 +317,45 @@ def test_attention_role_override_validation(role, backend):
             validate_config(config)
     else:
         validate_config(config)
+
+
+def test_high_resolution_session_rejects_size_change_without_losing_owner(pipeline):
+    pipeline.height, pipeline.width = 736, 1280
+    first = run(pipeline, request(height=736, width=1280))
+    stream = pipeline._stream
+    assert first.media.video.tensor.shape == (1, 3, 1, 736, 1280)
+    with pytest.raises(ValueError, match="shape"):
+        run(pipeline, request(4, start=1))
+    assert pipeline._stream is stream and stream.frame == 1 and not stream.closed
+    last = run(pipeline, request(4, start=1, end=True, height=736, width=1280))
+    assert last.media.video.tensor.shape == (1, 3, 4, 736, 1280)
+    assert stream.closed and pipeline._stream is None
+
+
+@pytest.mark.parametrize("height,width", [(480, 864), (736, 1280), (720, 1280), (736, 864), (True, 1280)])
+def test_worker_resolution_configuration_and_preprocessing(height, width):
+    from vllm_omni.diffusion.data import OmniDiffusionConfig
+    from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import (
+        get_matrix_game4_pre_process_func,
+        validate_config,
+    )
+
+    config = OmniDiffusionConfig(
+        model="matrix-resources",
+        model_class_name="MatrixGame4Pipeline",
+        enforce_eager=True,
+        max_num_seqs=1,
+        diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
+        model_config={"height": height, "width": width},
+    )
+    if (height, width) not in {(480, 864), (736, 1280)}:
+        with pytest.raises(ValueError, match="frame size"):
+            validate_config(config)
+        return
+    validate_config(config)
+    preprocess = get_matrix_game4_pre_process_func(config)
+    prepared = preprocess(request(height=height, width=width))
+    assert (prepared.sampling_params.height, prepared.sampling_params.width) == (height, width)
+    prepared.sampling_params.height = 720
+    with pytest.raises(ValueError, match="worker requires"):
+        preprocess(prepared)

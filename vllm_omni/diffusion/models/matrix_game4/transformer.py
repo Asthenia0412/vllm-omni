@@ -273,7 +273,7 @@ class MatrixRuntime:
 
         if self.use_graph and position > 21:
             if kv_only not in self.graphs:
-                self.graphs[kv_only] = MatrixGraph(run)
+                self.graphs[kv_only] = MatrixGraph(run, num_tokens=height * width)
             output = self.graphs[kv_only](x, t, y, rotation, sink_rotation)
         else:
             output = run(x, t, y, rotation, sink_rotation)

@@ -13,7 +13,8 @@ pytestmark = [pytest.mark.core_model, pytest.mark.diffusion, *hardware_marks(res
 
 
 @torch.inference_mode()
-def test_graph_preserves_caller_stream_state_and_owned_outputs():
+@pytest.mark.parametrize("num_tokens", [405, 920])
+def test_graph_preserves_caller_stream_state_and_owned_outputs(num_tokens):
     with set_current_vllm_config(VllmConfig()):
         caller = torch.accelerator.current_stream()
         state = torch.zeros(16, device="cuda")
@@ -23,7 +24,7 @@ def test_graph_preserves_caller_stream_state_and_owned_outputs():
             state.copy_(output)
             return output
 
-        graph = MatrixGraph(advance, (state,))
+        graph = MatrixGraph(advance, (state,), num_tokens=num_tokens)
         # Capturing on vLLM's non-default stream must not leak that stream
         # into the caller/runner, whose output can cross Python threads.
         assert torch.accelerator.current_stream() == caller

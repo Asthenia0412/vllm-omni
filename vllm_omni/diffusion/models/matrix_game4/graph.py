@@ -20,7 +20,9 @@ class MatrixGraph:
     Each entry belongs to one session and is released before its caches.
     """
 
-    def __init__(self, run: Callable[..., torch.Tensor], preserve: tuple[torch.Tensor, ...] = ()):
+    def __init__(
+        self, run: Callable[..., torch.Tensor], preserve: tuple[torch.Tensor, ...] = (), *, num_tokens: int = 1
+    ):
         caller = torch.accelerator.current_stream()
         self.stream = current_stream()
         torch.accelerator.set_stream(caller)
@@ -35,6 +37,7 @@ class MatrixGraph:
         self.inputs: tuple[torch.Tensor | None, ...] | None = None
         self.output: torch.Tensor | None = None
         self.preserve = preserve
+        self.num_tokens = num_tokens
 
     def __call__(self, *inputs: torch.Tensor | None) -> torch.Tensor:
         caller = torch.accelerator.current_stream()
@@ -68,7 +71,7 @@ class MatrixGraph:
             None,
             self.config,
             cudagraph_runtime_mode=CUDAGraphMode.FULL,
-            batch_descriptor=BatchDescriptor(num_tokens=405),
+            batch_descriptor=BatchDescriptor(num_tokens=self.num_tokens),
         ):
             if first:
                 # Capture records operations but does not execute them. Retain

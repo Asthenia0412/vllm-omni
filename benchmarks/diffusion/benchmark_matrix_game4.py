@@ -23,7 +23,11 @@ from vllm_omni.platforms import current_omni_platform
 def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resources", required=True, type=Path)
-    parser.add_argument("--input", required=True, type=Path, help="uint8 THWC .npy geometry frames at 864x480")
+    parser.add_argument(
+        "--input", required=True, type=Path, help="uint8 THWC .npy geometry frames at the selected size"
+    )
+    parser.add_argument("--height", type=int, default=480)
+    parser.add_argument("--width", type=int, default=864)
     parser.add_argument("--output", required=True, type=Path, help="output prefix for .npy frames and .json metrics")
     parser.add_argument("--mode", choices=("omni", "reference"), default="omni")
     parser.add_argument("--reference-runtime", choices=("native", "rtx5090"), default="native")
@@ -49,6 +53,10 @@ def arguments() -> argparse.Namespace:
         parser.error("--require-exact needs --compare")
     if args.mode == "reference" and args.attention_backend != "TORCH_SDPA":
         parser.error("--attention-backend selects the Omni backend, not the reference runtime")
+    if (args.height, args.width) not in {(480, 864), (736, 1280)}:
+        parser.error("Use 864x480 or experimental 1280x736")
+    if args.mode == "reference" and (args.height, args.width) != (480, 864):
+        parser.error("The pinned reference runtime only supports 864x480")
     return args
 
 
@@ -72,7 +80,13 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
         enforce_eager=True,
         num_gpus=1,
         max_num_seqs=1,
-        model_config={"scene": args.scene, "cuda_graph": args.cuda_graph, "fp8": args.fp8},
+        model_config={
+            "scene": args.scene,
+            "cuda_graph": args.cuda_graph,
+            "fp8": args.fp8,
+            "height": args.height,
+            "width": args.width,
+        },
         distributed_executor_backend="uni",
         diffusion_attention_config={"default": {"backend": args.attention_backend}},
         video_output_transport=VideoOutputTransportConfig(enable_device_postprocess=True),
@@ -90,6 +104,8 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
                 request_id=f"matrix-{start}",
                 sampling_params=OmniDiffusionSamplingParams(
                     seed=args.seed,
+                    height=args.height,
+                    width=args.width,
                     num_inference_steps=args.steps,
                     output_type="np",
                     extra_args={SESSION_KEY: "qualification", START_KEY: start, END_KEY: False},
@@ -108,7 +124,7 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
             timings.append(time.perf_counter() - begin)
             # The runner resets peaks per request; retain both startup and all chunks.
             memory = {name: max(memory[name], value) for name, value in peak_memory().items()}
-            if chunk is None or chunk.shape != (1, size, 480, 864, 3) or chunk.dtype != np.uint8:
+            if chunk is None or chunk.shape != (1, size, args.height, args.width, 3) or chunk.dtype != np.uint8:
                 raise RuntimeError(
                     f"Invalid Omni output at frame {start}: "
                     f"type={type(chunk)}, shape={getattr(chunk, 'shape', None)}, "
@@ -180,8 +196,13 @@ def main() -> None:
 
     args = arguments()
     video = np.load(args.input, mmap_mode="r")
-    if video.dtype != np.uint8 or video.ndim != 4 or video.shape[1:] != (480, 864, 3) or len(video) < args.frames:
-        raise ValueError("Input must contain enough uint8 RGB geometry frames at 864x480")
+    if (
+        video.dtype != np.uint8
+        or video.ndim != 4
+        or video.shape[1:] != (args.height, args.width, 3)
+        or len(video) < args.frames
+    ):
+        raise ValueError(f"Input must contain enough uint8 RGB geometry frames at {args.width}x{args.height}")
     current_omni_platform.synchronize()
     torch.accelerator.reset_peak_memory_stats()
     if args.mode == "omni":
@@ -197,6 +218,8 @@ def main() -> None:
         "scene": args.scene,
         "reference_runtime": args.reference_runtime if args.mode == "reference" else None,
         "frames": len(frames),
+        "height": args.height,
+        "width": args.width,
         "steps": args.steps,
         "seed": args.seed,
         "cuda_graph": args.cuda_graph if args.mode == "omni" else None,
