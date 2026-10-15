@@ -26,18 +26,30 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--input", required=True, type=Path, help="uint8 THWC .npy geometry frames at 864x480")
     parser.add_argument("--output", required=True, type=Path, help="output prefix for .npy frames and .json metrics")
     parser.add_argument("--mode", choices=("omni", "reference"), default="omni")
+    parser.add_argument("--reference-runtime", choices=("native", "rtx5090"), default="native")
+    parser.add_argument("--scene", choices=("castle", "ancient-egypt", "racing"), default="castle")
     parser.add_argument("--frames", type=int, default=241)
     parser.add_argument("--steps", type=int, choices=(1, 2), default=1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--warmup-chunks", type=int, default=25)
     parser.add_argument("--compare", type=Path, help="reference output .npy to compare against")
+    parser.add_argument("--require-exact", action="store_true", help="Fail if compared RGB frames are not identical")
     args = parser.parse_args()
     if args.frames < 1 or (args.frames - 1) % 4 or args.warmup_chunks < 0:
         parser.error("--frames must be 1+4k and --warmup-chunks must be nonnegative")
+    if args.require_exact and args.compare is None:
+        parser.error("--require-exact needs --compare")
     return args
 
 
-async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.ndarray, list[float]]:
+def peak_memory() -> dict[str, float]:
+    return {
+        "peak_allocated_gib": torch.accelerator.max_memory_allocated() / 1024**3,
+        "peak_reserved_gib": torch.accelerator.max_memory_reserved() / 1024**3,
+    }
+
+
+async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.ndarray, list[float], dict[str, float]]:
     from vllm_omni.diffusion.data import OmniDiffusionConfig, VideoOutputTransportConfig
     from vllm_omni.diffusion.diffusion_engine import DiffusionEngine
     from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import END_KEY, SESSION_KEY, START_KEY
@@ -50,10 +62,13 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
         enforce_eager=True,
         num_gpus=1,
         max_num_seqs=1,
+        model_config={"scene": args.scene},
         distributed_executor_backend="uni",
+        diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
         video_output_transport=VideoOutputTransportConfig(enable_device_postprocess=True),
     )
     engine = DiffusionEngine(config)
+    memory = peak_memory()
     outputs, timings = [], []
     try:
         for start in [0, *range(1, args.frames, 4)]:
@@ -81,6 +96,8 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
                         chunk = result.images[0]
             current_omni_platform.synchronize()
             timings.append(time.perf_counter() - begin)
+            # The runner resets peaks per request; retain both startup and all chunks.
+            memory = {name: max(memory[name], value) for name, value in peak_memory().items()}
             if chunk is None or chunk.shape != (1, size, 480, 864, 3) or chunk.dtype != np.uint8:
                 raise RuntimeError(
                     f"Invalid Omni output at frame {start}: "
@@ -90,7 +107,7 @@ async def render_omni(args: argparse.Namespace, video: np.ndarray) -> tuple[np.n
             outputs.append(chunk[0])
     finally:
         engine.close()
-    return np.concatenate(outputs), timings
+    return np.concatenate(outputs), timings, memory
 
 
 def render_reference(args: argparse.Namespace, video: np.ndarray) -> tuple[np.ndarray, list[float]]:
@@ -103,11 +120,13 @@ def render_reference(args: argparse.Namespace, video: np.ndarray) -> tuple[np.nd
     options = parser.parse_args(
         [
             "--scene",
-            "castle",
+            args.scene,
             "--resources",
             str(args.resources),
             "--preset",
-            "rtx5090",
+            "realtime",
+            "--dit-runtime",
+            args.reference_runtime,
             "--steps",
             "1000" if args.steps == 1 else "1000,500",
         ]
@@ -139,12 +158,20 @@ def main() -> None:
     video = np.load(args.input, mmap_mode="r")
     if video.dtype != np.uint8 or video.ndim != 4 or video.shape[1:] != (480, 864, 3) or len(video) < args.frames:
         raise ValueError("Input must contain enough uint8 RGB geometry frames at 864x480")
-    frames, timings = asyncio.run(render_omni(args, video)) if args.mode == "omni" else render_reference(args, video)
+    current_omni_platform.synchronize()
+    torch.accelerator.reset_peak_memory_stats()
+    if args.mode == "omni":
+        frames, timings, memory = asyncio.run(render_omni(args, video))
+    else:
+        frames, timings = render_reference(args, video)
+        memory = peak_memory()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     np.save(args.output.with_suffix(".npy"), frames)
     measured = timings[args.warmup_chunks :]
     report = {
         "mode": args.mode,
+        "scene": args.scene,
+        "reference_runtime": args.reference_runtime if args.mode == "reference" else None,
         "frames": len(frames),
         "steps": args.steps,
         "seed": args.seed,
@@ -155,11 +182,15 @@ def main() -> None:
         "torch": torch.__version__,
         "vllm": vllm.__version__,
         "cuda_runtime": torch.version.cuda,
+        **memory,
+        "memory_scope": "allocator peaks observed after initialization and requests; internal resets may hide startup",
+        "codec": "taew2_2",
+        "precision": "bf16" if args.mode == "omni" or args.reference_runtime == "native" else "native_fp8",
         "timing_scope": "synchronized chunk execution; includes clean KV; Omni includes engine and postprocess",
     }
     if measured:
         report.update(
-            steady_fps=4 * len(measured) / sum(measured),
+            steady_fps=sum(1 if i == 0 else 4 for i in range(args.warmup_chunks, len(timings))) / sum(measured),
             chunk_p50_ms=float(np.percentile(measured, 50) * 1000),
             chunk_p95_ms=float(np.percentile(measured, 95) * 1000),
         )
@@ -175,6 +206,8 @@ def main() -> None:
         )
     args.output.with_suffix(".json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({key: value for key, value in report.items() if key != "chunk_seconds"}, indent=2))
+    if args.require_exact and not report["exact_match"]:
+        raise SystemExit("Quality gate failed: RGB output differs from the pinned reference")
 
 
 if __name__ == "__main__":

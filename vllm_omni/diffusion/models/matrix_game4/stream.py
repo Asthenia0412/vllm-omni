@@ -23,19 +23,7 @@ TIMESTEP_SHIFT = 5.0
 WINDOW = 21  # attention window in latent frames, sink included
 
 
-def load_transformer(checkpoint, *, device="cuda"):
-    """Load the DiT from a release checkpoint, quantize its block linears and wrap it in the runtime."""
-    from .base_model import load_causal_wan
-    from .fp8_linear import quantize_block_linears
-
-    model = load_causal_wan(str(checkpoint), local_attn_size=21, sink_size=1, device=device, dtype=torch.bfloat16)
-    quantize_block_linears(model)
-    from .causal_model import FastCausalWanModel
-
-    return FastCausalWanModel(model)
-
-
-class FastStream:
+class MatrixStream:
     """Accept [-1, 1] RGB [T, 3, 480, 864]: 1 frame first, then 4 per chunk.
 
     Racing: the sink is frame zero (absolute RoPE). Shooters: the sink is a KV-only prefix at position
@@ -89,8 +77,6 @@ class FastStream:
             with torch.no_grad():
                 self._forward(sink_latent.to(self.device, self.dtype), torch.zeros((), device=self.device), None, 0)
         vae.clear_cache()
-        if hasattr(vae, "prime"):
-            vae.prime()
 
     def set_prompt(self, embeddings):
         """Change text conditioning at a chunk boundary without clearing visual history."""
@@ -99,11 +85,11 @@ class FastStream:
             raise ValueError("prompt embeddings must be [1, 512, 4096]")
         self.context = context
         for cross in self.xc:
-            cross["is_init"] = False
+            cross.key = cross.value = None
 
     def _encode(self, x, param):
         """Control pixels [1, 3, T, H, W] -> one normalised latent frame [1, 1, 48, h, w], as CastleStream."""
-        return self.vae.encode_stream(x).latent_dist.mode().permute(0, 2, 1, 3, 4)
+        return self.vae.encode_stream(x).permute(0, 2, 1, 3, 4)
 
     def _sigma(self, timestep: torch.Tensor) -> torch.Tensor:
         """Sigma of the scheduler grid point nearest to `timestep` (0 for a clean input), as in the wrapper."""
@@ -194,11 +180,11 @@ class FastStream:
                         latent = latent.unflatten(0, (1, 1)).to(self.dtype)
             mark()
 
-            decoded = self.vae.decode_stream(pred.permute(0, 2, 1, 3, 4)).sample[0].permute(1, 0, 2, 3)
+            decoded = self.vae.decode_stream(pred.permute(0, 2, 1, 3, 4))[0].permute(1, 0, 2, 3)
             if tuple(decoded.shape) != (count, 3, 480, 864):
                 raise RuntimeError("VAE decoder output cadence changed")
             mark()
-            # Never expose the codec's reusable graph buffers to a later request.
+            # The caller owns its output independently of the next codec invocation.
             decoded = decoded.to(dtype=torch.float32, copy=True)
             mark()
             self._forward(pred, torch.zeros((), device=self.device), None, position, kv_only=True)
@@ -225,26 +211,3 @@ class FastStream:
         if self.vae_backend == "taehv":
             self.vae.clear_cache()
         self.closed = True
-
-
-def warm_up(
-    transformer, vae, prompt_embeds, sink_latent, sink_mode, sink_rope_mode, vae_backend, *, chunks: int = 23
-) -> None:
-    """Run one throwaway session long enough to fill the attention window, so every kernel is
-    compiled and every CUDA graph captured before the first real session (graphs and K/V buffers
-    are reused by later sessions)."""
-    stream = FastStream(
-        transformer,
-        vae,
-        prompt_embeds,
-        sink_latent=sink_latent,
-        sink_mode=sink_mode,
-        sink_rope_mode=sink_rope_mode,
-        vae_backend=vae_backend,
-    )
-    try:
-        for index in range(chunks):
-            count = 1 if index == 0 else 4
-            stream.push(torch.zeros(count, 3, 480, 864, device="cpu", dtype=torch.float32), frame_start=stream.frame)
-    finally:
-        stream.close()

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
-"""Native Matrix-Game 4.0 castle rendering, one resident session per worker.
+"""Native Matrix-Game 4.0 rendering, one resident session per worker.
 
 The engine schedules ordinary requests. A request can render a complete clip or
 advance a named session by one chunk; session KV and codec state are model-owned.
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import gc
 import html
+import json
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,7 +38,7 @@ from vllm_omni.diffusion.worker.request_batch import DiffusionRequestBatch
 from vllm_omni.platforms import current_omni_platform
 
 if TYPE_CHECKING:
-    from .stream import FastStream
+    from .stream import MatrixStream
 
 DEFAULT_PROMPT = (
     "a third-person shooter game in a medieval castle with stone walls, towers and courtyards, "
@@ -124,7 +125,7 @@ def validate_config(config: OmniDiffusionConfig) -> None:
     if config.num_gpus != 1 or config.parallel_config.world_size != 1 or config.max_num_seqs != 1:
         raise ValueError("Matrix-Game 4.0 requires one GPU and max_num_seqs=1")
     if config.dtype != torch.bfloat16 or not config.enforce_eager:
-        raise ValueError("Use dtype=bfloat16 and enforce_eager=True; Matrix owns its CUDA graphs")
+        raise ValueError("Use dtype=bfloat16 and enforce_eager=True; generic graph wrapping is not qualified")
     if any(
         (
             config.enable_cpu_offload,
@@ -134,16 +135,24 @@ def validate_config(config: OmniDiffusionConfig) -> None:
             config.diffusion_offload_config is not None,
         )
     ):
-        raise ValueError("Matrix-Game CUDA graphs require resident weights; offload and sleep are unsupported")
+        raise ValueError("Matrix-Game currently requires resident weights; offload and sleep are unsupported")
     if config.step_execution or config.streaming_output:
         raise ValueError("Submit consecutive chunk requests; diffusion step execution is unsupported")
     if config.quantization_config is not None or config.lora_path:
-        raise ValueError("Matrix-Game uses its native FP8 linears; generic quantization and LoRA are unsupported")
+        raise ValueError("Matrix-Game currently qualifies BF16 only; quantization and LoRA are unsupported")
     if config.cache_backend not in (None, "none") or config.enable_prefix_caching:
         raise ValueError("Matrix-Game owns its temporal KV cache; generic cache acceleration is unsupported")
+    for role in ("self", "cross"):
+        spec, _ = config.diffusion_attention_config.resolve_with_source(role)
+        if spec is None or spec.backend.upper() != "TORCH_SDPA":
+            raise ValueError(
+                "Matrix-Game quality qualification requires diffusion_attention_config.default.backend=TORCH_SDPA"
+            )
     options = config.model_config
-    if options.keys() - {"prompt", "max_latents"}:
-        raise ValueError("Matrix-Game model_config accepts only prompt and max_latents")
+    if options.keys() - {"prompt", "max_latents", "scene"}:
+        raise ValueError("Matrix-Game model_config accepts only prompt, max_latents and scene")
+    if options.get("scene", "castle") not in ("castle", "ancient-egypt", "racing"):
+        raise ValueError("scene must be castle, ancient-egypt or racing")
     limit = options.get("max_latents", 8192)
     if type(limit) is not int or not 1 <= limit <= 8192:
         raise ValueError("max_latents must be an integer in [1,8192]")
@@ -161,56 +170,65 @@ class MatrixGame4Pipeline(nn.Module):
         super().__init__()
         validate_config(od_config)
         if not current_omni_platform.is_cuda():
-            raise ValueError("Matrix-Game's FP8 runtime requires an NVIDIA CUDA GPU")
-        from .stream import load_transformer, warm_up
-        from .taehv import TAEHV
-        from .vae_graph import StreamingVAEGraph
+            raise ValueError("Matrix-Game currently requires an NVIDIA CUDA GPU")
+        from .codec import MatrixCodec
+        from .transformer import load_transformer
 
         self.device = current_omni_platform.get_torch_device()
-        self.prompt_text = od_config.model_config.get("prompt", DEFAULT_PROMPT)
         self.max_latents = od_config.model_config.get("max_latents", 8192)
         root = Path(od_config.model)
+        self.scene = od_config.model_config.get("scene", "castle")
+        scene_root = root / "models" / self.scene
         required = [
-            root / "models/castle/model.safetensors",
-            root / "models/castle/sink.png",
+            scene_root / "model.safetensors",
+            scene_root / "sink.png",
             root / "base/models_t5_umt5-xxl-enc-bf16.pth",
             root / "base/taew2_2.pth",
+            scene_root / "inference.json",
         ]
         missing = [str(path) for path in required if not path.is_file()]
         if not (root / "base/google/umt5-xxl").is_dir():
             missing.append(str(root / "base/google/umt5-xxl"))
         if missing:
             raise FileNotFoundError(f"Incomplete local Matrix-Game resources: {missing}")
+        profile = json.loads(required[4].read_text())
+        contract = {
+            "frame_size": [480, 864],
+            "kv_window_latents": 21,
+            "num_frame_per_block": 1,
+            "scheduler_shift": 5,
+            "cfg_scale": 1,
+        }
+        if any(profile.get(key) != value for key, value in contract.items()):
+            raise ValueError("Scene inference.json does not match the released Matrix-Game contract")
+        self.prompt_text = od_config.model_config.get("prompt", profile["prompt"])
+        self.sink_mode = "first_frame" if self.scene == "racing" else "kv_only"
+        self.sink_rope_mode = "absolute" if self.scene == "racing" else "fixed"
         # Loader's default-device context must not put checkpoint construction on GPU.
         with torch.device("cpu"):
             self.runtime = load_transformer(required[0], device=self.device)
             self.transformer = self.runtime.model
             self.register_buffer("prompt_embeds", self._encode_prompt(root), persistent=False)
-            self.vae = StreamingVAEGraph(TAEHV(str(required[3])).to(self.device, torch.bfloat16).eval())
+            self.vae = MatrixCodec(str(required[3])).to(self.device, torch.bfloat16).eval()
         self.register_buffer("sink_latent", self._encode_sink(required[1]), persistent=False)
-        self._stream: FastStream | None = None
+        self._stream: MatrixStream | None = None
         self._session_id: str | None = None
         self._steps: int | None = None
         self.eval().requires_grad_(False)
-        warm_up(self.runtime, self.vae, self.prompt_embeds, self.sink_latent, "kv_only", "fixed", "taehv")
 
     @torch.no_grad()
     def _encode_prompt(self, root: Path) -> torch.Tensor:
-        from .text_encoder import T5Encoder
+        from vllm_omni.diffusion.models.wan2_2.text_encoder import load_wan_umt5_encoder
 
         tokenizer = AutoTokenizer.from_pretrained(root / "base/google/umt5-xxl", local_files_only=True)
         text = " ".join(html.unescape(html.unescape(ftfy.fix_text(self.prompt_text))).split())
         tokens = tokenizer(
             [text], padding="max_length", truncation=True, max_length=512, return_tensors="pt", add_special_tokens=True
         )
-        with torch.device("meta"):
-            encoder = T5Encoder(256384, 4096, 4096, 10240, 64, 24, 32, shared_pos=False)
-        state = torch.load(root / "base/models_t5_umt5-xxl-enc-bf16.pth", map_location="cpu", weights_only=True)
-        encoder.load_state_dict(state, strict=True, assign=True)
-        del state
+        encoder = load_wan_umt5_encoder(str(root / "base/models_t5_umt5-xxl-enc-bf16.pth"), torch.bfloat16)
         encoder = encoder.to(self.device, torch.bfloat16).eval().requires_grad_(False)
         ids, mask = tokens.input_ids.to(self.device), tokens.attention_mask.to(self.device)
-        embeddings = encoder(ids, mask)
+        embeddings = encoder(input_ids=ids, attention_mask=mask).last_hidden_state
         embeddings[0, mask[0].sum() :] = 0
         del encoder
         gc.collect()
@@ -221,16 +239,20 @@ class MatrixGame4Pipeline(nn.Module):
     def _encode_sink(self, path: Path) -> torch.Tensor:
         with Image.open(path) as image:
             image = ImageOps.exif_transpose(image).convert("RGB")
-            width, height = image.size
-            scale = max(864 / width, 480 / height)
-            size = (round(width * scale), round(height * scale))
-            image = image.resize(size, Image.Resampling.BILINEAR)
-            left, top = round((size[0] - 864) / 2), round((size[1] - 480) / 2)
-            pixels = torch.from_numpy(np.array(image.crop((left, top, left + 864, top + 480))))
+            if self.sink_mode == "first_frame":
+                image = ImageOps.fit(image, (864, 480), method=Image.Resampling.LANCZOS)
+            else:
+                width, height = image.size
+                scale = max(864 / width, 480 / height)
+                size = (round(width * scale), round(height * scale))
+                image = image.resize(size, Image.Resampling.BILINEAR)
+                left, top = round((size[0] - 864) / 2), round((size[1] - 480) / 2)
+                image = image.crop((left, top, left + 864, top + 480))
+            pixels = torch.from_numpy(np.array(image))
         pixels = (pixels.permute(2, 0, 1).float() * (2.0 / 255.0) - 1.0)[None, :, None]
         self.vae.clear_cache()
         try:
-            latent = self.vae.encode(pixels.to(self.device, torch.bfloat16)).latent_dist.mode().permute(0, 2, 1, 3, 4)
+            latent = self.vae.encode(pixels.to(self.device, torch.bfloat16)).permute(0, 2, 1, 3, 4)
         finally:
             self.vae.clear_cache()
         if tuple(latent.shape) != (1, 1, 48, 30, 54) or not torch.isfinite(latent).all():
@@ -275,10 +297,10 @@ class MatrixGame4Pipeline(nn.Module):
         if self._stream is None:
             if prepared.frame_start:
                 raise ValueError("A new Matrix-Game session must begin at frame zero")
-            from .stream import FastStream
+            from .stream import MatrixStream
 
             steps = (1000,) if prepared.steps == 1 else (1000, 500)
-            self._stream = FastStream(
+            self._stream = MatrixStream(
                 self.runtime,
                 self.vae,
                 self.prompt_embeds,
@@ -287,8 +309,8 @@ class MatrixGame4Pipeline(nn.Module):
                 steps=steps,
                 first_steps=steps,
                 sink_latent=self.sink_latent,
-                sink_mode="kv_only",
-                sink_rope_mode="fixed",
+                sink_mode=self.sink_mode,
+                sink_rope_mode=self.sink_rope_mode,
             )
             self._session_id, self._steps = prepared.session_id, prepared.steps
         stream = self._stream

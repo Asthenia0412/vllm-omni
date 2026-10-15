@@ -71,10 +71,11 @@ class RecordingStream:
 
 @pytest.fixture
 def pipeline(monkeypatch):
-    monkeypatch.setattr("vllm_omni.diffusion.models.matrix_game4.stream.FastStream", RecordingStream)
+    monkeypatch.setattr("vllm_omni.diffusion.models.matrix_game4.stream.MatrixStream", RecordingStream)
     model = MatrixGame4Pipeline.__new__(MatrixGame4Pipeline)
     nn.Module.__init__(model)
     model.prompt_text = DEFAULT_PROMPT
+    model.sink_mode, model.sink_rope_mode = "kv_only", "fixed"
     model.max_latents = 64
     model.runtime = model.vae = model.prompt_embeds = model.sink_latent = None
     model._stream = model._session_id = model._steps = None
@@ -216,3 +217,45 @@ def test_omitted_seed_uses_native_default():
     req = request()
     req.sampling_params.seed = None
     assert prepare_request(req).sampling_params.seed == 0
+
+
+def test_temporal_cache_rewrite_and_eviction_preserve_sink():
+    from vllm_omni.diffusion.models.matrix_game4.transformer import TemporalCache
+
+    cache = TemporalCache(torch.empty(1, 3, 1, 1), torch.empty(1, 3, 1, 1))
+
+    def write(position, value):
+        tensor = torch.full((1, 1, 1, 1), float(value))
+        cache.write(tensor, -tensor, position)
+
+    for position in range(3):
+        write(position, position)
+    write(2, 22)  # Clean KV replaces noisy KV without consuming another slot.
+    assert cache.key.flatten().tolist() == [0, 1, 22]
+    write(3, 3)
+    assert cache.key.flatten().tolist() == [0, 22, 3]
+    assert cache.value.flatten().tolist() == [0, -22, -3]
+    before = cache.key.clone()
+    with pytest.raises(ValueError, match="consecutive"):
+        write(5, 5)
+    assert torch.equal(cache.key, before) and cache.position == 3
+
+
+@pytest.mark.parametrize("backend", [None, "TORCH_SDPA", "CUDNN_ATTN"])
+def test_quality_path_requires_qualified_attention_backend(backend):
+    from vllm_omni.diffusion.data import OmniDiffusionConfig
+    from vllm_omni.diffusion.models.matrix_game4.pipeline_matrix_game4 import validate_config
+
+    attention = {} if backend is None else {"default": {"backend": backend}}
+    config = OmniDiffusionConfig(
+        model="matrix-resources",
+        model_class_name="MatrixGame4Pipeline",
+        enforce_eager=True,
+        max_num_seqs=1,
+        diffusion_attention_config=attention,
+    )
+    if backend == "TORCH_SDPA":
+        validate_config(config)
+    else:
+        with pytest.raises(ValueError, match="quality qualification"):
+            validate_config(config)

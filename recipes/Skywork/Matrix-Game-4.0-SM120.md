@@ -1,124 +1,178 @@
-# Matrix-Game 4.0 castle rendering — NVIDIA SM120
+# Matrix-Game 4.0 — single RTX 5090 deployment target
 
-## Summary
+Native geometry-to-video inference through vLLM-Omni's experimental Python
+`DiffusionEngine`. The deployment target is **one RTX 5090 with 32 GB VRAM**.
+Local validation uses **one RTX PRO 5000 72GB Blackwell** (PCI ID
+`2BB3:10DE:227A`, 73,415 MiB reported). RTX 5090 fit and performance are not yet
+qualified. A separate whole-device NVML sample at 100 ms intervals observed
+23.13 GiB during cold startup on the PRO 5000, including the CUDA context. The reference preset name `rtx5090` is not a measurement of that SKU.
 
-- Vendor/model: Skywork, `Skywork/Matrix-Game-4.0`, castle checkpoint.
-- Task: render game-engine RGB geometry as stylized video.
-- Runtime: native `MatrixGame4Pipeline`, experimental Python `DiffusionEngine` API.
-- Hardware: one NVIDIA SM120 device reporting `NVIDIA Graphics Device`, 73,415 MiB.
-- Profile: BF16 model with native FP8 block linears, one worker and one active session.
-- Maintainer: @lishunyang12.
+Maintainer: @lishunyang12. Model:
+[Skywork/Matrix-Game-4.0](https://huggingface.co/Skywork/Matrix-Game-4.0).
+Status: experimental integration; quality qualification precedes optimization.
 
-Use this recipe to qualify chunked neural rendering against the released runtime.
-Game simulation, keyboard/mouse input, browser presentation and public serving
-remain application responsibilities. This integration does not add a game UI,
-an HTTP/WebSocket route, or the generic AR-Diffusion session protocol.
+## What this runs
 
-## Supported model contract
+A game engine produces low-poly RGB frames. The pipeline renders them at 864×480,
+accepting one opening frame followed by four frames per chunk. The first latent
+is followed by one new latent per chunk, with 21 latent frames of temporal KV.
+Castle and Egypt use a KV-only sink with relative positioning; Racing uses its
+sink image as the first output frame and absolute positions.
 
-| Item | Contract |
-| --- | --- |
-| Task | Castle geometry-to-video; not text-only generation |
-| Input | CPU `torch.uint8` RGB tensor `[T, 480, 864, 3]` in `prompt["multi_modal_data"]["video"]` |
-| First chunk | One RGB frame, `matrix_frame_start=0` |
-| Continuation | Four RGB frames, consecutive offsets `1, 5, 9, ...` |
-| Complete clip | Omit the session ID and provide `1+4k` frames; state closes automatically |
-| Output | Same frame count and geometry; one batched video in `result.images[0]` |
-| Presentation | `output_type="np"`; device postprocessing yields uint8 `[1,T,480,864,3]` |
-| Sampling | One or two denoising steps, seed, guidance scale 1 |
-| Caption | Fixed at startup; optionally set `model_config={"prompt": "..."}` |
-| Budget | Default 8,192 latent chunks, configurable downward with `model_config.max_latents` |
-| Session | At most one resident session per worker; callers serialize chunk requests |
+Gameplay, collision, keyboard/mouse input, browser transport and public serving
+are application responsibilities. GPT-6 or another coding-agent API is **not** a
+runtime dependency. This change does not add an HTTP/WebSocket game endpoint.
 
-The default caption, KV-only sink, rolling sink position, shift-5 scheduler,
-initial CPU noise and streaming TAEHV cadence follow the released castle preset.
-No runtime import from the Matrix-Game repository is required. Model-owned ring
-KV is separate from Omni's generic paged KV and prefix-cache interfaces.
+## Install
 
-## References
-
-- [Model assets](https://huggingface.co/Skywork/Matrix-Game-4.0/tree/4419accdb7bb7881234c5914de8cd915266e0325).
-- [Pinned reference implementation](https://github.com/SkyworkAI/Matrix-Game/tree/5446525c80da2a4a2f87801addbbc7faa8d2486e/Matrix-Game-4).
-- [Supported models](../../docs/models/supported_models.md) and
-  [diffusion features](../../docs/user_guide/diffusion_features.md).
-- [Generic AR-Diffusion contract](../../docs/design/feature/realtime_ar_diffusion.md):
-  not implemented by this initial pipeline.
-- [Qualification entrypoint](../../benchmarks/diffusion/benchmark_matrix_game4.py).
-  Existing shared text/image video examples do not supply this chunk-input contract.
-
-## Hardware and software
-
-| Hardware | Exercised profile |
-| --- | --- |
-| Accelerator | NVIDIA Graphics Device, SM120, 110 SMs, 73,415 MiB |
-| Count/interconnect | One GPU, PCIe; no collective communication |
-| Host staging | T5 checkpoint loads through host memory; no inference offload |
-| Scope | Bounded castle qualification; other device SKUs are not qualified |
-
-The upstream preset is named `rtx5090`. That name does not identify the hardware
-used here, and these results are not RTX 5090 measurements.
-
-| Software | Version |
-| --- | --- |
-| OS | Ubuntu 22.04.4 LTS, Linux 5.15.0-1069-nvidia |
-| Python | 3.12.13 |
-| NVIDIA driver / CUDA runtime | 580.95.05 / 13.0 |
-| PyTorch / vLLM | 2.13.0 / 0.31.0 |
-| Transformers / Diffusers | 5.14.1 / 0.40.0 |
-| vLLM-Omni | This change on base `8201f614b` |
-
-## Setup
-
-Install this branch with its CUDA dependencies. Download only the castle
-checkpoint, sink, tokenizer, text encoder and codec:
+Use Linux, Python 3.12 and an NVIDIA driver compatible with your selected vLLM /
+PyTorch CUDA build. Start with a fresh environment. From this integration branch:
 
 ```bash
-hf download Skywork/Matrix-Game-4.0 \
-  --revision 4419accdb7bb7881234c5914de8cd915266e0325 \
-  --include 'models/castle/model.safetensors' 'models/castle/sink.png' \
-    'base/models_t5_umt5-xxl-enc-bf16.pth' 'base/google/umt5-xxl/*' 'base/taew2_2.pth' \
-  --local-dir ./matrix-resources
+uv venv --python 3.12
+source .venv/bin/activate
+uv pip install vllm==0.31.0 --torch-backend=auto \
+  --extra-index-url https://wheels.vllm.ai/db9527a46873454610df6dbedf79a36d6bf1a7f6
+uv pip install -e .
 ```
 
-Capture geometry frames from the game engine and save a uint8 RGB THWC NumPy
-array as `geometry.npy`. A 241-frame qualification requires at least 241 frames
-at exactly 480 by 864 pixels. Generated neural frames are not geometry controls.
+See the [CUDA source installation guide](../../docs/getting_started/installation/gpu.md)
+for a different CUDA build. The bounded local comparisons below used Python
+3.12.13, PyTorch 2.13.0+cu130, vLLM 0.31.0, Transformers 5.14.1, Diffusers 0.40.0
+and NVIDIA driver 580.95.05. Requalify outputs when changing the software stack.
 
-## Commands
+No external Matrix-Game package is installed for Omni inference.
+
+## Download and arrange resources
+
+The source repositories use different directory names. The following commands
+create the layout consumed by this pipeline; they do not invoke upstream code.
+Download only the scenes you need. Each scene checkpoint is approximately 10 GB;
+the shared text checkpoint is approximately 11.4 GB. Only one scene is loaded per
+worker. Host RAM must accommodate checkpoint construction and text encoding.
+
+```bash
+MATRIX_RESOURCES="$PWD/matrix-resources"
+MATRIX_REV=4419accdb7bb7881234c5914de8cd915266e0325
+WAN_REV=b8bc1a65ab71d054ba4636dc0dac104aa4df2686
+
+hf download alibaba-pai/Wan2.2-Fun-5B-Control \
+  --revision "$WAN_REV" \
+  --include 'models_t5_umt5-xxl-enc-bf16.pth' 'google/umt5-xxl/*' \
+  --local-dir "$MATRIX_RESOURCES/base"
+
+hf download Skywork/Matrix-Game-4.0 --revision "$MATRIX_REV" \
+  --include 'base/taew2_2.pth' 'LICENSE' 'THIRD_PARTY_NOTICES.md' 'licenses/*' \
+    'fps-castle/model.safetensors' 'fps-castle/sink.png' 'fps-castle/inference.json' \
+    'fps-egypt/model.safetensors' 'fps-egypt/sink.png' 'fps-egypt/inference.json' \
+    'driving_game/model.safetensors' 'driving_game/sink.png' 'driving_game/inference.json' \
+  --local-dir "$MATRIX_RESOURCES"
+
+mkdir -p "$MATRIX_RESOURCES/models"
+ln -s ../fps-castle "$MATRIX_RESOURCES/models/castle"
+ln -s ../fps-egypt "$MATRIX_RESOURCES/models/ancient-egypt"
+ln -s ../driving_game "$MATRIX_RESOURCES/models/racing"
+```
+
+These commands assume a fresh resource directory. The required layout is:
+
+```text
+matrix-resources/
+  base/
+    models_t5_umt5-xxl-enc-bf16.pth
+    google/umt5-xxl/                 # tokenizer files
+    taew2_2.pth
+  models/
+    castle/                         # or ancient-egypt / racing
+      model.safetensors
+      sink.png
+      inference.json
+```
+
+`inference.json` supplies the released scene caption. The model checks its input
+geometry, temporal window, guidance and scheduler contract before loading.
+
+## Run on one GPU
+
+Save actual engine geometry as `geometry.npy`, a CPU uint8 RGB array of shape
+`[T,480,864,3]`. Do not use neural output frames as geometry controls. A complete
+clip contains `1+4k` frames. For a 241-frame qualification:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 \
   python benchmarks/diffusion/benchmark_matrix_game4.py \
-  --resources ./matrix-resources --input ./geometry.npy \
+  --scene castle --resources ./matrix-resources --input ./geometry.npy \
   --output ./qualification/omni --frames 241 --steps 1
 ```
 
-This constructs `OmniDiffusionConfig` with `model_class_name="MatrixGame4Pipeline"`,
-`num_gpus=1`, `max_num_seqs=1`, `distributed_executor_backend="uni"` and
-`enforce_eager=True`. The latter disables the generic graph wrapper: Matrix owns
-the DiT and codec graphs. `VideoOutputTransportConfig(enable_device_postprocess=True)`
-lets the runner convert normalized device output to RGB bytes before download.
+Select `--scene ancient-egypt` or `--scene racing` with matching geometry input.
+`--steps 2` selects timesteps 1000 and 500 before the shift-5 scheduler mapping.
+Changing scene requires a new worker; each scene has its own checkpoint.
 
-The entrypoint uses `DiffusionEngine.step_streaming()` for consecutive ordinary
-requests. Each request carries these sampling `extra_args`:
+The benchmark constructs this engine configuration:
 
-| Key | Value |
+```python
+config = OmniDiffusionConfig(
+    model="./matrix-resources",
+    model_class_name="MatrixGame4Pipeline",
+    dtype="bfloat16",
+    num_gpus=1,
+    max_num_seqs=1,
+    distributed_executor_backend="uni",
+    enforce_eager=True,
+    diffusion_attention_config={"default": {"backend": "TORCH_SDPA"}},
+    model_config={"scene": "castle", "max_latents": 8192},
+    video_output_transport=VideoOutputTransportConfig(
+        enable_device_postprocess=True,
+    ),
+)
+```
+
+Use the shared SDPA backend for the qualified BF16 path. `enforce_eager=True`
+disables generic graph wrapping for the reference-correctness path.
+The text encoder runs once during startup and is released before gameplay.
+No CPU inference offload or generic quantization is enabled.
+
+## Input, output and session lifetime
+
+| Item | Contract |
 | --- | --- |
-| `matrix_session_id` | Nonempty string, at most 128 characters |
-| `matrix_frame_start` | Expected consecutive frame offset |
-| `matrix_end_session` | `True` on the final chunk |
+| Input field | `prompt["multi_modal_data"]["video"]` |
+| Input tensor | CPU `torch.uint8`, RGB `[T,480,864,3]` |
+| First chunk | One frame with `matrix_frame_start=0` |
+| Continuation | Four frames with offsets `1,5,9,...` |
+| Complete clip | Omit the session ID, supply `1+4k` frames; closes automatically |
+| Output | `result.images[0]`: uint8 `[1,T,480,864,3]`, same frame count |
+| Sampling | Seed, one or two steps, guidance scale 1, `output_type="np"` |
+| Caption | Fixed at startup; optionally override `model_config.prompt` |
+| Budget | At most 8,192 generated latents, configurable downward |
+| Concurrency | One resident session per worker; serialize requests |
 
-To close without rendering, send the owning session ID with
-`matrix_end_session=True` and omit video. Applications must close in a `finally`
-block; abandoned sessions have no idle timeout in this initial API. A conflicting
-session or incorrect offset is rejected without taking over the existing owner.
-An inference failure clears the session. After closure, a fresh session begins
-at frame zero. End-of-session cleanup includes a device synchronization.
+Named sessions use sampling `extra_args`:
 
-## Reference comparison
+```python
+{
+    "matrix_session_id": "player-1",
+    "matrix_frame_start": 1,
+    "matrix_end_session": False,
+}
+```
 
-The optional oracle requires the pinned upstream checkout only in the reference
-process. Run both modes on the same device and Python environment:
+The initial request uses offset zero. Set `matrix_end_session=True` on the last
+chunk, or omit video to close the owning session explicitly. Close in a `finally`
+block; this API has no idle timeout. Conflicting session IDs and incorrect
+offsets are rejected without taking ownership. Inference failure clears state.
+
+The current serial session path does not implement the framework's experimental
+[AR-Diffusion session/paged-KV protocol](../../docs/design/feature/realtime_ar_diffusion.md).
+Reusing `DiffusionEngine` does not imply its routing or concurrency guarantees.
+
+## Compare quality against the reference
+
+The reference is an isolated oracle, never an Omni runtime dependency. Keep
+checkpoint, input, caption, seed, precision, codec, timesteps and software equal.
+The current qualification uses **BF16 + TAEHV**. It does not compare the TAEHV
+result to the upstream `quality` preset's full Wan VAE.
 
 ```bash
 git clone https://github.com/SkyworkAI/Matrix-Game.git matrix-reference
@@ -126,61 +180,54 @@ git -C matrix-reference checkout 5446525c80da2a4a2f87801addbbc7faa8d2486e
 PYTHONPATH=./matrix-reference/Matrix-Game-4 \
   CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 \
   python benchmarks/diffusion/benchmark_matrix_game4.py \
-  --mode reference --resources ./matrix-resources --input ./geometry.npy \
+  --mode reference --reference-runtime native --scene castle \
+  --resources ./matrix-resources --input ./geometry.npy \
   --output ./qualification/reference --frames 241 --steps 1 \
-  --compare ./qualification/omni.npy
+  --compare ./qualification/omni.npy --require-exact
 ```
 
-## Supported features
+The two commands write `.npy` output and JSON timings, pixel MAE, maximum error
+and exact-match status. A 241-frame castle test at seed 42 matched every decoded
+RGB byte, including KV-window eviction and sink repositioning. The shared UMT5
+encoder also matched the reference embedding exactly. The final shared-codec implementation also matched every RGB byte for all six
+121-frame pairs: Castle, Ancient Egypt and Racing, each at one and two steps
+(seed 42, 864×480). All cases cross the 21-latent cache window. This is bounded
+qualification, not a guarantee for arbitrary-length sessions. Three additional
+1,201-frame (20.02-second) comparisons, one per scene at two steps, also matched
+every RGB byte, including captured movement, firing, steering and braking.
 
-| Feature | Status |
-| --- | --- |
-| Native FP8, CUDA graphs, ring KV, text KV reuse, streaming TAEHV | Included |
-| Single GPU / single active session | Qualified profile |
-| [TP/SP/PP/CFG/HSDP](../../docs/user_guide/diffusion/parallelism/overview.md) | Unsupported |
-| [Generic quantization](../../docs/user_guide/quantization/overview.md), LoRA | Unsupported; native FP8 is fixed |
-| [CPU offload](../../docs/user_guide/diffusion/cpu_offload.md), sleep | Unsupported |
-| TeaCache / Cache-DiT / prefix caching | Unsupported |
-| Step execution / concurrent batching / generic streaming output | Unsupported; use serial chunk requests |
-| Other scenes, dynamic captions, public session routing | Not implemented |
-| Other accelerators, frame interpolation | Not qualified |
+The correctness path preserves original BF16 RMSNorm rounding, separate Q/K/V
+GEMMs, chronological temporal KV order and the convolution implementation of the
+shared patch embedding. Packed QKV and convolution-to-GEMM were measured to
+change results on SM120. Optimizations need their own quality comparison before
+being enabled. Do not mix FP8 runtime results with BF16 results.
 
-## Verification
+## Framework reuse and limits
+
+The DiT reuses Omni's Wan modules, unified Attention, Linear weight loaders and
+FFN. UMT5 checkpoint loading is shared with ABot-World. Request scheduling, typed
+video media and output conversion use existing engine interfaces. Matrix owns
+conditioning, the incremental flow schedule and its sink policy. The TAEW2 decoder is shared with ABot-World; its matching encoder and independent
+encoder/decoder states are shared Wan codec components.
+
+Unsupported: multi-GPU TP/SP/PP/CFG/HSDP, generic FP8/FP4 or LoRA, offload/sleep,
+TeaCache/Cache-DiT/prefix caching, concurrent sessions, step execution, dynamic
+captions and generic streaming-output APIs. Full Wan VAE, other devices and
+attention backends are not qualified.
 
 ```bash
-python -m pytest tests/diffusion/models/matrix_game4/test_session.py -q
+python -m pytest tests/diffusion/models/matrix_game4/test_session.py \
+  tests/diffusion/models/abot_world/test_offline_check.py -q
 ```
 
-The qualification command writes `.npy` RGB output and `.json` timing/software
-metadata. `--compare` additionally records pixel MAE, maximum error and exact
-equality. Timings synchronize each chunk and include the clean KV pass; Omni
-timings also include engine scheduling and output postprocessing. The first
-25 chunks are excluded from steady timing. Browser/network latency, game-loop
-timing and action-to-photon latency are not measured by this command.
+Timings synchronize each chunk and include clean KV; Omni additionally includes
+engine scheduling and output postprocessing. The first 25 chunks are excluded.
+Allocator peaks in the JSON are observed after initialization and per request;
+internal engine resets can hide cold-start peaks, so use the separate NVML
+measurement above when assessing startup capacity.
+These measurements do not include game simulation, browser/network delivery or
+action-to-photon latency. They do not establish a guaranteed 60 FPS game loop.
 
-### Initial qualification
-
-One 241-frame castle capture, seed 42, one denoising step, concurrency one,
-and 25 excluded warmup chunks produced the following on the environment above:
-
-| Path | Steady FPS | Four-frame p50 / p95 |
-| --- | --- | --- |
-| Native pipeline through Omni | 59.81 | 66.79 / 69.61 ms |
-| Pinned standalone runtime | 63.04 | 63.08 / 64.68 ms |
-
-These are bounded single-run measurements, not a speedup claim. The through-engine
-output is not yet qualified for reference parity: pixel MAE was 23.00 on the
-0–255 RGB scale across the 241 frames. Direct pipeline execution matched the first
-five reference frames exactly, localizing further investigation to engine
-integration. Human visual review, longer sessions, two-step parity and peak memory
-qualification remain outstanding. Do not use these timings to imply equivalent
-image quality or a guaranteed 60 FPS browser experience.
-
-## Source provenance
-
-Native network, fused kernels, graph execution and codec streaming are adapted
-from the pinned Matrix-Game-4 source. The tiny codec retains the MIT notice for
-Ollin Boer Bohan's TAEHV, upstream revision
-`011dfc2112197741c540e0bdd5b7b67bcc930771`. Unused H3 and larger-codec architectures
-are excluded. Text encoding and scheduler arithmetic retain released checkpoint
-semantics; this is not a Diffusers pipeline adapter.
+Model assets retain their original licenses. The shared TAEW2 codec retains its MIT
+notice. Official source revision:
+[`5446525c80da2a4a2f87801addbbc7faa8d2486e`](https://github.com/SkyworkAI/Matrix-Game/tree/5446525c80da2a4a2f87801addbbc7faa8d2486e/Matrix-Game-4).
