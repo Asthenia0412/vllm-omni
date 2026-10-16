@@ -82,6 +82,10 @@ platforms:
           cudagraph_mode: FULL
           max_cudagraph_capture_size: 512
           cudagraph_num_of_warmups: 1
+          inductor_compile_config:
+            triton.enable_pdl: true
+            coordinate_descent_tuning: true
+            max_autotune_pointwise: true
         kv_cache_memory_bytes: 34359738368  # 32 GiB
         enable_prefix_caching: true
         attention_config:
@@ -97,6 +101,9 @@ platforms:
           inductor_compile_config:
             combo_kernels: false
             benchmark_combo_kernel: false
+            triton.enable_pdl: true
+            coordinate_descent_tuning: true
+            max_autotune_pointwise: true
         max_num_seqs: 128
         hf_overrides:
           codec_attention_backend: triton_slot
