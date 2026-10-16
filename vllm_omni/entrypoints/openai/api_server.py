@@ -117,12 +117,12 @@ from vllm_omni.entrypoints.openai.app_state import (
 )
 from vllm_omni.entrypoints.openai.batch_serving import OmniOpenAIServingChatBatch
 from vllm_omni.entrypoints.openai.chat_template import _load_model_chat_template_json
-from vllm_omni.entrypoints.openai.speech.router import speech_router
 from vllm_omni.entrypoints.openai.diffusion import (
     MAX_UINT32_SEED,
     _generate_with_async_omni,
     apply_stage_default_sampling_params,
 )
+
 # Speech-specific errors moved to vllm_omni.entrypoints.openai.speech.router
 from vllm_omni.entrypoints.openai.image_api_utils import (
     SUPPORTED_LAYERED_RESOLUTIONS,
@@ -142,6 +142,7 @@ from vllm_omni.entrypoints.openai.images.helpers import (
 )
 from vllm_omni.entrypoints.openai.lora import _get_lora_from_json_str, _parse_lora_request
 from vllm_omni.entrypoints.openai.models import serving as openai_models_serving
+
 # Speech protocol models moved to vllm_omni.entrypoints.openai.speech.router
 from vllm_omni.entrypoints.openai.protocol.images import (
     ImageData,
@@ -179,6 +180,7 @@ from vllm_omni.entrypoints.openai.serving_video import (
 )
 from vllm_omni.entrypoints.openai.serving_video_output_stream import OmniStreamingVideoOutputHandler
 from vllm_omni.entrypoints.openai.serving_video_stream import create_streaming_video_handler
+from vllm_omni.entrypoints.openai.speech.router import speech_router
 from vllm_omni.entrypoints.openai.storage import STORAGE_MANAGER, FileStorageHandle
 from vllm_omni.entrypoints.openai.stores import VIDEO_STORE, VIDEO_TASKS
 from vllm_omni.entrypoints.openai.utils import get_stage_type
@@ -1380,7 +1382,6 @@ async def create_batch_chat_completion(request: BatchChatCompletionRequest, raw_
             status_code=result.error.code if result.error else 400,
         )
     return JSONResponse(content=result.model_dump(mode="json"))
-
 
 
 def _resolve_api_server_count(args: Namespace, client_config: OmniClientConfig | None) -> int:
