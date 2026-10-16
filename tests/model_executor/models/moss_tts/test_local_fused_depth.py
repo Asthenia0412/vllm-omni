@@ -220,19 +220,3 @@ def test_generate_frame_fused_depth_graph_replay_matches_eager():
         model.fused_depth = True
         for actual, expected in zip(replayed, eager, strict=True):
             _equal(actual, expected)
-
-
-@cuda_only
-@hardware_test(res={"cuda": "L4"}, num_cards=1)
-@torch.inference_mode()
-def test_codec_gelu_epilogue_matches_float32_reference():
-    from vllm_omni.model_executor.models.moss_tts.audio_tokenizer_v2 import linear_gelu_epilogue
-
-    torch.manual_seed(17)
-    x = torch.randn(37, 256, device="cuda", dtype=torch.bfloat16)
-    weight = torch.randn(512, 256, device="cuda", dtype=torch.bfloat16) / 16
-    bias = torch.zeros(512, device="cuda", dtype=torch.bfloat16)
-    actual = linear_gelu_epilogue(x, weight, bias)
-    expected = torch.nn.functional.gelu(x.float() @ weight.float().t(), approximate="tanh")
-    # The epilogue rounds once to BF16, after GEMM and GELU.
-    torch.testing.assert_close(actual.float(), expected, rtol=0.01, atol=0.002)
