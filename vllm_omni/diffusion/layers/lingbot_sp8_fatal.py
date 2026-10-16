@@ -1,10 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM-Omni project
-"""Opt-in SP8 failure receipts for the root-owned eight-worker supervisor.
+"""Retain SP8 failure owners and optionally report to an external launcher.
 
-Only standard-library imports. This module retains owners and reports; it never
-signals processes, changes runtime policy, retries kernels, or rolls back caches.
-The supervisor verifies nonce/PID/start time/group before reclaiming its workers.
+Owners remain alive until process teardown, including when reporting is disabled.
+Callers propagate the original exception. An external launcher can configure
+ROOT_LINGBOT_SP8_FATAL_DIR and ROOT_LINGBOT_SP8_FATAL_NONCE; receipt-write failures
+attempt a structured stderr report instead.
+
+The receipt consumer must be supplied by the deployment. It is responsible for
+verifying the launch nonce and process identities, then terminating its complete
+eight-worker launch before starting fresh workers. This module does not implement
+process supervision, signal workers, restart them, retry kernels, or roll back
+caches. The legacy ROOT_ environment prefix does not require OS root privileges.
 """
 
 import json
@@ -23,11 +30,11 @@ _COUNTER = 0
 
 
 def ensure_protocol():
-    """Validate the launch-owned channel before admitting custom writes."""
+    """Check optional receipt-directory and nonce syntax before custom writes."""
     if not ENABLED:
         return False
     if len(_NONCE) != 32 or any(value not in "0123456789abcdef" for value in _NONCE):
-        raise RuntimeError("SP8 fatal channel requires a root-configured 32-hex nonce")
+        raise RuntimeError("SP8 fatal channel requires a launcher-configured 32-hex nonce")
     directory = Path(_DIRECTORY)
     if not directory.is_absolute() or not directory.is_dir():
         raise RuntimeError("SP8 fatal channel must be an existing launch-owned absolute directory")
@@ -47,10 +54,11 @@ def _process_identity():
 
 
 def report_failure(origin, reason, owners):
-    """Hold all owners, atomically notify the supervisor, preserve original error.
+    """Retain owners and optionally emit a receipt for an external launcher.
 
-    Reporting failure cannot enable a native retry. A broken reporting channel
-    also emits a structured stderr record for the same supervisor to inspect.
+    Callers remain responsible for propagating the original exception. Receipt
+    writes are atomic; a write failure attempts a structured stderr report.
+    The restart_scope field is advisory metadata, not a worker-restart action.
     """
     global _COUNTER
     owner_tuple = tuple(owners)

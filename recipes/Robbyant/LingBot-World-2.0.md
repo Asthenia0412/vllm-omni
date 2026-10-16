@@ -116,9 +116,27 @@ borrowed graph outputs until its residual has been submitted. Completion events
 prevent slot reuse while any consumer remains in flight. The graph does not
 capture communication, KV writeback or VAE-cache advancement.
 
-Changed parameter owners, callable code, LayerNorm backend settings, or an execution failure abort the candidate; there
-is no mid-execution fallback. The launch-owned optional fatal-receipt channel
-retains active owners and reports that all eight workers must be restarted.
+Changed parameter owners, callable code, LayerNorm backend settings, or an
+execution failure abort the candidate; there is no mid-execution fallback.
+After a submitted operation fails, failure handling retains active tensor owners
+until process teardown, and the caller propagates the original exception.
+
+Deployments can provide an external launcher to consume optional failure
+receipts. It configures `ROOT_LINGBOT_SP8_FATAL_DIR` as an existing absolute
+directory and `ROOT_LINGBOT_SP8_FATAL_NONCE` as a launch-specific 32-character
+lowercase hexadecimal nonce. These legacy names do not require OS root
+privileges. With neither variable set, no receipt is emitted; owners are still
+retained and the caller still propagates the exception. A receipt-write failure
+attempts a structured stderr report instead.
+
+This PR supplies the reporting side only: it does not include a receipt consumer,
+supervisor, or automatic worker restart. The external launcher must verify the
+launch nonce and process identities before terminating all eight workers it
+started. It must start fresh workers before admitting another request after an
+irrecoverable execution failure; `restart_scope: all8` in a receipt is advisory
+metadata, not an implemented restart action. End-to-end failure supervision
+remains a deployment integration requirement.
+
 These experimental modes require eight-rank correctness, paired model timing
 and lifecycle validation before enabling them in a serving deployment. CPU
 ownership tests alone do not provide that acceptance.
