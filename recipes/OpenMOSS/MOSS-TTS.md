@@ -247,30 +247,13 @@ The codec backends differ in state access:
 - `triton` replaces the attention calculation, retaining the ring-cache
   gather/copy and explicit mask construction.
 - `triton_slot` writes surviving K/V directly into request slots, attends
-  directly to the ring. On CUDA, a single-pass flash kernel combines the
-  write and attention work, followed by the offset update. Graph-padding
-  rows do not advance persistent state.
+  directly to the ring, and advances the active slot offsets in three
+  ordered kernels. Graph-padding rows do not advance persistent state.
 
 The slot path preserves the existing chunk-complete ring semantics, including
 retaining the final cache-capacity tokens when a chunk exceeds the ring.
 It does not introduce another cache owner or change request-slot lifetime.
 Zero-length padding rows skip the attention computation and emit zeros.
-
-CUDA codec v2 with `triton_slot` and streaming graphs packs supported chunks
-along time, so different chunk lengths can share one graph replay without
-padding each stream to the longest chunk. Packed frame buckets are derived
-from the existing codec batch buckets and maximum chunk length; per-request
-reference priming retains the smallest ordinary batch bucket. Padding segments
-use distinct scratch slots. The two engines, connector, MPS and stream lifetime
-are unchanged, and no additional packed-codec switches are required.
-
-The CUDA Local profile also fuses depth sampling with the next codebook's
-attention and runs completing prefills in the existing eager-MTP path.
-The backbone uses vLLM's configured attention backend. Codec v2 CUDA FFNs use
-cuBLASLt's tanh GELU epilogue before BF16 rounding, so waveforms need not be
-bit-identical.
-These paths use the existing model/backend eligibility checks; no additional
-experiment environment variables or model switches are required.
 
 The CUDA profile includes dense codec batch buckets, including 3, 5, 6, 7,
 10, 12, 14 and 24. To compare with power-of-two buckets, change the stage-1
