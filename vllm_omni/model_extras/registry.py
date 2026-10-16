@@ -299,6 +299,11 @@ _EXTRA_SPECS: dict[str, dict[str, Any]] = {
         "text_to_image_prompt_builder": build_ming_flash_omni_text_to_image_prompt,
         "image_to_image_prompt_builder": build_ming_flash_omni_image_to_image_prompt,
     },
+    "Flux3Pipeline": {
+        "extra_body_params": frozenset({"flow_shift"}),
+        "image_to_image_prompt_builder": default_image_to_image_prompt,
+        "reference_image_size_resolver": _always_preserve_reference_image_size,
+    },
 }
 
 for model_class_name in ("LTX2Pipeline", "LTX2TwoStagePipeline"):
