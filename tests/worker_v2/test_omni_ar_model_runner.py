@@ -103,6 +103,51 @@ def test_async_output_blocking_event_preserves_masks_and_aux_output(monkeypatch,
     np.testing.assert_array_equal(copied[0][1], [2, 0])
 
 
+@pytest.mark.parametrize("has_audio", [False, True])
+@pytest.mark.parametrize("include_hidden", [False, True])
+def test_voxcpm2_streaming_output_owns_channels_and_finalizes_once(monkeypatch, has_audio, include_hidden) -> None:
+    from vllm_omni.model_executor.models.voxcpm2.model_state import VoxCPM2AudioOutput
+
+    monkeypatch.setattr(torch.cuda, "set_stream", lambda _stream: None)
+    audio = torch.arange(8, dtype=torch.float32)
+    input_batch = SimpleNamespace(
+        query_start_loc_np=np.array([0, 3, 4]),
+        num_scheduled_tokens=np.array([3, 1]),
+        num_reqs=2,
+        num_tokens_after_padding=4,
+    )
+    sampler_output = SamplerOutput(torch.tensor([[0], [1]]), None, None, torch.tensor([0, 1]), torch.tensor([0, 0]))
+    finalizer = MagicMock(side_effect=lambda output: output)
+
+    output = _async_output(
+        req_ids=["prefill", "decode"],
+        sampler_output=sampler_output,
+        num_sampled_tokens=torch.tensor([0, 1]),
+        text_hidden=torch.arange(8, dtype=torch.float32).reshape(4, 2) if include_hidden else None,
+        multimodal_outputs={"voxcpm2_audio_pending": True},
+        input_batch=input_batch,
+        streaming_audio=VoxCPM2AudioOutput.packed(
+            wav=audio if has_audio else torch.empty(0),
+            lengths=torch.tensor([audio.numel()] if has_audio else [], dtype=torch.long),
+            sample_rate=torch.tensor(48000),
+            batch_rows=(1,) if has_audio else (),
+            num_reqs=2,
+        ),
+        finalize_output=finalizer,
+    ).get_output()
+
+    finalizer.assert_called_once_with(output)
+    assert output.sampled_token_ids == [[], [1]]
+    assert output.pooler_output is None
+    assert output.inter_stage_outputs is None
+    if has_audio:
+        assert output.multimodal_outputs[0] == {}
+        assert set(output.multimodal_outputs[1]) == {"model_outputs", "sr"}
+        torch.testing.assert_close(output.multimodal_outputs[1]["model_outputs"], audio)
+    else:
+        assert output.multimodal_outputs == [{}, {}]
+
+
 @pytest.mark.parametrize("needs_history", [False, True])
 def test_last_pp_rank_orchestration_and_kv_resolver(monkeypatch, needs_history) -> None:
     runner = OmniARModelRunner.__new__(OmniARModelRunner)
@@ -390,6 +435,45 @@ def test_async_output_slices_request_payloads_with_graph_padding(
         torch.testing.assert_close(payload["codes.ref"], refs[i])
         if not async_chunk:
             torch.testing.assert_close(payload["hidden"], hidden[offsets[i] : offsets[i + 1]])
+
+
+def test_finalized_full_payload_latent_ledger_is_accumulated_once(monkeypatch):
+    from tests.engine.test_output_processor_mrv2_text import (
+        _Detokenizer,
+        _make_processor,
+        _rehydrated_output,
+    )
+    from vllm_omni.outputs.output_modality import OutputModality
+
+    monkeypatch.setattr(torch.cuda, "set_stream", lambda _stream: None)
+    ids = torch.tensor([[11], [12], [13]])
+    positions = torch.arange(3).reshape(-1, 1)
+    hidden = torch.ones(3, 4)
+    batch = SimpleNamespace(
+        query_start_loc_np=np.array([0, 3]),
+        num_scheduled_tokens=np.array([3]),
+        num_reqs=1,
+        num_tokens_after_padding=3,
+    )
+    # The MiniCPM-o duplex Thinker sampler publishes through finalize_multimodal
+    # instead of the full-payload fallback that mirrors rows into both channels.
+    output = _async_output(
+        req_ids=["r"],
+        multimodal_outputs={"latent": hidden, "latent_input_ids": ids, "latent_positions": positions},
+        input_batch=batch,
+        async_chunk=False,
+        finalize_multimodal=lambda payload, _num_sampled: payload,
+    ).get_output()
+    assert output.multimodal_outputs is None
+    engine_output = _rehydrated_output(pooling_output=output.pooler_output[0])
+    if output.multimodal_outputs:
+        engine_output.multimodal_output = output.multimodal_outputs[0]
+    processor, _ = _make_processor(OutputModality.LATENT, _Detokenizer())
+    processed = processor.process_outputs([engine_output])
+    payload = processed.request_outputs[0].outputs[0].multimodal_output
+    torch.testing.assert_close(payload["latent_input_ids"], ids)
+    torch.testing.assert_close(payload["latent_positions"], positions)
+    torch.testing.assert_close(payload["latent"], hidden)
 
 
 def test_async_chunk_output_stages_mm_on_copy_stream_before_get_output(monkeypatch) -> None:

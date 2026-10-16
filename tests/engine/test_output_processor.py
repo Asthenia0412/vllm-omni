@@ -14,7 +14,8 @@ from vllm.outputs import PoolingRequestOutput
 from vllm.sampling_params import RequestOutputKind
 from vllm.v1.engine import EngineCoreEvent, EngineCoreEventType, FinishReason
 from vllm.v1.engine.output_processor import OutputProcessor as VLLMOutputProcessor
-from vllm.v1.metrics.stats import IterationStats, PrefillStats
+from vllm.v1.metrics.stats import IterationStats, LoRARequestStates, PrefillStats
+from vllm.v1.serial_utils import MsgpackDecoder, MsgpackEncoder
 
 from vllm_omni.engine import OmniEngineCoreOutput
 from vllm_omni.outputs import output_processor
@@ -248,6 +249,35 @@ def test_native_text_tpot_weights_multi_token_engine_output(monkeypatch):
     assert record["vllm_tpot_ms"] == pytest.approx(10.0)
     assert "_tpot_elapsed_ms" not in record
     assert "_tpot_intervals" not in record
+
+
+@pytest.mark.parametrize("is_coalesced", [False, True])
+def test_coalesced_outputs_skip_itl_but_preserve_token_and_finish_stats(is_coalesced):
+    processor = object.__new__(MultimodalOutputProcessor)
+    processor._native_text_metrics_by_request = {}
+    processor.lora_states = LoRARequestStates()
+    state = _make_state(RequestOutputKind.DELTA)
+    stats = IterationStats()
+    stats.inter_token_latencies_iter = [0.02]  # Another request's sample must survive.
+    for timestamp, tokens, coalesced in [
+        (100.0, [0], False),
+        (100.16, list(range(1, 17)), is_coalesced),
+        (100.17, [17], False),
+    ]:
+        output = OmniEngineCoreOutput(request_id="r", new_token_ids=tokens, is_coalesced=coalesced)
+        output = MsgpackDecoder(OmniEngineCoreOutput).decode(MsgpackEncoder().encode(output))
+        processor._update_stats_from_output(state, output, timestamp, stats)
+        state.is_prefilling = False
+    processor._update_stats_from_finished(state, FinishReason.STOP, stats)
+    record = processor.pop_native_text_metrics("r")
+    expected_itls = [10.0] if is_coalesced else [160.0, 10.0]
+    assert stats.inter_token_latencies_iter == pytest.approx([0.02] + [x / 1000 for x in expected_itls])
+    assert record["vllm_itls_ms"] == pytest.approx(expected_itls)
+    assert record["num_generation_tokens"] == 18
+    assert record["vllm_tpot_ms"] == pytest.approx(10.0)
+    assert len(stats.time_to_first_tokens_iter) == 1
+    assert stats.finished_requests[-1].num_generation_tokens == 18
+    assert stats.finished_requests[-1].decode_time == pytest.approx(0.17)
 
 
 @pytest.mark.parametrize(
@@ -561,6 +591,25 @@ def test_final_only_consolidates_drainable_keys(mm_type):
     audio = result.outputs[0].multimodal_output[mm_type]
     assert isinstance(audio, torch.Tensor)
     assert audio.shape == (800,)
+
+
+def test_final_only_audio_exposes_concatenated_public_waveform():
+    """Tensor-only model payloads become one public audio tensor, not a chunk list."""
+    state = _make_state(RequestOutputKind.FINAL_ONLY)
+    chunks = [torch.arange(4, dtype=torch.float32), torch.arange(4, 7, dtype=torch.float32)]
+    for chunk in chunks:
+        state.add_multimodal_tensor({"model_outputs": chunk, "sr": torch.tensor(24000)}, mm_type=AUDIO)
+        assert state.make_request_output([1], None, None, None) is None
+
+    result = state.make_request_output([2], None, FinishReason.STOP, None)
+    assert result is not None and not isinstance(result, PoolingRequestOutput)
+    mm = result.outputs[0].multimodal_output
+    assert "model_outputs" not in mm
+    audio = mm["audio"]
+    assert isinstance(audio, torch.Tensor) and audio.dtype == torch.float32
+    assert audio.shape == (7,)
+    torch.testing.assert_close(audio, torch.cat(chunks), atol=0, rtol=0)
+    assert mm["sr"].item() == 24000
 
 
 def test_cumulative_token_ids_always_set():

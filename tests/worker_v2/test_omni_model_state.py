@@ -103,6 +103,28 @@ def _seeded(seed):
     return SimpleNamespace(extra_args={"test_seed": seed}, seed=None)
 
 
+def test_preprocess_forwards_request_seed_to_model() -> None:
+    state = _make_state(has_preprocess=True)
+    state.intermediate_buffer.buffers[0] = {
+        "req_id": "seeded",
+        "sampling_params": SimpleNamespace(seed=42, max_tokens=128),
+    }
+    captured = []
+
+    def preprocess(input_ids, input_embeds, **info):
+        captured.append(info)
+        return input_ids, input_embeds, {}
+
+    state.model.preprocess = preprocess
+    state.run_preprocess(
+        _DummyInputBatch([0], num_computed_tokens_cpu=[0]),
+        {"input_ids": torch.tensor([1]), "inputs_embeds": torch.zeros(1, 4)},
+        SimpleNamespace(prompt_len=np.array([1], dtype=np.int32), num_computed_tokens=None),
+    )
+    assert captured[0]["_omni_seed"] == 42
+    assert captured[0]["_omni_max_tokens"] == 128
+
+
 def _init_static(state, bsz, dim=3):
     state._mtp_input_ids = torch.zeros(bsz, dtype=torch.long)
     state._mtp_input_embeds = torch.zeros((bsz, dim))
@@ -152,6 +174,7 @@ def test_output_spans_follow_reordered_mixed_batch():
     # batch=[2, 0]: prefill (3 tokens) reordered ahead of decode (1 token).
     state = _make_state(have_multimodal_outputs=True)
     batch = _DummyInputBatch([2, 0])
+    batch.req_ids = ["prefill", "decode"]
     batch.num_scheduled_tokens = [3, 1]
     batch.query_start_loc_np = [0, 3]
     state.intermediate_buffer.buffers[2] = {"req_id": "prefill"}
@@ -235,6 +258,64 @@ def test_static_decode_embeddings_refresh_from_input_ids():
     assert OmniModelState._preprocess_result_needs_writeback(original, original.view_as(original)) is True
 
 
+@pytest.mark.parametrize(
+    "declared,mm_inputs,encoder_dim,reuses",
+    [(True, True, 4, True), (False, True, 4, False), (True, False, 4, False), (True, True, 6, False)],
+)
+def test_preprocess_model_reuses_encoder_buffer_only_when_declared(
+    monkeypatch, declared, mm_inputs, encoder_dim, reuses
+):
+    def default_init(self, vllm_config, model, encoder_cache, device):
+        self.vllm_config = vllm_config
+        self.model_config = vllm_config.model_config
+        self.scheduler_config = vllm_config.scheduler_config
+        self.model = model
+        self.device = device
+        self.max_num_reqs = 2
+        self.max_num_tokens = 8
+        self.dtype = torch.float32
+        self.supports_mm_inputs = encoder_cache is not None
+        if self.supports_mm_inputs:
+            self.encoder_runner = SimpleNamespace(inputs_embeds=torch.zeros(8, encoder_dim))
+
+    class Model(torch.nn.Module):
+        has_preprocess = True
+        preprocess_keeps_mm_inputs = declared
+
+        def embed_input_ids(self, input_ids):
+            return torch.zeros(input_ids.shape[0], 4)
+
+    monkeypatch.setattr(DefaultModelState, "__init__", default_init)
+    config = SimpleNamespace(model_config=SimpleNamespace(), scheduler_config=SimpleNamespace(max_num_seqs=2))
+    state = OmniModelState(config, Model(), object() if mm_inputs else None, torch.device("cpu"))
+    assert state.preprocess_keeps_mm_inputs is reuses
+    assert state._static_inputs_embeds.shape == (8, 4)
+    encoder_runner = getattr(state, "encoder_runner", None)
+    assert (encoder_runner is not None and state._static_inputs_embeds is encoder_runner.inputs_embeds) is reuses
+
+
+def test_preprocess_on_encoder_embeddings_keeps_media_rows():
+    """With native multimodal inputs kept, the encoder buffer already holds this step's rows."""
+    state = _make_state(has_preprocess=True)
+    encoder_embeds = torch.tensor([[7.0, 7.0], [1.0, 1.0]])  # row 0: image features, row 1: text
+    state._static_inputs_embeds = encoder_embeds
+    state.preprocess_keeps_mm_inputs = True
+    state.model.embed_input_ids = lambda input_ids: torch.zeros(input_ids.shape[0], 2)
+    duplex_embeds = torch.tensor([[3.0, 3.0]])
+
+    def preprocess(input_ids, input_embeds, **info):
+        # A duplex append replaces its own row; a chat row passes through.
+        return input_ids, duplex_embeds if info["req_id"] == "duplex" else input_embeds, {}
+
+    state.model.preprocess = preprocess
+    _fill_buffers(state, "chat", "duplex")
+    state.run_preprocess(
+        _DummyInputBatch([0, 1]),
+        {"input_ids": torch.tensor([151667, 42], dtype=torch.long), "inputs_embeds": encoder_embeds[:2]},
+    )
+    assert torch.equal(encoder_embeds, torch.tensor([[7.0, 7.0], [3.0, 3.0]]))
+
+
 def test_moss_local_decode_runs_depth_predictor_and_routes_eos(mocker):
     """Exercise MRV2 dispatch through the real Local hook, output and logits."""
     from vllm.sampling_params import SamplingParams
@@ -272,6 +353,7 @@ def test_moss_local_decode_runs_depth_predictor_and_routes_eos(mocker):
             "hidden_states": {"last": torch.full((4,), float(idx + 1))},
         }
     batch = _DummyInputBatch([1, 0], num_computed_tokens_cpu=[1, 1])
+    batch.req_ids = ["r1", "r0"]
     inputs = {"input_ids": torch.tensor([2, 2]), "inputs_embeds": torch.zeros(2, 4)}
     request_state = mocker.Mock(spec=RequestState, prompt_len=np.array([1, 1]), num_computed_tokens=None)
     state.run_preprocess(batch, inputs, request_state)
