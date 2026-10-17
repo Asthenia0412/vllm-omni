@@ -32,36 +32,35 @@ import shutil
 import subprocess
 import tempfile
 import threading
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from fractions import Fraction
-from typing import Callable
 
 import numpy as np
 
 try:
     from vllm.logger import init_logger
+
     logger = init_logger(__name__)
 except Exception:  # pragma: no cover - fallback for import-only contexts
     import logging
+
     logger = logging.getLogger(__name__)
 
 try:
     from .media_utils import _validate_video_chunk, mux_av_video_audio_bytes
 except Exception:  # pragma: no cover - fallback for import-only / standalone tests
+
     def _validate_video_chunk(chunk, *, width, height):  # type: ignore[misc]
         if chunk.ndim != 4 or chunk.shape[-1] != 3:
             raise ValueError("video chunk must have shape (T, H, W, 3)")
         if chunk.dtype != np.uint8:
             raise ValueError("video chunk must have dtype uint8")
         if chunk.shape[1] != height or chunk.shape[2] != width:
-            raise ValueError(
-                "video chunks in a session must use a consistent frame size"
-            )
+            raise ValueError("video chunks in a session must use a consistent frame size")
 
     def mux_av_video_audio_bytes(*args, **kwargs):  # type: ignore[misc]
-        raise NotImplementedError(
-            "media_utils.mux_av_video_audio_bytes is unavailable in this context"
-        )
+        raise NotImplementedError("media_utils.mux_av_video_audio_bytes is unavailable in this context")
 
 
 # ---------------------------------------------------------------------------
@@ -114,12 +113,18 @@ def _build_encode_cmd(
 
     # Video input: raw rgb24 on stdin.
     cmd += [
-        "-f", "rawvideo",
-        "-vcodec", "rawvideo",
-        "-s", f"{width}x{height}",
-        "-pix_fmt", "rgb24",
-        "-r", str(float(Fraction(fps).limit_denominator(10000))),
-        "-i", "pipe:0",
+        "-f",
+        "rawvideo",
+        "-vcodec",
+        "rawvideo",
+        "-s",
+        f"{width}x{height}",
+        "-pix_fmt",
+        "rgb24",
+        "-r",
+        str(float(Fraction(fps).limit_denominator(10000))),
+        "-i",
+        "pipe:0",
     ]
 
     # Audio input, if the caller prepared one offline.
@@ -135,8 +140,10 @@ def _build_encode_cmd(
         video_encoder = video_codec
 
     cmd += [
-        "-c:v", video_encoder,
-        "-pix_fmt", "yuv420p",
+        "-c:v",
+        video_encoder,
+        "-pix_fmt",
+        "yuv420p",
     ]
 
     # Encode options as ``-key value`` pairs so every PyAV-style option can
@@ -217,9 +224,7 @@ class _BaseChunkedFFmpegEncoder:
         if width <= 0 or height <= 0:
             raise ValueError("width and height must be positive")
         if not _ffmpeg_available():
-            raise RuntimeError(
-                "ffmpeg binary not found on PATH; cannot use ffmpeg encoder backend"
-            )
+            raise RuntimeError("ffmpeg binary not found on PATH; cannot use ffmpeg encoder backend")
         self.width = int(width)
         self.height = int(height)
         self.fps = float(fps)
@@ -300,9 +305,7 @@ class _BaseChunkedFFmpegEncoder:
                         try:
                             cb()
                         except BaseException:  # noqa: BLE001
-                            logger.exception(
-                                "ffmpeg encoder failed to release a chunk during abort"
-                            )
+                            logger.exception("ffmpeg encoder failed to release a chunk during abort")
                 self._queue.put(self._ABORT)
         self._thread.join()
 
@@ -332,9 +335,7 @@ class _BaseChunkedFFmpegEncoder:
                     try:
                         cb()
                     except BaseException:  # noqa: BLE001
-                        logger.exception(
-                            "ffmpeg encoder failed to release a consumed chunk"
-                        )
+                        logger.exception("ffmpeg encoder failed to release a consumed chunk")
             self._result = self._run_encode(collected)
         except BaseException as exc:  # noqa: BLE001
             self._error = exc
@@ -479,13 +480,9 @@ class SegmentedFFmpegEncoder(_BaseChunkedFFmpegEncoder):
             max_workers = min(num_segments, 8, os.cpu_count() or 4)
             with ThreadPoolExecutor(max_workers=max_workers) as pool:
                 futures = [
-                    pool.submit(encode_range, start, end, idx)
-                    for idx, (start, end) in enumerate(ranges)
-                    if start < end
+                    pool.submit(encode_range, start, end, idx) for idx, (start, end) in enumerate(ranges) if start < end
                 ]
-                segment_paths = [
-                    fut.result() for fut in futures if not fut.cancelled()
-                ]
+                segment_paths = [fut.result() for fut in futures if not fut.cancelled()]
 
             if errors:
                 raise errors[0]
@@ -544,9 +541,7 @@ def _plan_segment_ranges(
     else:
         parsed = [float(w) for w in ratio.split(",") if w.strip()]
         if len(parsed) != num_segments:
-            raise ValueError(
-                f"segment_ratio has {len(parsed)} weights but num_segments={num_segments}"
-            )
+            raise ValueError(f"segment_ratio has {len(parsed)} weights but num_segments={num_segments}")
         if any(w <= 0 for w in parsed):
             raise ValueError("segment_ratio weights must all be positive")
         weights = parsed
@@ -596,18 +591,24 @@ def _concat_segments(segment_paths: list[str], workdir: str) -> bytes:
 
     out_path = os.path.join(workdir, "concat.mp4")
     cmd = [
-        "ffmpeg", "-y", "-loglevel", "error",
-        "-f", "concat",
-        "-safe", "0",
-        "-i", concat_list,
-        "-c", "copy",
+        "ffmpeg",
+        "-y",
+        "-loglevel",
+        "error",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        concat_list,
+        "-c",
+        "copy",
         out_path,
     ]
     proc = subprocess.run(cmd, capture_output=True, timeout=3600)
     if proc.returncode != 0:
         raise RuntimeError(
-            f"ffmpeg concat failed (code {proc.returncode}): "
-            f"{proc.stderr.decode(errors='replace')[-600:]}"
+            f"ffmpeg concat failed (code {proc.returncode}): {proc.stderr.decode(errors='replace')[-600:]}"
         )
     return _read_file(out_path)
 
@@ -649,11 +650,18 @@ def _mux_audio_overlay(
         audio_interleaved = np.ascontiguousarray(audio_waveform.T).tobytes()
 
         audio_cmd = [
-            "ffmpeg", "-y", "-loglevel", "error",
-            "-f", "f32le",
-            "-ar", str(sample_rate),
-            "-ac", str(num_channels),
-            "-i", "pipe:0",
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-f",
+            "f32le",
+            "-ar",
+            str(sample_rate),
+            "-ac",
+            str(num_channels),
+            "-i",
+            "pipe:0",
         ]
         # Run this subprocess just to write a WAV from the pipe, then read that
         # WAV file back in the overlay subprocess's second input slot.  Two
@@ -674,13 +682,22 @@ def _mux_audio_overlay(
 
         out_path = os.path.join(td, "overlay.mp4")
         overlay_cmd = [
-            "ffmpeg", "-y", "-loglevel", "error",
-            "-i", video_path,
-            "-i", audio_path,
-            "-c:v", "copy",
-            "-c:a", audio_codec,
-            "-map", "0:v:0",
-            "-map", "1:a:0",
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            video_path,
+            "-i",
+            audio_path,
+            "-c:v",
+            "copy",
+            "-c:a",
+            audio_codec,
+            "-map",
+            "0:v:0",
+            "-map",
+            "1:a:0",
             "-shortest",
             out_path,
         ]
@@ -738,9 +755,7 @@ def make_chunked_video_encoder(
         try:
             from .media_utils import ChunkedMP4Encoder
         except Exception as exc:  # pragma: no cover - environment gap
-            raise RuntimeError(
-                "pyav backend requires vllm_omni.diffusion.utils.media_utils"
-            ) from exc
+            raise RuntimeError("pyav backend requires vllm_omni.diffusion.utils.media_utils") from exc
         return ChunkedMP4Encoder(
             width=width,
             height=height,
@@ -781,7 +796,4 @@ def make_chunked_video_encoder(
             num_segments=num_segments,
             segment_ratio=segment_ratio,
         )
-    raise ValueError(
-        f"unknown encoder backend {backend!r}; expected one of "
-        "pyav, ffmpeg, segmented_ffmpeg"
-    )
+    raise ValueError(f"unknown encoder backend {backend!r}; expected one of pyav, ffmpeg, segmented_ffmpeg")
