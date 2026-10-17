@@ -64,13 +64,9 @@ class SegmentPlan:
         if self.total_frames <= 0:
             raise ValueError(f"total_frames must be positive, got {self.total_frames}")
         if self.process_count <= 0:
-            raise ValueError(
-                f"process_count must be positive, got {self.process_count}"
-            )
+            raise ValueError(f"process_count must be positive, got {self.process_count}")
         if self.process_count > self.total_frames:
-            raise ValueError(
-                f"process_count ({self.process_count}) cannot exceed total_frames ({self.total_frames})"
-            )
+            raise ValueError(f"process_count ({self.process_count}) cannot exceed total_frames ({self.total_frames})")
         if len(self.segments) != self.process_count:
             raise ValueError("segments count must equal process_count")
         # Verify no gaps or overlaps.
@@ -81,25 +77,17 @@ class SegmentPlan:
                 raise ValueError(f"duplicate segment index {seg.index}")
             seen.add(seg.index)
             if seg.start != expected_start:
-                raise ValueError(
-                    f"segment {seg.index}: start={seg.start}, expected {expected_start}"
-                )
+                raise ValueError(f"segment {seg.index}: start={seg.start}, expected {expected_start}")
             if seg.end < seg.start:
-                raise ValueError(
-                    f"segment {seg.index}: end={seg.end} before start={seg.start}"
-                )
+                raise ValueError(f"segment {seg.index}: end={seg.end} before start={seg.start}")
             if seg.is_empty:
                 raise ValueError(f"segment {seg.index} is empty")
             expected_start = seg.end
         if expected_start != self.total_frames:
-            raise ValueError(
-                f"segments cover up to frame {expected_start}, expected {self.total_frames}"
-            )
+            raise ValueError(f"segments cover up to frame {expected_start}, expected {self.total_frames}")
 
 
-def plan_segments(
-    total_frames: int, process_count: int, weights: list[float] | None = None
-) -> SegmentPlan:
+def plan_segments(total_frames: int, process_count: int, weights: list[float] | None = None) -> SegmentPlan:
     """Build an immutable :class:`SegmentPlan` from total frames and weights.
 
     ``weights`` normalizes to process allocation ratios. ``None`` or all-ones
@@ -117,16 +105,12 @@ def plan_segments(
     if process_count <= 0:
         raise ValueError(f"process_count must be positive, got {process_count}")
     if process_count > total_frames:
-        raise ValueError(
-            f"process_count ({process_count}) cannot exceed total_frames ({total_frames})"
-        )
+        raise ValueError(f"process_count ({process_count}) cannot exceed total_frames ({total_frames})")
 
     if weights is None:
         weights = [1.0] * process_count
     if len(weights) != process_count:
-        raise ValueError(
-            f"weights length ({len(weights)}) != process_count ({process_count})"
-        )
+        raise ValueError(f"weights length ({len(weights)}) != process_count ({process_count})")
     if any(w <= 0 for w in weights):
         raise ValueError("all weights must be positive")
 
@@ -151,9 +135,7 @@ def plan_segments(
         segments.append(SegmentRange(index=i, start=cursor, end=cursor + size))
         cursor += size
 
-    return SegmentPlan(
-        total_frames=total_frames, process_count=process_count, segments=tuple(segments)
-    )
+    return SegmentPlan(total_frames=total_frames, process_count=process_count, segments=tuple(segments))
 
 
 # ---------------------------------------------------------------------------
@@ -165,9 +147,7 @@ def _default_ffmpeg_path() -> str:
     """Return the absolute path to the ffmpeg binary, or raise FileNotFoundError."""
     path = shutil.which("ffmpeg")
     if path is None:
-        raise FileNotFoundError(
-            "ffmpeg binary not found on PATH; segmented encoding requires ffmpeg"
-        )
+        raise FileNotFoundError("ffmpeg binary not found on PATH; segmented encoding requires ffmpeg")
     return path
 
 
@@ -175,9 +155,7 @@ class FFmpegProcessError(RuntimeError):
     """Raised when an FFmpeg subprocess fails to start, times out, or exits
     with a non-zero code."""
 
-    def __init__(
-        self, segment_index: int, message: str, *, stderr_tail: str | None = None
-    ) -> None:
+    def __init__(self, segment_index: int, message: str, *, stderr_tail: str | None = None) -> None:
         full = f"segment {segment_index}: {message}"
         if stderr_tail:
             tail_lines = stderr_tail.strip().splitlines()[-10:]
@@ -281,15 +259,11 @@ def preflight_check(
     if width <= 0 or height <= 0:
         raise ValueError(f"width and height must be positive, got {width}x{height}")
     if process_count not in (1, 2, 4):
-        raise ValueError(
-            f"segmented encoding currently supports 1, 2, or 4 processes, got {process_count}"
-        )
+        raise ValueError(f"segmented encoding currently supports 1, 2, or 4 processes, got {process_count}")
     if total_frames < 0:
         raise ValueError("total_frames must be non-negative at preflight time")
     if total_frames > 0 and process_count > total_frames:
-        raise ValueError(
-            f"process_count ({process_count}) cannot exceed total_frames ({total_frames})"
-        )
+        raise ValueError(f"process_count ({process_count}) cannot exceed total_frames ({total_frames})")
     # Confirm FFmpeg is reachable early.
     path = ffmpeg_path or _default_ffmpeg_path()
     if not os.path.isfile(path) or not os.access(path, os.X_OK):
@@ -303,13 +277,9 @@ def preflight_check(
             check=False,
         )
         if result.returncode != 0:
-            raise RuntimeError(
-                f"ffmpeg -version failed: {result.stderr.decode(errors='replace')[:200]}"
-            )
+            raise RuntimeError(f"ffmpeg -version failed: {result.stderr.decode(errors='replace')[:200]}")
     except FileNotFoundError as exc:
-        raise RuntimeError(
-            f"ffmpeg at {path} vanished between probe and use: {exc}"
-        ) from exc
+        raise RuntimeError(f"ffmpeg at {path} vanished between probe and use: {exc}") from exc
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError("ffmpeg -version timed out during preflight") from exc
 
@@ -375,9 +345,7 @@ class SegmentedFFmpegEncoder:
         if max_pending <= 0:
             raise ValueError("max_pending must be positive")
         if process_count not in (1, 2, 4):
-            raise ValueError(
-                f"segmented encoding only supports 1, 2, or 4 processes, got {process_count}"
-            )
+            raise ValueError(f"segmented encoding only supports 1, 2, or 4 processes, got {process_count}")
         if per_process_threads <= 0:
             raise ValueError("per_process_threads must be positive")
         if total_frames is not None and total_frames <= 0:
@@ -462,8 +430,7 @@ class SegmentedFFmpegEncoder:
             # Streaming path -- verify frame count matches, then send EOS.
             if self._total_frames_seen != self._plan.total_frames:
                 self._failure = RuntimeError(
-                    f"promised total_frames={self._plan.total_frames} but "
-                    f"received {self._total_frames_seen}"
+                    f"promised total_frames={self._plan.total_frames} but received {self._total_frames_seen}"
                 )
                 self._send_eos_all()  # unblock workers even on mismatch
             else:
@@ -565,9 +532,7 @@ class SegmentedFFmpegEncoder:
             self._segments[seg_range.index] = _SegmentState(
                 index=seg_range.index,
                 frame_count=seg_range.frame_count,
-                output_path=os.path.join(
-                    self._temp_dir.name, f"segment_{seg_range.index:02d}.mp4"
-                ),
+                output_path=os.path.join(self._temp_dir.name, f"segment_{seg_range.index:02d}.mp4"),
                 queue=queue.Queue(maxsize=per_queue_max),
                 stderr_buffer=[],
                 done_event=threading.Event(),
@@ -594,9 +559,7 @@ class SegmentedFFmpegEncoder:
 
         Used only by the fallback path when total_frames was not known up front.
         """
-        self._dispatch_thread = threading.Thread(
-            target=self._dispatch_worker, name="ffmpeg-dispatch", daemon=True
-        )
+        self._dispatch_thread = threading.Thread(target=self._dispatch_worker, name="ffmpeg-dispatch", daemon=True)
         self._dispatch_thread.start()
 
     def _dispatch_worker(self) -> None:
@@ -614,15 +577,11 @@ class SegmentedFFmpegEncoder:
                         self._segments[seg_idx].queue.put(frame, timeout=15.0)
                     except queue.Full:
                         if self._failure is None:
-                            self._failure = RuntimeError(
-                                f"segment {seg_idx} queue timed out waiting for slot"
-                            )
+                            self._failure = RuntimeError(f"segment {seg_idx} queue timed out waiting for slot")
                         return
                     except Exception:
                         if self._failure is None:
-                            self._failure = RuntimeError(
-                                f"dispatch to segment {seg_idx} failed"
-                            )
+                            self._failure = RuntimeError(f"dispatch to segment {seg_idx} failed")
                         return
                     frame_cursor += 1
 
@@ -653,15 +612,11 @@ class SegmentedFFmpegEncoder:
                 self._segments[seg_idx].queue.put(frame, timeout=15.0)
             except queue.Full:
                 if self._failure is None:
-                    self._failure = RuntimeError(
-                        f"segment {seg_idx} queue timed out waiting for slot"
-                    )
+                    self._failure = RuntimeError(f"segment {seg_idx} queue timed out waiting for slot")
                 return
             except Exception:
                 if self._failure is None:
-                    self._failure = RuntimeError(
-                        f"dispatch to segment {seg_idx} failed"
-                    )
+                    self._failure = RuntimeError(f"dispatch to segment {seg_idx} failed")
                 return
 
     def _send_eos_all(self) -> None:
@@ -673,17 +628,11 @@ class SegmentedFFmpegEncoder:
                 seg.queue.put(_SEGMENT_EOS, timeout=30.0)
             except queue.Full:
                 if self._failure is None:
-                    self._failure = RuntimeError(
-                        f"cannot put EOS into segment {seg.index} queue"
-                    )
+                    self._failure = RuntimeError(f"cannot put EOS into segment {seg.index} queue")
                 return
 
     def _segment_for_frame(self, frame_index: int) -> int | None:
-        if (
-            self._plan is None
-            or frame_index < 0
-            or frame_index >= self._plan.total_frames
-        ):
+        if self._plan is None or frame_index < 0 or frame_index >= self._plan.total_frames:
             return None
         # Linear scan -- process_count is 1/2/4 so this is fine.
         for seg in self._plan.segments:
@@ -715,15 +664,11 @@ class SegmentedFFmpegEncoder:
                 stderr=subprocess.PIPE,
             )
         except FileNotFoundError as exc:
-            seg.error = FFmpegProcessError(
-                segment_index, f"ffmpeg binary missing: {exc}"
-            )
+            seg.error = FFmpegProcessError(segment_index, f"ffmpeg binary missing: {exc}")
             seg.done_event.set()
             return
         except OSError as exc:
-            seg.error = FFmpegProcessError(
-                segment_index, f"cannot start subprocess: {exc}"
-            )
+            seg.error = FFmpegProcessError(segment_index, f"cannot start subprocess: {exc}")
             seg.done_event.set()
             return
 
@@ -805,9 +750,7 @@ class SegmentedFFmpegEncoder:
 
     def _finalize(self) -> bytes:
         assert self._plan is not None
-        segment_paths = [
-            self._segments[seg.index].output_path for seg in self._plan.segments
-        ]
+        segment_paths = [self._segments[seg.index].output_path for seg in self._plan.segments]
         try:
             concatenated = _stream_copy_concat(segment_paths)
             return _mux_audio_once(
@@ -871,9 +814,7 @@ def _stream_copy_concat(segment_paths: list[str]) -> bytes:
         return path.replace("\\", "/").replace("'", "\\'")
 
     lines = [f"file '{_escape(os.path.abspath(p))}'" for p in segment_paths]
-    list_file = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    )
+    list_file = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8")
     list_file.write("\n".join(lines) + "\n")
     list_file.close()
 
@@ -914,9 +855,7 @@ def _stream_copy_concat(segment_paths: list[str]) -> bytes:
                 pass
 
 
-def _mux_audio_once(
-    video_bytes: bytes, *, waveform: np.ndarray | None, sample_rate: int | None
-) -> bytes:
+def _mux_audio_once(video_bytes: bytes, *, waveform: np.ndarray | None, sample_rate: int | None) -> bytes:
     """Attach an audio track to an already-encoded MP4 without re-encoding the video.
 
     Uses an ffmpeg subprocess to stream-copy the video track and encode / mux
@@ -928,9 +867,7 @@ def _mux_audio_once(
         return video_bytes
 
     if sample_rate is None:
-        raise ValueError(
-            "audio_sample_rate is required when audio_waveform is provided"
-        )
+        raise ValueError("audio_sample_rate is required when audio_waveform is provided")
 
     with tempfile.TemporaryDirectory() as tmpdir:
         video_path = os.path.join(tmpdir, "video.mp4")
