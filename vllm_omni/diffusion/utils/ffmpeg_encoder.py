@@ -29,6 +29,7 @@ from __future__ import annotations
 import os
 import queue
 import shutil
+import signal
 import subprocess
 import tempfile
 import threading
@@ -188,6 +189,39 @@ def _frames_to_raw(frames: np.ndarray) -> bytes:
     return frames.tobytes()
 
 
+def _terminate_process(
+    proc: subprocess.Popen,
+    *,
+    grace_seconds: float = 2.0,
+) -> None:
+    """Best-effort terminate of a subprocess with a short SIGKILL fallback.
+
+    On SIGTERM the ffmpeg process should close cleanly; we give it a bounded
+    grace period before SIGKILL so abort does not stall behind encoder I/O.
+    """
+    if proc.poll() is not None:
+        return
+    try:
+        if hasattr(signal, "SIGTERM"):
+            proc.send_signal(signal.SIGTERM)
+        else:
+            proc.terminate()
+    except OSError:
+        # Process already gone; nothing to do.
+        return
+    try:
+        proc.wait(timeout=grace_seconds)
+    except subprocess.TimeoutExpired:
+        try:
+            proc.kill()
+        except OSError:
+            pass
+        try:
+            proc.wait(timeout=2.0)
+        except subprocess.TimeoutExpired:
+            pass
+
+
 # ---------------------------------------------------------------------------
 # Base encoder contract
 # ---------------------------------------------------------------------------
@@ -196,10 +230,15 @@ def _frames_to_raw(frames: np.ndarray) -> bytes:
 class _BaseChunkedFFmpegEncoder:
     """Shared queue + thread + validation machinery for ffmpeg-backed encoders.
 
-    Subclasses implement :meth:`_run_encode` and :meth:`_result_path`; this
-    base class owns the producer-side contract (``push`` / ``finish`` /
-    ``abort``), chunk validation, in-order queueing, and the final process
-    readback.
+    Subclasses implement :meth:`_on_chunk` / :meth:`_finalize` (or the legacy
+    :meth:`_run_encode`) and this base class owns the producer-side contract
+    (``push`` / ``finish`` / ``abort``), chunk validation, in-order queueing,
+    subprocess tracking, and the final process readback.
+
+    Every chunk is deep-copied from the caller's borrowed buffer before the
+    release callback fires.  That makes the encoder's view independent of
+    session-side ring re-use so later transfer slots cannot silently overwrite
+    a frame that an encoder has not yet consumed.
     """
 
     _DONE = object()
@@ -240,6 +279,10 @@ class _BaseChunkedFFmpegEncoder:
         self._error: BaseException | None = None
         self._closed = False
         self._state_lock = threading.Lock()
+        # Live subprocess handles tracked by subclasses so abort() can kill
+        # them without waiting for a one-hour subprocess.run timeout.
+        self._active_procs: list[subprocess.Popen] = []
+        self._procs_lock = threading.Lock()
 
         self._thread = threading.Thread(
             target=self._run,
@@ -250,8 +293,32 @@ class _BaseChunkedFFmpegEncoder:
 
     # ---- subclass hooks ---------------------------------------------------
 
+    def _on_chunk(self, chunk: np.ndarray) -> None:
+        """Called by the worker for each consumed chunk.
+
+        Subclasses that can stream data directly to a subprocess override
+        this; the default implementation buffers chunks for a later
+        :meth:`_finalize` call.
+        """
+        self._buffer.append(chunk)
+
+    def _finalize(self) -> bytes:
+        """Called once the consumer has signalled ``_DONE``.
+
+        Default implementation delegates to :meth:`_run_encode` with the
+        buffered chunks list, which preserves the pre-PR-refactor behaviour
+        for subclasses that still need to plan over the full frame set
+        (e.g. segmented encoding).
+        """
+        return self._run_encode(self._buffer)
+
     def _run_encode(self, collected: list[np.ndarray]) -> bytes:
-        """Encode all collected chunks into final MP4 bytes."""
+        """Fallback encode-all-together path.
+
+        Prefer overriding :meth:`_on_chunk` + :meth:`_finalize` for streaming
+        backends; this remains available for subclasses that must see the full
+        frame set before they can encode.
+        """
         raise NotImplementedError
 
     # ---- lifecycle --------------------------------------------------------
@@ -267,7 +334,10 @@ class _BaseChunkedFFmpegEncoder:
         with self._state_lock:
             if self._closed:
                 raise RuntimeError("ffmpeg encoder is already closed")
-        self._queue.put((chunk, on_consumed))
+        # Deep-copy here so the encoder's view stays valid regardless of ring
+        # re-use after the session-side lease release.
+        owned = chunk.copy()
+        self._queue.put((owned, on_consumed))
 
     def finish(self) -> bytes:
         """Flush the queue, wait for encoding, return MP4 bytes."""
@@ -287,12 +357,14 @@ class _BaseChunkedFFmpegEncoder:
         """Drop pending chunks and tear down the encoder.
 
         Already-consumed chunks cannot be returned -- the subprocess may be
-        mid-encode -- but chunks still in the queue are released.
+        mid-encode -- but chunks still in the queue are released, and any
+        live ffmpeg subprocess is SIGTERM'd / SIGKILL'd within a bounded
+        grace period so cancellation never stalls behind encode I/O.
         """
+        # 1. Mark closed and drain any still-queued callbacks.
         with self._state_lock:
             if not self._closed:
                 self._closed = True
-                # Drain whatever remains and release each callback.
                 while True:
                     try:
                         entry = self._queue.get_nowait()
@@ -307,6 +379,18 @@ class _BaseChunkedFFmpegEncoder:
                         except BaseException:  # noqa: BLE001
                             logger.exception("ffmpeg encoder failed to release a chunk during abort")
                 self._queue.put(self._ABORT)
+            else:
+                # finish() has already been called; nothing more to drain.
+                pass
+
+        # 2. Terminate any live subprocesses we have tracked.
+        with self._procs_lock:
+            procs = list(self._active_procs)
+            self._active_procs.clear()
+        for p in procs:
+            _terminate_process(p)
+
+        # 3. Wait for the worker to exit.
         self._thread.join()
 
     def __enter__(self):
@@ -321,7 +405,10 @@ class _BaseChunkedFFmpegEncoder:
     # ---- worker -----------------------------------------------------------
 
     def _run(self) -> None:
-        collected: list[np.ndarray] = []
+        # Buffer for subclasses that need to plan over the full frame set
+        # (e.g. segmented).  Streaming subclasses override _on_chunk so this
+        # stays empty for them.
+        self._buffer: list[np.ndarray] = []
         try:
             while True:
                 entry = self._queue.get()
@@ -330,13 +417,18 @@ class _BaseChunkedFFmpegEncoder:
                 if entry is self._ABORT:
                     return
                 chunk, cb = entry
-                collected.append(chunk)
+                # Fire the session-side release callback BEFORE feeding the
+                # chunk to the encoder so the ring can recycle the slot
+                # immediately.  The chunk is already an owned copy, so
+                # session-side reuse cannot affect us.
                 if cb is not None:
                     try:
                         cb()
                     except BaseException:  # noqa: BLE001
                         logger.exception("ffmpeg encoder failed to release a consumed chunk")
-            self._result = self._run_encode(collected)
+                # Let the subclass decide what to do with the now-owned data.
+                self._on_chunk(chunk)
+            self._result = self._finalize()
         except BaseException as exc:  # noqa: BLE001
             self._error = exc
 
@@ -349,19 +441,32 @@ class _BaseChunkedFFmpegEncoder:
 class FFmpegBinaryEncoder(_BaseChunkedFFmpegEncoder):
     """One ``ffmpeg`` subprocess encodes all collected chunks into one MP4.
 
-    Replaces the in-process PyAV-backed :class:`ChunkedMP4Encoder` with the
-    same contract but gives access to the full ``ffmpeg`` CLI: hardware
-    encoders (``h264_nvenc`` / ``hevc_nvenc`` / ``h264_vaapi``), multi-threaded
-    libx264 / libx265 with all of their tuning knobs, and any codec the host
-    happens to ship.
+    The subprocess is started lazily on the first pushed chunk and its stdin
+    pipe is fed in real time, so encoding overlaps with decode and retained
+    raw-frame memory is bounded by a single in-flight chunk (no unbounded
+    list of every frame).  Replaces the in-process PyAV-backed
+    :class:`ChunkedMP4Encoder` with the same contract but gives access to the
+    full ``ffmpeg`` CLI: hardware encoders (``h264_nvenc`` / ``hevc_nvenc`` /
+    ``h264_vaapi``), multi-threaded libx264 / libx265 with all of their tuning
+    knobs, and any codec the host happens to ship.
     """
 
-    def _run_encode(self, collected: list[np.ndarray]) -> bytes:
-        if not collected:
-            raise RuntimeError("ffmpeg encoder received no frames")
-        full = np.concatenate(collected, axis=0)
-        with tempfile.TemporaryDirectory(prefix="ffmpeg-enc-") as td:
-            out_path = os.path.join(td, "out.mp4")
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._proc: subprocess.Popen | None = None
+        self._proc_stdout: bytes | None = None
+        self._proc_stderr: bytes | None = None
+        self._tempdir: tempfile.TemporaryDirectory[str] | None = None
+        self._out_path: str | None = None
+        self._proc_lock = threading.Lock()
+
+    def _ensure_proc_started(self) -> None:
+        """Start the ffmpeg subprocess on demand (first chunk) if not yet."""
+        with self._proc_lock:
+            if self._proc is not None:
+                return
+            self._tempdir = tempfile.TemporaryDirectory(prefix="ffmpeg-enc-")
+            self._out_path = os.path.join(self._tempdir.name, "out.mp4")
             cmd = _build_encode_cmd(
                 width=self.width,
                 height=self.height,
@@ -369,23 +474,75 @@ class FFmpegBinaryEncoder(_BaseChunkedFFmpegEncoder):
                 video_codec=self._video_codec,
                 crf=self._crf,
                 video_codec_options=self._video_codec_options,
-                output_path=out_path,
-                # Audio is muxed after the pure-video encode so we do not need
-                # a wav intermediate file here.
-                audio_path=None,
+                output_path=self._out_path,
+                audio_path=None,  # audio is muxed after pure-video encode
             )
-            proc = subprocess.run(
+            # Buffering None means raw I/O; ffmpeg reads stdin as a stream.
+            self._proc = subprocess.Popen(
                 cmd,
-                input=_frames_to_raw(full),
-                capture_output=True,
-                timeout=3600,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                bufsize=0,
             )
-            if proc.returncode != 0:
-                raise RuntimeError(
-                    f"ffmpeg single-process encode failed (code {proc.returncode}): "
-                    f"{proc.stderr.decode(errors='replace')[-800:]}"
-                )
-            video_bytes = _read_file(out_path)
+            # Track so abort() can kill it.
+            with self._procs_lock:
+                self._active_procs.append(self._proc)
+
+    def _on_chunk(self, chunk: np.ndarray) -> None:
+        self._ensure_proc_started()
+        assert self._proc is not None and self._proc.stdin is not None
+        raw = _frames_to_raw(chunk)
+        try:
+            self._proc.stdin.write(raw)
+            self._proc.stdin.flush()
+        except BrokenPipeError as exc:
+            raise RuntimeError("ffmpeg subprocess closed stdin unexpectedly; encoder error") from exc
+
+    def _finalize(self) -> bytes:
+        # Drain stdin, wait for ffmpeg to finish, then read output.
+        proc = self._proc
+        tempdir = self._tempdir
+        out_path = self._out_path
+        try:
+            if proc is not None:
+                assert proc.stdin is not None
+                try:
+                    proc.stdin.close()
+                except Exception:  # noqa: BLE001
+                    pass
+                # Give ffmpeg a bounded time to finish (same as the old
+                # subprocess.run timeout).
+                try:
+                    proc.wait(timeout=3600)
+                except subprocess.TimeoutExpired:
+                    _terminate_process(proc)
+                self._proc_stderr = proc.stderr.read() if proc.stderr is not None else b""
+                rc = proc.returncode
+                # Drop from tracked list.
+                with self._procs_lock:
+                    if proc in self._active_procs:
+                        self._active_procs.remove(proc)
+            else:
+                rc = -1
+        finally:
+            self._proc = None
+            # Best-effort termination if still alive.
+            if proc is not None and proc.poll() is None:
+                _terminate_process(proc)
+
+        if rc != 0:
+            raise RuntimeError(
+                f"ffmpeg single-process encode failed (code {rc}): "
+                f"{(self._proc_stderr or b'').decode(errors='replace')[-800:]}"
+            )
+        if out_path is None or not os.path.exists(out_path):
+            raise RuntimeError("ffmpeg produced no output file")
+
+        video_bytes = _read_file(out_path)
+        if tempdir is not None:
+            tempdir.cleanup()
+            self._tempdir = None
 
         # Mux audio exactly once on top of the pure-video stream.
         if self._audio_waveform is None:
@@ -459,21 +616,42 @@ class SegmentedFFmpegEncoder(_BaseChunkedFFmpegEncoder):
                     output_path=seg_path,
                     audio_path=None,
                 )
-                proc = subprocess.run(
+                # Use Popen so we can track + kill on abort().
+                proc = subprocess.Popen(
                     cmd,
-                    input=_frames_to_raw(seg_frames),
-                    capture_output=True,
-                    timeout=3600,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                 )
-                if proc.returncode != 0:
-                    err = RuntimeError(
-                        f"segment {index} encode failed (code {proc.returncode}): "
-                        f"{proc.stderr.decode(errors='replace')[-600:]}"
-                    )
+                with self._procs_lock:
+                    self._active_procs.append(proc)
+                try:
+                    assert proc.stdin is not None
+                    proc.stdin.write(_frames_to_raw(seg_frames))
+                    proc.stdin.close()
+                    try:
+                        proc.wait(timeout=3600)
+                    except subprocess.TimeoutExpired:
+                        _terminate_process(proc)
+                        raise RuntimeError(f"segment {index} encode timed out")
+                    if proc.returncode != 0:
+                        err_str = b""
+                        if proc.stderr is not None:
+                            err_str = proc.stderr.read()
+                        raise RuntimeError(
+                            f"segment {index} encode failed (code {proc.returncode}): "
+                            f"{err_str.decode(errors='replace')[-600:]}"
+                        )
+                    return seg_path
+                except BaseException as exc:  # noqa: BLE001
                     with lock:
-                        errors.append(err)
+                        errors.append(exc if isinstance(exc, Exception) else RuntimeError(str(exc)))
+                    _terminate_process(proc)
                     return ""
-                return seg_path
+                finally:
+                    with self._procs_lock:
+                        if proc in self._active_procs:
+                            self._active_procs.remove(proc)
 
             # Cap worker threads so a runaway auto-count does not spawn more
             # ffmpeg processes than the host can schedule.
@@ -482,7 +660,19 @@ class SegmentedFFmpegEncoder(_BaseChunkedFFmpegEncoder):
                 futures = [
                     pool.submit(encode_range, start, end, idx) for idx, (start, end) in enumerate(ranges) if start < end
                 ]
-                segment_paths = [fut.result() for fut in futures if not fut.cancelled()]
+                # Collect futures with early abort on first encode failure
+                # so we do not wait for all segments when one has already
+                # raised; ThreadPoolExecutor context manager already cancels
+                # pending futures on early exit.
+                try:
+                    segment_paths = [fut.result() for fut in futures if not fut.cancelled()]
+                except BaseException:
+                    # Best-effort kill any still-running subprocesses.
+                    with self._procs_lock:
+                        for p in list(self._active_procs):
+                            _terminate_process(p)
+                        self._active_procs.clear()
+                    raise
 
             if errors:
                 raise errors[0]
@@ -608,7 +798,7 @@ def _concat_segments(segment_paths: list[str], workdir: str) -> bytes:
     proc = subprocess.run(cmd, capture_output=True, timeout=3600)
     if proc.returncode != 0:
         raise RuntimeError(
-            f"ffmpeg concat failed (code {proc.returncode}): {proc.stderr.decode(errors='replace')[-600:]}"
+            f"ffmpeg concat failed (code {proc.returncode}): " f"{proc.stderr.decode(errors='replace')[-600:]}"
         )
     return _read_file(out_path)
 
@@ -628,6 +818,13 @@ def _mux_audio_overlay(
     audio is encoded exactly once with the requested codec.  Keeping the overlay
     in ffmpeg means we never need to touch PyAV's container-writing API, which
     varies significantly across versions.
+
+    Unlike the unconditional ``-shortest`` form this used before, the overlay
+    now preserves the full video duration -- matching the existing full-stream
+    mux contract -- and lets the audio stream end early rather than truncating
+    the generated video to a shorter waveform.  Callers that want the old
+    truncation behaviour can ask ffmpeg for it explicitly; the default here is
+    "do not silently drop decoded frames".
     """
     if not video_bytes:
         raise RuntimeError("cannot overlay audio on empty video bytes")
@@ -698,7 +895,9 @@ def _mux_audio_overlay(
             "0:v:0",
             "-map",
             "1:a:0",
-            "-shortest",
+            # Intentionally no `-shortest`: preserve full generated video
+            # duration even when the caller supplies shorter audio, matching
+            # the existing full-stream mux contract.
             out_path,
         ]
         overlay_proc = subprocess.run(overlay_cmd, capture_output=True, timeout=3600)
@@ -796,4 +995,4 @@ def make_chunked_video_encoder(
             num_segments=num_segments,
             segment_ratio=segment_ratio,
         )
-    raise ValueError(f"unknown encoder backend {backend!r}; expected one of pyav, ffmpeg, segmented_ffmpeg")
+    raise ValueError(f"unknown encoder backend {backend!r}; " "expected one of pyav, ffmpeg, segmented_ffmpeg")
