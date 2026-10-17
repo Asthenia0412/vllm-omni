@@ -4,21 +4,14 @@
 
 from __future__ import annotations
 
-import hashlib
 import io
-import os
-import subprocess
-import tempfile
-import threading
 
 import av
 import numpy as np
 import pytest
 
 from vllm_omni.diffusion.utils.ffmpeg_encoder import (
-    SegmentedFFmpegEncoder,
     _ffmpeg_available,
-    _frames_to_raw,
     _plan_segment_ranges,
     make_chunked_video_encoder,
 )
@@ -51,7 +44,10 @@ pytest_skip_no_ffmpeg = pytest.mark.skipif(
 class TestPlanSegmentRanges:
     def test_equal_partitioning(self) -> None:
         assert _plan_segment_ranges(12, 4, None) == [
-            (0, 3), (3, 6), (6, 9), (9, 12),
+            (0, 3),
+            (3, 6),
+            (6, 9),
+            (9, 12),
         ]
 
     def test_weighted_partitioning(self) -> None:
@@ -91,9 +87,7 @@ def _probe_frame_count(video_bytes: bytes) -> int | None:
     """Decoded frame count via ffmpeg / PyAV."""
     try:
         with av.open(io.BytesIO(video_bytes), format="mp4") as container:
-            video_stream = next(
-                (s for s in container.streams if s.type == "video"), None
-            )
+            video_stream = next((s for s in container.streams if s.type == "video"), None)
             if video_stream is None:
                 return 0
             return len(list(container.decode(video_stream)))
@@ -106,7 +100,10 @@ def _probe_frame_count(video_bytes: bytes) -> int | None:
 class TestEncoderContract:
     def test_push_finish_roundtrip(self, frames: np.ndarray, backend: str) -> None:
         enc = make_chunked_video_encoder(
-            backend, width=24, height=16, fps=24,
+            backend,
+            width=24,
+            height=16,
+            fps=24,
             max_pending=4,
         )
         enc.push(frames[:4])
@@ -161,7 +158,9 @@ class TestEncoderContract:
 class TestFFmpegAudio:
     def test_with_audio_waveform(self, frames: np.ndarray, audio_waveform: np.ndarray, backend: str) -> None:
         kwargs = dict(
-            width=24, height=16, fps=24,
+            width=24,
+            height=16,
+            fps=24,
             audio_waveform=audio_waveform,
             audio_sample_rate=48000,
         )
@@ -213,7 +212,11 @@ class TestSegmentedFFmpegEncoder:
     def test_auto_segment_count(self, frames: np.ndarray) -> None:
         """num_segments=0 triggers auto partitioning based on host CPU count."""
         enc = make_chunked_video_encoder(
-            "segmented_ffmpeg", width=24, height=16, fps=24, num_segments=0,
+            "segmented_ffmpeg",
+            width=24,
+            height=16,
+            fps=24,
+            num_segments=0,
         )
         enc.push(frames)
         result = enc.finish()
@@ -222,8 +225,12 @@ class TestSegmentedFFmpegEncoder:
     def test_custom_segment_ratio(self, frames: np.ndarray) -> None:
         """Falling ratios put more work on earlier segments."""
         enc = make_chunked_video_encoder(
-            "segmented_ffmpeg", width=24, height=16, fps=24,
-            num_segments=4, segment_ratio="5,3,2,2",
+            "segmented_ffmpeg",
+            width=24,
+            height=16,
+            fps=24,
+            num_segments=4,
+            segment_ratio="5,3,2,2",
         )
         enc.push(frames)
         result = enc.finish()
@@ -232,7 +239,11 @@ class TestSegmentedFFmpegEncoder:
     def test_single_segment_is_passthrough(self, frames: np.ndarray) -> None:
         """num_segments=1 should behave like FFmpegBinaryEncoder (one encode, one concat path)."""
         enc = make_chunked_video_encoder(
-            "segmented_ffmpeg", width=24, height=16, fps=24, num_segments=1,
+            "segmented_ffmpeg",
+            width=24,
+            height=16,
+            fps=24,
+            num_segments=1,
         )
         enc.push(frames)
         result = enc.finish()
@@ -240,7 +251,11 @@ class TestSegmentedFFmpegEncoder:
 
     def test_empty_push_rejected(self) -> None:
         enc = make_chunked_video_encoder(
-            "segmented_ffmpeg", width=24, height=16, fps=24, num_segments=2,
+            "segmented_ffmpeg",
+            width=24,
+            height=16,
+            fps=24,
+            num_segments=2,
         )
         with pytest.raises(ValueError, match="shape"):
             enc.push(np.zeros((0, 16, 24, 3), dtype=np.uint8))
@@ -256,6 +271,7 @@ class TestSegmentedFFmpegEncoder:
 class TestSessionBackendWiring:
     def test_session_switch_backend(self, frames: np.ndarray) -> None:
         import torch
+
         from vllm_omni.diffusion.utils.chunked_video import ChunkedVideoMP4Session
 
         # Build fake chunks (BCTHW) shaped like what the session expects.
@@ -280,6 +296,7 @@ class TestSessionBackendWiring:
 
     def test_session_invalid_backend_raises(self) -> None:
         import torch
+
         from vllm_omni.diffusion.utils.chunked_video import ChunkedVideoMP4Session
 
         session = ChunkedVideoMP4Session(
@@ -301,8 +318,12 @@ class TestSessionBackendWiring:
 class TestErrorPropagation:
     def test_invalid_ratio_instantiation_fails_early(self) -> None:
         enc = make_chunked_video_encoder(
-            "segmented_ffmpeg", width=24, height=16, fps=24,
-            num_segments=4, segment_ratio="1,2",
+            "segmented_ffmpeg",
+            width=24,
+            height=16,
+            fps=24,
+            num_segments=4,
+            segment_ratio="1,2",
         )
         enc.push(np.zeros((4, 16, 24, 3), dtype=np.uint8))
         # The bad ratio is caught at finish-time planning.
