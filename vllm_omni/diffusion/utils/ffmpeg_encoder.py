@@ -798,7 +798,7 @@ def _concat_segments(segment_paths: list[str], workdir: str) -> bytes:
     proc = subprocess.run(cmd, capture_output=True, timeout=3600)
     if proc.returncode != 0:
         raise RuntimeError(
-            f"ffmpeg concat failed (code {proc.returncode}): " f"{proc.stderr.decode(errors='replace')[-600:]}"
+            f"ffmpeg concat failed (code {proc.returncode}): {proc.stderr.decode(errors='replace')[-600:]}"
         )
     return _read_file(out_path)
 
@@ -995,4 +995,4 @@ def make_chunked_video_encoder(
             num_segments=num_segments,
             segment_ratio=segment_ratio,
         )
-    raise ValueError(f"unknown encoder backend {backend!r}; " "expected one of pyav, ffmpeg, segmented_ffmpeg")
+    raise ValueError(f"unknown encoder backend {backend!r}; expected one of pyav, ffmpeg, segmented_ffmpeg")
