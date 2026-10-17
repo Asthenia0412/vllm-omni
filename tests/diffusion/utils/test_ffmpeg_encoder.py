@@ -274,9 +274,13 @@ class TestSessionBackendWiring:
 
         from vllm_omni.diffusion.utils.chunked_video import ChunkedVideoMP4Session
 
-        # Build fake chunks (BCTHW) shaped like what the session expects.
+        # Build fake chunks in BCTHW layout (B=1, C=3, T=slice_len, H=16, W=24),
+        # which is what ChunkedVideoMP4Session.push expects.  The fixture
+        # provides (T, H, W, 3) = THWC numpy chunks; swap axes and add the
+        # leading batch dim.
+        # THWC (T, H, W, C) -> permute(3, 0, 1, 2) => B missing -> unsqueeze(0)
         chunks = [
-            torch.from_numpy(f.copy()).permute(0, 2, 3, 4, 1).contiguous()
+            torch.from_numpy(f.copy()).permute(3, 0, 1, 2).unsqueeze(0).contiguous()
             for f in [frames[:4], frames[4:8], frames[8:]]
         ]
 
@@ -299,6 +303,7 @@ class TestSessionBackendWiring:
 
         from vllm_omni.diffusion.utils.chunked_video import ChunkedVideoMP4Session
 
+        # BCTHW shape: B=1, C=3, T=4, H=16, W=24.
         session = ChunkedVideoMP4Session(
             value_range=(0, 255),
             fps=24,
@@ -306,7 +311,7 @@ class TestSessionBackendWiring:
             transfer_slots=0,
         )
         with pytest.raises(ValueError, match="unknown encoder backend"):
-            session.push(torch.zeros(1, 1, 16, 24, 3, dtype=torch.uint8))
+            session.push(torch.zeros(1, 3, 4, 16, 24, dtype=torch.uint8))
 
 
 # ---------------------------------------------------------------------------
