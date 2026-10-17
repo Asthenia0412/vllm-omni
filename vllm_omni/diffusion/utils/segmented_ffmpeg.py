@@ -662,7 +662,6 @@ class SegmentedFFmpegEncoder:
                 concatenated,
                 waveform=self._audio_waveform,
                 sample_rate=self._audio_sample_rate,
-                fps=self._fps,
             )
         except BaseException as exc:  # noqa: BLE001
             if self._failure is None:
@@ -761,31 +760,72 @@ def _stream_copy_concat(segment_paths: list[str]) -> bytes:
                 pass
 
 
-def _mux_audio_once(video_bytes: bytes, *, waveform: np.ndarray | None, sample_rate: int | None, fps: float) -> bytes:
-    """Add the audio track exactly once after stream-copy concat."""
+def _mux_audio_once(video_bytes: bytes, *, waveform: np.ndarray | None, sample_rate: int | None) -> bytes:
+    """Attach an audio track to an already-encoded MP4 without re-encoding the video.
+
+    Uses an ffmpeg subprocess to stream-copy the video track and encode / mux
+    the audio from a raw PCM dump of ``waveform``. This preserves the
+    previously-encoded video bitstream (no decode--re-encode round-trip) and is
+    significantly faster than the previous PyAV round-trip.
+    """
     if waveform is None:
         return video_bytes
 
-    import av  # noqa: PLC0415
+    if sample_rate is None:
+        raise ValueError("audio_sample_rate is required when audio_waveform is provided")
 
-    from vllm_omni.diffusion.utils.media_utils import mux_video_audio_bytes  # noqa: PLC0415
+    with tempfile.TemporaryDirectory() as tmpdir:
+        video_path = os.path.join(tmpdir, "video.mp4")
+        audio_path = os.path.join(tmpdir, "audio.pcm")
+        out_path = os.path.join(tmpdir, "output.mp4")
 
-    video_frames = []
-    try:
-        with av.open(av.io.BytesIO(video_bytes), format="mp4") as container:
-            stream = container.streams.video[0]
-            for frame in container.decode(stream):
-                video_frames.append(frame)
-    except Exception as exc:
-        logger.warning("Could not decode concat'd video for audio mux: %s", exc)
-        return video_bytes
+        with open(video_path, "wb") as f:
+            f.write(video_bytes)
 
-    if not video_frames:
-        return video_bytes
+        # Normalise waveform layout to (channels, samples) float32 in [-1, 1].
+        samples = waveform.astype(np.float32)
+        if samples.ndim == 1:
+            samples = samples.reshape(1, -1)
+        elif samples.ndim == 2 and samples.shape[0] > samples.shape[1]:
+            samples = np.ascontiguousarray(samples.T)
+        num_channels = samples.shape[0]
 
-    return mux_video_audio_bytes(
-        video_frames,
-        fps=fps,
-        audio_waveform=waveform,
-        audio_sample_rate=sample_rate,
-    )
+        # Convert float32 -> int16 raw PCM for ffmpeg's s16le input format.
+        pcm = np.clip(samples, -1.0, 1.0)
+        pcm_int16 = (pcm * 32767.0).astype(np.int16)
+        pcm_int16.tofile(audio_path)
+
+        cmd = [
+            _default_ffmpeg_path(),
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            video_path,
+            "-f",
+            "s16le",
+            "-ar",
+            str(sample_rate),
+            "-ac",
+            str(num_channels),
+            "-i",
+            audio_path,
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-shortest",
+            "-movflags",
+            "+faststart",
+            out_path,
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, timeout=60, check=False)
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"ffmpeg audio mux failed (code {result.returncode}): {result.stderr.decode(errors='replace')[-1000:]}"
+            )
+
+        with open(out_path, "rb") as f:
+            return f.read()
