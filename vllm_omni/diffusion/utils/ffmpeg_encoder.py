@@ -334,17 +334,39 @@ class _BaseChunkedFFmpegEncoder:
         with self._state_lock:
             if self._closed:
                 raise RuntimeError("ffmpeg encoder is already closed")
+            if self._error is not None:
+                raise self._error
         # Deep-copy here so the encoder's view stays valid regardless of ring
         # re-use after the session-side lease release.
         owned = chunk.copy()
-        self._queue.put((owned, on_consumed))
+        # Use a bounded-put loop so that when the worker has exited (due to
+        # ffmpeg failure) and the queue is full, we surface _error instead
+        # of blocking forever.
+        while True:
+            try:
+                self._queue.put((owned, on_consumed), timeout=0.1)
+                return
+            except queue.Full:
+                with self._state_lock:
+                    if self._error is not None:
+                        raise self._error
+                    if self._closed:
+                        raise RuntimeError("ffmpeg encoder closed while waiting to push chunk")
 
     def finish(self) -> bytes:
         """Flush the queue, wait for encoding, return MP4 bytes."""
         with self._state_lock:
             if not self._closed:
                 self._closed = True
-                self._queue.put(self._DONE)
+                if self._error is None:
+                    # Try to enqueue the DONE sentinel without blocking.  If
+                    # the queue is full and the worker has already exited
+                    # (due to error), we skip — join() + _error check below
+                    # handles that path.
+                    try:
+                        self._queue.put(self._DONE, timeout=0.5)
+                    except queue.Full:
+                        pass
         self._thread.join()
         if self._error is not None:
             raise self._error
