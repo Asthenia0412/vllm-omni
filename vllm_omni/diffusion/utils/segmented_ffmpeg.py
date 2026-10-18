@@ -429,10 +429,13 @@ class SegmentedFFmpegEncoder:
         if self._plan is not None:
             # Streaming path -- verify frame count matches, then send EOS.
             if self._total_frames_seen != self._plan.total_frames:
+                # Send EOS BEFORE setting _failure — _send_eos_all bails
+                # out when _failure is already set, so setting it first
+                # would leave workers hanging on their queues until timeout.
+                self._send_eos_all()
                 self._failure = RuntimeError(
                     f"promised total_frames={self._plan.total_frames} but received {self._total_frames_seen}"
                 )
-                self._send_eos_all()  # unblock workers even on mismatch
             else:
                 self._send_eos_all()
         else:
@@ -886,8 +889,11 @@ def _mux_audio_once(video_bytes: bytes, *, waveform: np.ndarray | None, sample_r
         num_channels = samples.shape[0]
 
         # Convert float32 -> int16 raw PCM for ffmpeg's s16le input format.
+        # s16le expects interleaved samples (L0,R0, L1,R1, ...), so we
+        # transpose from (channels, N) to (N, channels) before flattening.
         pcm = np.clip(samples, -1.0, 1.0)
         pcm_int16 = (pcm * 32767.0).astype(np.int16)
+        pcm_int16 = np.ascontiguousarray(pcm_int16.T)  # (N, channels) → interleaved
         pcm_int16.tofile(audio_path)
 
         cmd = [
