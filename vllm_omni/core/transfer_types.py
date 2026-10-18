@@ -266,6 +266,35 @@ class TransferPayload:
     # ── Construction helpers ──────────────────────────────────────────
 
     @classmethod
+    def _flatten_nested_dict(
+        cls,
+        raw: dict[str, Any],
+        *,
+        prefix: str = "",
+    ) -> tuple[dict[str, torch.Tensor | None], dict[str, Any]]:
+        """Recursively flatten a nested dict into (dotted_keyed_tensors, remaining_nested_meta).
+
+        Any ``torch.Tensor`` anywhere in the nesting ends up in the tensors
+        dict with a dotted key (``"hidden_states.layers.0"``).  Non-tensor
+        leaves are stored back into the remaining_nested_meta dict so that
+        :meth:`as_dict` can rebuild the original schema.
+        """
+        tensors: dict[str, torch.Tensor | None] = {}
+        meta: dict[str, Any] = {}
+        for k, v in raw.items():
+            key = f"{prefix}.{k}" if prefix else str(k)
+            if isinstance(v, torch.Tensor):
+                tensors[key] = v
+            elif isinstance(v, dict):
+                sub_tensors, sub_meta = cls._flatten_nested_dict(v, prefix=key)
+                tensors.update(sub_tensors)
+                if sub_meta:
+                    meta[k] = sub_meta
+            else:
+                meta[k] = v
+        return tensors, meta
+
+    @classmethod
     def from_dict(
         cls,
         raw: dict[str, Any],
@@ -280,33 +309,14 @@ class TransferPayload:
 
         The input dict is treated as a set of *named* fields; values that
         are ``torch.Tensor`` instances land in ``self.tensors``, everything
-        else lands in ``self.metadata``.  Optional keyword arguments
-        override the heuristically populated fields.
+        else lands in ``self.metadata``.  Nested dicts are recursively
+        scanned — every tensor, no matter how deeply nested, ends up in
+        ``self.tensors`` under a dotted key (``"embed.prefill"``,
+        ``"hidden_states.layers.0"``).  Non-tensor leaves are preserved
+        as nested metadata so :meth:`as_dict` can rebuild the original
+        schema for legacy consumers.
         """
-        tensors: dict[str, torch.Tensor | None] = {}
-        metadata: dict[str, Any] = {}
-        for k, v in raw.items():
-            if isinstance(v, torch.Tensor):
-                tensors[k] = v
-            elif isinstance(v, dict):
-                # Nested dict — descend one level and keep non-tensor dicts
-                # as metadata (consumers can still inspect them).
-                sub_tensors: dict[str, torch.Tensor | None] = {}
-                sub_meta: dict[str, Any] = {}
-                for sk, sv in v.items():
-                    if isinstance(sv, torch.Tensor):
-                        sub_tensors[sk] = sv
-                    else:
-                        sub_meta[sk] = sv
-                if sub_tensors:
-                    # Flatten nested tensors with a dotted key so downstream
-                    # consumers do not need to know the original nesting.
-                    for sk, sv in sub_tensors.items():
-                        tensors[f"{k}.{sk}"] = sv
-                if sub_meta:
-                    metadata[k] = sub_meta
-            else:
-                metadata[k] = v
+        tensors, metadata = cls._flatten_nested_dict(raw)
         return cls(
             tensors=tensors,
             device_policy=device_policy or _DEFAULT_DEVICE_POLICY,
@@ -390,27 +400,43 @@ class TransferPayload:
     # ── Serialisation helpers ────────────────────────────────────────
 
     def as_dict(self) -> dict[str, Any]:
-        """Shallow dict representation (strips ``None`` values).
+        """Rebuild a nested dict representation (strips ``None`` values).
 
         Consumers that still speak the legacy ``OmniPayload``-style
         dictionary contract can call this to downgrade before processing.
+        Dotted-keyed entries in ``self.tensors`` (``"embed.prefill"``) are
+        folded back into their original nesting (``{"embed": {"prefill": t}}``)
+        so legacy consumers that read ``payload["embed"]["prefill"]`` keep
+        working.
         """
-        out: dict[str, Any] = {}
-        out.update({k: v for k, v in self.metadata.items() if v is not None})
-        out.update({k: v for k, v in self.tensors.items() if v is not None})
+        # Start from the non-tensor metadata — it already has the nested shape.
+        out: dict[str, Any] = {k: v for k, v in self.metadata.items() if v is not None}
+        # Fold each (non-None) tensor back into nested buckets.
+        for dotted_key, t in self.tensors.items():
+            if t is None:
+                continue
+            parts: list[str | int] = [int(p) if p.isdigit() else p for p in dotted_key.split(".")]
+            cursor: Any = out
+            for part in parts[:-1]:
+                if part not in cursor or not isinstance(cursor[part], dict):
+                    cursor[part] = {}
+                cursor = cursor[part]
+            cursor[parts[-1]] = t
         return out
 
     # ── Introspection ─────────────────────────────────────────────────
 
     def describe(self) -> str:
         """Human-readable summary for debug logs."""
-        {k: tuple(v.shape) if isinstance(v, torch.Tensor) else None for k, v in self.tensors.items() if v is not None}
+        tensor_shapes = {
+            k: tuple(v.shape) if isinstance(v, torch.Tensor) else None for k, v in self.tensors.items() if v is not None
+        }
         chunk_str = f"chunk={self.chunk}" if self.chunk is not None else "chunk=None"
         return (
             f"TransferPayload(req={self.request_id}, "
             f"{self.source_stage}->{self.target_stage}, "
             f"policy={self.device_policy}, "
-            f"tensors={list(self.tensors.keys())}, "
+            f"tensors={tensor_shapes}, "
             f"{chunk_str})"
         )
 

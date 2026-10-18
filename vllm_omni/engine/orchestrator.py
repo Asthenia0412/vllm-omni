@@ -3043,22 +3043,22 @@ class OrchestratorBase:
                 target_stage_id=next_logical,
                 is_final_update=is_final_update,
             )
-            _extra_kwargs: dict[str, Any] = {}
+            _engine_extra_kwargs: dict[str, Any] = {}
             try:
                 import inspect as _inspect
 
                 _sig = _inspect.signature(process_inputs)
                 if "transfer_payload" in _sig.parameters:
-                    _extra_kwargs["transfer_payload"] = _typed_payload
+                    _engine_extra_kwargs["transfer_payload"] = _typed_payload
                 if "chunk_meta" in _sig.parameters:
-                    _extra_kwargs["chunk_meta"] = _typed_payload.chunk
+                    _engine_extra_kwargs["chunk_meta"] = _typed_payload.chunk
             except (TypeError, ValueError):
                 pass
             next_inputs = process_inputs(
                 source_outputs,
                 req_state.prompt,
                 streaming_context=req_state.streaming,
-                **_extra_kwargs,
+                **_engine_extra_kwargs,
             )
         except OmniClientError as exc:
             await self._fail_request_client_error(
