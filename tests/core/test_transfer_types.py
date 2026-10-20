@@ -12,9 +12,12 @@ Covers the reviewer-requested scenarios from PR #9014:
 
 from __future__ import annotations
 
+import pytest
 import torch
 
 from vllm_omni.core.transfer_types import ChunkMeta, ChunkPhase, TransferPayload
+
+pytestmark = [pytest.mark.core_model, pytest.mark.cpu]
 
 
 class TestChunkMeta:
